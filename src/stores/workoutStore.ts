@@ -37,6 +37,18 @@ export interface WorkoutLog {
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6 // Sun=0, Mon=1, ..., Sat=6
 
+export interface CustomExercise {
+  id: string
+  name: string
+  targetSets: number
+  targetReps: string
+}
+
+export interface WorkoutCustomization {
+  workoutType: WorkoutType
+  exercises: CustomExercise[]
+}
+
 export interface WorkoutPlan {
   trainingDays: TrainingDays
   selectedDays: DayOfWeek[] // Which days of the week user works out
@@ -51,6 +63,7 @@ interface WorkoutStore {
   currentPlan: WorkoutPlan | null
   workoutLogs: WorkoutLog[]
   currentWeek: number
+  customizations: WorkoutCustomization[]
 
   // Actions
   setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => void
@@ -70,6 +83,15 @@ interface WorkoutStore {
   resetWorkouts: () => void
   exportData: () => string
   importData: (data: string) => boolean
+
+  // Customization actions
+  getExercisesForType: (type: WorkoutType) => Omit<Exercise, 'id' | 'sets'>[]
+  setCustomExercises: (type: WorkoutType, exercises: CustomExercise[]) => void
+  addExercise: (type: WorkoutType, exercise: Omit<CustomExercise, 'id'>) => void
+  updateExercise: (type: WorkoutType, id: string, updates: Partial<Omit<CustomExercise, 'id'>>) => void
+  removeExercise: (type: WorkoutType, id: string) => void
+  reorderExercise: (type: WorkoutType, fromIndex: number, toIndex: number) => void
+  resetToDefaults: (type: WorkoutType) => void
 }
 
 // Exercise templates for each workout type
@@ -117,10 +139,16 @@ const WORKOUT_TEMPLATES: Record<WorkoutType, Omit<Exercise, 'id' | 'sets'>[]> = 
   rest: []
 }
 
-const generateExercises = (type: WorkoutType): Exercise[] => {
-  const template = WORKOUT_TEMPLATES[type]
+const generateExercises = (type: WorkoutType, customizations: WorkoutCustomization[]): Exercise[] => {
+  const customization = customizations.find(c => c.workoutType === type)
+  const template = customization && customization.exercises.length > 0
+    ? customization.exercises
+    : WORKOUT_TEMPLATES[type]
+
   return template.map((ex, index) => ({
-    ...ex,
+    name: ex.name,
+    targetSets: ex.targetSets,
+    targetReps: ex.targetReps,
     id: `${type}-${index}-${Date.now()}`,
     sets: Array.from({ length: ex.targetSets }, () => ({
       weight: 0,
@@ -196,6 +224,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
       currentPlan: null,
       workoutLogs: [],
       currentWeek: 1,
+      customizations: [],
 
       setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => {
         const days = selectedDays || getDefaultDays(trainingDays)
@@ -260,7 +289,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
           workoutType: type,
           dayNumber,
           weekNumber: get().currentWeek,
-          exercises: generateExercises(type),
+          exercises: generateExercises(type, get().customizations),
           completed: false,
           xpAwarded: false,
           startTime: Date.now()
@@ -399,7 +428,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
       resetWorkouts: () => set({
         currentPlan: null,
         workoutLogs: [],
-        currentWeek: 1
+        currentWeek: 1,
+        customizations: []
       }),
 
       exportData: () => {
@@ -408,7 +438,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
           workouts: {
             currentPlan: state.currentPlan,
             workoutLogs: state.workoutLogs,
-            currentWeek: state.currentWeek
+            currentWeek: state.currentWeek,
+            customizations: state.customizations
           }
         }, null, 2)
       },
@@ -420,7 +451,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
             set({
               currentPlan: parsed.workouts.currentPlan || null,
               workoutLogs: parsed.workouts.workoutLogs || [],
-              currentWeek: parsed.workouts.currentWeek || 1
+              currentWeek: parsed.workouts.currentWeek || 1,
+              customizations: parsed.workouts.customizations || []
             })
             return true
           }
@@ -428,6 +460,128 @@ export const useWorkoutStore = create<WorkoutStore>()(
         } catch {
           return false
         }
+      },
+
+      // Customization actions
+      getExercisesForType: (type: WorkoutType) => {
+        const customization = get().customizations.find(c => c.workoutType === type)
+        if (customization && customization.exercises.length > 0) {
+          return customization.exercises.map(ex => ({
+            name: ex.name,
+            targetSets: ex.targetSets,
+            targetReps: ex.targetReps
+          }))
+        }
+        return WORKOUT_TEMPLATES[type]
+      },
+
+      setCustomExercises: (type: WorkoutType, exercises: CustomExercise[]) => {
+        set((state) => {
+          const existing = state.customizations.findIndex(c => c.workoutType === type)
+          if (existing >= 0) {
+            const updated = [...state.customizations]
+            updated[existing] = { workoutType: type, exercises }
+            return { customizations: updated }
+          }
+          return {
+            customizations: [...state.customizations, { workoutType: type, exercises }]
+          }
+        })
+      },
+
+      addExercise: (type: WorkoutType, exercise: Omit<CustomExercise, 'id'>) => {
+        const newExercise: CustomExercise = {
+          ...exercise,
+          id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }
+
+        set((state) => {
+          const existing = state.customizations.find(c => c.workoutType === type)
+          if (existing) {
+            return {
+              customizations: state.customizations.map(c =>
+                c.workoutType === type
+                  ? { ...c, exercises: [...c.exercises, newExercise] }
+                  : c
+              )
+            }
+          }
+          // Create new customization with defaults + new exercise
+          const defaultExercises: CustomExercise[] = WORKOUT_TEMPLATES[type].map((ex, i) => ({
+            id: `default-${type}-${i}`,
+            name: ex.name,
+            targetSets: ex.targetSets,
+            targetReps: ex.targetReps
+          }))
+          return {
+            customizations: [
+              ...state.customizations,
+              { workoutType: type, exercises: [...defaultExercises, newExercise] }
+            ]
+          }
+        })
+      },
+
+      updateExercise: (type: WorkoutType, id: string, updates: Partial<Omit<CustomExercise, 'id'>>) => {
+        set((state) => ({
+          customizations: state.customizations.map(c =>
+            c.workoutType === type
+              ? {
+                  ...c,
+                  exercises: c.exercises.map(ex =>
+                    ex.id === id ? { ...ex, ...updates } : ex
+                  )
+                }
+              : c
+          )
+        }))
+      },
+
+      removeExercise: (type: WorkoutType, id: string) => {
+        set((state) => ({
+          customizations: state.customizations.map(c =>
+            c.workoutType === type
+              ? { ...c, exercises: c.exercises.filter(ex => ex.id !== id) }
+              : c
+          )
+        }))
+      },
+
+      resetToDefaults: (type: WorkoutType) => {
+        set((state) => ({
+          customizations: state.customizations.filter(c => c.workoutType !== type)
+        }))
+      },
+
+      reorderExercise: (type: WorkoutType, fromIndex: number, toIndex: number) => {
+        set((state) => {
+          const customization = state.customizations.find(c => c.workoutType === type)
+          if (!customization) {
+            // Create customization from defaults first
+            const defaultExercises: CustomExercise[] = WORKOUT_TEMPLATES[type].map((ex, i) => ({
+              id: `default-${type}-${i}`,
+              name: ex.name,
+              targetSets: ex.targetSets,
+              targetReps: ex.targetReps
+            }))
+            const exercises = [...defaultExercises]
+            const [moved] = exercises.splice(fromIndex, 1)
+            exercises.splice(toIndex, 0, moved)
+            return {
+              customizations: [...state.customizations, { workoutType: type, exercises }]
+            }
+          }
+
+          const exercises = [...customization.exercises]
+          const [moved] = exercises.splice(fromIndex, 1)
+          exercises.splice(toIndex, 0, moved)
+
+          return {
+            customizations: state.customizations.map(c =>
+              c.workoutType === type ? { ...c, exercises } : c
+            )
+          }
+        })
       }
     }),
     {
