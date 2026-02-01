@@ -13,7 +13,7 @@ export function Navigation() {
   const location = useLocation()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-bg-secondary/95 backdrop-blur-lg border-t border-gray-800 safe-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 glass-elevated border-t border-white/10 safe-bottom z-50">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
         {navItems.map(item => {
           const isActive = location.pathname === item.path
@@ -27,11 +27,17 @@ export function Navigation() {
               {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute -top-0.5 w-8 h-1 bg-accent-primary rounded-full"
+                  className="absolute -top-0.5 w-8 h-1 bg-accent-primary rounded-full shadow-lg shadow-accent-primary/30"
                 />
               )}
-              <span className="text-xl">{item.icon}</span>
-              <span className={`text-[10px] mt-0.5 ${isActive ? 'text-accent-primary' : 'text-gray-500'}`}>
+              <motion.span
+                className="text-xl"
+                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
+                transition={{ duration: 0.15 }}
+              >
+                {item.icon}
+              </motion.span>
+              <span className={`text-[10px] mt-0.5 font-medium transition-colors duration-150 ${isActive ? 'text-accent-primary' : 'text-gray-500'}`}>
                 {item.label}
               </span>
             </NavLink>

@@ -10,7 +10,8 @@ import {
   AvatarScreen,
   Settings,
   Auth,
-  Coach
+  Coach,
+  Achievements
 } from '@/screens'
 
 function App() {
@@ -82,6 +83,7 @@ function App() {
           <Route path="/avatar" element={<AvatarScreen />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/coach" element={<Coach />} />
+          <Route path="/achievements" element={<Achievements />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Navigation />

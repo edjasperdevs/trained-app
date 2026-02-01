@@ -13,15 +13,15 @@ interface ButtonProps {
 }
 
 const variantClasses = {
-  primary: 'bg-accent-primary text-bg-primary hover:bg-accent-primary/90 glow-cyan',
-  secondary: 'bg-accent-secondary text-white hover:bg-accent-secondary/90 glow-purple',
-  ghost: 'bg-transparent text-gray-300 hover:bg-bg-card border border-gray-700',
+  primary: 'bg-accent-primary text-black hover:bg-accent-primary/90 glow-gold font-bold',
+  secondary: 'bg-accent-secondary text-white hover:bg-accent-secondary/90 glow-green',
+  ghost: 'glass text-gray-300 hover:bg-white/10',
   danger: 'bg-accent-danger text-white hover:bg-accent-danger/90'
 }
 
 const sizeClasses = {
   sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2.5 text-base',
+  md: 'px-5 py-2.5 text-base',
   lg: 'px-6 py-3 text-lg'
 }
 
@@ -40,14 +40,14 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      whileTap={{ scale: 0.97 }}
-      whileHover={{ scale: 1.02 }}
+      whileTap={disabled ? undefined : { scale: 0.97 }}
+      whileHover={disabled ? undefined : { scale: 1.02 }}
       className={`
         ${variantClasses[variant]}
         ${sizeClasses[size]}
         ${fullWidth ? 'w-full' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-        rounded-lg font-semibold transition-all duration-200
+        rounded-xl font-semibold transition-all duration-150
         flex items-center justify-center gap-2
         ${className}
       `}

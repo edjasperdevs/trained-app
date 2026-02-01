@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card } from '@/components'
+import { Button, Card, WeightChart, ClientMacroAdherence, ClientActivityFeed } from '@/components'
 import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
+import { useClientDetails } from '@/hooks/useClientDetails'
+
+type ClientDetailTab = 'overview' | 'progress' | 'activity'
 
 interface ClientSummary {
   client_id: string | null
@@ -27,10 +30,27 @@ export function Coach() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedClient, setSelectedClient] = useState<ClientSummary | null>(null)
+  const [activeTab, setActiveTab] = useState<ClientDetailTab>('overview')
   const [showAddClient, setShowAddClient] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [inviteMessage, setInviteMessage] = useState('')
+
+  const {
+    weightData: clientWeightData,
+    macroData: clientMacroData,
+    activityData: clientActivityData,
+    isLoading: isClientDetailsLoading,
+    error: clientDetailsError,
+    refresh: refreshClientDetails
+  } = useClientDetails(selectedClient?.client_id || null)
+
+  // Reset tab when selecting a new client
+  useEffect(() => {
+    if (selectedClient) {
+      setActiveTab('overview')
+    }
+  }, [selectedClient?.client_id])
 
   useEffect(() => {
     fetchClients()
@@ -343,21 +363,42 @@ export function Coach() {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 bg-bg-secondary p-4 border-b border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold">
-                      {selectedClient.username || selectedClient.email?.split('@')[0] || 'Unknown'}
-                    </h2>
-                    <p className="text-sm text-gray-400">{selectedClient.email}</p>
+              <div className="sticky top-0 bg-bg-secondary z-10">
+                <div className="p-4 border-b border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold">
+                        {selectedClient.username || selectedClient.email?.split('@')[0] || 'Unknown'}
+                      </h2>
+                      <p className="text-sm text-gray-400">{selectedClient.email}</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedClient(null)}
+                      className="text-gray-400 hover:text-white text-2xl"
+                    >
+                      ×
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setSelectedClient(null)}
-                    className="text-gray-400 hover:text-white text-2xl"
-                  >
-                    ×
-                  </button>
                 </div>
+
+                {/* Tab Navigation */}
+                {selectedClient.onboarding_complete && (
+                  <div className="flex border-b border-gray-800">
+                    {(['overview', 'progress', 'activity'] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                          activeTab === tab
+                            ? 'text-accent-primary border-b-2 border-accent-primary'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Content */}
@@ -369,67 +410,127 @@ export function Coach() {
                   </Card>
                 ) : (
                   <>
-                    {/* Status */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <Card padding="sm">
-                        <p className="text-xs text-gray-500 mb-1">Level</p>
-                        <p className="text-2xl font-bold font-digital text-accent-primary">
-                          {selectedClient.current_level || 1}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {selectedClient.total_xp?.toLocaleString() || 0} XP
-                        </p>
-                      </Card>
-                      <Card padding="sm">
-                        <p className="text-xs text-gray-500 mb-1">Streak</p>
-                        <p className="text-2xl font-bold font-digital text-accent-secondary">
-                          {selectedClient.current_streak || 0}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Best: {selectedClient.longest_streak || 0}
-                        </p>
-                      </Card>
-                    </div>
-
-                    {/* Activity */}
-                    <Card>
-                      <h3 className="text-sm font-semibold text-gray-400 mb-3">ACTIVITY</h3>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Last Check-in</span>
-                          <span className={getStatusColor(selectedClient)}>
-                            {selectedClient.last_check_in_date
-                              ? new Date(selectedClient.last_check_in_date).toLocaleDateString()
-                              : 'Never'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Workouts (7 days)</span>
-                          <span>{selectedClient.workouts_last_7_days || 0}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Goal</span>
-                          <span className="capitalize">{selectedClient.goal || 'Not set'}</span>
-                        </div>
+                    {/* Loading/Error state for client details */}
+                    {isClientDetailsLoading && (
+                      <div className="text-center py-4">
+                        <span className="text-2xl animate-pulse">...</span>
+                        <p className="text-sm text-gray-500 mt-1">Loading details...</p>
                       </div>
-                    </Card>
+                    )}
 
-                    {/* Weight */}
-                    {selectedClient.latest_weight && (
-                      <Card>
-                        <h3 className="text-sm font-semibold text-gray-400 mb-3">WEIGHT</h3>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-bold font-digital">
-                            {selectedClient.latest_weight}
-                          </span>
-                          <span className="text-gray-400">lbs</span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Last logged: {selectedClient.latest_weight_date
-                            ? new Date(selectedClient.latest_weight_date).toLocaleDateString()
-                            : 'Unknown'}
-                        </p>
+                    {clientDetailsError && (
+                      <Card className="text-center py-4">
+                        <p className="text-sm text-accent-danger mb-2">{clientDetailsError}</p>
+                        <Button size="sm" onClick={refreshClientDetails}>Retry</Button>
                       </Card>
+                    )}
+
+                    {/* Overview Tab */}
+                    {activeTab === 'overview' && (
+                      <>
+                        {/* Status */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <Card padding="sm">
+                            <p className="text-xs text-gray-500 mb-1">Level</p>
+                            <p className="text-2xl font-bold font-digital text-accent-primary">
+                              {selectedClient.current_level || 1}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {selectedClient.total_xp?.toLocaleString() || 0} XP
+                            </p>
+                          </Card>
+                          <Card padding="sm">
+                            <p className="text-xs text-gray-500 mb-1">Streak</p>
+                            <p className="text-2xl font-bold font-digital text-accent-secondary">
+                              {selectedClient.current_streak || 0}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Best: {selectedClient.longest_streak || 0}
+                            </p>
+                          </Card>
+                        </div>
+
+                        {/* Activity Summary */}
+                        <Card>
+                          <h3 className="text-sm font-semibold text-gray-400 mb-3">ACTIVITY</h3>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Last Check-in</span>
+                              <span className={getStatusColor(selectedClient)}>
+                                {selectedClient.last_check_in_date
+                                  ? new Date(selectedClient.last_check_in_date).toLocaleDateString()
+                                  : 'Never'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Workouts (7 days)</span>
+                              <span>{selectedClient.workouts_last_7_days || 0}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Goal</span>
+                              <span className="capitalize">{selectedClient.goal || 'Not set'}</span>
+                            </div>
+                          </div>
+                        </Card>
+
+                        {/* Mini Weight Chart */}
+                        {clientWeightData.length > 0 && (
+                          <Card>
+                            <h3 className="text-sm font-semibold text-gray-400 mb-3">WEIGHT TREND</h3>
+                            <WeightChart data={clientWeightData} height={100} />
+                            {clientWeightData.length >= 2 && (
+                              <p className="text-xs text-gray-500 mt-2">
+                                Change: {' '}
+                                <span className={
+                                  clientWeightData[clientWeightData.length - 1].weight < clientWeightData[0].weight
+                                    ? 'text-accent-success'
+                                    : clientWeightData[clientWeightData.length - 1].weight > clientWeightData[0].weight
+                                    ? 'text-accent-danger'
+                                    : 'text-gray-400'
+                                }>
+                                  {(clientWeightData[clientWeightData.length - 1].weight - clientWeightData[0].weight).toFixed(1)} lbs
+                                </span>
+                              </p>
+                            )}
+                          </Card>
+                        )}
+                      </>
+                    )}
+
+                    {/* Progress Tab */}
+                    {activeTab === 'progress' && (
+                      <>
+                        {/* Full Weight Chart */}
+                        <Card>
+                          <h3 className="text-sm font-semibold text-gray-400 mb-3">WEIGHT TREND (30 DAYS)</h3>
+                          <WeightChart data={clientWeightData} height={150} />
+                          {clientWeightData.length >= 2 && (
+                            <p className="text-sm text-gray-400 mt-3">
+                              Change: {' '}
+                              <span className={`font-digital ${
+                                clientWeightData[clientWeightData.length - 1].weight < clientWeightData[0].weight
+                                  ? 'text-accent-success'
+                                  : clientWeightData[clientWeightData.length - 1].weight > clientWeightData[0].weight
+                                  ? 'text-accent-danger'
+                                  : 'text-gray-400'
+                              }`}>
+                                {(clientWeightData[clientWeightData.length - 1].weight - clientWeightData[0].weight).toFixed(1)} lbs
+                              </span>
+                            </p>
+                          )}
+                        </Card>
+
+                        {/* Macro Adherence */}
+                        <Card>
+                          <h3 className="text-sm font-semibold text-gray-400 mb-3">MACRO ADHERENCE (14 DAYS)</h3>
+                          <ClientMacroAdherence data={clientMacroData} />
+                        </Card>
+                      </>
+                    )}
+
+                    {/* Activity Tab */}
+                    {activeTab === 'activity' && (
+                      <ClientActivityFeed activities={clientActivityData} />
                     )}
                   </>
                 )}

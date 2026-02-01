@@ -36,10 +36,10 @@ interface XPStore {
     PERFECT_DAY: number
     STREAK_PER_DAY: number
   }
-  XP_PER_LEVEL: number
   MAX_LEVEL: number
 
   // Actions
+  completeOnboarding: () => { newLevel: number }
   logDailyXP: (data: Omit<DailyXP, 'total' | 'claimed'>) => number
   claimWeeklyXP: () => { xpClaimed: number; leveledUp: boolean; newLevel: number }
   calculateLevel: (xp: number) => number
@@ -65,8 +65,49 @@ const XP_VALUES = {
   STREAK_PER_DAY: 10,
 }
 
-const XP_PER_LEVEL = 1000
 const MAX_LEVEL = 99
+
+// Progressive XP curve - fast early, slower later
+// Level 0→1 happens at onboarding (0 XP needed)
+// Level 1→2: 100 XP, Level 2→3: 150 XP, etc.
+const getXPForLevel = (level: number): number => {
+  if (level <= 1) return 0
+  if (level === 2) return 100
+  if (level === 3) return 150
+  if (level === 4) return 250
+  if (level === 5) return 400
+  if (level === 6) return 600
+  if (level === 7) return 800
+  if (level === 8) return 1000
+  if (level === 9) return 1200
+  if (level === 10) return 1400
+  // After level 10, increase by 200 each level, capped at 2500
+  return Math.min(1400 + (level - 10) * 200, 2500)
+}
+
+// Get cumulative XP needed to reach a level
+const getCumulativeXP = (level: number): number => {
+  let total = 0
+  for (let i = 2; i <= level; i++) {
+    total += getXPForLevel(i)
+  }
+  return total
+}
+
+// Calculate level from total XP
+const calculateLevelFromXP = (totalXP: number): number => {
+  let level = 1
+  let cumulativeXP = 0
+
+  while (level < MAX_LEVEL) {
+    const xpForNext = getXPForLevel(level + 1)
+    if (cumulativeXP + xpForNext > totalXP) break
+    cumulativeXP += xpForNext
+    level++
+  }
+
+  return level
+}
 
 const calculateDailyTotal = (data: Omit<DailyXP, 'total' | 'claimed'>): number => {
   let total = 0
@@ -83,15 +124,20 @@ export const useXPStore = create<XPStore>()(
   persist(
     (set, get) => ({
       totalXP: 0,
-      currentLevel: 1,
+      currentLevel: 0,
       pendingXP: 0,
       weeklyHistory: [],
       dailyLogs: [],
       lastClaimDate: null,
 
       XP_VALUES,
-      XP_PER_LEVEL,
       MAX_LEVEL,
+
+      completeOnboarding: () => {
+        // Level up from 0 to 1 when onboarding completes
+        set({ currentLevel: 1 })
+        return { newLevel: 1 }
+      },
 
       logDailyXP: (data) => {
         const today = new Date().toISOString().split('T')[0]
@@ -125,7 +171,7 @@ export const useXPStore = create<XPStore>()(
         const xpToClaim = state.pendingXP
         const newTotalXP = state.totalXP + xpToClaim
         const oldLevel = state.currentLevel
-        const newLevel = Math.min(Math.floor(newTotalXP / XP_PER_LEVEL) + 1, MAX_LEVEL)
+        const newLevel = calculateLevelFromXP(newTotalXP)
         const leveledUp = newLevel > oldLevel
 
         const today = new Date().toISOString().split('T')[0]
@@ -149,19 +195,24 @@ export const useXPStore = create<XPStore>()(
       },
 
       calculateLevel: (xp: number) => {
-        return Math.min(Math.floor(xp / XP_PER_LEVEL) + 1, MAX_LEVEL)
+        return calculateLevelFromXP(xp)
       },
 
       getXPForNextLevel: () => {
         const state = get()
         if (state.currentLevel >= MAX_LEVEL) return 0
-        return state.currentLevel * XP_PER_LEVEL - state.totalXP
+        const xpNeededForNextLevel = getCumulativeXP(state.currentLevel + 1)
+        return xpNeededForNextLevel - state.totalXP
       },
 
       getCurrentLevelProgress: () => {
         const state = get()
-        const xpInCurrentLevel = state.totalXP % XP_PER_LEVEL
-        return (xpInCurrentLevel / XP_PER_LEVEL) * 100
+        if (state.currentLevel === 0) return 0
+        const xpForCurrentLevel = getCumulativeXP(state.currentLevel)
+        const xpForNextLevel = getCumulativeXP(state.currentLevel + 1)
+        const xpInCurrentLevel = state.totalXP - xpForCurrentLevel
+        const xpNeededForLevel = xpForNextLevel - xpForCurrentLevel
+        return (xpInCurrentLevel / xpNeededForLevel) * 100
       },
 
       getTodayLog: () => {
@@ -196,7 +247,7 @@ export const useXPStore = create<XPStore>()(
 
       resetXP: () => set({
         totalXP: 0,
-        currentLevel: 1,
+        currentLevel: 0,
         pendingXP: 0,
         weeklyHistory: [],
         dailyLogs: [],

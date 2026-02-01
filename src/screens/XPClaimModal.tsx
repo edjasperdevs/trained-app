@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card } from '@/components'
-import { useXPStore, useAvatarStore } from '@/stores'
+import { Button, Card, BadgeUnlockModal } from '@/components'
+import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 
 interface XPClaimModalProps {
   isOpen: boolean
@@ -44,13 +44,17 @@ function Confetti({ delay }: { delay: number }) {
 }
 
 export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
-  const { claimWeeklyXP, getPendingXPBreakdown, pendingXP, currentLevel, totalXP, XP_PER_LEVEL } = useXPStore()
+  const { claimWeeklyXP, getPendingXPBreakdown, pendingXP, currentLevel, totalXP, getCurrentLevelProgress, getXPForNextLevel } = useXPStore()
   const { triggerReaction, updateEvolutionStage } = useAvatarStore()
 
   const [phase, setPhase] = useState<'preview' | 'claiming' | 'complete' | 'levelup'>('preview')
   const [claimResult, setClaimResult] = useState<{ xpClaimed: number; leveledUp: boolean; newLevel: number } | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [xpCountUp, setXpCountUp] = useState(0)
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([])
+  const [showBadgeModal, setShowBadgeModal] = useState(false)
+
+  const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
 
   const breakdown = getPendingXPBreakdown()
 
@@ -61,6 +65,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
       setClaimResult(null)
       setShowConfetti(false)
       setXpCountUp(0)
+      setUnlockedBadges([])
+      setShowBadgeModal(false)
     }
   }, [isOpen])
 
@@ -81,6 +87,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
 
           // Move to next phase after count up
           setTimeout(() => {
+            // Check for new badges (especially level-based ones)
+            const newBadges = checkAndAwardBadges()
+            if (newBadges.length > 0) {
+              setUnlockedBadges(newBadges)
+            }
+
             if (claimResult.leveledUp) {
               setPhase('levelup')
             } else {
@@ -95,6 +107,14 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
       return () => clearInterval(interval)
     }
   }, [phase, claimResult])
+
+  const handleClose = () => {
+    if (unlockedBadges.length > 0 && !showBadgeModal) {
+      setShowBadgeModal(true)
+    } else {
+      onClose()
+    }
+  }
 
   const handleClaim = () => {
     // Trigger avatar reaction
@@ -119,7 +139,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center overflow-hidden"
-        onClick={phase === 'complete' || phase === 'levelup' ? onClose : undefined}
+        onClick={phase === 'complete' || phase === 'levelup' ? handleClose : undefined}
       >
         {/* Confetti */}
         {showConfetti && (
@@ -286,17 +306,17 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <div className="mt-2 h-2 bg-bg-secondary rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(totalXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100}%` }}
+                    animate={{ width: `${getCurrentLevelProgress()}%` }}
                     transition={{ delay: 1, duration: 1 }}
                     className="h-full bg-gradient-to-r from-accent-primary to-accent-secondary"
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {XP_PER_LEVEL - (totalXP % XP_PER_LEVEL)} XP to next level
+                  {getXPForNextLevel()} XP to next level
                 </p>
               </motion.div>
 
-              <Button onClick={onClose} fullWidth>
+              <Button onClick={handleClose} fullWidth>
                 Awesome!
               </Button>
             </Card>
@@ -370,7 +390,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 }}
               >
-                <Button onClick={onClose} fullWidth size="lg">
+                <Button onClick={handleClose} fullWidth size="lg">
                   <span className="flex items-center gap-2">
                     <motion.span
                       animate={{ scale: [1, 1.2, 1] }}
@@ -385,6 +405,14 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
             </div>
           )}
         </motion.div>
+
+        {/* Badge Unlock Modal */}
+        {showBadgeModal && unlockedBadges.length > 0 && (
+          <BadgeUnlockModal
+            badgeIds={unlockedBadges}
+            onClose={onClose}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   )

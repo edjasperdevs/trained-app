@@ -4,13 +4,22 @@ import { WeightEntry } from '@/stores'
 interface WeightChartProps {
   data: WeightEntry[]
   height?: number
+  goalWeight?: number
+  showGoalLine?: boolean
+  unit?: string
 }
 
-export function WeightChart({ data, height = 150 }: WeightChartProps) {
+export function WeightChart({
+  data,
+  height = 150,
+  goalWeight,
+  showGoalLine = true,
+  unit = 'lbs'
+}: WeightChartProps) {
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-gray-500 text-sm"
+        className="flex items-center justify-center text-gray-500 text-sm glass rounded-xl"
         style={{ height }}
       >
         No weight data yet
@@ -20,10 +29,12 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
 
   // Calculate min/max for scaling
   const weights = data.map(d => d.weight)
+  if (goalWeight) weights.push(goalWeight)
+
   const minWeight = Math.min(...weights)
   const maxWeight = Math.max(...weights)
   const range = maxWeight - minWeight || 1 // Avoid division by zero
-  const padding = range * 0.1 // Add 10% padding
+  const padding = range * 0.15 // Add 15% padding
 
   const chartMin = minWeight - padding
   const chartMax = maxWeight + padding
@@ -44,11 +55,19 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
   // Create area fill path
   const areaD = `${pathD} L ${points[points.length - 1]?.x || 0} 100 L 0 100 Z`
 
+  // Calculate goal line Y position
+  const goalLineY = goalWeight
+    ? 100 - ((goalWeight - chartMin) / chartRange) * 100
+    : null
+
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
+
+  // Calculate weekly averages for markers
+  const weeklyAverages = calculateWeeklyAverages(data)
 
   return (
     <div className="relative" style={{ height }}>
@@ -67,16 +86,45 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
           className="w-full h-full"
         >
           {/* Grid lines */}
-          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-gray-800" />
-          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-gray-800" />
-          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-gray-800" />
+          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
+          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
+
+          {/* Goal line */}
+          {showGoalLine && goalLineY !== null && goalLineY >= 0 && goalLineY <= 100 && (
+            <>
+              <motion.line
+                x1="0"
+                y1={goalLineY}
+                x2="100"
+                y2={goalLineY}
+                stroke="rgba(245, 158, 11, 0.6)"
+                strokeWidth="1"
+                strokeDasharray="4 2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              />
+              <motion.text
+                x="2"
+                y={goalLineY - 2}
+                fill="rgba(245, 158, 11, 0.8)"
+                fontSize="3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                Goal
+              </motion.text>
+            </>
+          )}
 
           {/* Area fill */}
           <motion.path
             d={areaD}
-            fill="url(#weightGradient)"
+            fill="url(#weightGradientNew)"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.3 }}
+            animate={{ opacity: 0.4 }}
             transition={{ duration: 0.5 }}
           />
 
@@ -84,7 +132,7 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
           <motion.path
             d={pathD}
             fill="none"
-            stroke="url(#lineGradient)"
+            stroke="url(#lineGradientNew)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -104,19 +152,39 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
               className="fill-accent-primary"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: index * 0.05, duration: 0.2 }}
+              transition={{ delay: index * 0.03, duration: 0.2 }}
             />
           ))}
 
-          {/* Gradients */}
+          {/* Weekly average markers */}
+          {weeklyAverages.map((avg, index) => {
+            const y = 100 - ((avg.weight - chartMin) / chartRange) * 100
+            const x = (avg.dataIndex / (data.length - 1 || 1)) * 100
+            return (
+              <motion.circle
+                key={`avg-${index}`}
+                cx={x}
+                cy={y}
+                r="2.5"
+                fill="none"
+                stroke="rgba(92, 107, 74, 0.8)"
+                strokeWidth="1"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.8 + index * 0.1 }}
+              />
+            )
+          })}
+
+          {/* Gradients - Updated for gold/green */}
           <defs>
-            <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgb(0, 212, 255)" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="rgb(0, 212, 255)" stopOpacity="0" />
+            <linearGradient id="weightGradientNew" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgb(245, 158, 11)" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="rgb(245, 158, 11)" stopOpacity="0" />
             </linearGradient>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="rgb(0, 212, 255)" />
-              <stop offset="100%" stopColor="rgb(157, 78, 221)" />
+            <linearGradient id="lineGradientNew" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgb(245, 158, 11)" />
+              <stop offset="100%" stopColor="rgb(92, 107, 74)" />
             </linearGradient>
           </defs>
         </svg>
@@ -130,13 +198,32 @@ export function WeightChart({ data, height = 150 }: WeightChartProps) {
 
       {/* Current value indicator */}
       {data.length > 0 && (
-        <div className="absolute top-0 right-0 bg-bg-card rounded px-2 py-1">
+        <div className="absolute top-0 right-0 glass rounded-lg px-3 py-1.5">
           <span className="text-xs text-gray-400">Latest: </span>
           <span className="font-digital font-bold text-accent-primary">
-            {data[data.length - 1].weight} lbs
+            {data[data.length - 1].weight} {unit}
           </span>
         </div>
       )}
     </div>
   )
+}
+
+// Calculate weekly averages for markers on the chart
+function calculateWeeklyAverages(data: WeightEntry[]): { weight: number; dataIndex: number }[] {
+  if (data.length < 7) return []
+
+  const averages: { weight: number; dataIndex: number }[] = []
+  const weekSize = 7
+
+  for (let i = weekSize - 1; i < data.length; i += weekSize) {
+    const weekData = data.slice(Math.max(0, i - weekSize + 1), i + 1)
+    const avg = weekData.reduce((sum, e) => sum + e.weight, 0) / weekData.length
+    averages.push({
+      weight: Math.round(avg * 10) / 10,
+      dataIndex: i
+    })
+  }
+
+  return averages
 }

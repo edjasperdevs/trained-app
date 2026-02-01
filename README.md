@@ -183,10 +183,9 @@ See `supabase/schema.sql` for the complete Supabase schema including:
 
 Based on the current roadmap:
 
-1. **Workout Customization** - Allow users to add/edit/remove exercises per workout type (partially implemented in store, needs UI)
-2. **Social Features** - Leaderboards, friend challenges
-3. **Brand Partnership Portal** - Sponsored challenges and rewards
-4. **Advanced Analytics** - Progress photos, body measurements, strength tracking
+1. **Social Features** - Leaderboards, friend challenges
+2. **Brand Partnership Portal** - Sponsored challenges and rewards
+3. **Advanced Analytics** - Progress photos, body measurements, strength tracking
 
 ## Development Notes
 

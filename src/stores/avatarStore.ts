@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { AvatarBase } from './userStore'
 
-export type EvolutionStage = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+export type EvolutionStage = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 export type AvatarMood = 'happy' | 'neutral' | 'sad' | 'hyped' | 'neglected'
 
 export interface EvolutionInfo {
@@ -13,17 +13,25 @@ export interface EvolutionInfo {
   emoji: string
 }
 
+// More stages early = more frequent dopamine hits
+// Stage 0: Before onboarding (Level 0)
+// Stage 1: After onboarding (Level 1) - first evolution!
+// Stage 2-4: Rapid early progression (Levels 2-6)
+// Stage 5+: Slower progression
 export const EVOLUTION_STAGES: EvolutionInfo[] = [
-  { stage: 1, name: 'Hatchling', levelRange: [1, 5], description: 'Just starting out', emoji: '🥚' },
-  { stage: 2, name: 'Newbie', levelRange: [6, 15], description: 'Finding your footing', emoji: '🐣' },
-  { stage: 3, name: 'Beginner', levelRange: [16, 25], description: 'Starting to show definition', emoji: '🏃' },
-  { stage: 4, name: 'Intermediate', levelRange: [26, 35], description: 'Clear muscle definition', emoji: '💪' },
-  { stage: 5, name: 'Advanced', levelRange: [36, 45], description: 'Obviously fit', emoji: '🦾' },
-  { stage: 6, name: 'Elite', levelRange: [46, 55], description: 'Impressive physique', emoji: '🔥' },
-  { stage: 7, name: 'Champion', levelRange: [56, 65], description: 'Competition-ready', emoji: '🏆' },
-  { stage: 8, name: 'Legend', levelRange: [66, 80], description: 'Peak natty', emoji: '⚡' },
-  { stage: 9, name: 'Mythic', levelRange: [81, 95], description: 'Transcendent gains', emoji: '✨' },
-  { stage: 10, name: 'Ascended', levelRange: [96, 99], description: 'Final form achieved', emoji: '👑' },
+  { stage: 0, name: 'Egg', levelRange: [0, 0], description: 'Waiting to hatch...', emoji: '🥒' },
+  { stage: 1, name: 'Hatchling', levelRange: [1, 1], description: 'Just hatched!', emoji: '🐣' },
+  { stage: 2, name: 'Sprout', levelRange: [2, 3], description: 'Starting to grow', emoji: '🌱' },
+  { stage: 3, name: 'Rookie', levelRange: [4, 5], description: 'Finding your footing', emoji: '🏃' },
+  { stage: 4, name: 'Contender', levelRange: [6, 8], description: 'Building momentum', emoji: '💪' },
+  { stage: 5, name: 'Warrior', levelRange: [9, 12], description: 'Gaining strength', emoji: '⚔️' },
+  { stage: 6, name: 'Veteran', levelRange: [13, 18], description: 'Clear definition', emoji: '🦾' },
+  { stage: 7, name: 'Elite', levelRange: [19, 25], description: 'Impressive physique', emoji: '🔥' },
+  { stage: 8, name: 'Champion', levelRange: [26, 35], description: 'Competition-ready', emoji: '🏆' },
+  { stage: 9, name: 'Legend', levelRange: [36, 50], description: 'Peak performance', emoji: '⚡' },
+  { stage: 10, name: 'Mythic', levelRange: [51, 70], description: 'Transcendent gains', emoji: '✨' },
+  { stage: 11, name: 'Titan', levelRange: [71, 90], description: 'Beyond limits', emoji: '🌟' },
+  { stage: 12, name: 'Ascended', levelRange: [91, 99], description: 'Final form achieved', emoji: '👑' },
 ]
 
 interface AvatarStore {
@@ -54,7 +62,7 @@ const getStageForLevel = (level: number): EvolutionStage => {
       return stage.stage
     }
   }
-  return 10
+  return 12 // Max stage
 }
 
 const REACTION_MESSAGES = {
@@ -69,7 +77,7 @@ export const useAvatarStore = create<AvatarStore>()(
   persist(
     (set, get) => ({
       baseCharacter: 'warrior',
-      evolutionStage: 1,
+      evolutionStage: 0,
       currentMood: 'neutral',
       accessories: [],
       lastInteraction: Date.now(),
@@ -152,7 +160,7 @@ export const useAvatarStore = create<AvatarStore>()(
 
       resetAvatar: () => set({
         baseCharacter: 'warrior',
-        evolutionStage: 1,
+        evolutionStage: 0,
         currentMood: 'neutral',
         accessories: [],
         lastInteraction: Date.now(),

@@ -71,6 +71,7 @@ interface MacroStore {
   logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   logQuickMacros: (macros: Partial<MacroTargets>) => void
   saveMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  editSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt'>>) => void
   deleteSavedMeal: (id: string) => void
   getSavedMeals: () => SavedMeal[]
   getTodayMeals: () => LoggedMeal[]
@@ -344,6 +345,14 @@ export const useMacroStore = create<MacroStore>()(
         }
         set((state) => ({
           savedMeals: [...state.savedMeals, newSavedMeal]
+        }))
+      },
+
+      editSavedMeal: (id, updates) => {
+        set((state) => ({
+          savedMeals: state.savedMeals.map(meal =>
+            meal.id === id ? { ...meal, ...updates } : meal
+          )
         }))
       },
 

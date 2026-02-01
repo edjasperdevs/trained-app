@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Button, Card, WeightChart } from '@/components'
+import { Button, Card, WeightChart, ProgressBar } from '@/components'
 import {
   useUserStore,
   useXPStore,
@@ -9,9 +9,14 @@ import {
   useWorkoutStore,
   useAvatarStore,
   useAuthStore,
+  useRemindersStore,
+  useAchievementsStore,
   toast,
-  DayOfWeek
+  DayOfWeek,
+  ReminderType,
+  UnitSystem
 } from '@/stores'
+import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { isCoach as checkIsCoach } from '@/lib/supabase'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
@@ -24,6 +29,9 @@ export function Settings() {
   const getTodayWeight = useUserStore((state) => state.getTodayWeight)
   const getWeightHistory = useUserStore((state) => state.getWeightHistory)
   const getWeightTrend = useUserStore((state) => state.getWeightTrend)
+  const getRateOfChange = useUserStore((state) => state.getRateOfChange)
+  const getProjectedGoalDate = useUserStore((state) => state.getProjectedGoalDate)
+  const setGoalWeight = useUserStore((state) => state.setGoalWeight)
 
   const currentPlan = useWorkoutStore((state) => state.currentPlan)
   const setWorkoutDays = useWorkoutStore((state) => state.setWorkoutDays)
@@ -32,11 +40,15 @@ export function Settings() {
   const signOut = useAuthStore((state) => state.signOut)
   const isConfigured = useAuthStore((state) => state.isConfigured)
 
+  const reminderPreferences = useRemindersStore((state) => state.preferences)
+  const setReminderPreference = useRemindersStore((state) => state.setPreference)
+
   const [showDangerZone, setShowDangerZone] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [importData, setImportData] = useState('')
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [weightInput, setWeightInput] = useState('')
+  const [goalWeightInput, setGoalWeightInput] = useState('')
   const [showWeightChart, setShowWeightChart] = useState(false)
   const [isCoach, setIsCoach] = useState(false)
 
@@ -51,9 +63,12 @@ export function Settings() {
   const todayWeight = getTodayWeight()
   const weightHistory = getWeightHistory(30)
   const weightTrend = getWeightTrend()
+  const rateOfChange = getRateOfChange()
+  const projectedGoal = getProjectedGoalDate()
 
   const selectedDays = currentPlan?.selectedDays || []
   const trainingDays = profile?.trainingDaysPerWeek || 3
+  const units: UnitSystem = profile?.units || 'imperial'
 
   const toggleDay = (day: DayOfWeek) => {
     const isSelected = selectedDays.includes(day)
@@ -75,14 +90,36 @@ export function Settings() {
   }
 
   const handleLogWeight = () => {
-    const weight = Number(weightInput)
-    if (weight <= 0 || weight >= 500) {
-      toast.warning('Please enter a valid weight (1-499 lbs)')
+    const inputValue = Number(weightInput)
+    const maxValue = units === 'metric' ? 225 : 500
+    const minValue = units === 'metric' ? 20 : 50
+
+    if (inputValue <= 0 || inputValue >= maxValue || inputValue < minValue) {
+      toast.warning(`Please enter a valid weight (${minValue}-${maxValue - 1} ${getWeightUnit(units)})`)
       return
     }
-    logWeight(weight)
+
+    // Convert to internal storage (lbs) if using metric
+    const weightInLbs = toInternalWeight(inputValue, units)
+    logWeight(weightInLbs)
     setWeightInput('')
     toast.success('Weight logged!')
+  }
+
+  const handleSetGoalWeight = () => {
+    const inputValue = Number(goalWeightInput)
+    const maxValue = units === 'metric' ? 225 : 500
+    const minValue = units === 'metric' ? 20 : 50
+
+    if (inputValue <= 0 || inputValue >= maxValue || inputValue < minValue) {
+      toast.warning(`Please enter a valid goal weight (${minValue}-${maxValue - 1} ${getWeightUnit(units)})`)
+      return
+    }
+
+    const weightInLbs = toInternalWeight(inputValue, units)
+    setGoalWeight(weightInLbs)
+    setGoalWeightInput('')
+    toast.success('Goal weight set!')
   }
 
   const handleExport = () => {
@@ -225,21 +262,21 @@ export function Settings() {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Username</label>
+              <label className="text-xs text-gray-500 block mb-1.5">Username</label>
               <input
                 type="text"
                 value={profile?.username || ''}
                 onChange={(e) => setProfile({ username: e.target.value })}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                className="w-full glass-input rounded-xl px-4 py-2.5"
               />
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Fitness Level</label>
+              <label className="text-xs text-gray-500 block mb-1.5">Fitness Level</label>
               <select
                 value={profile?.fitnessLevel || 'beginner'}
                 onChange={(e) => setProfile({ fitnessLevel: e.target.value as 'beginner' | 'intermediate' | 'advanced' })}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                className="w-full glass-input rounded-xl px-4 py-2.5"
               >
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
@@ -248,7 +285,7 @@ export function Settings() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Training Days per Week</label>
+              <label className="text-xs text-gray-500 block mb-1.5">Training Days per Week</label>
               <select
                 value={profile?.trainingDaysPerWeek || 3}
                 onChange={(e) => {
@@ -256,7 +293,7 @@ export function Settings() {
                   setProfile({ trainingDaysPerWeek: days })
                   useWorkoutStore.getState().setPlan(days)
                 }}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                className="w-full glass-input rounded-xl px-4 py-2.5"
               >
                 <option value={3}>3 Days</option>
                 <option value={4}>4 Days</option>
@@ -300,21 +337,50 @@ export function Settings() {
           </div>
         </Card>
 
+        {/* Units */}
+        <Card>
+          <h3 className="text-sm font-semibold text-gray-400 mb-4">UNITS</h3>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setProfile({ units: 'imperial' })}
+              className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
+                profile?.units === 'imperial'
+                  ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
+                  : 'glass-subtle border-transparent hover:bg-white/10'
+              }`}
+            >
+              <p className="font-semibold">Imperial</p>
+              <p className="text-xs text-gray-500">lbs, ft/in</p>
+            </button>
+            <button
+              onClick={() => setProfile({ units: 'metric' })}
+              className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
+                profile?.units === 'metric'
+                  ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
+                  : 'glass-subtle border-transparent hover:bg-white/10'
+              }`}
+            >
+              <p className="font-semibold">Metric</p>
+              <p className="text-xs text-gray-500">kg, cm</p>
+            </button>
+          </div>
+        </Card>
+
         {/* Stats */}
         <Card>
           <h3 className="text-sm font-semibold text-gray-400 mb-4">YOUR STATS</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-bg-secondary rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold font-digital text-accent-primary">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="glass-subtle rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold font-digital text-accent-primary">
                 {profile?.currentStreak || 0}
               </p>
-              <p className="text-xs text-gray-500">Current Streak</p>
+              <p className="text-xs text-gray-500 mt-1">Current Streak</p>
             </div>
-            <div className="bg-bg-secondary rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold font-digital text-accent-secondary">
+            <div className="glass-subtle rounded-xl p-4 text-center">
+              <p className="text-3xl font-bold font-digital text-accent-secondary">
                 {profile?.longestStreak || 0}
               </p>
-              <p className="text-xs text-gray-500">Longest Streak</p>
+              <p className="text-xs text-gray-500 mt-1">Longest Streak</p>
             </div>
           </div>
           {profile?.createdAt && (
@@ -324,62 +390,163 @@ export function Settings() {
           )}
         </Card>
 
+        {/* Achievements */}
+        <AchievementsCard onViewAll={() => navigate('/achievements')} />
+
         {/* Weight Tracking */}
         <Card>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-gray-400">WEIGHT TRACKING</h3>
-            {weightTrend && (
-              <div className={`flex items-center gap-1 text-sm ${
-                weightTrend.direction === 'down' ? 'text-accent-success' :
-                weightTrend.direction === 'up' ? 'text-accent-warning' :
-                'text-gray-400'
+            {rateOfChange && (
+              <div className={`flex items-center gap-1.5 text-sm px-2 py-1 rounded-lg ${
+                rateOfChange.direction === 'losing' ? 'bg-accent-success/10 text-accent-success' :
+                rateOfChange.direction === 'gaining' ? 'bg-accent-primary/10 text-accent-primary' :
+                'bg-white/5 text-gray-400'
               }`}>
                 <span>
-                  {weightTrend.direction === 'down' ? '↓' :
-                   weightTrend.direction === 'up' ? '↑' : '→'}
+                  {rateOfChange.direction === 'losing' ? '↓' :
+                   rateOfChange.direction === 'gaining' ? '↑' : '→'}
                 </span>
-                <span className="font-digital">{Math.abs(weightTrend.change)} lbs</span>
+                <span className="font-digital font-semibold">
+                  {toDisplayWeight(rateOfChange.value, units)} {getWeightUnit(units)}/wk
+                </span>
               </div>
             )}
           </div>
 
           {/* Today's Weight Input */}
           <div className="flex gap-3 mb-4">
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <input
                 type="number"
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
-                placeholder={todayWeight ? String(todayWeight.weight) : String(profile?.weight || 150)}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
-                min={80}
-                max={400}
+                placeholder={String(toDisplayWeight(todayWeight?.weight || profile?.weight || 150, units))}
+                className="w-full glass-input rounded-xl px-4 py-2.5 pr-12 font-digital"
+                min={units === 'metric' ? 35 : 80}
+                max={units === 'metric' ? 180 : 400}
                 step={0.1}
               />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+                {getWeightUnit(units)}
+              </span>
             </div>
             <Button onClick={handleLogWeight} disabled={!weightInput}>
               {todayWeight ? 'Update' : 'Log'}
             </Button>
           </div>
 
-          {/* Today's status */}
-          {todayWeight && (
-            <div className="bg-bg-secondary rounded-lg p-3 mb-4 flex items-center justify-between">
-              <span className="text-sm text-gray-400">Today's weight</span>
-              <span className="font-digital font-bold text-accent-primary">
-                {todayWeight.weight} lbs
-              </span>
+          {/* Current & Goal Weight Display */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Current Weight */}
+            <div className="glass-subtle rounded-xl p-3">
+              <p className="text-xs text-gray-500 mb-1">Current</p>
+              <p className="font-digital font-bold text-xl text-white">
+                {formatWeight(profile?.weight || 0, units)}
+              </p>
+              {todayWeight && (
+                <p className="text-xs text-gray-500 mt-1">Updated today</p>
+              )}
             </div>
+
+            {/* Goal Weight */}
+            <div className="glass-subtle rounded-xl p-3">
+              <p className="text-xs text-gray-500 mb-1">Goal</p>
+              {profile?.goalWeight ? (
+                <>
+                  <p className="font-digital font-bold text-xl text-accent-primary">
+                    {formatWeight(profile.goalWeight, units)}
+                  </p>
+                  <button
+                    onClick={() => setGoalWeight(null)}
+                    className="text-xs text-gray-500 hover:text-accent-danger mt-1"
+                  >
+                    Clear goal
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={goalWeightInput}
+                    onChange={(e) => setGoalWeightInput(e.target.value)}
+                    placeholder="Set goal"
+                    className="w-full bg-transparent border-b border-gray-600 focus:border-accent-primary outline-none font-digital text-lg py-1"
+                  />
+                  {goalWeightInput && (
+                    <button
+                      onClick={handleSetGoalWeight}
+                      className="text-accent-primary text-sm font-medium"
+                    >
+                      Set
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Projected Goal Date */}
+          {projectedGoal && profile?.goalWeight && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`rounded-xl p-4 mb-4 ${
+                projectedGoal.isAchieved
+                  ? 'bg-accent-success/10 border border-accent-success/30'
+                  : 'bg-accent-primary/10 border border-accent-primary/30'
+              }`}
+            >
+              {projectedGoal.isAchieved ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🎉</span>
+                  <div>
+                    <p className="font-bold text-accent-success">Goal Achieved!</p>
+                    <p className="text-sm text-gray-400">You've reached your target weight</p>
+                  </div>
+                </div>
+              ) : projectedGoal.projectedDate ? (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Projected Goal Date</p>
+                    <p className="font-bold text-lg">
+                      {projectedGoal.projectedDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">~{projectedGoal.weeksRemaining} weeks</p>
+                    <p className="text-sm text-accent-primary font-digital">
+                      {Math.abs(toDisplayWeight(projectedGoal.currentWeight - projectedGoal.targetWeight, units)).toFixed(1)} {getWeightUnit(units)} to go
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">📊</span>
+                  <div>
+                    <p className="text-sm text-gray-400">
+                      {weightTrend && weightTrend.daysTracked < 7
+                        ? `Log ${7 - weightTrend.daysTracked} more days to see projected date`
+                        : 'Keep tracking to see your projected goal date'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </motion.div>
           )}
 
           {/* Chart Toggle */}
           {weightHistory.length > 1 && (
             <button
               onClick={() => setShowWeightChart(!showWeightChart)}
-              className="w-full text-sm text-accent-primary flex items-center justify-center gap-2"
+              className="w-full text-sm text-accent-primary flex items-center justify-center gap-2 py-2"
             >
               {showWeightChart ? 'Hide Chart' : 'Show Trend Chart'}
-              <span className={`transition-transform ${showWeightChart ? 'rotate-180' : ''}`}>
+              <span className={`transition-transform duration-150 ${showWeightChart ? 'rotate-180' : ''}`}>
                 ▼
               </span>
             </button>
@@ -390,17 +557,62 @@ export function Settings() {
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
-              className="mt-4 pt-4 border-t border-gray-800"
+              className="mt-4 pt-4 border-t border-white/10"
             >
-              <WeightChart data={weightHistory} height={180} />
+              <WeightChart
+                data={weightHistory}
+                height={200}
+                goalWeight={profile?.goalWeight}
+                showGoalLine={!!profile?.goalWeight}
+                unit={getWeightUnit(units)}
+              />
             </motion.div>
           )}
 
           {weightHistory.length === 0 && (
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center py-2">
               Log your weight daily to track your progress
             </p>
           )}
+        </Card>
+
+        {/* Reminders */}
+        <Card>
+          <h3 className="text-sm font-semibold text-gray-400 mb-4">REMINDERS</h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Show reminder cards on the home screen to help you stay on track.
+          </p>
+          <div className="space-y-2">
+            {([
+              { key: 'logMacros' as ReminderType, label: 'Log Macros', description: 'When no food logged today', icon: '🍽️' },
+              { key: 'checkIn' as ReminderType, label: 'Daily Check-In', description: 'When not checked in', icon: '✅' },
+              { key: 'claimXP' as ReminderType, label: 'Claim XP', description: 'On Sunday with pending XP', icon: '🎁' },
+              { key: 'workout' as ReminderType, label: 'Workout', description: 'When workout scheduled but not done', icon: '🏋️' }
+            ]).map(({ key, label, description, icon }) => (
+              <button
+                key={key}
+                onClick={() => setReminderPreference(key, !reminderPreferences[key])}
+                className="w-full flex items-center justify-between p-3 rounded-xl glass-subtle hover:bg-white/10 transition-all duration-150"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-lg">{icon}</span>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{label}</p>
+                    <p className="text-xs text-gray-500">{description}</p>
+                  </div>
+                </div>
+                <div className={`w-11 h-6 rounded-full transition-all duration-150 flex items-center ${
+                  reminderPreferences[key] ? 'bg-accent-primary justify-end' : 'bg-white/10 justify-start'
+                }`}>
+                  <motion.div
+                    layout
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    className={`w-5 h-5 rounded-full mx-0.5 ${reminderPreferences[key] ? 'bg-black' : 'bg-white/50'}`}
+                  />
+                </div>
+              </button>
+            ))}
+          </div>
         </Card>
 
         {/* Data Management */}
@@ -607,5 +819,78 @@ export function Settings() {
         </motion.div>
       )}
     </div>
+  )
+}
+
+// Achievements Summary Card
+function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
+  const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
+  const getEarnedBadges = useAchievementsStore((state) => state.getEarnedBadges)
+
+  const allBadges = getAllBadges()
+  const earnedBadges = getEarnedBadges()
+  const percentComplete = Math.round((earnedBadges.length / allBadges.length) * 100)
+
+  const rarityBg: Record<string, string> = {
+    common: 'bg-gray-500/20',
+    rare: 'bg-blue-500/20',
+    epic: 'bg-purple-500/20',
+    legendary: 'bg-yellow-500/20'
+  }
+
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400">ACHIEVEMENTS</h3>
+        <button
+          onClick={onViewAll}
+          className="text-xs text-accent-primary font-medium"
+        >
+          View All →
+        </button>
+      </div>
+
+      <div className="flex items-center gap-4 mb-4">
+        <div className="w-16 h-16 rounded-full bg-bg-secondary flex items-center justify-center relative">
+          <span className="text-3xl">🏆</span>
+          <div className="absolute -bottom-1 -right-1 bg-accent-primary text-bg-primary text-xs font-bold px-1.5 py-0.5 rounded-full">
+            {percentComplete}%
+          </div>
+        </div>
+        <div className="flex-1">
+          <p className="text-xl font-bold">
+            {earnedBadges.length} <span className="text-gray-500 font-normal text-base">/ {allBadges.length}</span>
+          </p>
+          <p className="text-sm text-gray-400 mb-2">Badges Earned</p>
+          <ProgressBar progress={percentComplete} size="sm" color="gradient" />
+        </div>
+      </div>
+
+      {/* Recent badges */}
+      {earnedBadges.length > 0 && (
+        <div className="flex gap-2">
+          {earnedBadges.slice(0, 5).map((badge) => (
+            <div
+              key={badge.id}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${rarityBg[badge.rarity]}`}
+              title={badge.name}
+            >
+              {badge.icon}
+            </div>
+          ))}
+          {earnedBadges.length > 5 && (
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm bg-bg-secondary text-gray-400">
+              +{earnedBadges.length - 5}
+            </div>
+          )}
+        </div>
+      )}
+
+      {earnedBadges.length === 0 && (
+        <p className="text-sm text-gray-500 text-center py-2">
+          Complete check-ins and workouts to earn badges!
+        </p>
+      )}
+    </Card>
   )
 }

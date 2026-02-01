@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card } from '@/components'
+import { Button, Card, BadgeUnlockModal } from '@/components'
 import {
   useUserStore,
   useXPStore,
   useWorkoutStore,
   useMacroStore,
-  useAvatarStore
+  useAvatarStore,
+  useAchievementsStore
 } from '@/stores'
 
 interface CheckInModalProps {
@@ -40,6 +41,10 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   const [submitted, setSubmitted] = useState(false)
   const [earnedXP, setEarnedXP] = useState(0)
   const [xpAnimations, setXpAnimations] = useState<{ id: number; amount: number; label: string }[]>([])
+  const [unlockedBadges, setUnlockedBadges] = useState<string[]>([])
+  const [showBadgeModal, setShowBadgeModal] = useState(false)
+
+  const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
 
   const todayWorkout = getTodayWorkout()
   const workoutCompleted = isWorkoutCompletedToday()
@@ -56,6 +61,8 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       setSubmitted(false)
       setEarnedXP(0)
       setXpAnimations([])
+      setUnlockedBadges([])
+      setShowBadgeModal(false)
     }
   }, [isOpen])
 
@@ -128,6 +135,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
         setXpAnimations(prev => [...prev, anim])
       }, index * 300)
     })
+
+    // Check for new badges after animations complete
+    const badgeCheckDelay = animations.length * 300 + 1000
+    setTimeout(() => {
+      const newBadges = checkAndAwardBadges()
+      if (newBadges.length > 0) {
+        setUnlockedBadges(newBadges)
+        setShowBadgeModal(true)
+      }
+    }, badgeCheckDelay)
   }
 
   if (!isOpen) return null
@@ -322,6 +339,14 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
             </div>
           )}
         </motion.div>
+
+        {/* Badge Unlock Modal */}
+        {showBadgeModal && unlockedBadges.length > 0 && (
+          <BadgeUnlockModal
+            badgeIds={unlockedBadges}
+            onClose={() => setShowBadgeModal(false)}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   )

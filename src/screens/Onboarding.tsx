@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card } from '@/components'
@@ -7,14 +7,17 @@ import {
   useWorkoutStore,
   useMacroStore,
   useAvatarStore,
+  useXPStore,
   FitnessLevel,
   TrainingDays,
   Goal,
   AvatarBase,
-  Gender
+  Gender,
+  UnitSystem
 } from '@/stores'
+import { EVOLUTION_STAGES } from '@/stores/avatarStore'
 
-type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'goal' | 'avatar' | 'tutorial'
+type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'goal' | 'avatar' | 'tutorial' | 'evolution'
 
 interface OnboardingData {
   username: string
@@ -26,6 +29,7 @@ interface OnboardingData {
   age: number
   goal: Goal
   avatarBase: AvatarBase
+  units: UnitSystem
 }
 
 const slideVariants = {
@@ -48,7 +52,8 @@ export function Onboarding() {
   const { initProfile, completeOnboarding } = useUserStore()
   const { setPlan } = useWorkoutStore()
   const { calculateMacros } = useMacroStore()
-  const { setBaseCharacter } = useAvatarStore()
+  const { setBaseCharacter, updateEvolutionStage } = useAvatarStore()
+  const { completeOnboarding: completeXPOnboarding } = useXPStore()
 
   const [step, setStep] = useState<Step>('welcome')
   const [direction, setDirection] = useState(1)
@@ -61,7 +66,8 @@ export function Onboarding() {
     height: 68, // 5'8"
     age: 25,
     goal: 'maintain',
-    avatarBase: 'warrior'
+    avatarBase: 'warrior',
+    units: 'imperial'
   })
 
   const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'goal', 'avatar', 'tutorial']
@@ -88,6 +94,17 @@ export function Onboarding() {
     calculateMacros(data.weight, data.height, data.age, data.gender, data.goal, 'moderate')
     setBaseCharacter(data.avatarBase)
     completeOnboarding()
+
+    // Trigger level up from 0 to 1 and evolution from Egg to Hatchling
+    completeXPOnboarding()
+    updateEvolutionStage(1)
+
+    // Show the evolution animation
+    setDirection(1)
+    setStep('evolution')
+  }
+
+  const finishEvolution = () => {
     navigate('/')
   }
 
@@ -184,6 +201,13 @@ export function Onboarding() {
                 username={data.username}
                 onFinish={finishOnboarding}
                 onBack={goBack}
+              />
+            )}
+            {step === 'evolution' && (
+              <EvolutionStep
+                username={data.username}
+                avatarBase={data.avatarBase}
+                onContinue={finishEvolution}
               />
             )}
           </motion.div>
@@ -683,6 +707,211 @@ function TutorialStep({
           Start My Journey
         </Button>
       </div>
+    </div>
+  )
+}
+
+function EvolutionStep({
+  username,
+  avatarBase,
+  onContinue
+}: {
+  username: string
+  avatarBase: AvatarBase
+  onContinue: () => void
+}) {
+  const [showNew, setShowNew] = useState(false)
+
+  const oldStage = EVOLUTION_STAGES[0] // Egg
+  const newStage = EVOLUTION_STAGES[1] // Hatchling
+
+  const avatarEmojis: Record<AvatarBase, string> = {
+    warrior: '⚔️',
+    mage: '🔮',
+    rogue: '🌙'
+  }
+
+  // Trigger the evolution animation after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowNew(true)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <div className="text-center">
+      {/* Background glow effect */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: showNew ? 0.3 : 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%)'
+        }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4"
+      >
+        <span className="text-sm font-semibold text-accent-primary uppercase tracking-wider">
+          First Evolution!
+        </span>
+      </motion.div>
+
+      <h2 className="text-2xl font-bold mb-8">Congratulations, {username}!</h2>
+
+      {/* Evolution animation */}
+      <div className="relative h-48 flex items-center justify-center mb-8">
+        <AnimatePresence mode="wait">
+          {!showNew ? (
+            <motion.div
+              key="old"
+              initial={{ scale: 1 }}
+              animate={{
+                scale: [1, 1.1, 1, 1.1, 1],
+              }}
+              exit={{
+                scale: 1.5,
+                opacity: 0,
+                filter: 'blur(10px)'
+              }}
+              transition={{
+                duration: 0.5,
+                repeat: Infinity,
+                repeatDelay: 0.5
+              }}
+              className="text-center"
+            >
+              <div className="text-8xl mb-2">{oldStage.emoji}</div>
+              <p className="text-gray-400">{oldStage.name}</p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="new"
+              initial={{
+                scale: 0,
+                rotate: -180,
+                opacity: 0
+              }}
+              animate={{
+                scale: 1,
+                rotate: 0,
+                opacity: 1
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 200,
+                damping: 15
+              }}
+              className="text-center"
+            >
+              <motion.div
+                animate={{
+                  y: [0, -10, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut'
+                }}
+              >
+                <div className="text-8xl mb-2">{newStage.emoji}</div>
+              </motion.div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-xl font-bold text-accent-primary"
+              >
+                {newStage.name}
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Sparkle effects when evolved */}
+        {showNew && (
+          <>
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute text-2xl"
+                initial={{
+                  opacity: 0,
+                  scale: 0,
+                  x: 0,
+                  y: 0
+                }}
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0, 1, 0],
+                  x: Math.cos((i / 8) * Math.PI * 2) * 80,
+                  y: Math.sin((i / 8) * Math.PI * 2) * 80
+                }}
+                transition={{
+                  duration: 1,
+                  delay: 0.1 * i,
+                  ease: 'easeOut'
+                }}
+              >
+                ✨
+              </motion.div>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* Level up indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: showNew ? 0.5 : 2 }}
+        className="mb-6"
+      >
+        <Card className="inline-block px-6">
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <p className="text-xs text-gray-500 uppercase">Level</p>
+              <p className="text-2xl font-bold font-digital text-gray-400">0</p>
+            </div>
+            <motion.div
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 0.5, repeat: Infinity }}
+              className="text-accent-primary text-xl"
+            >
+              →
+            </motion.div>
+            <div className="text-center">
+              <p className="text-xs text-gray-500 uppercase">Level</p>
+              <p className="text-2xl font-bold font-digital text-accent-primary">1</p>
+            </div>
+            <div className="text-3xl ml-2">{avatarEmojis[avatarBase]}</div>
+          </div>
+        </Card>
+      </motion.div>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: showNew ? 0.7 : 2.2 }}
+        className="text-gray-400 mb-8"
+      >
+        Your journey begins! Keep earning XP to evolve further.
+      </motion.p>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: showNew ? 1 : 2.5 }}
+      >
+        <Button onClick={onContinue} fullWidth size="lg">
+          Let's Go!
+        </Button>
+      </motion.div>
     </div>
   )
 }

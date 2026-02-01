@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Avatar, XPDisplay, Card, Button, ProgressBar } from '@/components'
+import { Avatar, XPDisplay, Card, Button, ProgressBar, ReminderList, WeeklySummary, NearestBadges } from '@/components'
 import {
   useUserStore,
   useXPStore,
   useWorkoutStore,
   useMacroStore,
-  useAvatarStore
+  useAvatarStore,
+  useRemindersStore
 } from '@/stores'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
@@ -47,6 +49,7 @@ function getLast7Days(): { date: string; dayLetter: string }[] {
 }
 
 export function Home() {
+  const navigate = useNavigate()
   const profile = useUserStore((state) => state.profile)
   const { currentLevel, pendingXP, XP_VALUES, dailyLogs, getTodayLog } = useXPStore()
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
@@ -54,6 +57,7 @@ export function Home() {
   // triggerReaction is handled in XPClaimModal
   useAvatarStore()
   const canClaimXP = useXPStore((state) => state.canClaimXP())
+  const activeReminders = useRemindersStore((state) => state.getActiveReminders())
 
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
@@ -135,26 +139,33 @@ export function Home() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-gradient-to-b from-bg-secondary to-bg-primary pt-8 pb-6 px-4">
+      <div className="bg-gradient-to-b from-white/[0.02] to-transparent pt-8 pb-6 px-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-gray-400 text-sm">Welcome back,</p>
+            <p className="text-gray-500 text-sm">Welcome back,</p>
             <h1 className="text-2xl font-bold">{profile?.username || 'Champion'}</h1>
           </div>
           {profile?.currentStreak ? (
-            <div className="bg-accent-warning/20 border border-accent-warning/30 rounded-lg px-3 py-1">
-              <span className="text-accent-warning font-bold">
-                🔥 {profile.currentStreak} day streak
+            <div className="glass px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+              <span className="text-lg">🔥</span>
+              <span className="text-accent-primary font-bold font-digital">
+                {profile.currentStreak}
               </span>
+              <span className="text-gray-400 text-sm">day streak</span>
             </div>
           ) : null}
         </div>
 
         {/* Motivational message */}
-        <p className="text-gray-500 text-sm italic">{message}</p>
+        <p className="text-gray-600 text-sm italic">{message}</p>
       </div>
 
       <div className="px-4 space-y-6">
+        {/* Active Reminders */}
+        {activeReminders.length > 0 && !hasCheckedInToday && (
+          <ReminderList maxReminders={2} />
+        )}
+
         {/* Check-In Reminder Banner */}
         <AnimatePresence>
           {!hasCheckedInToday && !justCheckedIn && (
@@ -234,6 +245,9 @@ export function Home() {
             </div>
           </div>
         </Card>
+
+        {/* Weekly Summary */}
+        <WeeklySummary />
 
         {/* Weekly XP Claim Banner */}
         <AnimatePresence>
@@ -446,6 +460,12 @@ export function Home() {
             </Card>
           </div>
         )}
+
+        {/* Achievements */}
+        <NearestBadges
+          limit={3}
+          onViewAll={() => navigate('/achievements')}
+        />
 
         {/* Check-In Button */}
         {hasCheckedInToday ? (

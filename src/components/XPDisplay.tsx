@@ -9,13 +9,12 @@ interface XPDisplayProps {
 }
 
 export function XPDisplay({ compact = false, showPending = true }: XPDisplayProps) {
-  const { totalXP, currentLevel, pendingXP, XP_PER_LEVEL, getCurrentLevelProgress, MAX_LEVEL } = useXPStore()
+  const { totalXP, currentLevel, pendingXP, getCurrentLevelProgress, getXPForNextLevel, MAX_LEVEL } = useXPStore()
   const [displayXP, setDisplayXP] = useState(totalXP)
   const [xpGains, setXpGains] = useState<{ id: number; amount: number }[]>([])
 
   const levelProgress = getCurrentLevelProgress()
-  const xpInLevel = totalXP % XP_PER_LEVEL
-  const xpToNextLevel = XP_PER_LEVEL - xpInLevel
+  const xpToNextLevel = getXPForNextLevel()
 
   // Animate XP changes
   useEffect(() => {
@@ -81,31 +80,30 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
 
       <div className="text-center">
         {/* Level display */}
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="text-2xl font-bold text-accent-primary text-glow-cyan font-digital">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-2xl font-bold text-accent-primary text-glow-gold font-digital">
             Level {currentLevel}
           </span>
           {currentLevel >= MAX_LEVEL && (
-            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded-full font-semibold">
               MAX
             </span>
           )}
         </div>
 
         {/* XP Bar */}
-        <div className="mb-1">
+        <div className="mb-2">
           <ProgressBar
-            progress={xpInLevel}
-            maxProgress={XP_PER_LEVEL}
+            progress={levelProgress}
             color="gradient"
             size="lg"
           />
         </div>
 
         {/* XP numbers */}
-        <div className="flex justify-between text-xs text-gray-400">
-          <span className="font-digital">{xpInLevel.toLocaleString()} XP</span>
-          <span className="font-digital">{xpToNextLevel.toLocaleString()} to next</span>
+        <div className="flex justify-between text-xs text-gray-500">
+          <span className="font-digital">{Math.round(levelProgress)}%</span>
+          <span className="font-digital">{xpToNextLevel.toLocaleString()} XP to next</span>
         </div>
 
         {/* Pending XP indicator */}
@@ -113,12 +111,12 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 bg-accent-secondary/20 border border-accent-secondary/30 rounded-lg p-2"
+            className="mt-3 glass rounded-xl p-3 border border-accent-secondary/30"
           >
-            <p className="text-xs text-accent-secondary">
+            <p className="text-sm text-accent-secondary">
               <span className="font-digital font-bold">+{pendingXP} XP</span> pending
             </p>
-            <p className="text-[10px] text-gray-500">Claim on Sunday</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">Claim on Sunday</p>
           </motion.div>
         )}
       </div>
