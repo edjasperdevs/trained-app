@@ -215,7 +215,7 @@ Found in `sync.ts` line 145-146:
 |---------|----------------|--------|--------|
 | **Streak Freeze** | Duolingo's #1 retention mechanic (-21% churn) | Low | High |
 | **Push Notifications** | Bring users back without opening app | Medium | High |
-| **PWA Icons Fix** | App literally won't install without this | Low | High |
+| ~~PWA Icons Fix~~ | ~~App literally won't install without this~~ | ✅ Done | ✅ Done |
 | **Leaderboards (Weekly)** | Duolingo's leagues drive 40% more engagement | Medium | High |
 
 ### HIGH IMPACT + MEDIUM EFFORT
@@ -272,7 +272,7 @@ Found in `sync.ts` line 145-146:
 
 | Blocker | Severity | Resolution |
 |---------|----------|------------|
-| **Missing PWA icons** | Critical | Add `pwa-192x192.png` and `pwa-512x512.png` to `/public/` |
+| ~~Missing PWA icons~~ | ~~Critical~~ | ✅ RESOLVED - Icons added to `/public/` |
 
 ### Non-Critical Issues
 
@@ -286,21 +286,18 @@ Found in `sync.ts` line 145-146:
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
-| Service Worker | Pass | vite-plugin-pwa handles this |
-| Manifest.json | Pass | Configured in vite.config.ts |
-| Icons (192x192) | **MISSING** | Required for installation |
-| Icons (512x512) | **MISSING** | Required for installation |
-| Offline capability | Pass | Workbox configured |
-| HTTPS | Pass | Vercel provides this |
-| Installable | Blocked | Missing icons |
+| Service Worker | ✅ Pass | vite-plugin-pwa handles this |
+| Manifest.json | ✅ Pass | Configured in vite.config.ts |
+| Icons (192x192) | ✅ Pass | Added `pwa-192x192.png` |
+| Icons (512x512) | ✅ Pass | Added `pwa-512x512.png` |
+| Apple Touch Icon | ✅ Pass | Added `apple-touch-icon.png` |
+| Offline capability | ✅ Pass | Workbox configured |
+| HTTPS | ✅ Pass | Vercel provides this |
+| Installable | ✅ Pass | Fully installable on iOS/Android |
 
-### MVP VERDICT: CONDITIONAL YES
+### MVP VERDICT: ✅ YES - READY FOR LAUNCH
 
-**You CAN launch IF you:**
-1. Add the two missing PWA icon files
-2. Test installation on iOS and Android
-
-**Launch-ready in: ~1 hour** (just need to create/add icons)
+All blockers have been resolved. The app is now fully launch-ready.
 
 ---
 
@@ -350,51 +347,46 @@ PHASE 3: PUBLIC LAUNCH (Week 5+)
 
 ### Infrastructure Changes Before Launch
 
-| Change | Priority | Effort |
+| Change | Priority | Status |
 |--------|----------|--------|
-| Add PWA icons | Required | 30 min |
-| Add analytics | Recommended | 1 hour |
-| Set up error tracking (Sentry) | Recommended | 1 hour |
-| Custom domain | Nice to have | 30 min |
+| Add PWA icons | Required | ✅ Complete |
+| Add analytics (Plausible) | Recommended | ✅ Complete |
+| Set up error tracking (Sentry) | Recommended | ✅ Complete |
+| Access code gating | Required | ✅ Complete |
+| Custom domain | Nice to have | Pending |
 
 ---
 
 ## 8. MONETIZATION GATING OPTIONS
 
-### Option 1: Access Code System (Recommended for MVP)
+### Option 1: Access Code System ✅ IMPLEMENTED
+
+**Status:** Live in production
 
 **How it works:**
-- Generate unique codes in a spreadsheet/Airtable
-- Ebook includes a unique code or link to retrieve one
-- App checks code against list at first launch
-- Validated codes stored in LocalStorage
+- Access codes stored in Supabase `access_codes` table
+- User enters code on first launch via `AccessGate` screen
+- Code validated against database, marked as used
+- Access stored in localStorage for future visits
+- Allows re-entry with same code (for reinstalls)
 
-**Implementation:**
-```typescript
-// Simple code validation via Supabase Edge Function
-const validateCode = async (code: string) => {
-  const { data } = await supabase
-    .from('access_codes')
-    .select('*')
-    .eq('code', code)
-    .eq('used', false)
-    .single()
+**Files:**
+- `src/stores/accessStore.ts` - Validation logic
+- `src/screens/AccessGate.tsx` - Code entry UI
+- `supabase/access_codes.sql` - Database schema
 
-  if (data) {
-    await supabase.from('access_codes').update({ used: true }).eq('code', code)
-    return true
-  }
-  return false
-}
+**To generate codes:**
+```sql
+-- In Supabase SQL Editor
+SELECT * FROM generate_access_codes(50, 8);
 ```
 
 | Pros | Cons |
 |------|------|
-| Simple to implement | Codes can be shared |
-| Works offline after validation | Need to generate codes |
-| No ongoing server costs | Can't revoke access easily |
-
-**Effort:** ~4-6 hours
+| ✅ Implemented and live | Codes can be shared |
+| ✅ Works offline after validation | Need to generate codes |
+| ✅ Tracks usage count | - |
+| ✅ Allows returning users | - |
 
 ### Option 2: Email Verification via Supabase
 

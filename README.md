@@ -34,8 +34,12 @@ A gamified fitness tracking PWA that turns your workout and nutrition journey in
 | Settings | Complete | Unit toggle (lbs/kg), data export/import, account management |
 | Reminders | Complete | Contextual in-app reminders for actions |
 | Cloud Sync | Complete | Real-time sync via Supabase with offline support |
+| PWA Installation | Complete | Installable on iOS/Android with custom icons |
+| Analytics | Complete | Plausible analytics for key user events |
+| Error Tracking | Complete | Sentry integration with ErrorBoundary |
+| Access Gating | Complete | Access code verification for ebook purchasers |
 
-### Recent Additions (This Session)
+### Recent Additions
 
 - Gender-specific TDEE calculation (Mifflin-St Jeor formula)
 - Enhanced check-in flow with streak calendar
@@ -47,6 +51,10 @@ A gamified fitness tracking PWA that turns your workout and nutrition journey in
 - Client activity feed
 - Workout exercise customization with add/edit/remove/reorder
 - Edit saved meals functionality
+- **PWA icons** - Full icon set for iOS/Android installation
+- **Plausible Analytics** - Privacy-friendly usage tracking
+- **Sentry Error Tracking** - Production error monitoring
+- **Access Code Gating** - Ebook purchaser verification
 
 ## Tech Stack
 
@@ -104,7 +112,8 @@ src/
 │   ├── Auth.tsx         # Login/signup/forgot password
 │   ├── Onboarding.tsx   # New user flow
 │   ├── CheckInModal.tsx # Daily check-in
-│   └── XPClaimModal.tsx # Sunday XP celebration
+│   ├── XPClaimModal.tsx # Sunday XP celebration
+│   └── AccessGate.tsx   # Access code entry screen
 ├── stores/              # Zustand state stores
 │   ├── userStore.ts     # Profile, streak, check-ins
 │   ├── xpStore.ts       # XP, levels, pending claims
@@ -114,7 +123,8 @@ src/
 │   ├── authStore.ts     # Supabase auth state
 │   ├── achievementsStore.ts # Badge unlocks
 │   ├── remindersStore.ts    # Reminder preferences
-│   └── toastStore.ts    # Toast notifications
+│   ├── toastStore.ts    # Toast notifications
+│   └── accessStore.ts   # Access code validation
 ├── hooks/               # Custom React hooks
 │   └── useClientDetails.ts  # Coach client data fetching
 ├── lib/                 # Utilities and APIs
@@ -122,6 +132,8 @@ src/
 │   ├── sync.ts          # Cloud sync logic
 │   ├── foodApi.ts       # Open Food Facts API
 │   ├── units.ts         # Unit conversion helpers
+│   ├── analytics.ts     # Plausible event tracking
+│   ├── sentry.ts        # Error tracking setup
 │   └── database.types.ts # Supabase type definitions
 └── App.tsx              # Root component with routing
 ```
@@ -178,6 +190,7 @@ See `supabase/schema.sql` for the complete Supabase schema including:
 - `macro_targets` - User macro goals
 - `coach_clients` - Coach-client relationships
 - `coach_client_summary` - Aggregated client view for coaches
+- `access_codes` - Ebook purchaser access codes (see `supabase/access_codes.sql`)
 
 ## Suggested Next Features
 
@@ -186,6 +199,22 @@ Based on the current roadmap:
 1. **Social Features** - Leaderboards, friend challenges
 2. **Brand Partnership Portal** - Sponsored challenges and rewards
 3. **Advanced Analytics** - Progress photos, body measurements, strength tracking
+
+## Production Deployment
+
+The app is deployed on Vercel at: **https://gamify-gains-app.vercel.app**
+
+### Environment Variables
+
+Required in Vercel (or `.env` for local dev):
+- `VITE_SUPABASE_URL` - Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` - Supabase anon key
+- `VITE_SENTRY_DSN` - Sentry error tracking DSN
+
+### Analytics & Monitoring
+
+- **Plausible** - Privacy-friendly analytics (configured for `gamify-gains-app.vercel.app`)
+- **Sentry** - Error tracking with session replay on errors
 
 ## Development Notes
 
