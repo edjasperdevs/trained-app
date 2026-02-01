@@ -66,7 +66,6 @@ interface AccessState {
 
 // Generate a unique instance name for this device
 function getInstanceName(): string {
-  const userAgent = navigator.userAgent
   const platform = navigator.platform || 'Unknown'
   const timestamp = Date.now()
   return `${platform}-${timestamp}`
