@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useUserStore, useAvatarStore, useAuthStore } from '@/stores'
+import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
 import { Navigation, ToastContainer } from '@/components'
 import {
   Onboarding,
@@ -11,7 +11,8 @@ import {
   Settings,
   Auth,
   Coach,
-  Achievements
+  Achievements,
+  AccessGate
 } from '@/screens'
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
   const initializeAuth = useAuthStore((state) => state.initialize)
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
+  const hasAccess = useAccessStore((state) => state.hasAccess)
+  const [accessGranted, setAccessGranted] = useState(hasAccess)
 
   // Initialize auth on app load
   useEffect(() => {
@@ -44,6 +47,16 @@ function App() {
             <p className="text-gray-400">Loading...</p>
           </div>
         </div>
+      </>
+    )
+  }
+
+  // Check access code first (before auth)
+  if (!hasAccess && !accessGranted) {
+    return (
+      <>
+        <ToastContainer />
+        <AccessGate onAccessGranted={() => setAccessGranted(true)} />
       </>
     )
   }

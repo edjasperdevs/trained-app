@@ -23,3 +23,5 @@ export type { ReminderType, ReminderPreferences, ActiveReminder } from './remind
 
 export { useAchievementsStore, RARITY_COLORS } from './achievementsStore'
 export type { Badge, BadgeRarity, EarnedBadge } from './achievementsStore'
+
+export { useAccessStore } from './accessStore'
