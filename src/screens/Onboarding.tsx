@@ -16,6 +16,7 @@ import {
   UnitSystem
 } from '@/stores'
 import { EVOLUTION_STAGES } from '@/stores/avatarStore'
+import { analytics } from '@/lib/analytics'
 
 type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'goal' | 'avatar' | 'tutorial' | 'evolution'
 
@@ -98,6 +99,9 @@ export function Onboarding() {
     // Trigger level up from 0 to 1 and evolution from Egg to Hatchling
     completeXPOnboarding()
     updateEvolutionStage(1)
+
+    // Track analytics
+    analytics.onboardingCompleted(data.trainingDaysPerWeek)
 
     // Show the evolution animation
     setDirection(1)

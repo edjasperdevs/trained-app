@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, ProgressBar } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
+import { analytics } from '@/lib/analytics'
 
 export function Workouts() {
   const {
@@ -57,6 +58,7 @@ export function Workouts() {
     if (!todayWorkout) return
     startWorkout(todayWorkout.type, todayWorkout.dayNumber)
     setActiveWorkout(getCurrentWorkout())
+    analytics.workoutStarted(todayWorkout.type)
   }
 
   const handleMinimalWorkout = () => {
@@ -79,6 +81,7 @@ export function Workouts() {
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
+    analytics.quickWorkoutLogged()
     setShowMinimalModal(false)
     setMinimalNotes('')
   }
@@ -103,6 +106,13 @@ export function Workouts() {
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
+
+    // Track workout completion with duration
+    const duration = activeWorkout.startTime && activeWorkout.endTime
+      ? Math.round((Date.now() - activeWorkout.startTime) / 60000)
+      : 0
+    analytics.workoutCompleted(activeWorkout.workoutType, duration)
+
     setActiveWorkout(null)
   }
 

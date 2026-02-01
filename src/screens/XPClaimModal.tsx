@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
+import { analytics } from '@/lib/analytics'
 
 interface XPClaimModalProps {
   isOpen: boolean
@@ -125,6 +126,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
     setClaimResult(result)
     setPhase('claiming')
     setShowConfetti(true)
+
+    // Track analytics
+    analytics.xpClaimed(result.xpClaimed)
+    if (result.leveledUp) {
+      analytics.levelUp(result.newLevel)
+    }
 
     // Check for evolution
     updateEvolutionStage(result.newLevel)

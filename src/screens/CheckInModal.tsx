@@ -9,6 +9,7 @@ import {
   useAvatarStore,
   useAchievementsStore
 } from '@/stores'
+import { analytics } from '@/lib/analytics'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -124,6 +125,9 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
     // Check for evolution
     updateEvolutionStage(currentLevel)
+
+    // Track analytics
+    analytics.checkInCompleted((profile?.currentStreak || 0) + 1)
 
     // Animate
     setSubmitted(true)
