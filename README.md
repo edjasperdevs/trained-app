@@ -190,7 +190,27 @@ See `supabase/schema.sql` for the complete Supabase schema including:
 - `macro_targets` - User macro goals
 - `coach_clients` - Coach-client relationships
 - `coach_client_summary` - Aggregated client view for coaches
-- `access_codes` - Ebook purchaser access codes (see `supabase/access_codes.sql`)
+- `access_codes` - (Legacy) Ebook purchaser access codes
+
+## Access Gating with Lemon Squeezy
+
+The app is gated behind license key validation using [Lemon Squeezy](https://lemonsqueezy.com).
+
+### How It Works
+1. User purchases the ebook via Lemon Squeezy
+2. Lemon Squeezy automatically generates a license key
+3. User enters the license key in the app
+4. App validates against Lemon Squeezy API
+5. License is tied to this device (instance-based activation)
+
+### Setup
+1. Create a Lemon Squeezy account
+2. Create a product with "License keys" enabled
+3. Set activation limit (e.g., 3 devices per license)
+4. Add `VITE_LEMONSQUEEZY_API_URL=https://api.lemonsqueezy.com` to environment
+
+### Development Mode
+If `VITE_LEMONSQUEEZY_API_URL` is not set, the app accepts any 8+ character code for testing
 
 ## Suggested Next Features
 
@@ -210,6 +230,7 @@ Required in Vercel (or `.env` for local dev):
 - `VITE_SUPABASE_URL` - Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` - Supabase anon key
 - `VITE_SENTRY_DSN` - Sentry error tracking DSN
+- `VITE_LEMONSQUEEZY_API_URL` - Lemon Squeezy API (https://api.lemonsqueezy.com)
 
 ### Analytics & Monitoring
 

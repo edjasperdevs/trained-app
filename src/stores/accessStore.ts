@@ -2,32 +2,61 @@
  * Access Code Store
  *
  * Manages access gating for ebook purchasers.
- * Validates codes against Supabase and stores access locally.
+ * Validates license keys against Lemon Squeezy API.
+ *
+ * Setup:
+ * 1. Create a Lemon Squeezy account: https://lemonsqueezy.com
+ * 2. Create a product with "License keys" enabled
+ * 3. Customers automatically receive a license key on purchase
+ * 4. They enter that key here to unlock the app
  */
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase'
 
-// Type for access code record from Supabase
-interface AccessCodeRecord {
-  id: string
-  code: string
-  email?: string | null
-  used_at?: string | null
-  used_count?: number
-  is_active?: boolean
+// Lemon Squeezy license validation response
+interface LemonSqueezyLicenseResponse {
+  valid: boolean
+  error?: string
+  license_key?: {
+    id: number
+    status: string
+    key: string
+    activation_limit: number
+    activation_usage: number
+    created_at: string
+    expires_at: string | null
+  }
+  instance?: {
+    id: string
+    name: string
+    created_at: string
+  }
+  meta?: {
+    store_id: number
+    order_id: number
+    order_item_id: number
+    product_id: number
+    product_name: string
+    variant_id: number
+    variant_name: string
+    customer_id: number
+    customer_name: string
+    customer_email: string
+  }
 }
 
 interface AccessState {
   // Whether user has validated access
   hasAccess: boolean
-  // The code that was used (for reference)
-  accessCode: string | null
+  // The license key that was used
+  licenseKey: string | null
   // When access was granted
   accessGrantedAt: string | null
-  // Email associated with the code (optional)
+  // Customer email from Lemon Squeezy
   email: string | null
+  // Instance ID for this device
+  instanceId: string | null
 
   // Actions
   validateCode: (code: string) => Promise<{ success: boolean; error?: string }>
@@ -35,105 +64,133 @@ interface AccessState {
   checkAccess: () => boolean
 }
 
+// Generate a unique instance name for this device
+function getInstanceName(): string {
+  const userAgent = navigator.userAgent
+  const platform = navigator.platform || 'Unknown'
+  const timestamp = Date.now()
+  return `${platform}-${timestamp}`
+}
+
 export const useAccessStore = create<AccessState>()(
   persist(
     (set, get) => ({
       hasAccess: false,
-      accessCode: null,
+      licenseKey: null,
       accessGrantedAt: null,
       email: null,
+      instanceId: null,
 
       validateCode: async (code: string) => {
-        const trimmedCode = code.trim().toUpperCase()
+        const trimmedCode = code.trim()
 
-        // Check if Supabase is configured
-        if (!isSupabaseConfigured) {
-          // In local-only mode, accept any code that matches pattern
-          // This allows testing without Supabase
-          if (trimmedCode.length >= 6) {
+        // Basic format validation (Lemon Squeezy keys are usually UUID-like)
+        if (trimmedCode.length < 8) {
+          return { success: false, error: 'Invalid license key format' }
+        }
+
+        // Check if Lemon Squeezy is configured
+        const apiUrl = import.meta.env.VITE_LEMONSQUEEZY_API_URL
+
+        if (!apiUrl) {
+          // Fallback: In development or if not configured, accept any 8+ char code
+          console.log('[Access] Lemon Squeezy not configured, using fallback validation')
+          if (trimmedCode.length >= 8) {
             set({
               hasAccess: true,
-              accessCode: trimmedCode,
+              licenseKey: trimmedCode,
               accessGrantedAt: new Date().toISOString(),
-              email: null
+              email: null,
+              instanceId: 'dev-instance'
             })
             return { success: true }
           }
-          return { success: false, error: 'Invalid code format' }
+          return { success: false, error: 'Invalid license key' }
         }
 
         try {
-          const supabase = getSupabaseClient()
+          // Validate license key with Lemon Squeezy
+          const response = await fetch(`${apiUrl}/v1/licenses/validate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              license_key: trimmedCode,
+              instance_name: getInstanceName()
+            })
+          })
 
-          // Check if code exists - use rpc or raw query to avoid type issues
-          const { data, error } = await supabase
-            .from('access_codes' as 'profiles') // Type cast to bypass strict typing
-            .select('*')
-            .eq('code', trimmedCode)
-            .single() as { data: AccessCodeRecord | null; error: Error | null }
+          const data: LemonSqueezyLicenseResponse = await response.json()
 
-          if (error || !data) {
-            return { success: false, error: 'Invalid access code' }
-          }
-
-          // Check if code is active
-          if (data.is_active === false) {
-            return { success: false, error: 'This code has been deactivated' }
-          }
-
-          // Check if already used
-          if (data.used_at) {
-            // Allow re-entry with same code (user might reinstall)
-            // But only if it was used recently (within 1 year)
-            const usedAt = new Date(data.used_at)
-            const oneYearAgo = new Date()
-            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-
-            if (usedAt < oneYearAgo) {
-              return { success: false, error: 'This code has expired' }
+          if (!data.valid) {
+            // Handle specific error cases
+            if (data.error?.includes('activation limit')) {
+              return {
+                success: false,
+                error: 'This license has reached its activation limit. Please contact support.'
+              }
             }
+            if (data.error?.includes('expired')) {
+              return { success: false, error: 'This license has expired.' }
+            }
+            if (data.error?.includes('disabled') || data.error?.includes('inactive')) {
+              return { success: false, error: 'This license has been deactivated.' }
+            }
+            return { success: false, error: data.error || 'Invalid license key' }
           }
 
-          // Mark code as used (if not already)
-          if (!data.used_at) {
-            await supabase
-              .from('access_codes' as 'profiles')
-              .update({
-                used_at: new Date().toISOString(),
-                used_count: (data.used_count || 0) + 1
-              } as Record<string, unknown>)
-              .eq('code', trimmedCode)
-          } else {
-            // Increment usage count for returning users
-            await supabase
-              .from('access_codes' as 'profiles')
-              .update({
-                used_count: (data.used_count || 0) + 1
-              } as Record<string, unknown>)
-              .eq('code', trimmedCode)
-          }
-
-          // Grant access
+          // License is valid!
           set({
             hasAccess: true,
-            accessCode: trimmedCode,
+            licenseKey: trimmedCode,
             accessGrantedAt: new Date().toISOString(),
-            email: data.email || null
+            email: data.meta?.customer_email || null,
+            instanceId: data.instance?.id || null
           })
 
           return { success: true }
         } catch (err) {
-          console.error('Access code validation error:', err)
-          return { success: false, error: 'Unable to validate code. Please try again.' }
+          console.error('License validation error:', err)
+
+          // Network error - allow offline access if previously validated
+          const currentState = get()
+          if (currentState.licenseKey === trimmedCode && currentState.hasAccess) {
+            return { success: true }
+          }
+
+          return {
+            success: false,
+            error: 'Unable to validate license. Please check your internet connection.'
+          }
         }
       },
 
       revokeAccess: () => {
+        // Optionally deactivate the instance on Lemon Squeezy
+        const { licenseKey, instanceId } = get()
+        const apiUrl = import.meta.env.VITE_LEMONSQUEEZY_API_URL
+
+        if (apiUrl && licenseKey && instanceId) {
+          // Fire and forget - don't wait for response
+          fetch(`${apiUrl}/v1/licenses/deactivate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              license_key: licenseKey,
+              instance_id: instanceId
+            })
+          }).catch(() => {
+            // Ignore errors on deactivation
+          })
+        }
+
         set({
           hasAccess: false,
-          accessCode: null,
+          licenseKey: null,
           accessGrantedAt: null,
-          email: null
+          email: null,
+          instanceId: null
         })
       },
 
@@ -143,7 +200,7 @@ export const useAccessStore = create<AccessState>()(
     }),
     {
       name: 'gamify-gains-access',
-      version: 1
+      version: 2 // Bump version to handle migration from old format
     }
   )
 )

@@ -40,10 +40,10 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
     }
   }
 
-  // Format code as user types (uppercase, add dashes for readability)
+  // Format code as user types (keep dashes for Lemon Squeezy format)
   const handleCodeChange = (value: string) => {
-    // Remove non-alphanumeric characters and uppercase
-    const cleaned = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+    // Allow alphanumeric and dashes (Lemon Squeezy keys are UUID-like with dashes)
+    const cleaned = value.replace(/[^A-Za-z0-9-]/g, '').toUpperCase()
     setCode(cleaned)
     setError(null)
   }
@@ -82,7 +82,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
       >
         <Card className="bg-bg-secondary">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold mb-2">Enter Access Code</h2>
+            <h2 className="text-xl font-bold mb-2">Enter License Key</h2>
             <p className="text-gray-400 text-sm">
               This app is exclusive to Gamify Your Gains ebook owners.
             </p>
@@ -94,11 +94,11 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 type="text"
                 value={code}
                 onChange={(e) => handleCodeChange(e.target.value)}
-                placeholder="XXXXXX"
-                className={`w-full glass-input rounded-xl px-4 py-4 text-center text-2xl font-mono tracking-[0.3em] uppercase ${
+                placeholder="XXXX-XXXX-XXXX-XXXX"
+                className={`w-full glass-input rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider uppercase ${
                   error ? 'border-accent-danger' : ''
                 }`}
-                maxLength={12}
+                maxLength={50}
                 autoComplete="off"
                 autoFocus
               />
@@ -172,8 +172,8 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                     <span>🔑</span> Already Purchased?
                   </h3>
                   <p className="text-sm text-gray-400">
-                    Your access code was included in your purchase confirmation email.
-                    Check your inbox (and spam folder) for an email from us.
+                    Your license key was included in your purchase confirmation email.
+                    Check your inbox (and spam folder) for an email from Lemon Squeezy.
                   </p>
                 </div>
 
