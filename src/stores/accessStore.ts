@@ -81,11 +81,25 @@ export const useAccessStore = create<AccessState>()(
       instanceId: null,
 
       validateCode: async (code: string) => {
-        const trimmedCode = code.trim()
+        const trimmedCode = code.trim().toUpperCase()
 
         // Basic format validation (Lemon Squeezy keys are usually UUID-like)
         if (trimmedCode.length < 8) {
           return { success: false, error: 'Invalid license key format' }
+        }
+
+        // Check for master code (set via environment variable)
+        const masterCode = import.meta.env.VITE_MASTER_ACCESS_CODE
+        if (masterCode && trimmedCode === masterCode.toUpperCase()) {
+          console.log('[Access] Master code used')
+          set({
+            hasAccess: true,
+            licenseKey: 'MASTER',
+            accessGrantedAt: new Date().toISOString(),
+            email: null,
+            instanceId: 'master-access'
+          })
+          return { success: true }
         }
 
         // Check if Lemon Squeezy is configured
