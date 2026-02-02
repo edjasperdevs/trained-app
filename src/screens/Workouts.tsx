@@ -878,28 +878,35 @@ function ActiveWorkoutView({
                           return (
                             <div
                               key={setIndex}
-                              className={`flex items-center gap-2 ${set.completed || set.skipped ? 'opacity-60' : ''}`}
+                              className={`${set.completed || set.skipped ? 'opacity-60' : ''}`}
                             >
-                              <span className="text-sm text-gray-500 w-10">
-                                Set {setIndex + 1}
-                              </span>
-                              <div className="relative">
+                              {/* Last workout hint for this set */}
+                              {lastSet && !set.completed && !set.skipped && (
+                                <div className="text-xs text-gray-600 mb-1 ml-10">
+                                  Last: {lastSet.weight} × {lastSet.reps}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500 w-10">
+                                  Set {setIndex + 1}
+                                </span>
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    placeholder={lastSet ? String(lastSet.weight) : '0'}
+                                    value={set.weight || ''}
+                                    onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
+                                    className="w-16 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm placeholder:text-gray-600"
+                                  />
+                                </div>
+                                <span className="text-gray-500 text-sm">×</span>
                                 <input
                                   type="number"
-                                  placeholder={lastSet ? String(lastSet.weight) : 'lbs'}
-                                  value={set.weight || ''}
-                                  onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
-                                  className="w-16 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm"
+                                  placeholder={lastSet ? String(lastSet.reps) : '0'}
+                                  value={set.reps || ''}
+                                  onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
+                                  className="w-14 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm placeholder:text-gray-600"
                                 />
-                              </div>
-                              <span className="text-gray-500 text-sm">×</span>
-                              <input
-                                type="number"
-                                placeholder={lastSet ? String(lastSet.reps) : 'reps'}
-                                value={set.reps || ''}
-                                onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
-                                className="w-14 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm"
-                              />
                               {set.completed ? (
                                 <div className="flex items-center gap-1">
                                   <button
@@ -940,6 +947,7 @@ function ActiveWorkoutView({
                                   </button>
                                 </div>
                               )}
+                              </div>
                             </div>
                           )
                         })}
