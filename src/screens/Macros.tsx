@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, ProgressBar, FoodSearch } from '@/components'
-import { FoodSearchResult } from '@/lib/foodApi'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender } from '@/stores'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
@@ -700,8 +699,9 @@ function LogMealView({
     setEditingMeal(null)
   }
 
-  const handleFoodSelect = (food: FoodSearchResult) => {
-    setMealName(food.brand ? `${food.name} (${food.brand})` : food.name)
+  const handleFoodSelect = (food: { name: string; brand?: string; protein: number; carbs: number; fats: number; calories: number; quantity: number; unit: string }) => {
+    const quantityLabel = food.unit === 'serving' ? `${food.quantity} serving` : `${food.quantity}${food.unit}`
+    setMealName(food.brand ? `${food.name} (${food.brand}) - ${quantityLabel}` : `${food.name} - ${quantityLabel}`)
     setProtein(String(food.protein))
     setCarbs(String(food.carbs))
     setFats(String(food.fats))
