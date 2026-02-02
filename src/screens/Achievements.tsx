@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Card, ProgressBar } from '@/components'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores'
+import { Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check } from 'lucide-react'
 
 const RARITY_ORDER: BadgeRarity[] = ['legendary', 'epic', 'rare', 'common']
 
@@ -36,13 +37,13 @@ const RARITY_GLOW: Record<BadgeRarity, string> = {
 
 type CategoryFilter = 'all' | 'streak' | 'workout' | 'nutrition' | 'level' | 'special'
 
-const categories: { id: CategoryFilter; label: string; icon: string }[] = [
-  { id: 'all', label: 'All', icon: '🏆' },
-  { id: 'streak', label: 'Streak', icon: '🔥' },
-  { id: 'workout', label: 'Workout', icon: '🏋️' },
-  { id: 'nutrition', label: 'Nutrition', icon: '🥩' },
-  { id: 'level', label: 'Level', icon: '⬆️' },
-  { id: 'special', label: 'Special', icon: '✨' },
+const categories: { id: CategoryFilter; label: string; icon: typeof Trophy }[] = [
+  { id: 'all', label: 'All', icon: Trophy },
+  { id: 'streak', label: 'Streak', icon: Flame },
+  { id: 'workout', label: 'Workout', icon: Dumbbell },
+  { id: 'nutrition', label: 'Nutrition', icon: Beef },
+  { id: 'level', label: 'Level', icon: ArrowUp },
+  { id: 'special', label: 'Special', icon: Sparkles },
 ]
 
 interface BadgeCardProps {
@@ -84,7 +85,7 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
           </div>
           {earned && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-accent-success rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
+              <Check size={12} className="text-white" />
             </div>
           )}
         </div>
@@ -121,8 +122,8 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
                 color={progress.percentage >= 80 ? 'green' : progress.percentage >= 50 ? 'cyan' : 'purple'}
               />
               {progress.percentage >= 80 && (
-                <p className="text-xs text-accent-success mt-1 font-medium">
-                  Almost there! 🔥
+                <p className="text-xs text-accent-success mt-1 font-medium flex items-center gap-1">
+                  Almost there! <Flame size={12} />
                 </p>
               )}
             </div>
@@ -204,7 +205,7 @@ export function Achievements() {
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-full bg-bg-card flex items-center justify-center text-gray-400 hover:text-white transition-colors"
           >
-            ←
+            <ChevronLeft size={20} />
           </button>
           <div>
             <h1 className="text-2xl font-bold">Achievements</h1>
@@ -217,7 +218,7 @@ export function Achievements() {
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="w-20 h-20 rounded-full bg-bg-secondary flex items-center justify-center">
-                <span className="text-4xl">🏆</span>
+                <Trophy size={36} className="text-accent-primary" />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-accent-primary text-bg-primary text-xs font-bold px-2 py-0.5 rounded-full">
                 {percentComplete}%
@@ -258,7 +259,7 @@ export function Achievements() {
         {closestBadge && closestBadge.progress.percentage > 0 && (
           <Card className="border-accent-primary/30">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-lg">🎯</span>
+              <Target size={18} className="text-accent-primary" />
               <h3 className="font-semibold text-sm text-gray-400">CLOSEST TO UNLOCK</h3>
             </div>
             <div className="flex items-center gap-4">
@@ -283,26 +284,29 @@ export function Achievements() {
 
         {/* Category Filter */}
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-          {categories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setFilter(cat.id)}
-              className={`
-                flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-                ${filter === cat.id
-                  ? 'bg-accent-primary text-bg-primary shadow-lg shadow-accent-primary/20'
-                  : 'bg-bg-card text-gray-400 hover:text-white'}
-              `}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
-              {filter === cat.id && (
-                <span className="ml-1 bg-bg-primary/20 px-1.5 py-0.5 rounded text-xs">
-                  {filteredBadges.length}
-                </span>
-              )}
-            </button>
-          ))}
+          {categories.map(cat => {
+            const Icon = cat.icon
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setFilter(cat.id)}
+                className={`
+                  flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
+                  ${filter === cat.id
+                    ? 'bg-accent-primary text-bg-primary shadow-lg shadow-accent-primary/20'
+                    : 'bg-bg-card text-gray-400 hover:text-white'}
+                `}
+              >
+                <Icon size={16} />
+                <span>{cat.label}</span>
+                {filter === cat.id && (
+                  <span className="ml-1 bg-bg-primary/20 px-1.5 py-0.5 rounded text-xs">
+                    {filteredBadges.length}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {/* Badges List */}
@@ -330,7 +334,7 @@ export function Achievements() {
         {/* Empty State */}
         {sortedBadges.length === 0 && (
           <div className="text-center py-12">
-            <span className="text-4xl mb-4 block">🏆</span>
+            <Trophy size={40} className="mx-auto mb-4 text-gray-500" />
             <p className="text-gray-500">No badges in this category</p>
           </div>
         )}

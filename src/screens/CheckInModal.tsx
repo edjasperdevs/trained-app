@@ -10,6 +10,7 @@ import {
   useAchievementsStore
 } from '@/stores'
 import { analytics } from '@/lib/analytics'
+import { Dumbbell, Beef, Zap, CheckCircle2, Star, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -178,7 +179,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   onClick={() => onClose(false)}
                   className="text-gray-400 hover:text-white"
                 >
-                  ✕
+                  <X size={20} />
                 </button>
               </div>
 
@@ -190,13 +191,13 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     xp={XP_VALUES.WORKOUT}
                     checked={data.workout}
                     onChange={(v) => setData(d => ({ ...d, workout: v }))}
-                    icon="🏋️"
+                    icon={Dumbbell}
                     disabled={workoutCompleted}
                   />
                 ) : (
                   <Card className="opacity-60" padding="sm">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">😴</span>
+                      <Moon size={20} className="text-gray-400" />
                       <span className="text-gray-400">Rest Day - No workout scheduled</span>
                     </div>
                   </Card>
@@ -208,7 +209,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   xp={XP_VALUES.PROTEIN}
                   checked={data.protein}
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
-                  icon="🥩"
+                  icon={Beef}
                 />
 
                 {/* Calories */}
@@ -217,7 +218,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   xp={XP_VALUES.CALORIES}
                   checked={data.calories}
                   onChange={(v) => setData(d => ({ ...d, calories: v }))}
-                  icon="🔥"
+                  icon={Zap}
                 />
 
                 {/* Check-in (always checked) */}
@@ -226,7 +227,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   xp={XP_VALUES.CHECK_IN}
                   checked={data.checkIn}
                   onChange={() => {}}
-                  icon="✅"
+                  icon={CheckCircle2}
                   disabled
                 />
 
@@ -239,7 +240,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     <Card className="bg-accent-success/10 border-accent-success/30" padding="sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="text-xl">⭐</span>
+                          <Star size={20} className="text-accent-success" />
                           <span className="text-accent-success font-semibold">Perfect Day Bonus!</span>
                         </div>
                         <span className="text-accent-success font-digital font-bold">
@@ -255,7 +256,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   <Card className="bg-accent-warning/10 border-accent-warning/20" padding="sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">🔥</span>
+                        <Flame size={20} className="text-accent-warning" />
                         <span>Streak Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
                       </div>
                       <span className="text-accent-warning font-digital font-bold">
@@ -287,9 +288,9 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', delay: 0.2 }}
-                className="text-6xl mb-4"
+                className="mb-4"
               >
-                🎉
+                <PartyPopper size={56} className="mx-auto text-accent-success" />
               </motion.div>
 
               <motion.h2
@@ -361,14 +362,14 @@ function QuestCheckbox({
   xp,
   checked,
   onChange,
-  icon,
+  icon: Icon,
   disabled = false
 }: {
   label: string
   xp: number
   checked: boolean
   onChange: (v: boolean) => void
-  icon: string
+  icon: LucideIcon
   disabled?: boolean
 }) {
   return (
@@ -389,16 +390,15 @@ function QuestCheckbox({
           }`}
         >
           {checked && (
-            <motion.span
+            <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="text-white text-sm"
             >
-              ✓
-            </motion.span>
+              <Check size={14} className="text-white" />
+            </motion.div>
           )}
         </div>
-        <span className="text-xl">{icon}</span>
+        <Icon size={20} className={checked ? 'text-accent-success' : 'text-gray-400'} />
         <span className="flex-1">{label}</span>
         <span className={`font-digital font-bold ${checked ? 'text-accent-success' : 'text-gray-500'}`}>
           +{xp} XP

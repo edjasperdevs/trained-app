@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button, Card, WeightChart, ProgressBar } from '@/components'
+import { Trophy, PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle } from 'lucide-react'
 import {
   useUserStore,
   useXPStore,
@@ -403,10 +404,13 @@ export function Settings() {
                 rateOfChange.direction === 'gaining' ? 'bg-accent-primary/10 text-accent-primary' :
                 'bg-white/5 text-gray-400'
               }`}>
-                <span>
-                  {rateOfChange.direction === 'losing' ? '↓' :
-                   rateOfChange.direction === 'gaining' ? '↑' : '→'}
-                </span>
+                {rateOfChange.direction === 'losing' ? (
+                  <TrendingDown size={16} />
+                ) : rateOfChange.direction === 'gaining' ? (
+                  <TrendingUp size={16} />
+                ) : (
+                  <Minus size={16} />
+                )}
                 <span className="font-digital font-semibold">
                   {toDisplayWeight(rateOfChange.value, units)} {getWeightUnit(units)}/wk
                 </span>
@@ -499,7 +503,7 @@ export function Settings() {
             >
               {projectedGoal.isAchieved ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">🎉</span>
+                  <PartyPopper size={24} className="text-accent-success" />
                   <div>
                     <p className="font-bold text-accent-success">Goal Achieved!</p>
                     <p className="text-sm text-gray-400">You've reached your target weight</p>
@@ -526,7 +530,7 @@ export function Settings() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">📊</span>
+                  <BarChart3 size={20} className="text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-400">
                       {weightTrend && weightTrend.daysTracked < 7
@@ -546,9 +550,10 @@ export function Settings() {
               className="w-full text-sm text-accent-primary flex items-center justify-center gap-2 py-2"
             >
               {showWeightChart ? 'Hide Chart' : 'Show Trend Chart'}
-              <span className={`transition-transform duration-150 ${showWeightChart ? 'rotate-180' : ''}`}>
-                ▼
-              </span>
+              <ChevronDown
+                size={16}
+                className={`text-accent-primary transition-transform duration-150 ${showWeightChart ? 'rotate-180' : ''}`}
+              />
             </button>
           )}
 
@@ -584,18 +589,18 @@ export function Settings() {
           </p>
           <div className="space-y-2">
             {([
-              { key: 'logMacros' as ReminderType, label: 'Log Macros', description: 'When no food logged today', icon: '🍽️' },
-              { key: 'checkIn' as ReminderType, label: 'Daily Check-In', description: 'When not checked in', icon: '✅' },
-              { key: 'claimXP' as ReminderType, label: 'Claim XP', description: 'On Sunday with pending XP', icon: '🎁' },
-              { key: 'workout' as ReminderType, label: 'Workout', description: 'When workout scheduled but not done', icon: '🏋️' }
-            ]).map(({ key, label, description, icon }) => (
+              { key: 'logMacros' as ReminderType, label: 'Log Macros', description: 'When no food logged today', icon: UtensilsCrossed },
+              { key: 'checkIn' as ReminderType, label: 'Daily Check-In', description: 'When not checked in', icon: CheckCircle2 },
+              { key: 'claimXP' as ReminderType, label: 'Claim XP', description: 'On Sunday with pending XP', icon: Gift },
+              { key: 'workout' as ReminderType, label: 'Workout', description: 'When workout scheduled but not done', icon: Dumbbell }
+            ]).map(({ key, label, description, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setReminderPreference(key, !reminderPreferences[key])}
                 className="w-full flex items-center justify-between p-3 rounded-xl glass-subtle hover:bg-white/10 transition-all duration-150"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-lg">{icon}</span>
+                  <Icon size={20} className="text-gray-400" />
                   <div className="text-left">
                     <p className="font-medium text-sm">{label}</p>
                     <p className="text-xs text-gray-500">{description}</p>
@@ -643,9 +648,10 @@ export function Settings() {
             className="w-full flex items-center justify-between"
           >
             <h3 className="text-sm font-semibold text-accent-danger">DANGER ZONE</h3>
-            <span className={`transition-transform ${showDangerZone ? 'rotate-180' : ''}`}>
-              ▼
-            </span>
+            <ChevronDown
+              size={16}
+              className={`text-accent-danger transition-transform ${showDangerZone ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {showDangerZone && (
@@ -755,7 +761,7 @@ export function Settings() {
 
             {importStatus === 'success' ? (
               <div className="text-center py-8">
-                <span className="text-4xl block mb-4">✅</span>
+                <CheckCircle size={40} className="mx-auto mb-4 text-accent-success" />
                 <p className="text-accent-success font-bold">Import Successful!</p>
               </div>
             ) : (
@@ -844,15 +850,16 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
         <h3 className="text-sm font-semibold text-gray-400">ACHIEVEMENTS</h3>
         <button
           onClick={onViewAll}
-          className="text-xs text-accent-primary font-medium"
+          className="text-xs text-accent-primary font-medium flex items-center gap-1"
         >
-          View All →
+          View All
+          <ChevronRight size={14} />
         </button>
       </div>
 
       <div className="flex items-center gap-4 mb-4">
         <div className="w-16 h-16 rounded-full bg-bg-secondary flex items-center justify-center relative">
-          <span className="text-3xl">🏆</span>
+          <Trophy size={28} className="text-accent-primary" />
           <div className="absolute -bottom-1 -right-1 bg-accent-primary text-bg-primary text-xs font-bold px-1.5 py-0.5 rounded-full">
             {percentComplete}%
           </div>

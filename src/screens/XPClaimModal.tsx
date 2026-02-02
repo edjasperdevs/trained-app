@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 import { analytics } from '@/lib/analytics'
+import { Gift, Sparkles, Zap, Trophy, Star, ChevronRight, Gamepad2 } from 'lucide-react'
 
 interface XPClaimModalProps {
   isOpen: boolean
@@ -175,9 +176,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                     rotate: [0, 5, -5, 0]
                   }}
                   transition={{ repeat: Infinity, duration: 2 }}
-                  className="text-6xl mb-4"
+                  className="mb-4"
                 >
-                  🎁
+                  <Gift size={56} className="mx-auto text-accent-secondary" />
                 </motion.div>
                 <h2 className="text-2xl font-bold mb-2">Weekly XP Ready!</h2>
                 <p className="text-gray-400">Your hard work has paid off</p>
@@ -221,7 +222,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                       animate={{ rotate: [0, 15, -15, 0] }}
                       transition={{ repeat: Infinity, duration: 0.5 }}
                     >
-                      ✨
+                      <Sparkles size={18} />
                     </motion.span>
                     CLAIM XP
                   </span>
@@ -242,9 +243,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="text-6xl inline-block"
+                  className="inline-block"
                 >
-                  ⚡
+                  <Zap size={56} className="text-accent-primary" />
                 </motion.div>
               </motion.div>
 
@@ -272,9 +273,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: 'spring', delay: 0.2 }}
-                className="text-7xl mb-6"
+                className="mb-6"
               >
-                🏆
+                <Trophy size={64} className="mx-auto text-accent-success" />
               </motion.div>
 
               <motion.h2
@@ -307,7 +308,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 className="bg-bg-card rounded-lg p-4 mb-6"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <span className="text-2xl">⭐</span>
+                  <Star size={24} className="text-accent-primary" />
                   <span className="text-xl font-bold">Level {currentLevel}</span>
                 </div>
                 <div className="mt-2 h-2 bg-bg-secondary rounded-full overflow-hidden">
@@ -347,9 +348,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                     rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
                     scale: { duration: 1, repeat: Infinity }
                   }}
-                  className="text-8xl inline-block"
+                  className="inline-block"
                 >
-                  🌟
+                  <Star size={72} className="text-accent-primary" fill="currentColor" />
                 </motion.div>
               </motion.div>
 
@@ -370,13 +371,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               >
                 <div className="flex items-center justify-center gap-4">
                   <span className="text-4xl text-gray-500">Lvl {claimResult.newLevel - 1}</span>
-                  <motion.span
+                  <motion.div
                     animate={{ x: [0, 10, 0] }}
                     transition={{ repeat: Infinity, duration: 0.5 }}
-                    className="text-2xl"
                   >
-                    →
-                  </motion.span>
+                    <ChevronRight size={24} className="text-accent-primary" />
+                  </motion.div>
                   <span className="text-5xl font-bold font-digital text-glow-purple">
                     Lvl {claimResult.newLevel}
                   </span>
@@ -403,7 +403,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ repeat: Infinity, duration: 0.5 }}
                     >
-                      🎮
+                      <Gamepad2 size={18} />
                     </motion.span>
                     Continue
                   </span>
