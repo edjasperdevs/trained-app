@@ -19,7 +19,8 @@ A gamified fitness tracking Progressive Web App (PWA) that transforms your worko
 11. [Common Tasks](#common-tasks)
 12. [Troubleshooting](#troubleshooting)
 13. [Deployment](#deployment)
-14. [Contributing](#contributing)
+14. [Testing](#testing)
+15. [Contributing](#contributing)
 
 ---
 
@@ -70,6 +71,7 @@ npm run dev
 | **React 18** | UI framework | [react.dev](https://react.dev) |
 | **TypeScript** | Type safety | [typescriptlang.org](https://www.typescriptlang.org) |
 | **Vite** | Build tool & dev server | [vitejs.dev](https://vitejs.dev) |
+| **Vitest** | Unit & component testing | [vitest.dev](https://vitest.dev) |
 | **Zustand** | State management | [zustand docs](https://docs.pmnd.rs/zustand) |
 | **Tailwind CSS** | Styling | [tailwindcss.com](https://tailwindcss.com) |
 | **Framer Motion** | Animations | [framer.com/motion](https://www.framer.com/motion/) |
@@ -145,8 +147,12 @@ gamify-gains-app/
 │   │   ├── units.ts        # Unit conversion (lbs/kg)
 │   │   └── database.types.ts # TypeScript types for Supabase
 │   │
-│   └── hooks/              # Custom React hooks
-│       └── useClientDetails.ts # Fetch coach client data
+│   ├── hooks/              # Custom React hooks
+│   │   └── useClientDetails.ts # Fetch coach client data
+│   │
+│   └── test/               # Test configuration
+│       ├── setup.ts        # Test setup (mocks, globals)
+│       └── utils.tsx       # Test utilities (custom render)
 │
 ├── supabase/               # Database configuration
 │   ├── schema.sql          # Main database schema
@@ -204,6 +210,9 @@ npm run dev
 | `npm run build` | Build for production (outputs to `dist/`) |
 | `npm run preview` | Preview production build locally |
 | `npm run lint` | Run ESLint to check for code issues |
+| `npm test` | Run tests in watch mode |
+| `npm run test:run` | Run tests once (CI mode) |
+| `npm run test:coverage` | Run tests with coverage report |
 
 ---
 
@@ -580,6 +589,149 @@ git push origin master
 3. Watch the deployment progress
 4. Green checkmark = success
 5. Click deployment to see live URL
+
+---
+
+## Testing
+
+### Overview
+
+We use **Vitest** for unit and component testing with **React Testing Library** for component tests. Tests are located alongside the files they test with a `.test.ts` or `.test.tsx` extension.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode (re-runs on file changes)
+npm test
+
+# Run tests once (useful for CI)
+npm run test:run
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+> **Note:** Tests require Node.js 18+ due to Vitest compatibility. If you're on an older version, use `nvm use 20` first.
+
+### Test Structure
+
+```
+src/
+├── stores/
+│   ├── workoutStore.ts
+│   ├── workoutStore.test.ts    # Store tests
+│   ├── macroStore.ts
+│   ├── macroStore.test.ts
+│   ├── xpStore.ts
+│   └── xpStore.test.ts
+├── components/
+│   ├── Button.tsx
+│   ├── Button.test.tsx          # Component tests
+│   ├── Card.tsx
+│   ├── Card.test.tsx
+│   ├── ProgressBar.tsx
+│   └── ProgressBar.test.tsx
+└── test/
+    ├── setup.ts                 # Test setup (mocks)
+    └── utils.tsx                # Test utilities
+```
+
+### Writing Store Tests
+
+Store tests verify Zustand store logic without UI rendering:
+
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest'
+import { useMyStore } from './myStore'
+
+describe('myStore', () => {
+  beforeEach(() => {
+    // Reset store to initial state before each test
+    useMyStore.setState({ count: 0 })
+  })
+
+  it('should increment count', () => {
+    const { increment } = useMyStore.getState()
+
+    increment()
+
+    expect(useMyStore.getState().count).toBe(1)
+  })
+})
+```
+
+### Writing Component Tests
+
+Component tests use React Testing Library:
+
+```typescript
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '../test/utils'
+import { MyComponent } from './MyComponent'
+
+describe('MyComponent', () => {
+  it('should render text', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+  })
+
+  it('should call onClick when clicked', () => {
+    const handleClick = vi.fn()
+    render(<MyComponent onClick={handleClick} />)
+
+    fireEvent.click(screen.getByRole('button'))
+
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+})
+```
+
+### Test Utilities
+
+The `src/test/utils.tsx` file provides:
+
+- `render()` - Custom render wrapped with `BrowserRouter`
+- `mockDate()` - Set a fake system time for date-dependent tests
+- `resetStore()` - Reset a Zustand store to initial state
+- `waitForStateUpdate()` - Wait for async state updates
+
+### Test Setup
+
+The `src/test/setup.ts` file configures:
+
+- `@testing-library/jest-dom` matchers
+- Mock for `localStorage`
+- Mock for `matchMedia` (responsive tests)
+- Mock for `ResizeObserver` and `IntersectionObserver`
+- Mock for `window.scrollTo`
+
+### Testing Time-Dependent Code
+
+For tests involving dates (like the weekly XP claim feature):
+
+```typescript
+import { vi } from 'vitest'
+
+it('should return true on Sunday', () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2024-01-21T12:00:00')) // Sunday noon
+
+  // ... your test
+
+  vi.useRealTimers()
+})
+```
+
+### Current Test Coverage
+
+| Area | Tests | Description |
+|------|-------|-------------|
+| `workoutStore` | 25 | Workout plans, exercises, logging, history |
+| `xpStore` | 31 | XP earning, levels, claiming, streaks |
+| `macroStore` | 40 | Macro targets, meals, logging, progress |
+| `Button` | 14 | Variants, sizes, disabled state, click handlers |
+| `Card` | 14 | Variants, padding, hover, click behavior |
+| `ProgressBar` | 14 | Progress display, colors, sizes, labels |
 
 ---
 
