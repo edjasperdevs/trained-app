@@ -172,20 +172,21 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
       document.body
     )
 
-  // Quantity selection modal
-  const quantityModal = selectedFood && (
+  // Quantity selection modal - rendered via portal to escape any stacking contexts
+  const quantityModal = selectedFood && createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4"
+      style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+      className="bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleCancel}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-bg-secondary rounded-xl p-5 w-full max-w-sm"
+        className="bg-bg-secondary rounded-xl p-5 w-full max-w-sm shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="font-bold text-lg mb-1 truncate">{selectedFood.name}</h3>
@@ -345,7 +346,8 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
           </Button>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 
   return (
