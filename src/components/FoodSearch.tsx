@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { searchFoods, FoodSearchResult } from '@/lib/foodApi'
 
@@ -12,6 +13,8 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
+  const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
@@ -55,10 +58,94 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
     setShowResults(false)
   }
 
+  // Update dropdown position when showing results
+  useEffect(() => {
+    if (showResults && inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+        width: rect.width
+      })
+    }
+  }, [showResults])
+
+  const dropdown = showResults && createPortal(
+    <>
+      {/* Click outside to close */}
+      <div
+        className="fixed inset-0 z-[998]"
+        onClick={() => setShowResults(false)}
+      />
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          style={{
+            position: 'fixed',
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+            zIndex: 999
+          }}
+          className="max-h-60 overflow-y-auto bg-bg-secondary rounded-lg border border-gray-700 shadow-xl"
+        >
+          {error && (
+            <div className="p-4 text-center text-accent-danger text-sm">
+              {error}
+            </div>
+          )}
+
+          {!error && results.length === 0 && !isLoading && query && (
+            <div className="p-4 text-center text-gray-500 text-sm">
+              No foods found for "{query}"
+            </div>
+          )}
+
+          {results.map((food) => (
+            <button
+              key={food.id}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleSelect(food)
+              }}
+              className="w-full p-3 text-left hover:bg-bg-card active:bg-bg-card transition-colors border-b border-gray-800 last:border-b-0"
+            >
+              <div className="flex gap-3">
+                {food.imageUrl && (
+                  <img
+                    src={food.imageUrl}
+                    alt={food.name}
+                    className="w-10 h-10 rounded object-cover bg-bg-card flex-shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm truncate">{food.name}</p>
+                  {food.brand && (
+                    <p className="text-xs text-gray-500 truncate">{food.brand}</p>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+                  </p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </>,
+    document.body
+  )
+
   return (
     <div className="relative">
       <div className="relative">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -88,67 +175,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
           </button>
         )}
       </div>
-
-      <AnimatePresence>
-        {showResults && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute z-20 w-full mt-2 max-h-80 overflow-y-auto bg-bg-secondary rounded-lg border border-gray-700 shadow-lg"
-          >
-            {error && (
-              <div className="p-4 text-center text-accent-danger text-sm">
-                {error}
-              </div>
-            )}
-
-            {!error && results.length === 0 && !isLoading && query && (
-              <div className="p-4 text-center text-gray-500 text-sm">
-                No foods found for "{query}"
-              </div>
-            )}
-
-            {results.map((food) => (
-              <button
-                key={food.id}
-                onClick={() => handleSelect(food)}
-                className="w-full p-3 text-left hover:bg-bg-card transition-colors border-b border-gray-800 last:border-b-0"
-              >
-                <div className="flex gap-3">
-                  {food.imageUrl && (
-                    <img
-                      src={food.imageUrl}
-                      alt={food.name}
-                      className="w-12 h-12 rounded object-cover bg-bg-card"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{food.name}</p>
-                    {food.brand && (
-                      <p className="text-xs text-gray-500 truncate">{food.brand}</p>
-                    )}
-                    <p className="text-xs text-gray-400 mt-1">
-                      Per 100g: P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
-                    </p>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Click outside to close */}
-      {showResults && (
-        <div
-          className="fixed inset-0 z-10"
-          onClick={() => setShowResults(false)}
-        />
-      )}
+      {dropdown}
     </div>
   )
 }
