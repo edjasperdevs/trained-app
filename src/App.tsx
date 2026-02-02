@@ -17,12 +17,30 @@ import {
 
 function App() {
   const profile = useUserStore((state) => state.profile)
+  const resetProgress = useUserStore((state) => state.resetProgress)
   const checkNeglected = useAvatarStore((state) => state.checkNeglected)
   const initializeAuth = useAuthStore((state) => state.initialize)
+  const signOut = useAuthStore((state) => state.signOut)
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
   const hasAccess = useAccessStore((state) => state.hasAccess)
+  const revokeAccess = useAccessStore((state) => state.revokeAccess)
   const [accessGranted, setAccessGranted] = useState(hasAccess)
+
+  // Check for ?reset=true URL parameter to clear all data
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('reset') === 'true') {
+      // Clear all app data
+      resetProgress()
+      revokeAccess()
+      signOut()
+      // Remove the ?reset=true from URL
+      window.history.replaceState({}, '', window.location.pathname)
+      // Force page reload to ensure clean state
+      window.location.reload()
+    }
+  }, [resetProgress, revokeAccess, signOut])
 
   // Initialize auth on app load
   useEffect(() => {
