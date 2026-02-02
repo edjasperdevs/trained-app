@@ -16,11 +16,13 @@ interface AccessGateProps {
 
 export function AccessGate({ onAccessGranted }: AccessGateProps) {
   const validateCode = useAccessStore((state) => state.validateCode)
+  const email = useAccessStore((state) => state.email)
 
   const [code, setCode] = useState('')
   const [isValidating, setIsValidating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,10 +36,14 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
     setIsValidating(false)
 
     if (result.success) {
-      onAccessGranted()
+      setShowSuccess(true)
     } else {
       setError(result.error || 'Invalid code')
     }
+  }
+
+  const handleContinue = () => {
+    onAccessGranted()
   }
 
   // Format code as user types (keep dashes for Lemon Squeezy format)
@@ -206,6 +212,88 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
       >
         © {new Date().getFullYear()} Gamify Your Gains. All rights reserved.
       </motion.p>
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="w-full max-w-sm"
+          >
+            <Card className="bg-bg-secondary text-center">
+              {/* Celebration Animation */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: [0, 1.2, 1] }}
+                transition={{ duration: 0.5, times: [0, 0.6, 1] }}
+                className="text-7xl mb-4"
+              >
+                🎉
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-2xl font-bold mb-2 bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent"
+              >
+                Access Granted!
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-gray-400 mb-6"
+              >
+                {email ? (
+                  <>Welcome, <span className="text-white font-medium">{email}</span>!</>
+                ) : (
+                  <>Your license key has been verified.</>
+                )}
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-3"
+              >
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
+                  <span className="text-accent-primary">✓</span> Full app access unlocked
+                </div>
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
+                  <span className="text-accent-primary">✓</span> Progress syncs to cloud
+                </div>
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
+                  <span className="text-accent-primary">✓</span> All gamification features enabled
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-6"
+              >
+                <Button
+                  onClick={handleContinue}
+                  fullWidth
+                  size="lg"
+                >
+                  Let's Go! 💪
+                </Button>
+              </motion.div>
+            </Card>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   )
 }
