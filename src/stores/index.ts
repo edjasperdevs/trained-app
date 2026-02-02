@@ -7,7 +7,7 @@ export { useXPStore } from './xpStore'
 export type { WeeklyHistory, DailyXP } from './xpStore'
 
 export { useMacroStore } from './macroStore'
-export type { MacroTargets, MealPlan, DailyMacroLog, SavedMeal, LoggedMeal } from './macroStore'
+export type { MacroTargets, MealPlan, DailyMacroLog, SavedMeal, LoggedMeal, MealIngredient } from './macroStore'
 
 export { useWorkoutStore } from './workoutStore'
 export type { WorkoutType, ExerciseSet, Exercise, WorkoutLog, WorkoutPlan, DayOfWeek, CustomExercise, WorkoutCustomization } from './workoutStore'

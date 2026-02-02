@@ -27,9 +27,23 @@ export interface LoggedMeal {
   timestamp: number
 }
 
+export interface MealIngredient {
+  id: string
+  name: string
+  brand?: string
+  quantity: number
+  unit: 'g' | 'oz' | 'serving'
+  protein: number   // calculated for this quantity
+  carbs: number
+  fats: number
+  calories: number
+}
+
 export interface SavedMeal {
   id: string
   name: string
+  ingredients: MealIngredient[]  // Array of ingredients
+  // Totals (calculated from ingredients)
   protein: number
   carbs: number
   fats: number
@@ -70,7 +84,7 @@ interface MacroStore {
   logMeal: (mealNumber: number, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   logQuickMacros: (macros: Partial<MacroTargets>) => void
-  saveMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  saveMeal: (name: string, ingredients: MealIngredient[]) => void
   editSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt'>>) => void
   deleteSavedMeal: (id: string) => void
   getSavedMeals: () => SavedMeal[]
@@ -335,11 +349,23 @@ export const useMacroStore = create<MacroStore>()(
         }
       },
 
-      saveMeal: (name, macros) => {
+      saveMeal: (name, ingredients) => {
+        // Calculate totals from ingredients
+        const totals = ingredients.reduce(
+          (acc, ing) => ({
+            protein: acc.protein + ing.protein,
+            carbs: acc.carbs + ing.carbs,
+            fats: acc.fats + ing.fats,
+            calories: acc.calories + ing.calories
+          }),
+          { protein: 0, carbs: 0, fats: 0, calories: 0 }
+        )
+
         const newSavedMeal: SavedMeal = {
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name,
-          ...macros,
+          ingredients,
+          ...totals,
           createdAt: Date.now(),
           usageCount: 0
         }

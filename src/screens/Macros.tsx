@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card, ProgressBar, FoodSearch } from '@/components'
-import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender } from '@/stores'
+import { Button, Card, ProgressBar, MealBuilder } from '@/components'
+import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -21,7 +21,6 @@ export function Macros() {
     logQuickMacros,
     logNamedMeal,
     saveMeal,
-    editSavedMeal,
     deleteSavedMeal,
     getSavedMeals,
     getTodayMeals,
@@ -87,7 +86,6 @@ export function Macros() {
             savedMeals={savedMeals}
             onLogMeal={logNamedMeal}
             onSaveMeal={saveMeal}
-            onEditSavedMeal={editSavedMeal}
             onDeleteSavedMeal={deleteSavedMeal}
           />
         )}
@@ -654,89 +652,24 @@ function LogMealView({
   savedMeals,
   onLogMeal,
   onSaveMeal,
-  onEditSavedMeal,
   onDeleteSavedMeal
 }: {
   savedMeals: SavedMeal[]
   onLogMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
-  onSaveMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
-  onEditSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt'>>) => void
+  onSaveMeal: (name: string, ingredients: MealIngredient[]) => void
   onDeleteSavedMeal: (id: string) => void
 }) {
-  const [mealName, setMealName] = useState('')
-  const [protein, setProtein] = useState('')
-  const [carbs, setCarbs] = useState('')
-  const [fats, setFats] = useState('')
-  const [calories, setCalories] = useState('')
-  const [saveForLater, setSaveForLater] = useState(false)
-  const [showSaved, setShowSaved] = useState(true)
+  const [showMealBuilder, setShowMealBuilder] = useState(false)
   const [editingMeal, setEditingMeal] = useState<SavedMeal | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editProtein, setEditProtein] = useState('')
-  const [editCarbs, setEditCarbs] = useState('')
-  const [editFats, setEditFats] = useState('')
-  const [editCalories, setEditCalories] = useState('')
+  const [expandedMealId, setExpandedMealId] = useState<string | null>(null)
 
-  const openEditModal = (meal: SavedMeal) => {
-    setEditingMeal(meal)
-    setEditName(meal.name)
-    setEditProtein(String(meal.protein))
-    setEditCarbs(String(meal.carbs))
-    setEditFats(String(meal.fats))
-    setEditCalories(String(meal.calories))
-  }
-
-  const handleSaveEdit = () => {
-    if (!editingMeal || !editName.trim()) return
-    const editCalcCalories = (Number(editProtein) * 4) + (Number(editCarbs) * 4) + (Number(editFats) * 9)
-    onEditSavedMeal(editingMeal.id, {
-      name: editName,
-      protein: Number(editProtein) || 0,
-      carbs: Number(editCarbs) || 0,
-      fats: Number(editFats) || 0,
-      calories: Number(editCalories) || editCalcCalories
-    })
+  const handleSaveMeal = (name: string, ingredients: MealIngredient[]) => {
+    onSaveMeal(name, ingredients)
+    setShowMealBuilder(false)
     setEditingMeal(null)
   }
 
-  const handleFoodSelect = (food: { name: string; brand?: string; protein: number; carbs: number; fats: number; calories: number; quantity: number; unit: string }) => {
-    const quantityLabel = food.unit === 'serving' ? `${food.quantity} serving` : `${food.quantity}${food.unit}`
-    setMealName(food.brand ? `${food.name} (${food.brand}) - ${quantityLabel}` : `${food.name} - ${quantityLabel}`)
-    setProtein(String(food.protein))
-    setCarbs(String(food.carbs))
-    setFats(String(food.fats))
-    setCalories(String(food.calories))
-  }
-
-  // Auto-calculate calories from macros
-  const calculatedCalories = (Number(protein) * 4) + (Number(carbs) * 4) + (Number(fats) * 9)
-
-  const handleLog = () => {
-    if (!mealName.trim()) return
-
-    const macros = {
-      protein: Number(protein) || 0,
-      carbs: Number(carbs) || 0,
-      fats: Number(fats) || 0,
-      calories: Number(calories) || calculatedCalories
-    }
-
-    onLogMeal(mealName, macros)
-
-    if (saveForLater) {
-      onSaveMeal(mealName, macros)
-    }
-
-    // Reset form
-    setMealName('')
-    setProtein('')
-    setCarbs('')
-    setFats('')
-    setCalories('')
-    setSaveForLater(false)
-  }
-
-  const handleQuickAdd = (meal: SavedMeal) => {
+  const handleLogSavedMeal = (meal: SavedMeal) => {
     onLogMeal(meal.name, {
       protein: meal.protein,
       carbs: meal.carbs,
@@ -745,271 +678,138 @@ function LogMealView({
     })
   }
 
-  const hasValidMacros = Number(protein) > 0 || Number(carbs) > 0 || Number(fats) > 0 || Number(calories) > 0
+  const handleEditMeal = (meal: SavedMeal) => {
+    setEditingMeal(meal)
+    setShowMealBuilder(true)
+  }
+
+  const toggleExpandMeal = (mealId: string) => {
+    setExpandedMealId(expandedMealId === mealId ? null : mealId)
+  }
 
   return (
     <div className="space-y-6">
-      {/* Food Search */}
-      <Card>
-        <h3 className="text-sm font-semibold text-gray-400 mb-3">SEARCH FOODS</h3>
-        <p className="text-xs text-gray-500 mb-3">
-          Search Open Food Facts database to auto-fill macros
-        </p>
-        <FoodSearch onSelect={handleFoodSelect} />
-      </Card>
-
-      {/* Log New Meal */}
-      <Card>
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">LOG A MEAL</h3>
-
-        <div className="space-y-4">
-          {/* Meal Name */}
-          <div>
-            <label className="text-xs text-gray-500 block mb-1">Meal Name</label>
-            <input
-              type="text"
-              value={mealName}
-              onChange={(e) => setMealName(e.target.value)}
-              placeholder="e.g., Chicken & Rice"
-              className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
-            />
-          </div>
-
-          {/* Macros Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">Protein (g)</label>
-              <input
-                type="number"
-                value={protein}
-                onChange={(e) => setProtein(e.target.value)}
-                placeholder="0"
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">Carbs (g)</label>
-              <input
-                type="number"
-                value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
-                placeholder="0"
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">Fats (g)</label>
-              <input
-                type="number"
-                value={fats}
-                onChange={(e) => setFats(e.target.value)}
-                placeholder="0"
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 block mb-1">
-                Calories {calculatedCalories > 0 && `(~${calculatedCalories})`}
-              </label>
-              <input
-                type="number"
-                value={calories}
-                onChange={(e) => setCalories(e.target.value)}
-                placeholder={calculatedCalories > 0 ? String(calculatedCalories) : '0'}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
-              />
-            </div>
-          </div>
-
-          {/* Save for Later Toggle */}
-          <button
-            onClick={() => setSaveForLater(!saveForLater)}
-            className={`w-full p-3 rounded-lg border-2 flex items-center justify-between transition-colors ${
-              saveForLater
-                ? 'border-accent-primary bg-accent-primary/10'
-                : 'border-gray-700'
-            }`}
-          >
-            <span className="text-sm">Save for quick-add later</span>
-            <span className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-              saveForLater ? 'border-accent-primary bg-accent-primary' : 'border-gray-600'
-            }`}>
-              {saveForLater && <span className="text-xs text-white">✓</span>}
-            </span>
-          </button>
-
-          <Button
-            onClick={handleLog}
-            fullWidth
-            disabled={!mealName.trim() || !hasValidMacros}
-          >
-            Log Meal
-          </Button>
-        </div>
-      </Card>
+      {/* Create New Meal Button */}
+      <Button
+        onClick={() => {
+          setEditingMeal(null)
+          setShowMealBuilder(true)
+        }}
+        fullWidth
+        size="lg"
+      >
+        <span className="mr-2">+</span> Create New Meal
+      </Button>
 
       {/* Saved Meals */}
-      {savedMeals.length > 0 && (
-        <Card>
-          <button
-            onClick={() => setShowSaved(!showSaved)}
-            className="w-full flex items-center justify-between"
-          >
-            <h3 className="text-sm font-semibold text-gray-400">
-              SAVED MEALS ({savedMeals.length})
-            </h3>
-            <span className={`transition-transform ${showSaved ? 'rotate-180' : ''}`}>
-              ▼
-            </span>
-          </button>
+      {savedMeals.length > 0 ? (
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-gray-400">SAVED MEALS ({savedMeals.length})</h3>
 
-          <AnimatePresence>
-            {showSaved && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="mt-4 space-y-2 overflow-hidden"
-              >
-                {savedMeals.map((meal) => (
-                  <div
-                    key={meal.id}
-                    className="flex items-center gap-2 bg-bg-secondary rounded-lg p-3"
+          {savedMeals.map((meal) => (
+            <Card key={meal.id} padding="none" className="overflow-hidden">
+              {/* Meal Header */}
+              <div className="p-4">
+                <div className="flex items-start justify-between">
+                  <button
+                    onClick={() => toggleExpandMeal(meal.id)}
+                    className="flex-1 text-left"
                   >
-                    <button
-                      onClick={() => handleQuickAdd(meal)}
-                      className="flex-1 text-left"
-                    >
-                      <p className="font-semibold text-sm">{meal.name}</p>
-                      <p className="text-xs text-gray-500">
-                        P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
+                    <p className="font-semibold">{meal.name}</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
+                    </p>
+                    {meal.ingredients && meal.ingredients.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {meal.ingredients.length} ingredient{meal.ingredients.length !== 1 ? 's' : ''}
+                        <span className="ml-2">{expandedMealId === meal.id ? '▲' : '▼'}</span>
                       </p>
-                    </button>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-2 ml-3">
                     <Button
                       size="sm"
-                      onClick={() => handleQuickAdd(meal)}
+                      onClick={() => handleLogSavedMeal(meal)}
                     >
-                      + Add
+                      Log
                     </Button>
-                    <button
-                      onClick={() => openEditModal(meal)}
-                      className="text-gray-500 hover:text-accent-primary p-1"
-                      title="Edit meal"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => onDeleteSavedMeal(meal.id)}
-                      className="text-gray-500 hover:text-accent-danger p-1"
-                    >
-                      ✕
-                    </button>
                   </div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Card>
-      )}
+                </div>
 
-      {savedMeals.length === 0 && (
-        <Card className="text-center py-6">
-          <span className="text-3xl block mb-2">🍽️</span>
+                {/* Action buttons */}
+                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-800">
+                  <button
+                    onClick={() => handleEditMeal(meal)}
+                    className="flex-1 text-sm text-gray-400 hover:text-accent-primary py-1"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => onDeleteSavedMeal(meal.id)}
+                    className="flex-1 text-sm text-gray-400 hover:text-accent-danger py-1"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              {/* Expanded Ingredients */}
+              <AnimatePresence>
+                {expandedMealId === meal.id && meal.ingredients && meal.ingredients.length > 0 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="bg-bg-primary px-4 py-3 border-t border-gray-800">
+                      <p className="text-xs text-gray-500 mb-2">INGREDIENTS</p>
+                      <div className="space-y-2">
+                        {meal.ingredients.map((ing) => (
+                          <div key={ing.id} className="text-sm">
+                            <p className="text-gray-300">
+                              {ing.name}
+                              <span className="text-gray-500 ml-2">
+                                ({ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit})
+                              </span>
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="text-center py-8">
+          <span className="text-4xl block mb-3">🍽️</span>
+          <p className="text-lg font-semibold mb-1">No Saved Meals</p>
           <p className="text-gray-400 text-sm">
-            No saved meals yet. Log a meal and check "Save for quick-add later" to build your library.
+            Create a meal with multiple ingredients to quickly log it later
           </p>
         </Card>
       )}
 
-      {/* Edit Meal Modal */}
-      {editingMeal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setEditingMeal(null)}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-bg-secondary rounded-xl p-6 w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-bold mb-4">Edit Saved Meal</h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-gray-500 block mb-1">Meal Name</label>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Protein (g)</label>
-                  <input
-                    type="number"
-                    value={editProtein}
-                    onChange={(e) => setEditProtein(e.target.value)}
-                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Carbs (g)</label>
-                  <input
-                    type="number"
-                    value={editCarbs}
-                    onChange={(e) => setEditCarbs(e.target.value)}
-                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Fats (g)</label>
-                  <input
-                    type="number"
-                    value={editFats}
-                    onChange={(e) => setEditFats(e.target.value)}
-                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Calories</label>
-                  <input
-                    type="number"
-                    value={editCalories}
-                    onChange={(e) => setEditCalories(e.target.value)}
-                    placeholder={String((Number(editProtein) * 4) + (Number(editCarbs) * 4) + (Number(editFats) * 9))}
-                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => setEditingMeal(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  fullWidth
-                  onClick={handleSaveEdit}
-                  disabled={!editName.trim()}
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
+      {/* Meal Builder Modal */}
+      <MealBuilder
+        isOpen={showMealBuilder}
+        onClose={() => {
+          setShowMealBuilder(false)
+          setEditingMeal(null)
+        }}
+        onSave={handleSaveMeal}
+        editMeal={editingMeal ? {
+          name: editingMeal.name,
+          ingredients: editingMeal.ingredients || []
+        } : null}
+      />
     </div>
   )
 }
