@@ -13,6 +13,8 @@ export function Workouts() {
     startMinimalWorkout,
     logSet,
     completeWorkout,
+    endWorkoutEarly,
+    addExerciseToWorkout,
     markXPAwarded,
     getWorkoutHistory,
     isWorkoutCompletedToday,
@@ -116,6 +118,55 @@ export function Workouts() {
     setActiveWorkout(null)
   }
 
+  const handleEndWorkoutEarly = () => {
+    if (!activeWorkout) return
+
+    // Check if at least one set was completed
+    const completedSets = activeWorkout.exercises.reduce(
+      (acc, ex) => acc + ex.sets.filter(s => s.completed).length,
+      0
+    )
+
+    if (completedSets === 0) {
+      if (!window.confirm('You haven\'t completed any sets. End workout anyway?')) {
+        return
+      }
+    }
+
+    endWorkoutEarly(activeWorkout.id)
+    markXPAwarded(activeWorkout.id)
+
+    // Still award XP for showing up
+    const todayLog = getTodayLog()
+    logDailyXP({
+      date: new Date().toISOString().split('T')[0],
+      workout: true,
+      protein: todayLog?.protein || false,
+      calories: todayLog?.calories || false,
+      checkIn: todayLog?.checkIn || false,
+      perfectDay: todayLog?.perfectDay || false,
+      streakBonus: todayLog?.streakBonus || 0
+    })
+
+    triggerReaction('checkIn')
+    checkBadgesWithToast()
+    toast.success('Workout ended. Great effort! 💪')
+
+    const duration = activeWorkout.startTime
+      ? Math.round((Date.now() - activeWorkout.startTime) / 60000)
+      : 0
+    analytics.workoutCompleted(activeWorkout.workoutType, duration)
+
+    setActiveWorkout(null)
+  }
+
+  const handleAddExerciseToWorkout = (exercise: { name: string; targetSets: number; targetReps: string }) => {
+    if (!activeWorkout) return
+    addExerciseToWorkout(activeWorkout.id, exercise)
+    setActiveWorkout(getCurrentWorkout())
+    toast.success(`Added ${exercise.name} to workout`)
+  }
+
   const handleUpdateSet = (
     exerciseId: string,
     setIndex: number,
@@ -180,6 +231,8 @@ export function Workouts() {
             onSkipSet={handleSkipSet}
             onUncompleteSet={handleUncompleteSet}
             onComplete={handleCompleteWorkout}
+            onEndEarly={handleEndWorkoutEarly}
+            onAddExercise={handleAddExerciseToWorkout}
           />
         ) : (
           <>
@@ -650,7 +703,9 @@ function ActiveWorkoutView({
   onCompleteSet,
   onSkipSet,
   onUncompleteSet,
-  onComplete
+  onComplete,
+  onEndEarly,
+  onAddExercise
 }: {
   workout: WorkoutLog
   progress: number
@@ -659,12 +714,16 @@ function ActiveWorkoutView({
   onSkipSet: (exerciseId: string, setIndex: number) => void
   onUncompleteSet: (exerciseId: string, setIndex: number) => void
   onComplete: () => void
+  onEndEarly: () => void
+  onAddExercise: (exercise: { name: string; targetSets: number; targetReps: string }) => void
 }) {
   const getExerciseHistory = useWorkoutStore((state) => state.getExerciseHistory)
   const [expandedExercise, setExpandedExercise] = useState<string | null>(
     workout.exercises[0]?.id || null
   )
   const [showHistoryFor, setShowHistoryFor] = useState<string | null>(null)
+  const [showAddExercise, setShowAddExercise] = useState(false)
+  const [newExerciseForm, setNewExerciseForm] = useState({ name: '', targetSets: '2', targetReps: '8-12' })
 
   // Get last workout data for an exercise
   const getLastWorkout = (exerciseName: string) => {
@@ -894,16 +953,128 @@ function ActiveWorkoutView({
         })}
       </div>
 
-      {/* Complete Button */}
-      <Button
-        onClick={onComplete}
-        fullWidth
-        size="lg"
-        disabled={!allSetsComplete}
-        className={allSetsComplete ? 'animate-pulse' : ''}
+      {/* Add Exercise Button */}
+      <button
+        onClick={() => setShowAddExercise(true)}
+        className="w-full p-3 border-2 border-dashed border-gray-700 rounded-lg text-gray-400 hover:border-accent-primary hover:text-accent-primary transition-colors flex items-center justify-center gap-2"
       >
-        {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
-      </Button>
+        <span className="text-xl">+</span>
+        <span>Add Exercise</span>
+      </button>
+
+      {/* Action Buttons */}
+      <div className="space-y-3">
+        {/* Complete Button */}
+        <Button
+          onClick={onComplete}
+          fullWidth
+          size="lg"
+          disabled={!allSetsComplete}
+          className={allSetsComplete ? 'animate-pulse' : ''}
+        >
+          {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
+        </Button>
+
+        {/* End Early Button */}
+        {!allSetsComplete && (
+          <button
+            onClick={onEndEarly}
+            className="w-full py-3 text-sm text-gray-400 hover:text-accent-warning transition-colors"
+          >
+            End Workout Early
+          </button>
+        )}
+      </div>
+
+      {/* Add Exercise Modal */}
+      <AnimatePresence>
+        {showAddExercise && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowAddExercise(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-bg-secondary rounded-xl p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-bold mb-4">Add Exercise</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">Exercise Name</label>
+                  <input
+                    type="text"
+                    value={newExerciseForm.name}
+                    onChange={(e) => setNewExerciseForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Bicep Curls"
+                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500 block mb-1">Sets</label>
+                    <input
+                      type="number"
+                      value={newExerciseForm.targetSets}
+                      onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetSets: e.target.value }))}
+                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
+                      min={1}
+                      max={10}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs text-gray-500 block mb-1">Reps</label>
+                    <input
+                      type="text"
+                      value={newExerciseForm.targetReps}
+                      onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetReps: e.target.value }))}
+                      placeholder="e.g., 8-12"
+                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setShowAddExercise(false)
+                    setNewExerciseForm({ name: '', targetSets: '2', targetReps: '8-12' })
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  fullWidth
+                  onClick={() => {
+                    if (newExerciseForm.name.trim()) {
+                      onAddExercise({
+                        name: newExerciseForm.name.trim(),
+                        targetSets: Number(newExerciseForm.targetSets) || 2,
+                        targetReps: newExerciseForm.targetReps || '8-12'
+                      })
+                      setShowAddExercise(false)
+                      setNewExerciseForm({ name: '', targetSets: '2', targetReps: '8-12' })
+                    }
+                  }}
+                  disabled={!newExerciseForm.name.trim()}
+                >
+                  Add to Workout
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Exercise History Modal */}
       <AnimatePresence>

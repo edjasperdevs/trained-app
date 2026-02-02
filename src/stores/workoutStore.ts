@@ -74,7 +74,9 @@ interface WorkoutStore {
   startMinimalWorkout: (notes: string) => string
   updateWorkoutNotes: (workoutId: string, notes: string) => void
   logSet: (workoutId: string, exerciseId: string, setIndex: number, data: Partial<ExerciseSet>) => void
+  addExerciseToWorkout: (workoutId: string, exercise: { name: string; targetSets: number; targetReps: string }) => void
   completeWorkout: (workoutId: string) => void
+  endWorkoutEarly: (workoutId: string) => void
   markXPAwarded: (workoutId: string) => void
   getCurrentWorkout: () => WorkoutLog | null
   getWorkoutHistory: (limit?: number) => WorkoutLog[]
@@ -482,7 +484,41 @@ export const useWorkoutStore = create<WorkoutStore>()(
         }))
       },
 
+      addExerciseToWorkout: (workoutId, exercise) => {
+        const newExercise: Exercise = {
+          id: `exercise-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: exercise.name,
+          targetSets: exercise.targetSets,
+          targetReps: exercise.targetReps,
+          sets: Array.from({ length: exercise.targetSets }, () => ({
+            weight: 0,
+            reps: 0,
+            completed: false
+          }))
+        }
+
+        set((state) => ({
+          workoutLogs: state.workoutLogs.map(workout =>
+            workout.id === workoutId
+              ? { ...workout, exercises: [...workout.exercises, newExercise] }
+              : workout
+          )
+        }))
+      },
+
       completeWorkout: (workoutId) => {
+        set((state) => ({
+          workoutLogs: state.workoutLogs.map(workout =>
+            workout.id === workoutId
+              ? { ...workout, completed: true, endTime: Date.now() }
+              : workout
+          )
+        }))
+      },
+
+      endWorkoutEarly: (workoutId) => {
+        // Mark workout as completed even if not all sets are done
+        // This allows users to end early while still getting credit
         set((state) => ({
           workoutLogs: state.workoutLogs.map(workout =>
             workout.id === workoutId
