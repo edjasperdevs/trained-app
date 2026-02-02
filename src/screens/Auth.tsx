@@ -15,6 +15,7 @@ export function Auth() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,17 +48,26 @@ export function Auth() {
         if (error) {
           setError(error)
         } else {
-          setSuccess('Check your email to confirm your account!')
+          setNeedsEmailConfirmation(true)
+          setSuccess('Account created! Check your email to confirm before signing in.')
           toast.success('Account created! Check your email to confirm.')
+          // Switch to login mode so they can sign in after confirming
+          setMode('login')
         }
       } else if (mode === 'login') {
         const { error } = await signIn(email, password)
         if (error) {
           // Provide more user-friendly error messages
           if (error.includes('Invalid login credentials')) {
-            setError('Invalid email or password')
+            // This error can mean either wrong password OR unconfirmed email
+            if (needsEmailConfirmation) {
+              setError('Please confirm your email first. Check your inbox (and spam folder) for the confirmation link.')
+            } else {
+              setError('Invalid email or password. If you just signed up, please confirm your email first.')
+            }
           } else if (error.includes('Email not confirmed')) {
-            setError('Please check your email and confirm your account first')
+            setNeedsEmailConfirmation(true)
+            setError('Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.')
           } else {
             setError(error)
           }
@@ -116,6 +126,29 @@ export function Auth() {
             {mode === 'forgot' && 'Reset your password'}
           </p>
         </div>
+
+        {/* Email Confirmation Banner */}
+        {needsEmailConfirmation && mode === 'login' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-4 bg-accent-warning/10 border border-accent-warning/30 rounded-xl"
+          >
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">📧</span>
+              <div>
+                <p className="font-semibold text-accent-warning">Confirm Your Email</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  We sent a confirmation link to <span className="text-white">{email || 'your email'}</span>.
+                  Click the link to activate your account, then come back here to sign in.
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Don't see it? Check your spam folder.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <Card>
           <form onSubmit={handleSubmit} className="space-y-4">
