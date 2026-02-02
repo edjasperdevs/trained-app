@@ -94,61 +94,172 @@ interface WorkoutStore {
   resetToDefaults: (type: WorkoutType) => void
 }
 
-// Exercise templates for each workout type
+// ============================================
+// OPTION A: 3-Day Full Body (~45 min each)
+// Best for: Beginners, chaotic schedules
+// ============================================
+const THREE_DAY_TEMPLATES: Record<string, Omit<Exercise, 'id' | 'sets'>[]> = {
+  // Day A: Push + Quads
+  'day-a': [
+    { name: 'Squat Variation', targetSets: 2, targetReps: '6-10', notes: 'Goblet, leg press, or hack squat' },
+    { name: 'Incline Press', targetSets: 2, targetReps: '6-10', notes: 'Barbell, dumbbell, or machine' },
+    { name: 'Horizontal Row', targetSets: 2, targetReps: '8-12', notes: 'Cable row or chest-supported row' },
+    { name: 'Leg Extension', targetSets: 2, targetReps: '10-15', notes: 'Seat back for more quad stretch' },
+    { name: 'Lateral Raises', targetSets: 2, targetReps: '12-15', notes: 'Cable or dumbbell' }
+  ],
+  // Day B: Pull + Hinge
+  'day-b': [
+    { name: 'Romanian Deadlift', targetSets: 2, targetReps: '6-10', notes: 'Barbell or dumbbell' },
+    { name: 'Pull-ups or Pulldown', targetSets: 2, targetReps: '6-10', notes: 'Weighted if possible' },
+    { name: 'Leg Curl', targetSets: 2, targetReps: '10-15', notes: 'Seated or lying' },
+    { name: 'Overhead Press', targetSets: 2, targetReps: '8-12', notes: 'Barbell, dumbbell, or machine' },
+    { name: 'Bicep Curls', targetSets: 2, targetReps: '10-12', notes: 'Any variation' }
+  ],
+  // Day C: Full Body
+  'day-c': [
+    { name: 'Leg Press or Squat', targetSets: 2, targetReps: '8-12', notes: 'Different variation than Day A' },
+    { name: 'Chest Press or Dips', targetSets: 2, targetReps: '8-12', notes: 'Machine, dumbbell, or bodyweight' },
+    { name: 'Barbell Row', targetSets: 2, targetReps: '8-12', notes: 'Or dumbbell row' },
+    { name: 'Hip Thrust', targetSets: 2, targetReps: '10-15', notes: 'Barbell or machine' },
+    { name: 'Tricep Extension', targetSets: 2, targetReps: '10-15', notes: 'Overhead cable or pushdowns' }
+  ]
+}
+
+// ============================================
+// OPTION B: 4-Day Upper/Lower (~50 min each)
+// Best for: Intermediate lifters
+// ============================================
+const FOUR_DAY_TEMPLATES: Record<string, Omit<Exercise, 'id' | 'sets'>[]> = {
+  // Day 1: Upper (Push Focus)
+  'upper-push': [
+    { name: 'Incline Press', targetSets: 2, targetReps: '6-10', notes: 'Barbell or dumbbell' },
+    { name: 'Overhead Press', targetSets: 2, targetReps: '8-12', notes: 'Seated or standing' },
+    { name: 'Cable Row', targetSets: 2, targetReps: '8-12', notes: 'Seated or standing' },
+    { name: 'Lateral Raises', targetSets: 2, targetReps: '12-15', notes: 'Cable (high pulley) preferred' },
+    { name: 'Tricep Pushdowns', targetSets: 2, targetReps: '10-15', notes: 'Cable' }
+  ],
+  // Day 2: Lower (Quad Focus)
+  'lower-quad': [
+    { name: 'Squat Variation', targetSets: 2, targetReps: '6-10', notes: 'Back squat, hack squat, or pendulum' },
+    { name: 'Leg Press', targetSets: 2, targetReps: '10-12', notes: 'Feet lower for more quad' },
+    { name: 'Leg Extension', targetSets: 2, targetReps: '10-15', notes: 'Seat back, slow eccentric' },
+    { name: 'Walking Lunges', targetSets: 2, targetReps: '10/leg', notes: 'Dumbbell or bodyweight' },
+    { name: 'Standing Calf Raises', targetSets: 2, targetReps: '10-15', notes: 'Full stretch at bottom' }
+  ],
+  // Day 3: Upper (Pull Focus)
+  'upper-pull': [
+    { name: 'Pull-ups or Pulldown', targetSets: 2, targetReps: '6-10', notes: 'Add weight when possible' },
+    { name: 'Chest-Supported Row', targetSets: 2, targetReps: '8-12', notes: 'T-bar or dumbbell' },
+    { name: 'Incline Dumbbell Press', targetSets: 2, targetReps: '8-12', notes: 'Lower incline than Day 1' },
+    { name: 'Rear Delt Flyes', targetSets: 2, targetReps: '12-15', notes: 'Pec deck reverse or cable' },
+    { name: 'Bicep Curls', targetSets: 2, targetReps: '10-12', notes: 'Preacher or incline' }
+  ],
+  // Day 4: Lower (Hinge Focus)
+  'lower-hinge': [
+    { name: 'Romanian Deadlift', targetSets: 2, targetReps: '6-10', notes: 'Barbell preferred' },
+    { name: 'Hip Thrust', targetSets: 2, targetReps: '10-12', notes: 'Barbell or machine' },
+    { name: 'Leg Curl', targetSets: 2, targetReps: '10-15', notes: 'Seated (more hamstring growth)' },
+    { name: 'Hip Abduction', targetSets: 2, targetReps: '12-15', notes: 'Machine, hips extended' },
+    { name: 'Seated Calf Raises', targetSets: 2, targetReps: '15-20', notes: 'Deep stretch' }
+  ]
+}
+
+// ============================================
+// OPTION C: 5-Day Split (~45-50 min each)
+// Best for: Dedicated lifters with stable schedules
+// ============================================
+const FIVE_DAY_TEMPLATES: Record<string, Omit<Exercise, 'id' | 'sets'>[]> = {
+  // Day 1: Push (Chest/Shoulders/Triceps)
+  'push': [
+    { name: 'Incline Barbell Press', targetSets: 2, targetReps: '6-8', notes: 'Last set to failure' },
+    { name: 'Pec Deck or Cable Fly', targetSets: 2, targetReps: '10-12', notes: 'Deep stretch' },
+    { name: 'Seated Overhead Press', targetSets: 2, targetReps: '8-10', notes: 'Barbell or dumbbell' },
+    { name: 'Cable Lateral Raise', targetSets: 2, targetReps: '12-15', notes: 'High pulley, sweep across' },
+    { name: 'Overhead Tricep Extension', targetSets: 2, targetReps: '10-12', notes: 'Full stretch' }
+  ],
+  // Day 2: Pull (Back/Biceps/Rear Delts)
+  'pull': [
+    { name: 'Weighted Pull-ups', targetSets: 2, targetReps: '6-8', notes: 'Add weight when possible' },
+    { name: 'Chest-Supported Row', targetSets: 2, targetReps: '8-10', notes: 'T-bar or dumbbell' },
+    { name: 'Pendlay Row (Deficit)', targetSets: 2, targetReps: '6-8', notes: 'Stand on plate' },
+    { name: 'Reverse Pec Deck', targetSets: 2, targetReps: '12-15', notes: 'Rear delts' },
+    { name: 'Preacher Curl', targetSets: 2, targetReps: '8-12', notes: 'Slow eccentric' }
+  ],
+  // Day 3: Legs (Quad Focus)
+  'legs-quad': [
+    { name: 'Lying Leg Curl', targetSets: 2, targetReps: '10-12', notes: 'FIRST - warms up knees' },
+    { name: 'Pendulum or Hack Squat', targetSets: 2, targetReps: '6-10', notes: 'Deep, full ROM' },
+    { name: 'Leg Press', targetSets: 2, targetReps: '10-12', notes: 'Feet low for quads' },
+    { name: 'Leg Extension', targetSets: 2, targetReps: '10-15', notes: 'Seat back, slow eccentric' },
+    { name: 'Standing Calf Raise', targetSets: 2, targetReps: '10-12', notes: 'Deep stretch at bottom' }
+  ],
+  // Day 4: Upper (Chest/Back Focus)
+  'upper': [
+    { name: 'Incline Dumbbell Press', targetSets: 2, targetReps: '8-10', notes: 'Different angle than Day 1' },
+    { name: 'Lat Pulldown', targetSets: 2, targetReps: '8-10', notes: 'Wide grip, pull to chest' },
+    { name: 'Cable Row', targetSets: 2, targetReps: '10-12', notes: 'Squeeze shoulder blades' },
+    { name: 'Weighted Dips', targetSets: 2, targetReps: '8-12', notes: 'Lean forward for chest' },
+    { name: 'Dumbbell Lateral Raise', targetSets: 2, targetReps: '12-15', notes: 'Alternate with cable' }
+  ],
+  // Day 5: Legs (Hinge Focus) + Arms
+  'legs-hinge': [
+    { name: 'Romanian Deadlift', targetSets: 2, targetReps: '6-8', notes: 'Bar close, neutral spine' },
+    { name: 'Hip Thrust', targetSets: 2, targetReps: '10-12', notes: 'Pause and squeeze at top' },
+    { name: 'Seated Leg Curl', targetSets: 2, targetReps: '10-12', notes: 'Better than lying for growth' },
+    { name: 'Hip Abduction', targetSets: 2, targetReps: '12-15', notes: 'Hips extended/bridged' },
+    { name: 'Incline Dumbbell Curl', targetSets: 2, targetReps: '10-12', notes: 'Full stretch' },
+    { name: 'Tricep Extension', targetSets: 2, targetReps: '10-12', notes: 'Cable or dumbbell' }
+  ]
+}
+
+// Legacy templates for backward compatibility
 const WORKOUT_TEMPLATES: Record<WorkoutType, Omit<Exercise, 'id' | 'sets'>[]> = {
-  push: [
-    { name: 'Bench Press', targetSets: 3, targetReps: '6-8' },
-    { name: 'Overhead Press', targetSets: 3, targetReps: '8-10' },
-    { name: 'Incline Dumbbell Press', targetSets: 2, targetReps: '8-12' },
-    { name: 'Cable Flyes', targetSets: 2, targetReps: '12-15' },
-    { name: 'Tricep Pushdowns', targetSets: 3, targetReps: '10-12' },
-    { name: 'Lateral Raises', targetSets: 3, targetReps: '12-15' }
-  ],
-  pull: [
-    { name: 'Barbell Rows', targetSets: 3, targetReps: '6-8' },
-    { name: 'Lat Pulldowns', targetSets: 3, targetReps: '8-10' },
-    { name: 'Seated Cable Rows', targetSets: 2, targetReps: '10-12' },
-    { name: 'Face Pulls', targetSets: 3, targetReps: '12-15' },
-    { name: 'Barbell Curls', targetSets: 2, targetReps: '8-10' },
-    { name: 'Hammer Curls', targetSets: 2, targetReps: '10-12' }
-  ],
-  legs: [
-    { name: 'Squats', targetSets: 3, targetReps: '6-8' },
-    { name: 'Romanian Deadlifts', targetSets: 3, targetReps: '8-10' },
-    { name: 'Leg Press', targetSets: 3, targetReps: '10-12' },
-    { name: 'Leg Curls', targetSets: 2, targetReps: '10-12' },
-    { name: 'Leg Extensions', targetSets: 2, targetReps: '12-15' },
-    { name: 'Calf Raises', targetSets: 4, targetReps: '12-15' }
-  ],
-  upper: [
-    { name: 'Bench Press', targetSets: 3, targetReps: '6-8' },
-    { name: 'Barbell Rows', targetSets: 3, targetReps: '6-8' },
-    { name: 'Overhead Press', targetSets: 2, targetReps: '8-10' },
-    { name: 'Lat Pulldowns', targetSets: 2, targetReps: '10-12' },
-    { name: 'Dumbbell Curls', targetSets: 2, targetReps: '10-12' },
-    { name: 'Tricep Extensions', targetSets: 2, targetReps: '10-12' }
-  ],
-  lower: [
-    { name: 'Squats', targetSets: 3, targetReps: '6-8' },
-    { name: 'Romanian Deadlifts', targetSets: 3, targetReps: '8-10' },
-    { name: 'Bulgarian Split Squats', targetSets: 2, targetReps: '10-12' },
-    { name: 'Leg Curls', targetSets: 2, targetReps: '10-12' },
-    { name: 'Leg Extensions', targetSets: 2, targetReps: '12-15' },
-    { name: 'Calf Raises', targetSets: 3, targetReps: '12-15' }
-  ],
+  push: FIVE_DAY_TEMPLATES['push'],
+  pull: FIVE_DAY_TEMPLATES['pull'],
+  legs: FIVE_DAY_TEMPLATES['legs-quad'],
+  upper: FIVE_DAY_TEMPLATES['upper'],
+  lower: FIVE_DAY_TEMPLATES['legs-hinge'],
   rest: []
 }
 
-const generateExercises = (type: WorkoutType, customizations: WorkoutCustomization[]): Exercise[] => {
+// Get workout template based on training days and day number
+const getTemplateForDay = (trainingDays: TrainingDays, dayNumber: number): Omit<Exercise, 'id' | 'sets'>[] => {
+  switch (trainingDays) {
+    case 3:
+      const threeDayKeys = ['day-a', 'day-b', 'day-c']
+      return THREE_DAY_TEMPLATES[threeDayKeys[(dayNumber - 1) % 3]] || []
+    case 4:
+      const fourDayKeys = ['upper-push', 'lower-quad', 'upper-pull', 'lower-hinge']
+      return FOUR_DAY_TEMPLATES[fourDayKeys[(dayNumber - 1) % 4]] || []
+    case 5:
+      const fiveDayKeys = ['push', 'pull', 'legs-quad', 'upper', 'legs-hinge']
+      return FIVE_DAY_TEMPLATES[fiveDayKeys[(dayNumber - 1) % 5]] || []
+    default:
+      return []
+  }
+}
+
+const generateExercises = (type: WorkoutType, customizations: WorkoutCustomization[], trainingDays?: TrainingDays, dayNumber?: number): Exercise[] => {
+  // First check for customizations
   const customization = customizations.find(c => c.workoutType === type)
-  const template = customization && customization.exercises.length > 0
-    ? customization.exercises
-    : WORKOUT_TEMPLATES[type]
+
+  let template: Omit<Exercise, 'id' | 'sets'>[]
+
+  if (customization && customization.exercises.length > 0) {
+    template = customization.exercises
+  } else if (trainingDays && dayNumber) {
+    // Use the proper template based on training days
+    template = getTemplateForDay(trainingDays, dayNumber)
+  } else {
+    // Fallback to legacy templates
+    template = WORKOUT_TEMPLATES[type]
+  }
 
   return template.map((ex, index) => ({
     name: ex.name,
     targetSets: ex.targetSets,
     targetReps: ex.targetReps,
+    notes: ex.notes,
     id: `${type}-${index}-${Date.now()}`,
     sets: Array.from({ length: ex.targetSets }, () => ({
       weight: 0,
@@ -162,27 +273,34 @@ const generateExercises = (type: WorkoutType, customizations: WorkoutCustomizati
 const getWorkoutTypes = (trainingDays: TrainingDays): WorkoutType[] => {
   switch (trainingDays) {
     case 3:
+      // 3-Day Full Body: Day A, Day B, Day C (using push/pull/legs as type identifiers)
       return ['push', 'pull', 'legs']
     case 4:
+      // 4-Day Upper/Lower
       return ['upper', 'lower', 'upper', 'lower']
     case 5:
+      // 5-Day Split: Push, Pull, Legs (Quad), Upper, Legs (Hinge)
       return ['push', 'pull', 'legs', 'upper', 'lower']
     default:
       return ['push', 'pull', 'legs']
   }
 }
 
-// Get workout name for type
-const getWorkoutName = (type: WorkoutType): string => {
-  const names: Record<WorkoutType, string> = {
-    push: 'Push Day',
-    pull: 'Pull Day',
-    legs: 'Leg Day',
-    upper: 'Upper Body',
-    lower: 'Lower Body',
-    rest: 'Rest'
+// Get workout name based on training days and day number
+const getWorkoutNameForPlan = (trainingDays: TrainingDays, dayNumber: number): string => {
+  switch (trainingDays) {
+    case 3:
+      const threeDayNames = ['Day A: Push + Quads', 'Day B: Pull + Hinge', 'Day C: Full Body']
+      return threeDayNames[(dayNumber - 1) % 3]
+    case 4:
+      const fourDayNames = ['Upper (Push Focus)', 'Lower (Quad Focus)', 'Upper (Pull Focus)', 'Lower (Hinge Focus)']
+      return fourDayNames[(dayNumber - 1) % 4]
+    case 5:
+      const fiveDayNames = ['Push (Chest/Shoulders/Triceps)', 'Pull (Back/Biceps/Rear Delts)', 'Legs (Quad Focus)', 'Upper (Chest/Back)', 'Legs (Hinge Focus) + Arms']
+      return fiveDayNames[(dayNumber - 1) % 5]
+    default:
+      return `Day ${dayNumber}`
   }
-  return names[type]
 }
 
 // Build schedule from selected days
@@ -195,7 +313,8 @@ const buildSchedule = (trainingDays: TrainingDays, selectedDays: DayOfWeek[]): W
     const workoutIndex = selectedDays.indexOf(day as DayOfWeek)
     if (workoutIndex !== -1 && workoutIndex < workoutTypes.length) {
       const type = workoutTypes[workoutIndex]
-      schedule.push({ day, type, name: getWorkoutName(type) })
+      const dayNumber = workoutIndex + 1
+      schedule.push({ day, type, name: getWorkoutNameForPlan(trainingDays, dayNumber) })
     } else {
       schedule.push({ day, type: 'rest', name: 'Rest' })
     }
@@ -282,6 +401,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
       startWorkout: (type: WorkoutType, dayNumber: number) => {
         const id = `workout-${Date.now()}`
         const today = new Date().toISOString().split('T')[0]
+        const plan = get().currentPlan
+        const trainingDays = plan?.trainingDays
 
         const newWorkout: WorkoutLog = {
           id,
@@ -289,7 +410,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
           workoutType: type,
           dayNumber,
           weekNumber: get().currentWeek,
-          exercises: generateExercises(type, get().customizations),
+          exercises: generateExercises(type, get().customizations, trainingDays, dayNumber),
           completed: false,
           xpAwarded: false,
           startTime: Date.now()
