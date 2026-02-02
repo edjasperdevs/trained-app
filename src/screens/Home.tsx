@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Avatar, XPDisplay, Card, Button, ProgressBar, ReminderList, WeeklySummary, NearestBadges } from '@/components'
+import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check } from 'lucide-react'
 import {
   useUserStore,
   useXPStore,
@@ -110,7 +111,7 @@ export function Home() {
       label: todayWorkout ? `Complete ${todayWorkout.name}` : 'Rest Day',
       xp: todayWorkout ? XP_VALUES.WORKOUT : 0,
       completed: workoutCompleted || !todayWorkout,
-      icon: '🏋️',
+      icon: Dumbbell,
       isRest: !todayWorkout
     },
     {
@@ -118,21 +119,21 @@ export function Home() {
       label: `Hit Protein (${targets?.protein || 0}g)`,
       xp: XP_VALUES.PROTEIN,
       completed: proteinHit,
-      icon: '🥩'
+      icon: Beef
     },
     {
       id: 'calories',
       label: `Hit Calories (${targets?.calories.toLocaleString() || 0})`,
       xp: XP_VALUES.CALORIES,
       completed: caloriesHit,
-      icon: '🔥'
+      icon: Zap
     },
     {
       id: 'checkin',
       label: 'Daily Check-In',
       xp: XP_VALUES.CHECK_IN,
       completed: false,
-      icon: '✅'
+      icon: CheckCircle2
     }
   ]
 
@@ -147,7 +148,7 @@ export function Home() {
           </div>
           {profile?.currentStreak ? (
             <div className="glass px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-              <span className="text-lg">🔥</span>
+              <Flame size={18} className="text-accent-primary" />
               <span className="text-accent-primary font-bold font-digital">
                 {profile.currentStreak}
               </span>
@@ -182,9 +183,8 @@ export function Home() {
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 2 }}
-                    className="text-3xl"
                   >
-                    ✨
+                    <Sparkles size={28} className="text-accent-primary" />
                   </motion.div>
                   <div className="flex-1">
                     <p className="font-bold text-lg">Ready to check in?</p>
@@ -195,9 +195,8 @@ export function Home() {
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
-                    className="text-accent-primary"
                   >
-                    →
+                    <ChevronRight size={20} className="text-accent-primary" />
                   </motion.div>
                 </div>
               </Card>
@@ -219,9 +218,8 @@ export function Home() {
                     initial={{ rotate: 0 }}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 0.5 }}
-                    className="text-3xl"
                   >
-                    🎉
+                    <Trophy size={28} className="text-accent-success" />
                   </motion.div>
                   <div className="flex-1">
                     <p className="font-bold text-accent-success">Check-in complete!</p>
@@ -269,9 +267,8 @@ export function Home() {
                         rotate: [0, 10, -10, 0]
                       }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="text-3xl"
                     >
-                      🎁
+                      <Gift size={28} className="text-accent-secondary" />
                     </motion.div>
                     <div>
                       <p className="font-bold text-lg">Weekly XP Ready!</p>
@@ -298,7 +295,7 @@ export function Home() {
         <Card>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🔥</span>
+              <Flame size={18} className="text-accent-primary" />
               <span className="font-bold">
                 {profile?.currentStreak || 0} Day Streak
               </span>
@@ -346,7 +343,7 @@ export function Home() {
         {profile?.streakPaused && (
           <Card className="bg-accent-warning/10 border-accent-warning/30">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
+              <AlertTriangle size={24} className="text-accent-warning" />
               <div>
                 <p className="text-accent-warning font-semibold">Don't break the chain!</p>
                 <p className="text-sm text-gray-400">
@@ -380,13 +377,17 @@ export function Home() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                         quest.completed
                           ? 'bg-accent-success/20'
                           : 'bg-bg-secondary'
                       }`}
                     >
-                      {quest.completed ? '✓' : quest.icon}
+                      {quest.completed ? (
+                        <Check size={18} className="text-accent-success" />
+                      ) : (
+                        <quest.icon size={18} className="text-gray-400" />
+                      )}
                     </div>
                     <div className="flex-1">
                       <p className={quest.completed ? 'line-through text-gray-500' : ''}>
@@ -409,8 +410,8 @@ export function Home() {
             {profile?.currentStreak ? (
               <Card className="bg-accent-warning/10 border-accent-warning/20" padding="sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-accent-warning/20">
-                    🔥
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent-warning/20">
+                    <Flame size={18} className="text-accent-warning" />
                   </div>
                   <div className="flex-1">
                     <p>Streak Bonus ({profile.currentStreak} days)</p>
@@ -471,7 +472,7 @@ export function Home() {
         {hasCheckedInToday ? (
           <Card className="mt-6 bg-accent-success/10 border-accent-success/30">
             <div className="flex items-center justify-center gap-3 py-2">
-              <span className="text-2xl">✅</span>
+              <CheckCircle2 size={24} className="text-accent-success" />
               <div className="text-center">
                 <p className="font-bold text-accent-success">Today's Check-In Complete</p>
                 <p className="text-sm text-gray-400">
@@ -485,9 +486,9 @@ export function Home() {
           <motion.div
             animate={{
               boxShadow: [
-                '0 0 0 0 rgba(0, 245, 212, 0)',
-                '0 0 0 8px rgba(0, 245, 212, 0.3)',
-                '0 0 0 0 rgba(0, 245, 212, 0)'
+                '0 0 0 0 rgba(245, 158, 11, 0)',
+                '0 0 0 8px rgba(245, 158, 11, 0.2)',
+                '0 0 0 0 rgba(245, 158, 11, 0)'
               ]
             }}
             transition={{ repeat: Infinity, duration: 2 }}
@@ -503,7 +504,7 @@ export function Home() {
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 >
-                  ✨
+                  <Sparkles size={20} />
                 </motion.span>
                 Complete Check-In
               </span>

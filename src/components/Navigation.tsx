@@ -1,12 +1,19 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
 
-const navItems = [
-  { path: '/', label: 'Home', icon: '🏠' },
-  { path: '/workouts', label: 'Workouts', icon: '🏋️' },
-  { path: '/macros', label: 'Macros', icon: '🍽️' },
-  { path: '/avatar', label: 'Avatar', icon: '👤' },
-  { path: '/settings', label: 'Settings', icon: '⚙️' },
+interface NavItem {
+  path: string
+  label: string
+  icon: LucideIcon
+}
+
+const navItems: NavItem[] = [
+  { path: '/', label: 'Home', icon: Home },
+  { path: '/workouts', label: 'Workouts', icon: Dumbbell },
+  { path: '/macros', label: 'Macros', icon: UtensilsCrossed },
+  { path: '/avatar', label: 'Avatar', icon: User },
+  { path: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Navigation() {
@@ -30,13 +37,16 @@ export function Navigation() {
                   className="absolute -top-0.5 w-8 h-1 bg-accent-primary rounded-full shadow-lg shadow-accent-primary/30"
                 />
               )}
-              <motion.span
-                className="text-xl"
+              <motion.div
                 animate={isActive ? { scale: 1.1 } : { scale: 1 }}
                 transition={{ duration: 0.15 }}
               >
-                {item.icon}
-              </motion.span>
+                <item.icon
+                  size={22}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={isActive ? 'text-accent-primary' : 'text-gray-400'}
+                />
+              </motion.div>
               <span className={`text-[10px] mt-0.5 font-medium transition-colors duration-150 ${isActive ? 'text-accent-primary' : 'text-gray-500'}`}>
                 {item.label}
               </span>

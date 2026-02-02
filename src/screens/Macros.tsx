@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, ProgressBar, MealBuilder } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
+import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -234,7 +235,11 @@ function DailyView({
       <div className="grid grid-cols-2 gap-3">
         <Card className={proteinHit ? 'bg-accent-success/10 border-accent-success/30' : ''} padding="sm">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{proteinHit ? '✓' : '🥩'}</span>
+            {proteinHit ? (
+              <Check size={20} className="text-accent-success" />
+            ) : (
+              <Beef size={20} className="text-gray-400" />
+            )}
             <div>
               <p className="text-sm font-semibold">Protein Target</p>
               <p className="text-xs text-gray-500">
@@ -245,7 +250,11 @@ function DailyView({
         </Card>
         <Card className={caloriesHit ? 'bg-accent-success/10 border-accent-success/30' : ''} padding="sm">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{caloriesHit ? '✓' : '🔥'}</span>
+            {caloriesHit ? (
+              <Check size={20} className="text-accent-success" />
+            ) : (
+              <Zap size={20} className="text-gray-400" />
+            )}
             <div>
               <p className="text-sm font-semibold">Calorie Target</p>
               <p className="text-xs text-gray-500">
@@ -266,9 +275,10 @@ function DailyView({
             <h3 className="text-sm font-semibold text-gray-400">
               TODAY'S MEALS ({todayMeals.length})
             </h3>
-            <span className={`transition-transform ${showMeals ? 'rotate-180' : ''}`}>
-              ▼
-            </span>
+            <ChevronDown
+              size={16}
+              className={`text-gray-400 transition-transform ${showMeals ? 'rotate-180' : ''}`}
+            />
           </button>
 
           <AnimatePresence>
@@ -371,7 +381,7 @@ function MealsView({ mealPlan }: { mealPlan: MealPlan[] }) {
   if (!mealPlan || mealPlan.length === 0) {
     return (
       <Card className="text-center py-8">
-        <span className="text-4xl mb-4 block">🍽️</span>
+        <UtensilsCrossed size={40} className="mx-auto mb-4 text-gray-500" />
         <p className="text-xl font-bold mb-2">No Meal Plan</p>
         <p className="text-gray-400">Set your macros in Calculator to generate a meal plan</p>
       </Card>
@@ -457,11 +467,11 @@ function CalculatorView({
     { value: 'active', label: 'Active', description: '6-7 days/week' }
   ]
 
-  const goals: { value: 'cut' | 'recomp' | 'maintain' | 'bulk'; label: string; emoji: string }[] = [
-    { value: 'cut', label: 'Cut', emoji: '🔥' },
-    { value: 'recomp', label: 'Recomp', emoji: '🔄' },
-    { value: 'maintain', label: 'Maintain', emoji: '⚖️' },
-    { value: 'bulk', label: 'Bulk', emoji: '📈' }
+  const goals: { value: 'cut' | 'recomp' | 'maintain' | 'bulk'; label: string; icon: typeof Flame }[] = [
+    { value: 'cut', label: 'Cut', icon: Flame },
+    { value: 'recomp', label: 'Recomp', icon: RefreshCw },
+    { value: 'maintain', label: 'Maintain', icon: Scale },
+    { value: 'bulk', label: 'Bulk', icon: TrendingUp }
   ]
 
   return (
@@ -581,7 +591,7 @@ function CalculatorView({
                   : 'border-gray-700 hover:border-gray-600'}
               `}
             >
-              <span className="text-2xl block mb-1">{g.emoji}</span>
+              <g.icon size={24} className={`mb-1 ${goal === g.value ? 'text-accent-primary' : 'text-gray-400'}`} />
               <span className="text-sm">{g.label}</span>
             </button>
           ))}
@@ -789,7 +799,7 @@ function LogMealView({
         </div>
       ) : (
         <Card className="text-center py-8">
-          <span className="text-4xl block mb-3">🍽️</span>
+          <UtensilsCrossed size={40} className="mx-auto mb-3 text-gray-500" />
           <p className="text-lg font-semibold mb-1">No Saved Meals</p>
           <p className="text-gray-400 text-sm">
             Create a meal with multiple ingredients to quickly log it later
