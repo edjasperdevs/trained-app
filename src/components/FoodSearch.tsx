@@ -122,7 +122,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
     createPortal(
       <>
         {/* Click outside to close */}
-        <div className="fixed inset-0 z-[998]" onClick={() => setShowResults(false)} />
+        <div className="fixed inset-0 z-[10000]" onClick={() => setShowResults(false)} />
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -133,7 +133,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
               top: dropdownPosition.top,
               left: dropdownPosition.left,
               width: dropdownPosition.width,
-              zIndex: 999,
+              zIndex: 10001,
             }}
             className="max-h-60 overflow-y-auto bg-bg-secondary rounded-lg border border-gray-700 shadow-xl"
           >
@@ -178,7 +178,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+      style={{ position: 'fixed', inset: 0, zIndex: 10002 }}
       className="bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleCancel}
     >
