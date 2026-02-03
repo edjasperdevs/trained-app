@@ -104,7 +104,7 @@ export function Settings() {
     const weightInLbs = toInternalWeight(inputValue, units)
     logWeight(weightInLbs)
     setWeightInput('')
-    toast.success('Weight logged!')
+    toast.success('Weight logged')
   }
 
   const handleSetGoalWeight = () => {
@@ -120,7 +120,7 @@ export function Settings() {
     const weightInLbs = toInternalWeight(inputValue, units)
     setGoalWeight(weightInLbs)
     setGoalWeightInput('')
-    toast.success('Goal weight set!')
+    toast.success('Goal weight configured')
   }
 
   const handleExport = () => {
@@ -175,7 +175,7 @@ export function Settings() {
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
-      toast.success('Data exported successfully!')
+      toast.success('Data exported')
     } catch {
       toast.error('Failed to export data')
     }
@@ -209,7 +209,7 @@ export function Settings() {
       }
 
       setImportStatus('success')
-      toast.success('Data imported successfully!')
+      toast.success('Data imported')
       setTimeout(() => {
         setShowImportModal(false)
         setImportStatus('idle')
@@ -241,7 +241,7 @@ export function Settings() {
         useMacroStore.getState().resetMacros()
         useWorkoutStore.getState().resetWorkouts()
         useAvatarStore.getState().resetAvatar()
-        toast.info('Progress reset. Reloading...')
+        toast.info('System reset. Reloading...')
         setTimeout(() => window.location.reload(), 1000)
       } catch {
         toast.error('Failed to reset progress')

@@ -253,9 +253,9 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       >
         <Gamepad2 size={80} className="mx-auto text-accent-primary" />
       </motion.div>
-      <h1 className="text-3xl font-bold mb-2">Gamify Your Gains</h1>
+      <h1 className="text-3xl font-bold mb-2">Your Fitness Operating System</h1>
       <p className="text-gray-400 mb-8">
-        Turn your fitness journey into a game. Level up your avatar as you level up yourself.
+        Built by an engineer. Powered by game mechanics. Designed for people who think in systems.
       </p>
       <div className="space-y-3 text-left mb-8">
         <div className="flex items-center gap-3 text-sm">
@@ -272,7 +272,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         </div>
       </div>
       <Button onClick={onNext} fullWidth size="lg">
-        Let's Go
+        Initialize
       </Button>
     </div>
   )
@@ -292,7 +292,7 @@ function NameStep({
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">What should we call you?</h2>
-      <p className="text-gray-400 mb-6">This is your gamer tag for your fitness journey.</p>
+      <p className="text-gray-400 mb-6">Your handle for the system.</p>
 
       <input
         type="text"
@@ -334,8 +334,8 @@ function GenderStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">What's your biological sex?</h2>
-      <p className="text-gray-400 mb-6">This helps us calculate your metabolism more accurately.</p>
+      <h2 className="text-2xl font-bold mb-2">Calibrating baseline metrics</h2>
+      <p className="text-gray-400 mb-6">Biological sex affects metabolism calculations.</p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => {
@@ -387,8 +387,8 @@ function FitnessStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">What's your fitness level?</h2>
-      <p className="text-gray-400 mb-6">This helps us tailor your experience.</p>
+      <h2 className="text-2xl font-bold mb-2">Current system state</h2>
+      <p className="text-gray-400 mb-6">Where are you starting from?</p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => {
@@ -443,8 +443,8 @@ function DaysStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">How many days can you train?</h2>
-      <p className="text-gray-400 mb-6">Be realistic - consistency beats intensity.</p>
+      <h2 className="text-2xl font-bold mb-2">Configure your training schedule</h2>
+      <p className="text-gray-400 mb-6">Be realistic. Consistency beats intensity.</p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => (
@@ -515,8 +515,8 @@ function GoalStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Your Stats & Goal</h2>
-      <p className="text-gray-400 mb-6">We'll calculate your macros based on this.</p>
+      <h2 className="text-2xl font-bold mb-2">Select your optimization target</h2>
+      <p className="text-gray-400 mb-6">We'll calculate your macros based on these inputs.</p>
 
       {/* Height */}
       <div className="mb-4">
@@ -630,7 +630,7 @@ function AvatarStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Choose your avatar</h2>
+      <h2 className="text-2xl font-bold mb-2">Deploy your avatar</h2>
       <p className="text-gray-400 mb-6">This character will evolve with your progress.</p>
 
       <div className="space-y-3 mb-6">
@@ -739,7 +739,7 @@ function TutorialStep({
           Back
         </Button>
         <Button onClick={onFinish} fullWidth size="lg">
-          Start My Journey
+          Deploy
         </Button>
       </div>
     </div>

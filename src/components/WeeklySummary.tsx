@@ -101,7 +101,7 @@ export function WeeklySummary() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-400">THIS WEEK</h3>
+        <h3 className="text-sm font-semibold text-gray-400">SPRINT SUMMARY</h3>
         <span className="text-xs text-gray-500">
           Day {daysSoFar} of 7
         </span>
@@ -187,7 +187,7 @@ export function WeeklySummary() {
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">⚡</span>
-          <span className="text-sm text-gray-400">Week XP</span>
+          <span className="text-sm text-gray-400">Sprint XP</span>
         </div>
         <span className="font-bold font-digital text-accent-secondary">
           +{stats.xpEarned} XP
@@ -204,7 +204,7 @@ export function WeeklySummary() {
         >
           <div className="flex items-center gap-2">
             <span className="text-lg">🔥</span>
-            <span className="text-sm text-gray-400">Streak</span>
+            <span className="text-sm text-gray-400">Uptime</span>
           </div>
           <span className="font-bold font-digital text-accent-warning">
             {stats.currentStreak} days

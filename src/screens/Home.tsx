@@ -15,16 +15,26 @@ import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 
 const MOTIVATIONAL_MESSAGES = [
-  "Gains loading... 💪",
-  "Your future self is proud.",
-  "Discipline > Motivation",
-  "1% better every day",
-  "XP doesn't lie.",
-  "The grind is the game.",
-  "Consistency compounds.",
-  "Show up. Level up.",
-  "Today's work, tomorrow's gains.",
-  "Trust the process."
+  "Your body is a system. Optimize it.",
+  "Consistency is just a cron job you don't skip.",
+  "Progressive overload: version control for your muscles.",
+  "You don't need motivation. You need a system.",
+  "Ship the workout. Refactor later.",
+  "Today's session is a commit. Don't break the build.",
+  "Discipline is just automated decision-making.",
+  "Your future physique is in production. Keep deploying.",
+  "Rest days are garbage collection. They're not optional.",
+  "The best program is the one you actually execute.",
+  "Streak alive? That's uptime, baby.",
+  "Motivation is a runtime error. Systems are compiled.",
+  "Debug your diet. Optimize your training. Ship results.",
+  "One more set is just one more iteration.",
+  "Your PR is a release candidate. Push it to production.",
+  "Treat every workout like a sprint retrospective. What improved?",
+  "The gym doesn't have a staging environment. Every rep is production.",
+  "You're not grinding. You're compiling.",
+  "Abs are made in the kitchen. Like microservices, not monoliths.",
+  "Your body responds to consistent inputs. Be deterministic."
 ]
 
 // Get days until next Sunday
@@ -187,9 +197,9 @@ export function Home() {
                     <Sparkles size={28} className="text-accent-primary" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className="font-bold text-lg">Ready to check in?</p>
+                    <p className="font-bold text-lg">Daily standup pending</p>
                     <p className="text-sm text-gray-400">
-                      Complete your daily check-in to earn XP
+                      Log today's progress and earn XP
                     </p>
                   </div>
                   <motion.div
@@ -222,9 +232,9 @@ export function Home() {
                     <Trophy size={28} className="text-accent-success" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className="font-bold text-accent-success">Check-in complete!</p>
+                    <p className="font-bold text-accent-success">Build deployed.</p>
                     <p className="text-sm text-gray-400">
-                      {todayLog?.total || 0} XP earned today
+                      +{todayLog?.total || 0} XP committed
                     </p>
                   </div>
                 </div>
@@ -271,9 +281,9 @@ export function Home() {
                       <Gift size={28} className="text-accent-secondary" />
                     </motion.div>
                     <div>
-                      <p className="font-bold text-lg">Weekly XP Ready!</p>
+                      <p className="font-bold text-lg">Weekly Release Ready</p>
                       <p className="text-sm text-gray-400">
-                        {pendingXP} XP waiting to be claimed
+                        {pendingXP} XP ready to deploy
                       </p>
                     </div>
                   </div>
@@ -282,7 +292,7 @@ export function Home() {
                     transition={{ repeat: Infinity, duration: 1 }}
                   >
                     <Button variant="secondary">
-                      CLAIM
+                      DEPLOY
                     </Button>
                   </motion.div>
                 </div>
@@ -297,12 +307,12 @@ export function Home() {
             <div className="flex items-center gap-2">
               <Flame size={18} className="text-accent-primary" />
               <span className="font-bold">
-                {profile?.currentStreak || 0} Day Streak
+                {profile?.currentStreak || 0} Day Uptime
               </span>
             </div>
             {pendingXP > 0 && (
               <span className="text-xs text-gray-400">
-                {daysUntilClaim === 0 ? 'Claim today!' : `${daysUntilClaim}d until claim`}
+                {daysUntilClaim === 0 ? 'Deploy today!' : `${daysUntilClaim}d until release`}
               </span>
             )}
           </div>
@@ -345,9 +355,9 @@ export function Home() {
             <div className="flex items-center gap-3">
               <AlertTriangle size={24} className="text-accent-warning" />
               <div>
-                <p className="text-accent-warning font-semibold">Don't break the chain!</p>
+                <p className="text-accent-warning font-semibold">System downtime detected</p>
                 <p className="text-sm text-gray-400">
-                  You missed yesterday. Check in today to save your streak.
+                  You missed yesterday. Check in today to restore uptime.
                 </p>
               </div>
             </div>
@@ -474,10 +484,10 @@ export function Home() {
             <div className="flex items-center justify-center gap-3 py-2">
               <CheckCircle2 size={24} className="text-accent-success" />
               <div className="text-center">
-                <p className="font-bold text-accent-success">Today's Check-In Complete</p>
+                <p className="font-bold text-accent-success">Today's Build Complete</p>
                 <p className="text-sm text-gray-400">
-                  +{todayLog?.total || 0} XP earned
-                  {pendingXP > 0 && ` • ${pendingXP} XP pending`}
+                  +{todayLog?.total || 0} XP committed
+                  {pendingXP > 0 && ` • ${pendingXP} XP pending release`}
                 </p>
               </div>
             </div>
@@ -506,7 +516,7 @@ export function Home() {
                 >
                   <Sparkles size={20} />
                 </motion.span>
-                Complete Check-In
+                Run Daily Standup
               </span>
             </Button>
           </motion.div>

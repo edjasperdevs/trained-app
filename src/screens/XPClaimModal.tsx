@@ -180,8 +180,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 >
                   <Gift size={56} className="mx-auto text-accent-secondary" />
                 </motion.div>
-                <h2 className="text-2xl font-bold mb-2">Weekly XP Ready!</h2>
-                <p className="text-gray-400">Your hard work has paid off</p>
+                <h2 className="text-2xl font-bold mb-2">Weekly Release Ready</h2>
+                <p className="text-gray-400">Your sprint is complete. Time to ship.</p>
               </div>
 
               {/* XP Breakdown */}
@@ -205,7 +205,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               {/* Total */}
               <div className="bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 rounded-xl p-4 mb-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Total to Claim</span>
+                  <span className="text-gray-400">Ready to Deploy</span>
                   <span className="text-3xl font-bold font-digital text-glow-cyan">
                     {pendingXP} XP
                   </span>
@@ -224,7 +224,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                     >
                       <Sparkles size={18} />
                     </motion.span>
-                    CLAIM XP
+                    DEPLOY
                   </span>
                 </Button>
               </div>
@@ -254,7 +254,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 animate={{ opacity: 1 }}
                 className="text-gray-400 mb-4"
               >
-                Claiming XP...
+                Deploying to production...
               </motion.p>
 
               <motion.p
@@ -284,7 +284,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ delay: 0.4 }}
                 className="text-2xl font-bold mb-2"
               >
-                XP Claimed!
+                Deployed to Production
               </motion.h2>
 
               <motion.div
@@ -325,7 +325,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               </motion.div>
 
               <Button onClick={handleClose} fullWidth>
-                Awesome!
+                Nice.
               </Button>
             </Card>
           )}
@@ -360,7 +360,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-bold mb-4 bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent"
               >
-                LEVEL UP!
+                VERSION BUMP!
               </motion.h2>
 
               <motion.div
@@ -389,7 +389,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ delay: 0.7 }}
                 className="text-gray-400 mb-6"
               >
-                You earned {claimResult.xpClaimed} XP this week!
+                You shipped {claimResult.xpClaimed} XP this sprint.
               </motion.p>
 
               <motion.div

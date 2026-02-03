@@ -150,7 +150,7 @@ export function Workouts() {
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
-    toast.success('Workout ended. Great effort! 💪')
+    toast.success('Workout committed. Partial deploy counts.')
 
     const duration = activeWorkout.startTime
       ? Math.round((Date.now() - activeWorkout.startTime) / 60000)
@@ -164,7 +164,7 @@ export function Workouts() {
     if (!activeWorkout) return
     addExerciseToWorkout(activeWorkout.id, exercise)
     setActiveWorkout(getCurrentWorkout())
-    toast.success(`Added ${exercise.name} to workout`)
+    toast.success(`${exercise.name} added to session`)
   }
 
   const handleUpdateSet = (

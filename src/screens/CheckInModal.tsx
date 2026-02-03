@@ -174,7 +174,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
           {!submitted ? (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Daily Check-In</h2>
+                <h2 className="text-xl font-bold">Daily Standup</h2>
                 <button
                   onClick={() => onClose(false)}
                   className="text-gray-400 hover:text-white"
@@ -278,7 +278,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               </div>
 
               <Button onClick={handleSubmit} fullWidth size="lg">
-                Complete Check-In
+                Ship It
               </Button>
             </>
           ) : (
@@ -299,7 +299,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 transition={{ delay: 0.3 }}
                 className="text-2xl font-bold mb-2"
               >
-                Check-In Complete!
+                Deployed successfully.
               </motion.h2>
 
               {/* XP Breakdown Animation */}
@@ -334,7 +334,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   +{earnedXP} XP
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Pending until Sunday claim
+                  Pending until Sunday release
                 </p>
               </motion.div>
 

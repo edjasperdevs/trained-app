@@ -41,7 +41,7 @@ const createBadges = (): Badge[] => [
   // Streak badges
   {
     id: 'streak-7',
-    name: 'Week Warrior',
+    name: 'Iron Pipeline',
     description: 'Maintain a 7-day streak',
     icon: '🔥',
     rarity: 'common',
@@ -51,7 +51,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'streak-30',
-    name: 'Monthly Master',
+    name: '99.9% Uptime',
     description: 'Maintain a 30-day streak',
     icon: '🔥',
     rarity: 'rare',
@@ -61,7 +61,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'streak-100',
-    name: 'Century Club',
+    name: 'Always On',
     description: 'Maintain a 100-day streak',
     icon: '💯',
     rarity: 'legendary',
@@ -73,7 +73,7 @@ const createBadges = (): Badge[] => [
   // Workout badges
   {
     id: 'workouts-10',
-    name: 'Getting Started',
+    name: 'First Commit',
     description: 'Complete 10 workouts',
     icon: '🏋️',
     rarity: 'common',
@@ -83,7 +83,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'workouts-25',
-    name: 'Gym Regular',
+    name: 'Stable Build',
     description: 'Complete 25 workouts',
     icon: '💪',
     rarity: 'common',
@@ -93,7 +93,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'workouts-50',
-    name: 'Iron Addict',
+    name: 'Production Ready',
     description: 'Complete 50 workouts',
     icon: '🦾',
     rarity: 'rare',
@@ -115,7 +115,7 @@ const createBadges = (): Badge[] => [
   // Nutrition badges
   {
     id: 'protein-7',
-    name: 'Protein Pro',
+    name: 'Data-Fed',
     description: 'Hit protein target 7 days',
     icon: '🥩',
     rarity: 'common',
@@ -131,7 +131,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'protein-30',
-    name: 'Macro Master',
+    name: 'Optimized Inputs',
     description: 'Hit protein target 30 days',
     icon: '🎯',
     rarity: 'rare',
@@ -147,7 +147,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'perfect-7',
-    name: 'Perfect Week',
+    name: 'Zero Bugs',
     description: 'Achieve 7 perfect macro days',
     icon: '⭐',
     rarity: 'rare',
@@ -165,7 +165,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'perfect-30',
-    name: 'Nutrition Ninja',
+    name: 'Clean Architecture',
     description: 'Achieve 30 perfect macro days',
     icon: '🌟',
     rarity: 'epic',
@@ -185,7 +185,7 @@ const createBadges = (): Badge[] => [
   // Level badges
   {
     id: 'level-5',
-    name: 'Rising Star',
+    name: 'v0.5 Released',
     description: 'Reach level 5',
     icon: '⬆️',
     rarity: 'common',
@@ -195,7 +195,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'level-10',
-    name: 'Dedicated',
+    name: 'v1.0 Stable',
     description: 'Reach level 10',
     icon: '🌟',
     rarity: 'rare',
@@ -205,7 +205,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'level-25',
-    name: 'Elite',
+    name: 'Senior Dev',
     description: 'Reach level 25',
     icon: '💎',
     rarity: 'epic',
@@ -215,7 +215,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'level-50',
-    name: 'Legend',
+    name: '10x Engineer',
     description: 'Reach level 50',
     icon: '👑',
     rarity: 'legendary',
@@ -227,7 +227,7 @@ const createBadges = (): Badge[] => [
   // Special badges
   {
     id: 'first-workout',
-    name: 'First Steps',
+    name: 'Hello World',
     description: 'Complete your first workout',
     icon: '🎉',
     rarity: 'common',
@@ -237,7 +237,7 @@ const createBadges = (): Badge[] => [
   },
   {
     id: 'first-checkin',
-    name: 'Day One',
+    name: 'Init',
     description: 'Complete your first check-in',
     icon: '✨',
     rarity: 'common',
