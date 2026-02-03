@@ -3,6 +3,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card } from '@/components'
 import {
+  Gamepad2,
+  Sparkles,
+  Dumbbell,
+  Flame,
+  Sprout,
+  Sword,
+  Wand2,
+  Moon,
+  TrendingDown,
+  RefreshCw,
+  Scale,
+  TrendingUp,
+  Beef,
+  Zap,
+  CheckCircle2,
+  PartyPopper,
+  LucideIcon
+} from 'lucide-react'
+import {
   useUserStore,
   useWorkoutStore,
   useMacroStore,
@@ -230,9 +249,9 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', delay: 0.2 }}
-        className="text-8xl mb-6"
+        className="mb-6"
       >
-        🎮
+        <Gamepad2 size={80} className="mx-auto text-accent-primary" />
       </motion.div>
       <h1 className="text-3xl font-bold mb-2">Gamify Your Gains</h1>
       <p className="text-gray-400 mb-8">
@@ -240,15 +259,15 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       </p>
       <div className="space-y-3 text-left mb-8">
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-2xl">✨</span>
+          <Sparkles size={24} className="text-accent-secondary flex-shrink-0" />
           <span className="text-gray-300">Earn XP for workouts, hitting macros, and consistency</span>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-2xl">🦾</span>
+          <Dumbbell size={24} className="text-accent-primary flex-shrink-0" />
           <span className="text-gray-300">Watch your avatar evolve as you progress</span>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="text-2xl">🔥</span>
+          <Flame size={24} className="text-accent-warning flex-shrink-0" />
           <span className="text-gray-300">Build streaks and unlock achievements</span>
         </div>
       </div>
@@ -308,9 +327,9 @@ function GenderStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const options: { gender: Gender; label: string; emoji: string }[] = [
-    { gender: 'male', label: 'Male', emoji: '♂️' },
-    { gender: 'female', label: 'Female', emoji: '♀️' }
+  const options: { gender: Gender; label: string; icon: LucideIcon; color: string }[] = [
+    { gender: 'male', label: 'Male', icon: TrendingUp, color: 'text-blue-400' },
+    { gender: 'female', label: 'Female', icon: Sparkles, color: 'text-pink-400' }
   ]
 
   return (
@@ -319,19 +338,22 @@ function GenderStep({
       <p className="text-gray-400 mb-6">This helps us calculate your metabolism more accurately.</p>
 
       <div className="space-y-3 mb-6">
-        {options.map((opt) => (
-          <Card
-            key={opt.gender}
-            onClick={() => onChange(opt.gender)}
-            hover
-            className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-3xl">{opt.emoji}</span>
-              <p className="font-semibold text-lg">{opt.label}</p>
-            </div>
-          </Card>
-        ))}
+        {options.map((opt) => {
+          const Icon = opt.icon
+          return (
+            <Card
+              key={opt.gender}
+              onClick={() => onChange(opt.gender)}
+              hover
+              className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
+            >
+              <div className="flex items-center gap-4">
+                <Icon size={28} className={opt.color} />
+                <p className="font-semibold text-lg">{opt.label}</p>
+              </div>
+            </Card>
+          )
+        })}
       </div>
 
       <div className="flex gap-3">
@@ -357,10 +379,10 @@ function FitnessStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const options: { level: FitnessLevel; label: string; description: string; emoji: string }[] = [
-    { level: 'beginner', label: 'Beginner', description: 'New to lifting or returning after a break', emoji: '🌱' },
-    { level: 'intermediate', label: 'Intermediate', description: '1-3 years of consistent training', emoji: '💪' },
-    { level: 'advanced', label: 'Advanced', description: '3+ years, know your way around the gym', emoji: '🔥' }
+  const options: { level: FitnessLevel; label: string; description: string; icon: LucideIcon; color: string }[] = [
+    { level: 'beginner', label: 'Beginner', description: 'New to lifting or returning after a break', icon: Sprout, color: 'text-green-400' },
+    { level: 'intermediate', label: 'Intermediate', description: '1-3 years of consistent training', icon: Dumbbell, color: 'text-accent-primary' },
+    { level: 'advanced', label: 'Advanced', description: '3+ years, know your way around the gym', icon: Flame, color: 'text-accent-warning' }
   ]
 
   return (
@@ -369,22 +391,25 @@ function FitnessStep({
       <p className="text-gray-400 mb-6">This helps us tailor your experience.</p>
 
       <div className="space-y-3 mb-6">
-        {options.map((opt) => (
-          <Card
-            key={opt.level}
-            onClick={() => onChange(opt.level)}
-            hover
-            className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-3xl">{opt.emoji}</span>
-              <div>
-                <p className="font-semibold">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.description}</p>
+        {options.map((opt) => {
+          const Icon = opt.icon
+          return (
+            <Card
+              key={opt.level}
+              onClick={() => onChange(opt.level)}
+              hover
+              className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
+            >
+              <div className="flex items-center gap-4">
+                <Icon size={28} className={opt.color} />
+                <div>
+                  <p className="font-semibold">{opt.label}</p>
+                  <p className="text-sm text-gray-400">{opt.description}</p>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       <div className="flex gap-3">
@@ -477,11 +502,11 @@ function GoalStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const goals: { value: Goal; label: string; description: string; emoji: string }[] = [
-    { value: 'cut', label: 'Cut', description: 'Lose fat, maintain muscle', emoji: '🔥' },
-    { value: 'recomp', label: 'Recomp', description: 'Build muscle while losing fat', emoji: '🔄' },
-    { value: 'maintain', label: 'Maintain', description: 'Stay at current weight', emoji: '⚖️' },
-    { value: 'bulk', label: 'Bulk', description: 'Build muscle, gain weight', emoji: '📈' }
+  const goals: { value: Goal; label: string; description: string; icon: LucideIcon; color: string }[] = [
+    { value: 'cut', label: 'Cut', description: 'Lose fat, maintain muscle', icon: TrendingDown, color: 'text-red-400' },
+    { value: 'recomp', label: 'Recomp', description: 'Build muscle while losing fat', icon: RefreshCw, color: 'text-purple-400' },
+    { value: 'maintain', label: 'Maintain', description: 'Stay at current weight', icon: Scale, color: 'text-blue-400' },
+    { value: 'bulk', label: 'Bulk', description: 'Build muscle, gain weight', icon: TrendingUp, color: 'text-green-400' }
   ]
 
   // Convert height to feet and inches for display
@@ -553,22 +578,25 @@ function GoalStep({
       </div>
 
       <div className="space-y-3 mb-6">
-        {goals.map((opt) => (
-          <Card
-            key={opt.value}
-            onClick={() => onGoalChange(opt.value)}
-            hover
-            className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-3xl">{opt.emoji}</span>
-              <div>
-                <p className="font-semibold">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.description}</p>
+        {goals.map((opt) => {
+          const Icon = opt.icon
+          return (
+            <Card
+              key={opt.value}
+              onClick={() => onGoalChange(opt.value)}
+              hover
+              className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
+            >
+              <div className="flex items-center gap-4">
+                <Icon size={28} className={opt.color} />
+                <div>
+                  <p className="font-semibold">{opt.label}</p>
+                  <p className="text-sm text-gray-400">{opt.description}</p>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       <div className="flex gap-3">
@@ -594,10 +622,10 @@ function AvatarStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const options: { base: AvatarBase; label: string; emoji: string; description: string }[] = [
-    { base: 'warrior', label: 'Warrior', emoji: '⚔️', description: 'Strength and discipline' },
-    { base: 'mage', label: 'Mage', emoji: '🔮', description: 'Knowledge and power' },
-    { base: 'rogue', label: 'Rogue', emoji: '🌙', description: 'Speed and agility' }
+  const options: { base: AvatarBase; label: string; icon: LucideIcon; color: string; description: string }[] = [
+    { base: 'warrior', label: 'Warrior', icon: Sword, color: 'text-red-400', description: 'Strength and discipline' },
+    { base: 'mage', label: 'Mage', icon: Wand2, color: 'text-purple-400', description: 'Knowledge and power' },
+    { base: 'rogue', label: 'Rogue', icon: Moon, color: 'text-blue-400', description: 'Speed and agility' }
   ]
 
   return (
@@ -606,24 +634,27 @@ function AvatarStep({
       <p className="text-gray-400 mb-6">This character will evolve with your progress.</p>
 
       <div className="space-y-3 mb-6">
-        {options.map((opt) => (
-          <Card
-            key={opt.base}
-            onClick={() => onChange(opt.base)}
-            hover
-            className={`border-2 ${value === opt.base ? 'border-accent-primary' : 'border-transparent'}`}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center text-4xl">
-                {opt.emoji}
+        {options.map((opt) => {
+          const Icon = opt.icon
+          return (
+            <Card
+              key={opt.base}
+              onClick={() => onChange(opt.base)}
+              hover
+              className={`border-2 ${value === opt.base ? 'border-accent-primary' : 'border-transparent'}`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center">
+                  <Icon size={32} className={opt.color} />
+                </div>
+                <div>
+                  <p className="font-semibold text-lg">{opt.label}</p>
+                  <p className="text-sm text-gray-400">{opt.description}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-lg">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.description}</p>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       <div className="flex gap-3">
@@ -653,9 +684,9 @@ function TutorialStep({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', delay: 0.2 }}
-        className="text-6xl mb-4"
+        className="mb-4"
       >
-        🎉
+        <PartyPopper size={56} className="mx-auto text-accent-success" />
       </motion.div>
       <h2 className="text-2xl font-bold mb-2">You're all set, {username}!</h2>
       <p className="text-gray-400 mb-6">Here's how to earn XP:</p>
@@ -664,7 +695,7 @@ function TutorialStep({
         <Card>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xl">🏋️</span>
+              <Dumbbell size={20} className="text-accent-primary" />
               <span>Complete a workout</span>
             </div>
             <span className="text-accent-primary font-digital font-bold">+100 XP</span>
@@ -673,7 +704,7 @@ function TutorialStep({
         <Card>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xl">🥩</span>
+              <Beef size={20} className="text-accent-success" />
               <span>Hit protein target</span>
             </div>
             <span className="text-accent-primary font-digital font-bold">+50 XP</span>
@@ -682,7 +713,7 @@ function TutorialStep({
         <Card>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xl">🔥</span>
+              <Zap size={20} className="text-accent-warning" />
               <span>Hit calorie target</span>
             </div>
             <span className="text-accent-primary font-digital font-bold">+50 XP</span>
@@ -691,7 +722,7 @@ function TutorialStep({
         <Card>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <span className="text-xl">✅</span>
+              <CheckCircle2 size={20} className="text-accent-secondary" />
               <span>Daily check-in</span>
             </div>
             <span className="text-accent-primary font-digital font-bold">+25 XP</span>
@@ -729,10 +760,10 @@ function EvolutionStep({
   const oldStage = EVOLUTION_STAGES[0] // Egg
   const newStage = EVOLUTION_STAGES[1] // Hatchling
 
-  const avatarEmojis: Record<AvatarBase, string> = {
-    warrior: '⚔️',
-    mage: '🔮',
-    rogue: '🌙'
+  const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
+    warrior: { icon: Sword, color: 'text-red-400' },
+    mage: { icon: Wand2, color: 'text-purple-400' },
+    rogue: { icon: Moon, color: 'text-blue-400' }
   }
 
   // Trigger the evolution animation after a delay
@@ -843,7 +874,7 @@ function EvolutionStep({
             {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute text-2xl"
+                className="absolute"
                 initial={{
                   opacity: 0,
                   scale: 0,
@@ -862,7 +893,7 @@ function EvolutionStep({
                   ease: 'easeOut'
                 }}
               >
-                ✨
+                <Sparkles size={20} className="text-accent-secondary" />
               </motion.div>
             ))}
           </>
@@ -893,7 +924,12 @@ function EvolutionStep({
               <p className="text-xs text-gray-500 uppercase">Level</p>
               <p className="text-2xl font-bold font-digital text-accent-primary">1</p>
             </div>
-            <div className="text-3xl ml-2">{avatarEmojis[avatarBase]}</div>
+            <div className="ml-2">
+              {(() => {
+                const AvatarIcon = avatarIcons[avatarBase].icon
+                return <AvatarIcon size={28} className={avatarIcons[avatarBase].color} />
+              })()}
+            </div>
           </div>
         </Card>
       </motion.div>

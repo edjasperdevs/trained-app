@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button, Card } from '@/components'
 import { useAccessStore } from '@/stores/accessStore'
+import { Dumbbell, Zap, BookOpen, KeyRound, MessageCircle, PartyPopper, Check } from 'lucide-react'
 
 interface AccessGateProps {
   onAccessGranted: () => void
@@ -67,9 +68,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
             scale: [1, 1.05, 1],
           }}
           transition={{ repeat: Infinity, duration: 3 }}
-          className="text-7xl mb-4"
+          className="mb-4"
         >
-          💪
+          <Dumbbell size={72} className="mx-auto text-accent-primary" />
         </motion.div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent">
           Gamify Your Gains
@@ -131,7 +132,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   >
-                    ⚡
+                    <Zap size={18} />
                   </motion.span>
                   Validating...
                 </span>
@@ -158,7 +159,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
               >
                 <div className="bg-bg-card rounded-lg p-4">
                   <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <span>📚</span> Get the Ebook
+                    <BookOpen size={18} className="text-accent-primary" /> Get the Ebook
                   </h3>
                   <p className="text-sm text-gray-400 mb-3">
                     Purchase the Gamify Your Gains ebook to receive your access code.
@@ -175,7 +176,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
 
                 <div className="bg-bg-card rounded-lg p-4">
                   <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <span>🔑</span> Already Purchased?
+                    <KeyRound size={18} className="text-accent-secondary" /> Already Purchased?
                   </h3>
                   <p className="text-sm text-gray-400">
                     Your license key was included in your purchase confirmation email.
@@ -185,7 +186,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
 
                 <div className="bg-bg-card rounded-lg p-4">
                   <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <span>💬</span> Need Help?
+                    <MessageCircle size={18} className="text-accent-warning" /> Need Help?
                   </h3>
                   <p className="text-sm text-gray-400">
                     Contact support if you can't find your code or are having issues.
@@ -232,9 +233,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ duration: 0.5, times: [0, 0.6, 1] }}
-                className="text-7xl mb-4"
+                className="mb-4"
               >
-                🎉
+                <PartyPopper size={72} className="mx-auto text-accent-success" />
               </motion.div>
 
               <motion.h2
@@ -265,14 +266,14 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 transition={{ delay: 0.4 }}
                 className="space-y-3"
               >
-                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
-                  <span className="text-accent-primary">✓</span> Full app access unlocked
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400 flex items-center gap-2">
+                  <Check size={16} className="text-accent-primary" /> Full app access unlocked
                 </div>
-                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
-                  <span className="text-accent-primary">✓</span> Progress syncs to cloud
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400 flex items-center gap-2">
+                  <Check size={16} className="text-accent-primary" /> Progress syncs to cloud
                 </div>
-                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400">
-                  <span className="text-accent-primary">✓</span> All gamification features enabled
+                <div className="bg-bg-card rounded-lg p-3 text-sm text-gray-400 flex items-center gap-2">
+                  <Check size={16} className="text-accent-primary" /> All gamification features enabled
                 </div>
               </motion.div>
 
@@ -287,7 +288,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   fullWidth
                   size="lg"
                 >
-                  Let's Go! 💪
+                  <span className="flex items-center gap-2">
+                    Let's Go! <Dumbbell size={18} />
+                  </span>
                 </Button>
               </motion.div>
             </Card>
