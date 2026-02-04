@@ -1,15 +1,18 @@
 import { ReactElement } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
+import { ThemeProvider } from '../themes'
 
-// Custom render that includes providers
+// Custom render that includes all required providers
 function customRender(
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
 ) {
   return render(ui, {
     wrapper: ({ children }) => (
-      <BrowserRouter>{children}</BrowserRouter>
+      <ThemeProvider defaultTheme="trained">
+        <BrowserRouter>{children}</BrowserRouter>
+      </ThemeProvider>
     ),
     ...options
   })

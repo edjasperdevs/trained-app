@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { getLocalDateString, getLocalWeekString, isLocalSunday, getDaysSince } from '../lib/dateUtils'
 
 export interface WeeklyHistory {
   weekOf: string
@@ -140,7 +141,7 @@ export const useXPStore = create<XPStore>()(
       },
 
       logDailyXP: (data) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
 
         const total = calculateDailyTotal(data)
@@ -174,10 +175,9 @@ export const useXPStore = create<XPStore>()(
         const newLevel = calculateLevelFromXP(newTotalXP)
         const leveledUp = newLevel > oldLevel
 
-        const today = new Date().toISOString().split('T')[0]
-        const weekStart = new Date()
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-        const weekOf = weekStart.toISOString().split('T')[0]
+        // Use local timezone for date tracking
+        const today = getLocalDateString()
+        const weekOf = getLocalWeekString()
 
         set((state) => ({
           totalXP: newTotalXP,
@@ -216,7 +216,7 @@ export const useXPStore = create<XPStore>()(
       },
 
       getTodayLog: () => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         return get().dailyLogs.find(log => log.date === today) || null
       },
 
@@ -229,19 +229,15 @@ export const useXPStore = create<XPStore>()(
       },
 
       canClaimXP: () => {
-        const today = new Date()
-        const isSunday = today.getDay() === 0
+        // Use local timezone for Sunday check and day calculations
+        if (!isLocalSunday()) return false
+
         const state = get()
         const lastClaim = state.lastClaimDate
 
-        if (!isSunday) return false
         if (!lastClaim) return state.pendingXP > 0
 
-        const lastClaimDate = new Date(lastClaim)
-        const daysSinceLastClaim = Math.floor(
-          (today.getTime() - lastClaimDate.getTime()) / (1000 * 60 * 60 * 24)
-        )
-
+        const daysSinceLastClaim = getDaysSince(lastClaim)
         return daysSinceLastClaim >= 7 && state.pendingXP > 0
       },
 

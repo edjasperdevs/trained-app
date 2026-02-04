@@ -29,22 +29,26 @@ describe('Card', () => {
     expect(handleClick).toHaveBeenCalledTimes(1)
   })
 
-  it('should apply default glass variant', () => {
+  it('should apply default variant styles', () => {
     render(<Card>Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    expect(card?.className).toContain('glass')
+    // Trained theme uses bg-surface for default variant
+    expect(card?.className).toContain('bg-surface')
+    expect(card?.className).toContain('border')
   })
 
   it('should apply elevated variant', () => {
     render(<Card variant="elevated">Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    expect(card?.className).toContain('glass-elevated')
+    // Trained theme uses bg-surface-elevated
+    expect(card?.className).toContain('bg-surface-elevated')
   })
 
   it('should apply subtle variant', () => {
     render(<Card variant="subtle">Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    expect(card?.className).toContain('glass-subtle')
+    // Trained theme uses bg-surface/50
+    expect(card?.className).toContain('bg-surface/50')
   })
 
   it('should apply medium padding by default', () => {

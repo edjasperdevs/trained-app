@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { getLocalDateString, getLocalDaysDifference } from '../lib/dateUtils'
 
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 export type TrainingDays = 3 | 4 | 5
@@ -120,15 +121,14 @@ export const useUserStore = create<UserStore>()(
         const profile = get().profile
         if (!profile) return
 
-        const today = new Date().toISOString().split('T')[0]
+        // Use local timezone for all date comparisons
+        const today = getLocalDateString()
         const lastCheckIn = profile.lastCheckInDate
 
         if (!didCheckIn) {
           // User missed today - check if we need to pause or reset streak
           if (lastCheckIn) {
-            const lastDate = new Date(lastCheckIn)
-            const todayDate = new Date(today)
-            const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
+            const diffDays = getLocalDaysDifference(lastCheckIn, today)
 
             if (diffDays >= 2) {
               // Two consecutive misses - reset streak
@@ -161,9 +161,7 @@ export const useUserStore = create<UserStore>()(
         }
 
         if (lastCheckIn) {
-          const lastDate = new Date(lastCheckIn)
-          const todayDate = new Date(today)
-          const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
+          const diffDays = getLocalDaysDifference(lastCheckIn, today)
 
           if (diffDays === 1 || (diffDays === 2 && profile.streakPaused)) {
             // Consecutive day or recovering from paused streak
@@ -193,7 +191,7 @@ export const useUserStore = create<UserStore>()(
       },
 
       logWeight: (weight: number) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingIndex = get().weightHistory.findIndex(e => e.date === today)
 
         if (existingIndex >= 0) {
@@ -217,7 +215,7 @@ export const useUserStore = create<UserStore>()(
       },
 
       getTodayWeight: () => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         return get().weightHistory.find(e => e.date === today) || null
       },
 
@@ -225,7 +223,7 @@ export const useUserStore = create<UserStore>()(
         const history = get().weightHistory
         const cutoffDate = new Date()
         cutoffDate.setDate(cutoffDate.getDate() - days)
-        const cutoffStr = cutoffDate.toISOString().split('T')[0]
+        const cutoffStr = getLocalDateString(cutoffDate)
 
         return history
           .filter(e => e.date >= cutoffStr)

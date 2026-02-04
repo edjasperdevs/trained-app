@@ -21,51 +21,55 @@ describe('ProgressBar', () => {
 
   it('should cap percentage at 100%', () => {
     const { container } = render(<ProgressBar progress={150} maxProgress={100} />)
-    // The bar should not exceed 100% width
-    const progressFill = container.querySelector('.progress-gradient, .bg-accent-primary, .bg-accent-secondary, .bg-accent-success')
-    // Verify it exists - the actual width is controlled by framer-motion animation
+    // The bar should exist with theme-aware colors
+    const progressFill = container.querySelector('.bg-xp-bar, .bg-secondary, .bg-success')
     expect(progressFill).toBeInTheDocument()
   })
 
-  it('should apply gradient color by default', () => {
+  it('should apply primary color by default', () => {
     const { container } = render(<ProgressBar progress={50} />)
-    const progressFill = container.querySelector('.progress-gradient')
+    // Default color is 'primary' which maps to bg-xp-bar
+    const progressFill = container.querySelector('.bg-xp-bar')
     expect(progressFill).toBeInTheDocument()
   })
 
   it('should apply gold color', () => {
     const { container } = render(<ProgressBar progress={50} color="gold" />)
-    const progressFill = container.querySelector('.bg-accent-primary')
+    // Gold maps to bg-xp-bar
+    const progressFill = container.querySelector('.bg-xp-bar')
     expect(progressFill).toBeInTheDocument()
   })
 
   it('should apply green color', () => {
     const { container } = render(<ProgressBar progress={50} color="green" />)
-    const progressFill = container.querySelector('.bg-accent-secondary')
+    // Green maps to bg-secondary
+    const progressFill = container.querySelector('.bg-secondary')
     expect(progressFill).toBeInTheDocument()
   })
 
   it('should apply success color', () => {
     const { container } = render(<ProgressBar progress={50} color="success" />)
-    const progressFill = container.querySelector('.bg-accent-success')
+    // Success uses bg-success
+    const progressFill = container.querySelector('.bg-success')
     expect(progressFill).toBeInTheDocument()
   })
 
   it('should apply medium size by default', () => {
     const { container } = render(<ProgressBar progress={50} />)
-    const track = container.querySelector('.bg-white\\/5')
+    // Track uses bg-xp-bar-bg
+    const track = container.querySelector('.bg-xp-bar-bg')
     expect(track?.className).toContain('h-2')
   })
 
   it('should apply small size', () => {
     const { container } = render(<ProgressBar progress={50} size="sm" />)
-    const track = container.querySelector('.bg-white\\/5')
-    expect(track?.className).toContain('h-1.5')
+    const track = container.querySelector('.bg-xp-bar-bg')
+    expect(track?.className).toContain('h-1')
   })
 
   it('should apply large size', () => {
     const { container } = render(<ProgressBar progress={50} size="lg" />)
-    const track = container.querySelector('.bg-white\\/5')
+    const track = container.querySelector('.bg-xp-bar-bg')
     expect(track?.className).toContain('h-3')
   })
 

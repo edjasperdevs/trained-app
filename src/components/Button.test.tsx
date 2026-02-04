@@ -29,25 +29,29 @@ describe('Button', () => {
   it('should apply primary variant styles by default', () => {
     render(<Button>Primary</Button>)
     const button = screen.getByRole('button')
-    expect(button.className).toContain('bg-accent-primary')
+    // Trained theme uses bg-primary for primary variant
+    expect(button.className).toContain('bg-primary')
   })
 
   it('should apply secondary variant styles', () => {
     render(<Button variant="secondary">Secondary</Button>)
     const button = screen.getByRole('button')
-    expect(button.className).toContain('bg-accent-secondary')
+    // Trained theme uses border for secondary
+    expect(button.className).toContain('border')
   })
 
   it('should apply ghost variant styles', () => {
     render(<Button variant="ghost">Ghost</Button>)
     const button = screen.getByRole('button')
-    expect(button.className).toContain('glass')
+    // Trained theme uses bg-surface for ghost
+    expect(button.className).toContain('bg-surface')
   })
 
   it('should apply danger variant styles', () => {
     render(<Button variant="danger">Danger</Button>)
     const button = screen.getByRole('button')
-    expect(button.className).toContain('bg-accent-danger')
+    // Theme uses bg-error for danger
+    expect(button.className).toContain('bg-error')
   })
 
   it('should apply small size styles', () => {
@@ -59,7 +63,8 @@ describe('Button', () => {
   it('should apply large size styles', () => {
     render(<Button size="lg">Large</Button>)
     const button = screen.getByRole('button')
-    expect(button.className).toContain('text-lg')
+    // Trained theme uses text-base for large, not text-lg
+    expect(button.className).toContain('py-3')
   })
 
   it('should apply full width class when fullWidth is true', () => {

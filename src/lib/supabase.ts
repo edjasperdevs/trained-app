@@ -12,7 +12,7 @@ export type TypedSupabaseClient = SupabaseClient<Database>
 
 // Create client only if configured (allows app to work without backend)
 const _supabase: TypedSupabaseClient | null = isSupabaseConfigured
-  ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  ? createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,

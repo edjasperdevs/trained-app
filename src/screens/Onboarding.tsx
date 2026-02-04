@@ -26,11 +26,8 @@ import {
   Trophy,
   Star,
   Crown,
-  Calendar,
   Home,
-  Target,
-  TrendingUp as ChartUp,
-  Check
+  TrendingUp as ChartUp
 } from 'lucide-react'
 
 // Map icon names to Lucide components for evolution stages
@@ -1083,7 +1080,7 @@ function FeaturesStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { theme, themeId } = useTheme()
+  const { themeId } = useTheme()
   const isTrained = themeId === 'trained'
 
   const trainedFeatures = [
