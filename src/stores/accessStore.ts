@@ -166,10 +166,27 @@ export const useAccessStore = create<AccessState>()(
         } catch (err) {
           console.error('License validation error:', err)
 
-          // Network error - allow offline access if previously validated
+          // Network error - allow offline access ONLY if:
+          // 1. The EXACT same key was previously validated (not just attempted)
+          // 2. User already has access granted
+          // 3. Access was granted within the last 30 days (security measure)
           const currentState = get()
-          if (currentState.licenseKey === trimmedCode && currentState.hasAccess) {
-            return { success: true }
+          if (currentState.hasAccess &&
+              currentState.licenseKey === trimmedCode &&
+              currentState.accessGrantedAt) {
+            const accessDate = new Date(currentState.accessGrantedAt)
+            const thirtyDaysAgo = new Date()
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+            if (accessDate > thirtyDaysAgo) {
+              // Valid offline access - same key, recently validated
+              return { success: true }
+            }
+            // Access too old - require online revalidation
+            return {
+              success: false,
+              error: 'License needs to be revalidated. Please check your internet connection.'
+            }
           }
 
           return {

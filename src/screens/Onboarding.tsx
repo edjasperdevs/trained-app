@@ -847,6 +847,47 @@ function GoalStep({
     bulk: 'Maximize muscle growth with a caloric surplus. Best for those who are already lean and want to add size. Expect strength gains but some fat accumulation is normal.'
   }
 
+  // Validation ranges
+  const VALIDATION = {
+    weight: { min: 70, max: 500, unit: 'lbs' },  // Reasonable range for adults
+    height: { min: 48, max: 96 },                 // 4'0" to 8'0" in inches
+    age: { min: 13, max: 100 }
+  }
+
+  // Validate inputs and generate error messages
+  const getValidationErrors = () => {
+    const errors: string[] = []
+
+    if (weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) {
+      errors.push(`Weight must be between ${VALIDATION.weight.min}-${VALIDATION.weight.max} ${VALIDATION.weight.unit}`)
+    }
+    if (height < VALIDATION.height.min || height > VALIDATION.height.max) {
+      errors.push(`Height must be between 4'0" and 8'0"`)
+    }
+    if (age < VALIDATION.age.min || age > VALIDATION.age.max) {
+      errors.push(`Age must be between ${VALIDATION.age.min}-${VALIDATION.age.max}`)
+    }
+
+    return errors
+  }
+
+  const validationErrors = getValidationErrors()
+  const isValid = validationErrors.length === 0 && weight > 0 && height > 0 && age > 0
+
+  // Handle input changes with clamping to reasonable ranges
+  const handleWeightChange = (value: number) => {
+    // Allow any input but validation will catch issues
+    onWeightChange(Math.max(0, value))
+  }
+
+  const handleHeightChange = (newHeight: number) => {
+    onHeightChange(Math.max(0, newHeight))
+  }
+
+  const handleAgeChange = (value: number) => {
+    onAgeChange(Math.max(0, value))
+  }
+
   // Convert height to feet and inches for display
   const feet = Math.floor(height / 12)
   const inches = height % 12
@@ -854,6 +895,8 @@ function GoalStep({
   const inputClass = isTrained
     ? 'w-full bg-bg-secondary border border-gray-700 rounded px-4 py-3 text-white font-digital text-xl'
     : 'w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-white font-digital text-xl'
+
+  const inputErrorClass = 'border-red-500'
 
   return (
     <div>
@@ -877,10 +920,10 @@ function GoalStep({
               <input
                 type="number"
                 value={feet}
-                onChange={(e) => onHeightChange(Number(e.target.value) * 12 + inches)}
-                className={`${inputClass} pr-12`}
+                onChange={(e) => handleHeightChange(Number(e.target.value) * 12 + inches)}
+                className={`${inputClass} pr-12 ${(height < VALIDATION.height.min || height > VALIDATION.height.max) ? inputErrorClass : ''}`}
                 min={4}
-                max={7}
+                max={8}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">ft</span>
             </div>
@@ -890,8 +933,8 @@ function GoalStep({
               <input
                 type="number"
                 value={inches}
-                onChange={(e) => onHeightChange(feet * 12 + Number(e.target.value))}
-                className={`${inputClass} pr-12`}
+                onChange={(e) => handleHeightChange(feet * 12 + Number(e.target.value))}
+                className={`${inputClass} pr-12 ${(height < VALIDATION.height.min || height > VALIDATION.height.max) ? inputErrorClass : ''}`}
                 min={0}
                 max={11}
               />
@@ -902,7 +945,7 @@ function GoalStep({
       </div>
 
       {/* Weight and Age side by side */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-4">
         <div className="flex-1">
           <label className={`block text-sm text-gray-400 mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
             Weight (lbs)
@@ -910,10 +953,10 @@ function GoalStep({
           <input
             type="number"
             value={weight}
-            onChange={(e) => onWeightChange(Number(e.target.value))}
-            className={inputClass}
-            min={80}
-            max={400}
+            onChange={(e) => handleWeightChange(Number(e.target.value))}
+            className={`${inputClass} ${(weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) ? inputErrorClass : ''}`}
+            min={VALIDATION.weight.min}
+            max={VALIDATION.weight.max}
           />
         </div>
         <div className="flex-1">
@@ -923,13 +966,22 @@ function GoalStep({
           <input
             type="number"
             value={age}
-            onChange={(e) => onAgeChange(Number(e.target.value))}
-            className={inputClass}
-            min={16}
-            max={80}
+            onChange={(e) => handleAgeChange(Number(e.target.value))}
+            className={`${inputClass} ${(age < VALIDATION.age.min || age > VALIDATION.age.max) ? inputErrorClass : ''}`}
+            min={VALIDATION.age.min}
+            max={VALIDATION.age.max}
           />
         </div>
       </div>
+
+      {/* Validation errors */}
+      {validationErrors.length > 0 && (
+        <div className={`p-3 mb-4 bg-red-500/10 border border-red-500/30 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+          {validationErrors.map((error, index) => (
+            <p key={index} className="text-sm text-red-400">{error}</p>
+          ))}
+        </div>
+      )}
 
       {isTrained && (
         <h3 className="text-lg font-bold mb-4 font-heading uppercase tracking-wide">
@@ -988,7 +1040,7 @@ function GoalStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth disabled={!weight || !height || !age}>
+        <Button onClick={onNext} fullWidth disabled={!isValid}>
           Continue
         </Button>
       </div>
