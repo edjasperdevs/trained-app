@@ -4,6 +4,13 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { syncAllToCloud, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
 
+type AuthErrorCode = 'email_not_confirmed' | 'invalid_credentials' | 'not_configured' | 'unknown' | null
+
+interface AuthResult {
+  error: string | null
+  code?: AuthErrorCode
+}
+
 interface AuthStore {
   user: User | null
   session: Session | null
@@ -13,10 +20,10 @@ interface AuthStore {
 
   // Actions
   initialize: () => Promise<void>
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  signUp: (email: string, password: string) => Promise<AuthResult>
+  signIn: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<{ error: string | null }>
+  resetPassword: (email: string) => Promise<AuthResult>
   syncData: () => Promise<void>
 }
 
@@ -84,7 +91,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   signIn: async (email: string, password: string) => {
     if (!supabase) {
-      return { error: 'Backend not configured' }
+      return { error: 'Backend not configured', code: 'not_configured' }
     }
 
     try {
@@ -94,7 +101,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       if (error) {
-        return { error: error.message }
+        // Supabase error codes for better UX
+        // 'email_not_confirmed' - user hasn't confirmed email
+        // 'invalid_credentials' - wrong email/password
+        const errorCode = error.message.toLowerCase().includes('email not confirmed')
+          ? 'email_not_confirmed'
+          : error.message.toLowerCase().includes('invalid login credentials')
+          ? 'invalid_credentials'
+          : 'unknown'
+
+        return { error: error.message, code: errorCode }
       }
 
       set({ user: data.user, session: data.session })
@@ -104,7 +120,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       return { error: null }
     } catch (error) {
-      return { error: 'An unexpected error occurred' }
+      return { error: 'An unexpected error occurred', code: 'unknown' }
     }
   },
 

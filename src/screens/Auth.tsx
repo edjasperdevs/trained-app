@@ -55,19 +55,19 @@ export function Auth() {
           setMode('login')
         }
       } else if (mode === 'login') {
-        const { error } = await signIn(email, password)
+        const { error, code } = await signIn(email, password)
         if (error) {
-          // Provide more user-friendly error messages
-          if (error.includes('Invalid login credentials')) {
-            // This error can mean either wrong password OR unconfirmed email
+          // Use error code for clearer messaging
+          if (code === 'email_not_confirmed') {
+            setNeedsEmailConfirmation(true)
+            setError('Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.')
+          } else if (code === 'invalid_credentials') {
+            // Could be wrong password OR unconfirmed email (Supabase combines these)
             if (needsEmailConfirmation) {
               setError('Please confirm your email first. Check your inbox (and spam folder) for the confirmation link.')
             } else {
-              setError('Invalid email or password. If you just signed up, please confirm your email first.')
+              setError('Invalid email or password. If you recently signed up, please confirm your email first.')
             }
-          } else if (error.includes('Email not confirmed')) {
-            setNeedsEmailConfirmation(true)
-            setError('Please confirm your email before signing in. Check your inbox (and spam folder) for the confirmation link.')
           } else {
             setError(error)
           }

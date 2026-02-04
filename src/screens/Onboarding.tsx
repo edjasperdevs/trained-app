@@ -55,6 +55,13 @@ import { useTheme } from '@/themes'
 
 type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'avatar' | 'features' | 'tutorial' | 'evolution'
 
+const ONBOARDING_STORAGE_KEY = 'onboarding-progress'
+
+interface OnboardingProgress {
+  step: Step
+  data: OnboardingData
+}
+
 interface OnboardingData {
   username: string
   gender: Gender
@@ -98,6 +105,52 @@ const slideVariants = {
   })
 }
 
+// Load saved progress from localStorage
+const loadSavedProgress = (): OnboardingProgress | null => {
+  try {
+    const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null
+}
+
+// Save progress to localStorage
+const saveProgress = (step: Step, data: OnboardingData) => {
+  try {
+    const progress: OnboardingProgress = { step, data }
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(progress))
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+// Clear saved progress
+const clearProgress = () => {
+  try {
+    localStorage.removeItem(ONBOARDING_STORAGE_KEY)
+  } catch {
+    // Ignore errors
+  }
+}
+
+const defaultOnboardingData: OnboardingData = {
+  username: '',
+  gender: 'male',
+  fitnessLevel: 'beginner',
+  trainingDaysPerWeek: 3,
+  selectedDays: [1, 3, 5], // Mon, Wed, Fri default
+  weight: 150,
+  height: 68, // 5'8"
+  age: 25,
+  goal: 'maintain',
+  avatarBase: 'warrior',
+  units: 'imperial'
+}
+
 export function Onboarding() {
   const navigate = useNavigate()
   const { initProfile, completeOnboarding } = useUserStore()
@@ -106,24 +159,22 @@ export function Onboarding() {
   const { setBaseCharacter, updateEvolutionStage } = useAvatarStore()
   const { completeOnboarding: completeXPOnboarding } = useXPStore()
 
-  const [step, setStep] = useState<Step>('welcome')
+  // Load saved progress on mount
+  const savedProgress = loadSavedProgress()
+
+  const [step, setStep] = useState<Step>(savedProgress?.step || 'welcome')
   const [direction, setDirection] = useState(1)
-  const [data, setData] = useState<OnboardingData>({
-    username: '',
-    gender: 'male',
-    fitnessLevel: 'beginner',
-    trainingDaysPerWeek: 3,
-    selectedDays: [1, 3, 5], // Mon, Wed, Fri default
-    weight: 150,
-    height: 68, // 5'8"
-    age: 25,
-    goal: 'maintain',
-    avatarBase: 'warrior',
-    units: 'imperial'
-  })
+  const [data, setData] = useState<OnboardingData>(savedProgress?.data || defaultOnboardingData)
 
   const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'avatar', 'features', 'tutorial']
   const currentIndex = steps.indexOf(step)
+
+  // Save progress whenever step or data changes (except for evolution step)
+  useEffect(() => {
+    if (step !== 'evolution') {
+      saveProgress(step, data)
+    }
+  }, [step, data])
 
   const goNext = () => {
     if (currentIndex < steps.length - 1) {
@@ -140,6 +191,9 @@ export function Onboarding() {
   }
 
   const finishOnboarding = () => {
+    // Clear saved onboarding progress since we're completing
+    clearProgress()
+
     // Initialize all stores with the data
     initProfile(data)
     setPlan(data.trainingDaysPerWeek, data.selectedDays)

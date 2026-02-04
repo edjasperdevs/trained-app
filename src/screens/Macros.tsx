@@ -454,10 +454,15 @@ function CalculatorView({
   const [gender, setGender] = useState<Gender>(currentGender)
   const [goal, setGoal] = useState(currentGoal)
   const [activity, setActivity] = useState(currentActivity)
+  const [isCalculating, setIsCalculating] = useState(false)
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
+    setIsCalculating(true)
+    // Small delay for visual feedback even though calculation is synchronous
+    await new Promise(resolve => setTimeout(resolve, 300))
     const totalHeightInches = Number(heightFeet) * 12 + Number(heightInches)
     onCalculate(Number(weight), totalHeightInches, Number(age), gender, goal, activity)
+    setIsCalculating(false)
   }
 
   const activityLevels: { value: 'sedentary' | 'light' | 'moderate' | 'active'; label: string; description: string }[] = [
@@ -622,8 +627,8 @@ function CalculatorView({
         </div>
       </Card>
 
-      <Button onClick={handleCalculate} fullWidth size="lg">
-        Calculate Macros
+      <Button onClick={handleCalculate} fullWidth size="lg" disabled={isCalculating}>
+        {isCalculating ? 'Calculating...' : 'Calculate Macros'}
       </Button>
 
       {/* Current Targets Display */}

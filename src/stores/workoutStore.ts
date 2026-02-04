@@ -458,6 +458,23 @@ export const useWorkoutStore = create<WorkoutStore>()(
       },
 
       logSet: (workoutId, exerciseId, setIndex, data) => {
+        // Validate set data to prevent corrupted workout history
+        const validatedData: Partial<ExerciseSet> = { ...data }
+
+        // Reps must be positive (or 0 for uncompleted sets)
+        if (validatedData.reps !== undefined) {
+          validatedData.reps = Math.max(0, Math.round(validatedData.reps))
+          // Cap at reasonable maximum (1000 reps)
+          validatedData.reps = Math.min(validatedData.reps, 1000)
+        }
+
+        // Weight must be non-negative (0 for bodyweight exercises)
+        if (validatedData.weight !== undefined) {
+          validatedData.weight = Math.max(0, validatedData.weight)
+          // Cap at reasonable maximum (2000 lbs)
+          validatedData.weight = Math.min(validatedData.weight, 2000)
+        }
+
         set((state) => ({
           workoutLogs: state.workoutLogs.map(workout =>
             workout.id === workoutId
@@ -468,7 +485,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
                       ? {
                           ...ex,
                           sets: ex.sets.map((s, i) =>
-                            i === setIndex ? { ...s, ...data } : s
+                            i === setIndex ? { ...s, ...validatedData } : s
                           )
                         }
                       : ex

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
-import { Navigation, ToastContainer } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary } from '@/components'
 import { ThemeProvider } from '@/themes'
 import {
   Onboarding,
@@ -126,9 +126,11 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 
