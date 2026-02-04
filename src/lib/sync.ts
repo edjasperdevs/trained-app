@@ -93,9 +93,11 @@ export async function syncProfileToCloud() {
   const profile = useUserStore.getState().profile
   if (!profile) return { error: 'No local profile' }
 
+  // Use upsert to handle both new users and existing users (BUG-012 fix)
   const { error } = await client
     .from('profiles')
-    .update({
+    .upsert({
+      id: user.id,  // Include ID for upsert to work
       username: profile.username,
       gender: profile.gender,
       fitness_level: profile.fitnessLevel,
@@ -110,8 +112,13 @@ export async function syncProfileToCloud() {
       last_check_in_date: profile.lastCheckInDate,
       streak_paused: profile.streakPaused,
       onboarding_complete: profile.onboardingComplete
+    }, {
+      onConflict: 'id'
     })
-    .eq('id', user.id)
+
+  if (error) {
+    console.error('[Sync] Profile sync failed:', error.message)
+  }
 
   return { error: error?.message || null }
 }
