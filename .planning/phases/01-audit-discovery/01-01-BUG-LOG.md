@@ -478,7 +478,7 @@ Single failure = permanent sync failure until manual trigger
 **Severity:** Medium
 **Priority:** P3
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - Files: All stores with importData()
@@ -541,7 +541,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-017 | Check-in animation performance | Low | P3 | 3 | FIXED |
 | BUG-018 | Timezone handling inconsistent | High | P2 | 2 | FIXED |
 | BUG-019 | No retry logic for cloud API | Medium | P2 | 4 | FIXED |
-| BUG-020 | Import data not validated | Medium | P3 | 4 | Open |
+| BUG-020 | Import data not validated | Medium | P3 | 4 | FIXED |
 | BUG-021 | Unit tests fail (ThemeProvider) | Medium | P2 | 2 | FIXED |
 
 ---
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 17 |
-| Remaining | 4 |
+| Fixed | 18 |
+| Remaining | 3 |
 
 ---
 
