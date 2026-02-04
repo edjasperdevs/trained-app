@@ -37,7 +37,40 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Runtime caching for food search APIs (BUG-015 fix)
+        runtimeCaching: [
+          {
+            // Cache USDA food search results
+            urlPattern: /^https:\/\/api\.nal\.usda\.gov\/fdc\/v1\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'usda-food-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache Open Food Facts search results
+            urlPattern: /^https:\/\/world\.openfoodfacts\.org\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'openfoodfacts-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
       }
     })
   ],
