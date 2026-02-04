@@ -134,19 +134,15 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     // Track analytics
     analytics.checkInCompleted((profile?.currentStreak || 0) + 1)
 
-    // Animate
+    // Animate - set all animations at once to avoid multiple state updates
+    // Framer-motion handles the stagger via transition.delay
     setSubmitted(true)
     setEarnedXP(totalXP)
-
-    // Stagger the XP animations
-    animations.forEach((anim, index) => {
-      setTimeout(() => {
-        setXpAnimations(prev => [...prev, anim])
-      }, index * 300)
-    })
+    setXpAnimations(animations)
 
     // Check for new badges after animations complete
-    const badgeCheckDelay = animations.length * 300 + 1000
+    // Use reduced delay since framer-motion stagger (0.15s) is faster than our old JS stagger (0.3s)
+    const badgeCheckDelay = animations.length * 150 + 800
     setTimeout(() => {
       const newBadges = checkAndAwardBadges()
       if (newBadges.length > 0) {

@@ -137,7 +137,7 @@ Generic "Invalid email or password" message
 **Severity:** High
 **Priority:** P2
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/stores/macroStore.ts` (lines 132-162)
@@ -526,7 +526,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-002 | Access code security flaw | Critical | P1 | 4 | FIXED |
 | BUG-003 | Streak timezone off-by-one | Critical | P1 | 2 | FIXED |
 | BUG-004 | Auth error messages unclear | High | P1 | 4 | FIXED |
-| BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | Open |
+| BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | FIXED |
 | BUG-006 | XP claim timezone bug | High | P1 | 4 | FIXED |
 | BUG-007 | No workout set validation | High | P2 | 2 | FIXED |
 | BUG-008 | No localStorage schema validation | High | P2 | 4 | Open |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 12 |
-| Remaining | 9 |
+| Fixed | 13 |
+| Remaining | 8 |
 
 ---
 
