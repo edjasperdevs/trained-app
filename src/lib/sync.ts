@@ -76,6 +76,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useXPStore } from '@/stores/xpStore'
+import { useAvatarStore } from '@/stores/avatarStore'
 import type { Json } from './database.types'
 
 // ==========================================
@@ -380,6 +381,74 @@ export async function syncXPToCloud() {
 }
 
 // ==========================================
+// Avatar Sync (BUG-016 fix)
+// ==========================================
+
+export async function syncAvatarToCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const avatarState = useAvatarStore.getState()
+
+  const { error } = await client
+    .from('user_avatar')
+    .upsert({
+      user_id: user.id,
+      base_character: avatarState.baseCharacter,
+      evolution_stage: avatarState.evolutionStage,
+      current_mood: avatarState.currentMood,
+      accessories: avatarState.accessories,
+      last_interaction: new Date(avatarState.lastInteraction).toISOString()
+    }, {
+      onConflict: 'user_id'
+    })
+
+  return { error: error?.message || null }
+}
+
+export async function loadAvatarFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data, error } = await client
+    .from('user_avatar')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  if (error) {
+    // No avatar record exists yet - this is OK for new users
+    if (error.code === 'PGRST116') {
+      return { error: null }
+    }
+    return { error: error.message }
+  }
+
+  if (data) {
+    // Only update local state if cloud data has higher evolution stage
+    // (prevents regression if local is ahead)
+    const localState = useAvatarStore.getState()
+    if (data.evolution_stage >= localState.evolutionStage) {
+      useAvatarStore.setState({
+        baseCharacter: data.base_character || localState.baseCharacter,
+        evolutionStage: data.evolution_stage ?? localState.evolutionStage,
+        currentMood: data.current_mood || localState.currentMood,
+        accessories: data.accessories || localState.accessories,
+        lastInteraction: data.last_interaction ? new Date(data.last_interaction).getTime() : localState.lastInteraction
+      })
+    }
+  }
+
+  return { error: null }
+}
+
+// ==========================================
 // Full Sync (Initial load or manual sync)
 // ==========================================
 
@@ -390,7 +459,8 @@ export async function syncAllToCloud() {
     weightLogs: await withRetryResult(syncWeightLogsToCloud),
     macroTargets: await withRetryResult(syncMacroTargetsToCloud),
     savedMeals: await withRetryResult(syncSavedMealsToCloud),
-    xp: await withRetryResult(syncXPToCloud)
+    xp: await withRetryResult(syncXPToCloud),
+    avatar: await withRetryResult(syncAvatarToCloud)
   }
 
   // Sync today's macro log
@@ -411,8 +481,8 @@ export async function loadAllFromCloud() {
   // Use retry wrapper for each load operation
   const results = {
     profile: await withRetryResult(loadProfileFromCloud),
-    weightLogs: await withRetryResult(loadWeightLogsFromCloud)
-    // Add more loaders as needed
+    weightLogs: await withRetryResult(loadWeightLogsFromCloud),
+    avatar: await withRetryResult(loadAvatarFromCloud)
   }
 
   console.log('Load results:', results)
