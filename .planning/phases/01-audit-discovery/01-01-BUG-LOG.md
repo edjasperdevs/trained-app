@@ -114,7 +114,7 @@ Core gamification mechanic broken for users who work out late at night
 **Severity:** High
 **Priority:** P1
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/screens/Auth.tsx` (lines 85-92)
@@ -183,7 +183,7 @@ UTC-based calculation creates inconsistent claim windows
 **Severity:** High
 **Priority:** P2
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/stores/workoutStore.ts` (logSet function)
@@ -228,7 +228,7 @@ Corrupted/old data loads silently, app behaves unpredictably
 **Severity:** Medium
 **Priority:** P2
 **Phase Assignment:** Phase 3
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/screens/Macros.tsx` (lines 98-108)
@@ -250,7 +250,7 @@ Button appears unresponsive, users click multiple times
 **Severity:** Medium
 **Priority:** P2
 **Phase Assignment:** Phase 3
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/screens/Onboarding.tsx`
@@ -273,7 +273,7 @@ Start over from step 1 - all progress lost
 **Severity:** Medium
 **Priority:** P2
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/App.tsx`
@@ -525,14 +525,14 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-001 | Env vars corrupted with newlines | Critical | P1 | 2 | FIXED |
 | BUG-002 | Access code security flaw | Critical | P1 | 4 | Open |
 | BUG-003 | Streak timezone off-by-one | Critical | P1 | 2 | FIXED |
-| BUG-004 | Auth error messages unclear | High | P1 | 4 | Open |
+| BUG-004 | Auth error messages unclear | High | P1 | 4 | FIXED |
 | BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | Open |
 | BUG-006 | XP claim timezone bug | High | P1 | 4 | FIXED |
-| BUG-007 | No workout set validation | High | P2 | 2 | Open |
+| BUG-007 | No workout set validation | High | P2 | 2 | FIXED |
 | BUG-008 | No localStorage schema validation | High | P2 | 4 | Open |
-| BUG-009 | Missing macro calc loading state | Medium | P2 | 3 | Open |
-| BUG-010 | Onboarding progress not persisted | Medium | P2 | 3 | Open |
-| BUG-011 | No React error boundaries | Medium | P2 | 4 | Open |
+| BUG-009 | Missing macro calc loading state | Medium | P2 | 3 | FIXED |
+| BUG-010 | Onboarding progress not persisted | Medium | P2 | 3 | FIXED |
+| BUG-011 | No React error boundaries | Medium | P2 | 4 | FIXED |
 | BUG-012 | Sync partial failures silent | Medium | P3 | 4 | Open |
 | BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
 | BUG-014 | Goal weight not validated | Medium | P3 | 2 | Open |
@@ -559,7 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 5 |
+| Fixed | 10 |
+| Remaining | 11 |
 
 ---
 
