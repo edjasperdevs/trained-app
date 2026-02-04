@@ -364,7 +364,7 @@ Any value accepted, bad recommendations generated
 **Severity:** Medium
 **Priority:** P3
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `vite.config.ts` (workbox config)
@@ -536,7 +536,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-012 | Sync partial failures silent | Medium | P3 | 4 | FIXED |
 | BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
 | BUG-014 | Goal weight not validated | Medium | P3 | 2 | FIXED |
-| BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | Open |
+| BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | FIXED |
 | BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | FIXED |
 | BUG-017 | Check-in animation performance | Low | P3 | 3 | FIXED |
 | BUG-018 | Timezone handling inconsistent | High | P2 | 2 | FIXED |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 18 |
-| Remaining | 3 |
+| Fixed | 19 |
+| Remaining | 2 |
 
 ---
 
