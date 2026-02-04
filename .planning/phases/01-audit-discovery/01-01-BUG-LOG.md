@@ -88,7 +88,7 @@ Network error handling may mask the invalid code state
 **Severity:** Critical
 **Priority:** P1
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/stores/userStore.ts` (lines 119-150)
@@ -160,7 +160,7 @@ Silent data inconsistency
 **Severity:** High
 **Priority:** P1
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/stores/xpStore.ts` (lines 142-160)
@@ -432,7 +432,7 @@ Frame drops, modal appears stuck
 **Severity:** High
 **Priority:** P2
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - Files: `src/stores/userStore.ts`, `src/stores/xpStore.ts`, `src/screens/Home.tsx`
@@ -501,7 +501,7 @@ Corrupted data loaded, app behaves unpredictably
 **Severity:** Medium
 **Priority:** P2
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - Files: `src/components/*.test.tsx`
@@ -524,10 +524,10 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 |--------|-------------|----------|----------|-------|--------|
 | BUG-001 | Env vars corrupted with newlines | Critical | P1 | 2 | FIXED |
 | BUG-002 | Access code security flaw | Critical | P1 | 4 | Open |
-| BUG-003 | Streak timezone off-by-one | Critical | P1 | 2 | Open |
+| BUG-003 | Streak timezone off-by-one | Critical | P1 | 2 | FIXED |
 | BUG-004 | Auth error messages unclear | High | P1 | 4 | Open |
 | BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | Open |
-| BUG-006 | XP claim timezone bug | High | P1 | 4 | Open |
+| BUG-006 | XP claim timezone bug | High | P1 | 4 | FIXED |
 | BUG-007 | No workout set validation | High | P2 | 2 | Open |
 | BUG-008 | No localStorage schema validation | High | P2 | 4 | Open |
 | BUG-009 | Missing macro calc loading state | Medium | P2 | 3 | Open |
@@ -539,10 +539,10 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | Open |
 | BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | Open |
 | BUG-017 | Check-in animation performance | Low | P3 | 3 | Open |
-| BUG-018 | Timezone handling inconsistent | High | P2 | 2 | Open |
+| BUG-018 | Timezone handling inconsistent | High | P2 | 2 | FIXED |
 | BUG-019 | No retry logic for cloud API | Medium | P2 | 4 | Open |
 | BUG-020 | Import data not validated | Medium | P3 | 4 | Open |
-| BUG-021 | Unit tests fail (ThemeProvider) | Medium | P2 | 2 | Open |
+| BUG-021 | Unit tests fail (ThemeProvider) | Medium | P2 | 2 | FIXED |
 
 ---
 
@@ -559,7 +559,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 1 |
+| Fixed | 5 |
 
 ---
 
