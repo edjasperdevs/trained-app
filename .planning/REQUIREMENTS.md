@@ -1,7 +1,7 @@
 # Requirements: Trained MVP Launch Polish
 
 **Defined:** 2026-02-04
-**Core Value:** First impression must be flawless — no broken flows, confusing UX, or visual jank
+**Core Value:** First impression must be flawless - no broken flows, confusing UX, or visual jank
 
 ## v1 Requirements
 
@@ -9,7 +9,7 @@ Requirements for launch to 90k fitness enthusiast followers.
 
 ### Audit
 
-- [ ] **AUDIT-01**: Complete full user journey test (access → onboarding → workout → macros → XP claim)
+- [ ] **AUDIT-01**: Complete full user journey test (access -> onboarding -> workout -> macros -> XP claim)
 
 ### Performance
 
@@ -75,28 +75,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| PERF-04 | TBD | Pending |
-| UX-01 | TBD | Pending |
-| UX-02 | TBD | Pending |
-| UX-03 | TBD | Pending |
-| UX-04 | TBD | Pending |
-| UX-05 | TBD | Pending |
-| RES-01 | TBD | Pending |
-| RES-02 | TBD | Pending |
-| RES-03 | TBD | Pending |
-| LAUNCH-01 | TBD | Pending |
-| LAUNCH-02 | TBD | Pending |
-| LAUNCH-03 | TBD | Pending |
+| AUDIT-01 | Phase 1: Audit & Discovery | Pending |
+| PERF-01 | Phase 2: Performance Foundation | Pending |
+| PERF-02 | Phase 2: Performance Foundation | Pending |
+| PERF-03 | Phase 2: Performance Foundation | Pending |
+| PERF-04 | Phase 2: Performance Foundation | Pending |
+| UX-01 | Phase 3: UX Polish | Pending |
+| UX-02 | Phase 3: UX Polish | Pending |
+| UX-03 | Phase 3: UX Polish | Pending |
+| UX-04 | Phase 3: UX Polish | Pending |
+| UX-05 | Phase 3: UX Polish | Pending |
+| RES-01 | Phase 4: Resilience Hardening | Pending |
+| RES-02 | Phase 4: Resilience Hardening | Pending |
+| RES-03 | Phase 4: Resilience Hardening | Pending |
+| LAUNCH-01 | Phase 5: Launch Preparation | Pending |
+| LAUNCH-02 | Phase 5: Launch Preparation | Pending |
+| LAUNCH-03 | Phase 5: Launch Preparation | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-04*
-*Last updated: 2026-02-04 after initial definition*
+*Last updated: 2026-02-04 - Traceability completed*
