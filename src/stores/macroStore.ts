@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { Goal, Gender } from './userStore'
+import { isValidMacroTargets, isValidActivityLevel, isValidDailyLog, isArray } from '@/lib/validation'
 
 export interface MacroTargets {
   protein: number
@@ -540,17 +541,42 @@ export const useMacroStore = create<MacroStore>()(
       importData: (data: string) => {
         try {
           const parsed = JSON.parse(data)
-          if (parsed.macros) {
-            set({
-              targets: parsed.macros.targets || null,
-              mealPlan: parsed.macros.mealPlan || [],
-              dailyLogs: parsed.macros.dailyLogs || [],
-              activityLevel: parsed.macros.activityLevel || 'moderate'
-            })
-            return true
+          if (!parsed.macros) return false
+
+          const macros = parsed.macros
+
+          // Validate targets if provided (BUG-020 fix)
+          if (macros.targets !== null && macros.targets !== undefined) {
+            if (!isValidMacroTargets(macros.targets)) {
+              console.error('[Import] Invalid macro targets structure')
+              return false
+            }
           }
-          return false
-        } catch {
+
+          // Validate activity level
+          if (macros.activityLevel && !isValidActivityLevel(macros.activityLevel)) {
+            console.error('[Import] Invalid activity level')
+            return false
+          }
+
+          // Validate daily logs array
+          if (macros.dailyLogs && isArray(macros.dailyLogs)) {
+            const validLogs = macros.dailyLogs.filter(isValidDailyLog)
+            if (validLogs.length !== macros.dailyLogs.length) {
+              console.warn(`[Import] Filtered out ${macros.dailyLogs.length - validLogs.length} invalid daily logs`)
+            }
+            macros.dailyLogs = validLogs
+          }
+
+          set({
+            targets: macros.targets || null,
+            mealPlan: isArray(macros.mealPlan) ? macros.mealPlan : [],
+            dailyLogs: isArray(macros.dailyLogs) ? macros.dailyLogs : [],
+            activityLevel: macros.activityLevel || 'moderate'
+          })
+          return true
+        } catch (err) {
+          console.error('[Import] Failed to parse macro data:', err)
           return false
         }
       }
