@@ -583,6 +583,61 @@ export const useMacroStore = create<MacroStore>()(
     }),
     {
       name: 'gamify-gains-macros',
+      version: 2, // Bump version when schema changes (BUG-008 fix)
+      // Validate and migrate data on load
+      migrate: (persistedState: unknown, version: number) => {
+        const state = persistedState as Record<string, unknown>
+
+        // If coming from version 0 or 1, validate the data structure
+        if (version < 2) {
+          console.log('[Macros] Migrating from version', version)
+
+          // Validate targets
+          if (state.targets !== null && state.targets !== undefined) {
+            if (!isValidMacroTargets(state.targets)) {
+              console.warn('[Macros] Invalid targets found during migration, resetting')
+              state.targets = null
+            }
+          }
+
+          // Validate activity level
+          if (state.activityLevel && !isValidActivityLevel(state.activityLevel)) {
+            console.warn('[Macros] Invalid activity level found during migration, resetting')
+            state.activityLevel = 'moderate'
+          }
+
+          // Validate daily logs
+          if (state.dailyLogs && isArray(state.dailyLogs)) {
+            const validLogs = (state.dailyLogs as unknown[]).filter(isValidDailyLog)
+            if (validLogs.length !== (state.dailyLogs as unknown[]).length) {
+              console.warn(`[Macros] Filtered ${(state.dailyLogs as unknown[]).length - validLogs.length} invalid logs`)
+            }
+            state.dailyLogs = validLogs
+          } else {
+            state.dailyLogs = []
+          }
+
+          // Ensure arrays
+          if (!isArray(state.mealPlan)) {
+            state.mealPlan = []
+          }
+          if (!isArray(state.savedMeals)) {
+            state.savedMeals = []
+          }
+        }
+
+        return state as MacroStore
+      },
+      // Log hydration errors
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (error) {
+            console.error('[Macros] Failed to rehydrate from storage:', error)
+          } else if (state) {
+            console.log('[Macros] Hydrated from storage')
+          }
+        }
+      }
     }
   )
 )
