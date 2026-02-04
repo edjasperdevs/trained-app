@@ -1,8 +1,28 @@
 import { motion } from 'framer-motion'
 import { Avatar, Card, ProgressBar } from '@/components'
 import { useAvatarStore, useXPStore, EVOLUTION_STAGES } from '@/stores'
+import { useTheme } from '@/themes'
+import {
+  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
+  Trophy, Sparkles, Star, Crown, Lock, Check, LucideIcon
+} from 'lucide-react'
+
+// Map icon names to Lucide components
+const ICON_MAP: Record<string, LucideIcon> = {
+  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
+  Trophy, Bolt: Zap, Sparkles, Star, Crown
+}
+
+// Helper to render stage icon
+function StageIcon({ iconName, size = 24, className = '' }: { iconName: string; size?: number; className?: string }) {
+  const IconComponent = ICON_MAP[iconName] || Circle
+  return <IconComponent size={size} className={className} />
+}
 
 export function AvatarScreen() {
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
   const {
     baseCharacter,
     evolutionStage,
@@ -18,11 +38,17 @@ export function AvatarScreen() {
   const nextEvolution = getNextEvolutionInfo()
   const evolutionProgress = getProgressToNextEvolution(currentLevel)
 
+  // Get the avatar stage name from theme
+  const currentStageName = theme.avatarStages[evolutionStage - 1] || currentEvolution.name
+  const nextStageName = nextEvolution ? (theme.avatarStages[nextEvolution.stage - 1] || nextEvolution.name) : null
+
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-gradient-to-b from-bg-secondary to-bg-primary pt-8 pb-12 px-4">
-        <h1 className="text-2xl font-bold mb-6 text-center">Your Avatar</h1>
+      <div className={`pt-8 pb-12 px-4 ${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-bg-secondary to-bg-primary'}`}>
+        <h1 className={`text-2xl font-bold mb-6 text-center ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+          {isTrained ? 'Your Status' : 'Your Avatar'}
+        </h1>
 
         {/* Main Avatar Display */}
         <div className="flex justify-center">
@@ -41,18 +67,24 @@ export function AvatarScreen() {
         <Card>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-3xl font-bold font-digital text-accent-primary">{currentLevel}</p>
-              <p className="text-xs text-gray-500">Level</p>
+              <p className="text-3xl font-bold font-mono text-primary">{currentLevel}</p>
+              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+                {theme.labels.level}
+              </p>
             </div>
             <div>
-              <p className="text-3xl font-bold font-digital">{evolutionStage}</p>
-              <p className="text-xs text-gray-500">Evolution</p>
+              <p className="text-3xl font-bold font-mono">{evolutionStage}</p>
+              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+                {isTrained ? 'Stage' : 'Evolution'}
+              </p>
             </div>
             <div>
-              <p className="text-3xl font-bold font-digital text-accent-secondary">
+              <p className="text-3xl font-bold font-mono text-secondary">
                 {totalXP.toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">Total XP</p>
+              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+                Total {theme.labels.xp}
+              </p>
             </div>
           </div>
         </Card>
@@ -60,14 +92,16 @@ export function AvatarScreen() {
         {/* Current Evolution */}
         <Card>
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center text-4xl">
-              {currentEvolution.emoji}
+            <div className={`w-16 h-16 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded-lg' : 'rounded-full'}`}>
+              <StageIcon iconName={currentEvolution.emoji} size={32} className="text-primary" />
             </div>
             <div>
-              <h3 className="text-xl font-bold">{currentEvolution.name}</h3>
-              <p className="text-sm text-gray-400">{currentEvolution.description}</p>
-              <p className="text-xs text-gray-500">
-                Levels {currentEvolution.levelRange[0]} - {currentEvolution.levelRange[1]}
+              <h3 className={`text-xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                {currentStageName}
+              </h3>
+              <p className="text-sm text-text-secondary">{currentEvolution.description}</p>
+              <p className="text-xs text-text-secondary">
+                {theme.labels.level}s {currentEvolution.levelRange[0]} - {currentEvolution.levelRange[1]}
               </p>
             </div>
           </div>
@@ -75,35 +109,43 @@ export function AvatarScreen() {
           {/* Evolution Progress */}
           {nextEvolution && (
             <div>
-              <div className="flex justify-between text-xs text-gray-400 mb-2">
-                <span>Progress to {nextEvolution.name}</span>
-                <span className="font-digital">{Math.round(evolutionProgress)}%</span>
+              <div className="flex justify-between text-xs text-text-secondary mb-2">
+                <span>Progress to {nextStageName}</span>
+                <span className="font-mono">{Math.round(evolutionProgress)}%</span>
               </div>
-              <ProgressBar progress={evolutionProgress} color="gradient" size="md" />
-              <p className="text-xs text-gray-500 mt-2">
-                Reach Level {nextEvolution.levelRange[0]} to evolve
+              <ProgressBar progress={evolutionProgress} color={isTrained ? 'primary' : 'gradient'} size="md" />
+              <p className="text-xs text-text-secondary mt-2">
+                Reach {theme.labels.level} {nextEvolution.levelRange[0]} to {isTrained ? 'advance' : 'evolve'}
               </p>
             </div>
           )}
 
           {!nextEvolution && (
-            <div className="text-center py-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-              <span className="text-2xl">👑</span>
-              <p className="text-yellow-400 font-bold mt-2">Maximum Evolution Achieved!</p>
+            <div className={`text-center py-4 bg-warning/10 border border-warning/20 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+              <Crown size={32} className="mx-auto text-warning" />
+              <p className={`text-warning font-bold mt-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                {isTrained ? 'Maximum Status Achieved.' : 'Maximum Evolution Achieved!'}
+              </p>
             </div>
           )}
         </Card>
 
         {/* Character Info */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">CHARACTER CLASS</h3>
+          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+            {isTrained ? 'ROLE' : 'CHARACTER CLASS'}
+          </h3>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-bg-secondary rounded-lg flex items-center justify-center text-2xl">
-              {baseCharacter === 'warrior' ? '⚔️' : baseCharacter === 'mage' ? '🔮' : '🌙'}
+            <div className={`w-12 h-12 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+              {baseCharacter === 'warrior' && <Sword size={24} className="text-red-400" />}
+              {baseCharacter === 'mage' && <Sparkles size={24} className="text-purple-400" />}
+              {baseCharacter === 'rogue' && <Zap size={24} className="text-yellow-400" />}
             </div>
             <div>
-              <p className="font-bold capitalize">{baseCharacter}</p>
-              <p className="text-sm text-gray-500">
+              <p className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : 'capitalize'}`}>
+                {theme.labels.avatarClasses[baseCharacter]}
+              </p>
+              <p className="text-sm text-text-secondary">
                 {baseCharacter === 'warrior' && 'Strength and discipline'}
                 {baseCharacter === 'mage' && 'Knowledge and power'}
                 {baseCharacter === 'rogue' && 'Speed and agility'}
@@ -114,12 +156,15 @@ export function AvatarScreen() {
 
         {/* Evolution Timeline */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">EVOLUTION TIMELINE</h3>
+          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+            {isTrained ? 'PROGRESSION PATH' : 'EVOLUTION TIMELINE'}
+          </h3>
           <div className="space-y-3">
             {EVOLUTION_STAGES.map((stage, index) => {
               const isUnlocked = currentLevel >= stage.levelRange[0]
               const isCurrent = stage.stage === evolutionStage
               const isNext = stage.stage === evolutionStage + 1
+              const stageName = theme.avatarStages[stage.stage - 1] || stage.name
 
               return (
                 <motion.div
@@ -128,40 +173,46 @@ export function AvatarScreen() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={`
-                    flex items-center gap-3 p-2 rounded-lg
-                    ${isCurrent ? 'bg-accent-primary/10 border border-accent-primary/30' : ''}
-                    ${isNext ? 'bg-accent-secondary/10 border border-accent-secondary/30' : ''}
+                    flex items-center gap-3 p-2
+                    ${isTrained ? 'rounded' : 'rounded-lg'}
+                    ${isCurrent ? 'bg-primary/10 border border-primary/30' : ''}
+                    ${isNext ? 'bg-secondary/10 border border-secondary/30' : ''}
                     ${!isUnlocked && !isNext ? 'opacity-40' : ''}
                   `}
                 >
                   <div className={`
-                    w-10 h-10 rounded-full flex items-center justify-center text-xl
-                    ${isUnlocked ? 'bg-bg-secondary' : 'bg-bg-card'}
+                    w-10 h-10 flex items-center justify-center
+                    ${isTrained ? 'rounded' : 'rounded-full'}
+                    ${isUnlocked ? 'bg-surface-elevated' : 'bg-surface'}
                   `}>
-                    {isUnlocked ? stage.emoji : '🔒'}
+                    {isUnlocked ? (
+                      <StageIcon iconName={stage.emoji} size={20} className={isCurrent ? 'text-primary' : 'text-text-secondary'} />
+                    ) : (
+                      <Lock size={16} className="text-text-secondary" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className={`font-semibold ${isCurrent ? 'text-accent-primary' : ''}`}>
-                        {stage.name}
+                      <p className={`font-semibold ${isCurrent ? 'text-primary' : ''} ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                        {stageName}
                       </p>
                       {isCurrent && (
-                        <span className="text-xs bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded">
+                        <span className={`text-xs bg-primary/20 text-primary px-2 py-0.5 ${isTrained ? 'rounded' : 'rounded'}`}>
                           Current
                         </span>
                       )}
                       {isNext && (
-                        <span className="text-xs bg-accent-secondary/20 text-accent-secondary px-2 py-0.5 rounded">
+                        <span className={`text-xs bg-secondary/20 text-secondary px-2 py-0.5 ${isTrained ? 'rounded' : 'rounded'}`}>
                           Next
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Lv. {stage.levelRange[0]} - {stage.levelRange[1]}
+                    <p className="text-xs text-text-secondary">
+                      {theme.labels.level} {stage.levelRange[0]} - {stage.levelRange[1]}
                     </p>
                   </div>
                   {isUnlocked && (
-                    <span className="text-accent-success">✓</span>
+                    <Check size={16} className="text-success" />
                   )}
                 </motion.div>
               )
@@ -172,13 +223,13 @@ export function AvatarScreen() {
         {/* Mood */}
         <Card padding="sm">
           <div className="flex items-center justify-between">
-            <span className="text-gray-400">Current Mood</span>
-            <span className="capitalize font-semibold">
-              {currentMood === 'happy' && '😊 Happy'}
-              {currentMood === 'neutral' && '😐 Neutral'}
-              {currentMood === 'sad' && '😢 Sad'}
-              {currentMood === 'hyped' && '🤩 Hyped'}
-              {currentMood === 'neglected' && '😔 Neglected'}
+            <span className="text-text-secondary">{isTrained ? 'Current State' : 'Current Mood'}</span>
+            <span className={`capitalize font-semibold ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+              {currentMood === 'happy' && (isTrained ? 'Compliant' : 'Happy')}
+              {currentMood === 'neutral' && (isTrained ? 'Steady' : 'Neutral')}
+              {currentMood === 'sad' && (isTrained ? 'Flagging' : 'Sad')}
+              {currentMood === 'hyped' && (isTrained ? 'Exemplary' : 'Hyped')}
+              {currentMood === 'neglected' && (isTrained ? 'Overdue' : 'Neglected')}
             </span>
           </div>
         </Card>

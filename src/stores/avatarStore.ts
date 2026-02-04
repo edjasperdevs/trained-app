@@ -19,19 +19,19 @@ export interface EvolutionInfo {
 // Stage 2-4: Rapid early progression (Levels 2-6)
 // Stage 5+: Slower progression
 export const EVOLUTION_STAGES: EvolutionInfo[] = [
-  { stage: 0, name: 'Egg', levelRange: [0, 0], description: 'Waiting to hatch...', emoji: '🥒' },
-  { stage: 1, name: 'Hatchling', levelRange: [1, 1], description: 'Just hatched!', emoji: '🐣' },
-  { stage: 2, name: 'Sprout', levelRange: [2, 3], description: 'Starting to grow', emoji: '🌱' },
-  { stage: 3, name: 'Rookie', levelRange: [4, 5], description: 'Finding your footing', emoji: '🏃' },
-  { stage: 4, name: 'Contender', levelRange: [6, 8], description: 'Building momentum', emoji: '💪' },
-  { stage: 5, name: 'Warrior', levelRange: [9, 12], description: 'Gaining strength', emoji: '⚔️' },
-  { stage: 6, name: 'Veteran', levelRange: [13, 18], description: 'Clear definition', emoji: '🦾' },
-  { stage: 7, name: 'Elite', levelRange: [19, 25], description: 'Impressive physique', emoji: '🔥' },
-  { stage: 8, name: 'Champion', levelRange: [26, 35], description: 'Competition-ready', emoji: '🏆' },
-  { stage: 9, name: 'Legend', levelRange: [36, 50], description: 'Peak performance', emoji: '⚡' },
-  { stage: 10, name: 'Mythic', levelRange: [51, 70], description: 'Transcendent gains', emoji: '✨' },
-  { stage: 11, name: 'Titan', levelRange: [71, 90], description: 'Beyond limits', emoji: '🌟' },
-  { stage: 12, name: 'Ascended', levelRange: [91, 99], description: 'Final form achieved', emoji: '👑' },
+  { stage: 0, name: 'Egg', levelRange: [0, 0], description: 'Waiting to hatch...', emoji: 'Circle' },
+  { stage: 1, name: 'Hatchling', levelRange: [1, 1], description: 'Just hatched!', emoji: 'Zap' },
+  { stage: 2, name: 'Sprout', levelRange: [2, 3], description: 'Starting to grow', emoji: 'Sprout' },
+  { stage: 3, name: 'Rookie', levelRange: [4, 5], description: 'Finding your footing', emoji: 'Footprints' },
+  { stage: 4, name: 'Contender', levelRange: [6, 8], description: 'Building momentum', emoji: 'Dumbbell' },
+  { stage: 5, name: 'Warrior', levelRange: [9, 12], description: 'Gaining strength', emoji: 'Sword' },
+  { stage: 6, name: 'Veteran', levelRange: [13, 18], description: 'Clear definition', emoji: 'Shield' },
+  { stage: 7, name: 'Elite', levelRange: [19, 25], description: 'Impressive physique', emoji: 'Flame' },
+  { stage: 8, name: 'Champion', levelRange: [26, 35], description: 'Competition-ready', emoji: 'Trophy' },
+  { stage: 9, name: 'Legend', levelRange: [36, 50], description: 'Peak performance', emoji: 'Bolt' },
+  { stage: 10, name: 'Mythic', levelRange: [51, 70], description: 'Transcendent gains', emoji: 'Sparkles' },
+  { stage: 11, name: 'Titan', levelRange: [71, 90], description: 'Beyond limits', emoji: 'Star' },
+  { stage: 12, name: 'Ascended', levelRange: [91, 99], description: 'Final form achieved', emoji: 'Crown' },
 ]
 
 interface AvatarStore {
@@ -66,11 +66,11 @@ const getStageForLevel = (level: number): EvolutionStage => {
 }
 
 const REACTION_MESSAGES = {
-  checkIn: ['Great work! 💪', 'Keep grinding! 🔥', 'XP earned! ✨', 'Gains loading... 📈'],
-  levelUp: ['LEVEL UP! 🎉', 'You\'re evolving! ⚡', 'New power unlocked! 🚀'],
-  missedDay: ['I missed you... 😢', 'Come back soon! 🥺', 'Never miss twice! 💭'],
-  streak: ['Streak fire! 🔥', 'Unstoppable! ⚡', 'Consistency is key! 🗝️'],
-  claim: ['XP CLAIMED! 💰', 'Weekly gains secured! 🏆', 'Keep it up! 👊']
+  checkIn: ['Logged.', 'Noted.', 'Recorded.', 'Progress tracked.'],
+  levelUp: ['Rank up.', 'Advancement unlocked.', 'New level achieved.'],
+  missedDay: ['Missed day noted.', 'Return when ready.', 'Resume protocol.'],
+  streak: ['Streak continues.', 'Consistency maintained.', 'Protocol followed.'],
+  claim: ['Claimed.', 'Reward secured.', 'Points transferred.']
 }
 
 export const useAvatarStore = create<AvatarStore>()(
@@ -94,7 +94,7 @@ export const useAvatarStore = create<AvatarStore>()(
           set({
             evolutionStage: newStage,
             currentMood: 'hyped',
-            recentReaction: 'EVOLUTION! 🌟'
+            recentReaction: 'Stage advanced.'
           })
         }
 

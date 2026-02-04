@@ -9,6 +9,7 @@ import {
   useAvatarStore,
   useAchievementsStore
 } from '@/stores'
+import { useTheme } from '@/themes'
 import { analytics } from '@/lib/analytics'
 import { Dumbbell, Beef, Zap, CheckCircle2, Star, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
 
@@ -25,6 +26,9 @@ interface CheckInData {
 }
 
 export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
   const profile = useUserStore((state) => state.profile)
   const updateStreak = useUserStore((state) => state.updateStreak)
   const { logDailyXP, XP_VALUES } = useXPStore()
@@ -168,16 +172,20 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="w-full max-w-md bg-bg-secondary rounded-t-2xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
+          className={`w-full max-w-md bg-surface p-6 max-h-[90vh] overflow-y-auto ${
+            isTrained ? 'rounded-t-lg sm:rounded-lg' : 'rounded-t-2xl sm:rounded-2xl'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {!submitted ? (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Daily Standup</h2>
+                <h2 className={`text-xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                  {theme.labels.checkIn}
+                </h2>
                 <button
                   onClick={() => onClose(false)}
-                  className="text-gray-400 hover:text-white"
+                  className="text-text-secondary hover:text-text-primary"
                 >
                   <X size={20} />
                 </button>
@@ -193,12 +201,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     onChange={(v) => setData(d => ({ ...d, workout: v }))}
                     icon={Dumbbell}
                     disabled={workoutCompleted}
+                    xpLabel={theme.labels.xp}
+                    isTrained={isTrained}
                   />
                 ) : (
                   <Card className="opacity-60" padding="sm">
                     <div className="flex items-center gap-3">
-                      <Moon size={20} className="text-gray-400" />
-                      <span className="text-gray-400">Rest Day - No workout scheduled</span>
+                      <Moon size={20} className="text-text-secondary" />
+                      <span className="text-text-secondary">
+                        {isTrained ? 'Recovery Day - No training scheduled' : 'Rest Day - No workout scheduled'}
+                      </span>
                     </div>
                   </Card>
                 )}
@@ -210,6 +222,8 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   checked={data.protein}
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
                   icon={Beef}
+                  xpLabel={theme.labels.xp}
+                  isTrained={isTrained}
                 />
 
                 {/* Calories */}
@@ -219,16 +233,20 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   checked={data.calories}
                   onChange={(v) => setData(d => ({ ...d, calories: v }))}
                   icon={Zap}
+                  xpLabel={theme.labels.xp}
+                  isTrained={isTrained}
                 />
 
                 {/* Check-in (always checked) */}
                 <QuestCheckbox
-                  label="Daily Check-In"
+                  label={theme.labels.checkIn}
                   xp={XP_VALUES.CHECK_IN}
                   checked={data.checkIn}
                   onChange={() => {}}
                   icon={CheckCircle2}
                   disabled
+                  xpLabel={theme.labels.xp}
+                  isTrained={isTrained}
                 />
 
                 {/* Perfect Day Bonus */}
@@ -237,14 +255,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                   >
-                    <Card className="bg-accent-success/10 border-accent-success/30" padding="sm">
+                    <Card className="bg-success/10 border-success/30" padding="sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <Star size={20} className="text-accent-success" />
-                          <span className="text-accent-success font-semibold">Perfect Day Bonus!</span>
+                          <Star size={20} className="text-success" />
+                          <span className={`text-success font-semibold ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                            {isTrained ? 'Full Compliance Bonus!' : 'Perfect Day Bonus!'}
+                          </span>
                         </div>
-                        <span className="text-accent-success font-digital font-bold">
-                          +{XP_VALUES.PERFECT_DAY} XP
+                        <span className="text-success font-mono font-bold">
+                          +{XP_VALUES.PERFECT_DAY} {theme.labels.xp}
                         </span>
                       </div>
                     </Card>
@@ -253,14 +273,14 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
                 {/* Streak Bonus */}
                 {profile?.currentStreak !== undefined && (
-                  <Card className="bg-accent-warning/10 border-accent-warning/20" padding="sm">
+                  <Card className="bg-warning/10 border-warning/20" padding="sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Flame size={20} className="text-accent-warning" />
-                        <span>Streak Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
+                        <Flame size={20} className="text-warning" />
+                        <span>{isTrained ? 'Obedience Bonus' : 'Streak Bonus'} ({(profile?.currentStreak || 0) + 1} days)</span>
                       </div>
-                      <span className="text-accent-warning font-digital font-bold">
-                        +{streakBonus} XP
+                      <span className="text-warning font-mono font-bold">
+                        +{streakBonus} {theme.labels.xp}
                       </span>
                     </div>
                   </Card>
@@ -268,17 +288,17 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               </div>
 
               {/* Total XP Preview */}
-              <div className="bg-bg-card rounded-lg p-4 mb-6">
+              <div className={`bg-surface-elevated p-4 mb-6 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Total XP</span>
-                  <span className="text-2xl font-bold font-digital text-accent-primary">
-                    +{calculateXP()} XP
+                  <span className="text-text-secondary">Total {theme.labels.xp}</span>
+                  <span className="text-2xl font-bold font-mono text-primary">
+                    +{calculateXP()} {theme.labels.xp}
                   </span>
                 </div>
               </div>
 
               <Button onClick={handleSubmit} fullWidth size="lg">
-                Ship It
+                {isTrained ? 'Submit Report' : 'Ship It'}
               </Button>
             </>
           ) : (
@@ -290,16 +310,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 transition={{ type: 'spring', delay: 0.2 }}
                 className="mb-4"
               >
-                <PartyPopper size={56} className="mx-auto text-accent-success" />
+                <PartyPopper size={56} className={`mx-auto ${isTrained ? 'text-primary' : 'text-success'}`} />
               </motion.div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-bold mb-2"
+                className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}
               >
-                Deployed successfully.
+                {isTrained ? 'Report Accepted.' : 'Deployed successfully.'}
               </motion.h2>
 
               {/* XP Breakdown Animation */}
@@ -311,11 +331,11 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                       initial={{ opacity: 0, x: -50 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.15 }}
-                      className="flex items-center justify-between bg-bg-card rounded-lg px-4 py-2"
+                      className={`flex items-center justify-between bg-surface-elevated px-4 py-2 ${isTrained ? 'rounded' : 'rounded-lg'}`}
                     >
-                      <span className="text-gray-300">{anim.label}</span>
-                      <span className="text-accent-success font-digital font-bold">
-                        +{anim.amount} XP
+                      <span className="text-text-primary">{anim.label}</span>
+                      <span className="text-success font-mono font-bold">
+                        +{anim.amount} {theme.labels.xp}
                       </span>
                     </motion.div>
                   ))}
@@ -327,14 +347,18 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: xpAnimations.length * 0.15 + 0.3, type: 'spring' }}
-                className="bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 rounded-xl p-6 mb-6"
+                className={`p-6 mb-6 ${
+                  isTrained
+                    ? 'bg-primary-muted rounded border border-primary/30'
+                    : 'bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 rounded-xl'
+                }`}
               >
-                <p className="text-gray-400 mb-1">Total Earned</p>
-                <p className="text-4xl font-bold font-digital text-glow-cyan">
-                  +{earnedXP} XP
+                <p className="text-text-secondary mb-1">Total Earned</p>
+                <p className={`text-4xl font-bold font-mono ${isTrained ? 'text-primary' : 'text-glow-cyan'}`}>
+                  +{earnedXP} {theme.labels.xp}
                 </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Pending until Sunday release
+                <p className="text-sm text-text-secondary mt-2">
+                  {isTrained ? 'Pending until Sunday ritual' : 'Pending until Sunday release'}
                 </p>
               </motion.div>
 
@@ -363,7 +387,9 @@ function QuestCheckbox({
   checked,
   onChange,
   icon: Icon,
-  disabled = false
+  disabled = false,
+  xpLabel = 'XP',
+  isTrained = false
 }: {
   label: string
   xp: number
@@ -371,22 +397,26 @@ function QuestCheckbox({
   onChange: (v: boolean) => void
   icon: LucideIcon
   disabled?: boolean
+  xpLabel?: string
+  isTrained?: boolean
 }) {
   return (
     <Card
       onClick={disabled ? undefined : () => onChange(!checked)}
       hover={!disabled}
       className={`${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${
-        checked ? 'border-accent-success/50' : ''
+        checked ? 'border-success/50' : ''
       }`}
       padding="sm"
     >
       <div className="flex items-center gap-3">
         <div
-          className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
+          className={`w-6 h-6 border-2 flex items-center justify-center transition-colors ${
+            isTrained ? 'rounded' : 'rounded'
+          } ${
             checked
-              ? 'bg-accent-success border-accent-success'
-              : 'border-gray-600'
+              ? 'bg-success border-success'
+              : 'border-border'
           }`}
         >
           {checked && (
@@ -394,14 +424,14 @@ function QuestCheckbox({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
             >
-              <Check size={14} className="text-white" />
+              <Check size={14} className="text-text-on-primary" />
             </motion.div>
           )}
         </div>
-        <Icon size={20} className={checked ? 'text-accent-success' : 'text-gray-400'} />
+        <Icon size={20} className={checked ? 'text-success' : 'text-text-secondary'} />
         <span className="flex-1">{label}</span>
-        <span className={`font-digital font-bold ${checked ? 'text-accent-success' : 'text-gray-500'}`}>
-          +{xp} XP
+        <span className={`font-mono font-bold ${checked ? 'text-success' : 'text-text-secondary'}`}>
+          +{xp} {xpLabel}
         </span>
       </div>
     </Card>

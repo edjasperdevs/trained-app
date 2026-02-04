@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
 import { Navigation, ToastContainer } from '@/components'
+import { ThemeProvider } from '@/themes'
 import {
   Onboarding,
   Home,
@@ -15,7 +16,7 @@ import {
   AccessGate
 } from '@/screens'
 
-function App() {
+function AppContent() {
   const profile = useUserStore((state) => state.profile)
   const resetProgress = useUserStore((state) => state.resetProgress)
   const checkNeglected = useAvatarStore((state) => state.checkNeglected)
@@ -59,10 +60,10 @@ function App() {
     return (
       <>
         <ToastContainer />
-        <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
-            <span className="text-4xl block mb-4 animate-pulse">🎮</span>
-            <p className="text-gray-400">Loading...</p>
+            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-text-secondary">Loading...</p>
           </div>
         </div>
       </>
@@ -120,6 +121,14 @@ function App() {
         <Navigation />
       </div>
     </>
+  )
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   )
 }
 

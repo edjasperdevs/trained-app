@@ -56,6 +56,7 @@ export interface WorkoutPlan {
     day: number
     type: WorkoutType
     name: string
+    dayNumber: number // The workout day number (1, 2, 3, etc.) for template selection
   }[]
 }
 
@@ -316,9 +317,9 @@ const buildSchedule = (trainingDays: TrainingDays, selectedDays: DayOfWeek[]): W
     if (workoutIndex !== -1 && workoutIndex < workoutTypes.length) {
       const type = workoutTypes[workoutIndex]
       const dayNumber = workoutIndex + 1
-      schedule.push({ day, type, name: getWorkoutNameForPlan(trainingDays, dayNumber) })
+      schedule.push({ day, type, name: getWorkoutNameForPlan(trainingDays, dayNumber), dayNumber })
     } else {
-      schedule.push({ day, type: 'rest', name: 'Rest' })
+      schedule.push({ day, type: 'rest', name: 'Rest', dayNumber: 0 })
     }
   }
 
@@ -375,18 +376,12 @@ export const useWorkoutStore = create<WorkoutStore>()(
 
         if (!scheduled || scheduled.type === 'rest') return null
 
-        const trainingDaysThisWeek = get().workoutLogs.filter(log => {
-          const logDate = new Date(log.date)
-          const today = new Date()
-          const startOfWeek = new Date(today)
-          startOfWeek.setDate(today.getDate() - today.getDay())
-          return logDate >= startOfWeek && log.completed
-        }).length
-
+        // Use the schedule's dayNumber for correct template selection
+        // This ensures mid-week signups get the right workout
         return {
           type: scheduled.type,
           name: scheduled.name,
-          dayNumber: trainingDaysThisWeek + 1
+          dayNumber: scheduled.dayNumber
         }
       },
 

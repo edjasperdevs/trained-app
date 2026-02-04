@@ -10,11 +10,11 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'icon.svg'],
       manifest: {
-        name: 'Gamify Your Gains',
-        short_name: 'GamifyGains',
-        description: 'Turn your fitness journey into a game. Level up your avatar as you level up yourself.',
-        theme_color: '#0a0a0f',
-        background_color: '#0a0a0f',
+        name: 'Trained',
+        short_name: 'Trained',
+        description: 'The protocol for building discipline through fitness.',
+        theme_color: '#0a0a0a',
+        background_color: '#0a0a0a',
         display: 'standalone',
         orientation: 'portrait',
         icons: [

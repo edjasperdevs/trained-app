@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Button, Card, WeightChart, ProgressBar } from '@/components'
-import { Trophy, PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle } from 'lucide-react'
+import { Trophy, PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
 import {
   useUserStore,
   useXPStore,
@@ -17,6 +17,7 @@ import {
   ReminderType,
   UnitSystem
 } from '@/stores'
+import { useTheme } from '@/themes'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { isCoach as checkIsCoach } from '@/lib/supabase'
 
@@ -24,6 +25,8 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
 export function Settings() {
   const navigate = useNavigate()
+  const { theme, themeId, toggleTheme } = useTheme()
+  const isTrained = themeId === 'trained'
   const profile = useUserStore((state) => state.profile)
   const setProfile = useUserStore((state) => state.setProfile)
   const logWeight = useUserStore((state) => state.logWeight)
@@ -252,8 +255,10 @@ export function Settings() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-bg-secondary pt-8 pb-6 px-4">
-        <h1 className="text-2xl font-bold">Settings</h1>
+      <div className={`pt-8 pb-6 px-4 ${isTrained ? 'bg-surface' : 'bg-bg-secondary'}`}>
+        <h1 className={`text-2xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+          Settings
+        </h1>
       </div>
 
       <div className="px-4 py-6 space-y-6">
@@ -583,36 +588,44 @@ export function Settings() {
 
         {/* Reminders */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">REMINDERS</h3>
-          <p className="text-xs text-gray-500 mb-4">
-            Show reminder cards on the home screen to help you stay on track.
+          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+            {isTrained ? 'PROTOCOL REMINDERS' : 'REMINDERS'}
+          </h3>
+          <p className="text-xs text-text-secondary mb-4">
+            {isTrained
+              ? 'Show protocol reminders on the home screen to help maintain discipline.'
+              : 'Show reminder cards on the home screen to help you stay on track.'}
           </p>
           <div className="space-y-2">
             {([
-              { key: 'logMacros' as ReminderType, label: 'Log Macros', description: 'When no food logged today', icon: UtensilsCrossed },
-              { key: 'checkIn' as ReminderType, label: 'Daily Check-In', description: 'When not checked in', icon: CheckCircle2 },
-              { key: 'claimXP' as ReminderType, label: 'Claim XP', description: 'On Sunday with pending XP', icon: Gift },
-              { key: 'workout' as ReminderType, label: 'Workout', description: 'When workout scheduled but not done', icon: Dumbbell }
+              { key: 'logMacros' as ReminderType, label: isTrained ? 'Log Protocol' : 'Log Macros', description: 'When no food logged today', icon: UtensilsCrossed },
+              { key: 'checkIn' as ReminderType, label: theme.labels.checkIn, description: isTrained ? 'When report not submitted' : 'When not checked in', icon: CheckCircle2 },
+              { key: 'claimXP' as ReminderType, label: isTrained ? `Claim ${theme.labels.xp}` : 'Claim XP', description: `On Sunday with pending ${theme.labels.xp}`, icon: Gift },
+              { key: 'workout' as ReminderType, label: isTrained ? 'Training' : 'Workout', description: isTrained ? 'When training scheduled but not done' : 'When workout scheduled but not done', icon: Dumbbell }
             ]).map(({ key, label, description, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setReminderPreference(key, !reminderPreferences[key])}
-                className="w-full flex items-center justify-between p-3 rounded-xl glass-subtle hover:bg-white/10 transition-all duration-150"
+                className={`w-full flex items-center justify-between p-3 transition-all duration-150 ${
+                  isTrained ? 'rounded bg-surface-elevated hover:bg-surface-elevated/80' : 'rounded-xl glass-subtle hover:bg-white/10'
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon size={20} className="text-gray-400" />
+                  <Icon size={20} className="text-text-secondary" />
                   <div className="text-left">
                     <p className="font-medium text-sm">{label}</p>
-                    <p className="text-xs text-gray-500">{description}</p>
+                    <p className="text-xs text-text-secondary">{description}</p>
                   </div>
                 </div>
-                <div className={`w-11 h-6 rounded-full transition-all duration-150 flex items-center ${
-                  reminderPreferences[key] ? 'bg-accent-primary justify-end' : 'bg-white/10 justify-start'
+                <div className={`w-11 h-6 transition-all duration-150 flex items-center ${
+                  isTrained ? 'rounded' : 'rounded-full'
+                } ${
+                  reminderPreferences[key] ? 'bg-primary justify-end' : 'bg-surface justify-start'
                 }`}>
                   <motion.div
                     layout
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    className={`w-5 h-5 rounded-full mx-0.5 ${reminderPreferences[key] ? 'bg-black' : 'bg-white/50'}`}
+                    className={`w-5 h-5 mx-0.5 ${isTrained ? 'rounded-sm' : 'rounded-full'} ${reminderPreferences[key] ? 'bg-text-on-primary' : 'bg-text-secondary/50'}`}
                   />
                 </div>
               </button>
@@ -620,9 +633,48 @@ export function Settings() {
           </div>
         </Card>
 
+        {/* Theme Toggle */}
+        <Card>
+          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+            APP MODE
+          </h3>
+          <div className="flex gap-3">
+            <button
+              onClick={() => !isTrained && toggleTheme()}
+              className={`flex-1 p-4 border transition-all duration-150 ${
+                isTrained ? 'rounded' : 'rounded-xl'
+              } ${
+                isTrained
+                  ? 'border-primary bg-primary/10'
+                  : 'border-transparent bg-surface-elevated hover:bg-surface-elevated/80'
+              }`}
+            >
+              <p className={`font-semibold ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                Protocol Mode
+              </p>
+              <p className="text-xs text-text-secondary">Trained theme</p>
+            </button>
+            <button
+              onClick={() => isTrained && toggleTheme()}
+              className={`flex-1 p-4 border transition-all duration-150 ${
+                isTrained ? 'rounded' : 'rounded-xl'
+              } ${
+                !isTrained
+                  ? 'border-primary bg-primary/10'
+                  : 'border-transparent bg-surface-elevated hover:bg-surface-elevated/80'
+              }`}
+            >
+              <p className="font-semibold">Standard Mode</p>
+              <p className="text-xs text-text-secondary">GYG theme</p>
+            </button>
+          </div>
+        </Card>
+
         {/* Data Management */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">DATA MANAGEMENT</h3>
+          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+            DATA MANAGEMENT
+          </h3>
           <div className="space-y-3">
             <Button
               variant="ghost"
@@ -676,16 +728,20 @@ export function Settings() {
 
         {/* Coach Dashboard */}
         {isCoach && (
-          <Card className="border border-accent-primary/30">
-            <h3 className="text-sm font-semibold text-accent-primary mb-4">COACH MODE</h3>
-            <p className="text-sm text-gray-400 mb-4">
-              You have coach privileges. View and manage your clients from the dashboard.
+          <Card className="border border-primary/30">
+            <h3 className={`text-sm font-semibold text-primary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+              {isTrained ? 'DOM/ME MODE' : 'COACH MODE'}
+            </h3>
+            <p className="text-sm text-text-secondary mb-4">
+              {isTrained
+                ? `You have ${theme.labels.coach.toLowerCase()} privileges. View and manage your ${theme.labels.client.toLowerCase()}s from the dashboard.`
+                : 'You have coach privileges. View and manage your clients from the dashboard.'}
             </p>
             <Button
               fullWidth
               onClick={() => navigate('/coach')}
             >
-              Open Coach Dashboard
+              Open {theme.labels.coachDashboard}
             </Button>
           </Card>
         )}
@@ -736,9 +792,13 @@ export function Settings() {
         {/* About */}
         <Card padding="sm">
           <div className="text-center">
-            <p className="text-sm text-gray-400">Gamify Your Gains</p>
-            <p className="text-xs text-gray-500">Version 1.0.0</p>
-            <p className="text-xs text-gray-600 mt-2">Made for hyperfocusers</p>
+            <p className={`text-sm text-text-secondary ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+              {theme.name}
+            </p>
+            <p className="text-xs text-text-secondary">Version 1.0.0</p>
+            <p className="text-xs text-text-secondary/60 mt-2">
+              {isTrained ? 'Structure creates freedom' : 'Made for hyperfocusers'}
+            </p>
           </div>
         </Card>
       </div>
@@ -830,6 +890,8 @@ export function Settings() {
 
 // Achievements Summary Card
 function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
   const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
   const getEarnedBadges = useAchievementsStore((state) => state.getEarnedBadges)
 
@@ -847,10 +909,12 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-400">ACHIEVEMENTS</h3>
+        <h3 className={`text-sm font-semibold text-text-secondary ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
+          {theme.labels.achievements.toUpperCase()}
+        </h3>
         <button
           onClick={onViewAll}
-          className="text-xs text-accent-primary font-medium flex items-center gap-1"
+          className="text-xs text-primary font-medium flex items-center gap-1"
         >
           View All
           <ChevronRight size={14} />
@@ -858,18 +922,18 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
       </div>
 
       <div className="flex items-center gap-4 mb-4">
-        <div className="w-16 h-16 rounded-full bg-bg-secondary flex items-center justify-center relative">
-          <Trophy size={28} className="text-accent-primary" />
-          <div className="absolute -bottom-1 -right-1 bg-accent-primary text-bg-primary text-xs font-bold px-1.5 py-0.5 rounded-full">
+        <div className={`w-16 h-16 bg-surface-elevated flex items-center justify-center relative ${isTrained ? 'rounded-lg' : 'rounded-full'}`}>
+          {isTrained ? <Award size={28} className="text-primary" /> : <Trophy size={28} className="text-primary" />}
+          <div className={`absolute -bottom-1 -right-1 bg-primary text-text-on-primary text-xs font-bold px-1.5 py-0.5 ${isTrained ? 'rounded' : 'rounded-full'}`}>
             {percentComplete}%
           </div>
         </div>
         <div className="flex-1">
           <p className="text-xl font-bold">
-            {earnedBadges.length} <span className="text-gray-500 font-normal text-base">/ {allBadges.length}</span>
+            {earnedBadges.length} <span className="text-text-secondary font-normal text-base">/ {allBadges.length}</span>
           </p>
-          <p className="text-sm text-gray-400 mb-2">Badges Earned</p>
-          <ProgressBar progress={percentComplete} size="sm" color="gradient" />
+          <p className="text-sm text-text-secondary mb-2">{isTrained ? 'Marks Earned' : 'Badges Earned'}</p>
+          <ProgressBar progress={percentComplete} size="sm" color={isTrained ? 'primary' : 'gradient'} />
         </div>
       </div>
 
@@ -879,14 +943,14 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
           {earnedBadges.slice(0, 5).map((badge) => (
             <div
               key={badge.id}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg ${rarityBg[badge.rarity]}`}
+              className={`w-10 h-10 flex items-center justify-center text-lg ${isTrained ? 'rounded' : 'rounded-lg'} ${rarityBg[badge.rarity]}`}
               title={badge.name}
             >
-              {badge.icon}
+              {isTrained ? <Award size={18} /> : badge.icon}
             </div>
           ))}
           {earnedBadges.length > 5 && (
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-sm bg-bg-secondary text-gray-400">
+            <div className={`w-10 h-10 flex items-center justify-center text-sm bg-surface-elevated text-text-secondary ${isTrained ? 'rounded' : 'rounded-lg'}`}>
               +{earnedBadges.length - 5}
             </div>
           )}
@@ -894,8 +958,10 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
       )}
 
       {earnedBadges.length === 0 && (
-        <p className="text-sm text-gray-500 text-center py-2">
-          Complete check-ins and workouts to earn badges!
+        <p className="text-sm text-text-secondary text-center py-2">
+          {isTrained
+            ? 'Complete reports and training to earn marks!'
+            : 'Complete check-ins and workouts to earn badges!'}
         </p>
       )}
     </Card>

@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { useXPStore } from '@/stores'
+import { useTheme } from '@/themes'
 import { ProgressBar } from './ProgressBar'
 
 interface XPDisplayProps {
@@ -10,6 +11,9 @@ interface XPDisplayProps {
 
 export function XPDisplay({ compact = false, showPending = true }: XPDisplayProps) {
   const { totalXP, currentLevel, pendingXP, getCurrentLevelProgress, getXPForNextLevel, MAX_LEVEL } = useXPStore()
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
   const [displayXP, setDisplayXP] = useState(totalXP)
   const [xpGains, setXpGains] = useState<{ id: number; amount: number }[]>([])
 
@@ -53,9 +57,11 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-accent-primary font-bold font-digital">Lv.{currentLevel}</span>
+        <span className={`text-primary font-bold font-mono ${isTrained ? 'uppercase tracking-wide' : ''}`}>
+          {theme.labels.level} {currentLevel}
+        </span>
         <div className="w-20">
-          <ProgressBar progress={levelProgress} size="sm" color="gradient" />
+          <ProgressBar progress={levelProgress} size="sm" color="primary" />
         </div>
       </div>
     )
@@ -71,9 +77,9 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
             initial={{ opacity: 1, y: 0, x: '-50%' }}
             animate={{ opacity: 0, y: -40 }}
             exit={{ opacity: 0 }}
-            className="absolute left-1/2 -top-2 text-accent-success font-bold font-digital pointer-events-none z-10"
+            className="absolute left-1/2 -top-2 text-success font-bold font-mono pointer-events-none z-10"
           >
-            +{gain.amount} XP
+            +{gain.amount} {theme.labels.xp}
           </motion.div>
         ))}
       </AnimatePresence>
@@ -81,11 +87,11 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
       <div className="text-center">
         {/* Level display */}
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-2xl font-bold text-accent-primary text-glow-gold font-digital">
-            Level {currentLevel}
+          <span className={`text-2xl font-bold text-primary font-mono ${isTrained ? 'uppercase tracking-wider' : 'text-glow-primary'}`}>
+            {theme.labels.level} {currentLevel}
           </span>
           {currentLevel >= MAX_LEVEL && (
-            <span className="text-xs bg-accent-primary/20 text-accent-primary px-2 py-0.5 rounded-full font-semibold">
+            <span className={`text-xs bg-primary-muted text-primary px-2 py-0.5 font-semibold ${isTrained ? 'rounded' : 'rounded-full'}`}>
               MAX
             </span>
           )}
@@ -96,14 +102,14 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
           <ProgressBar
             progress={levelProgress}
             color="gradient"
-            size="lg"
+            size={isTrained ? 'lg' : 'lg'}
           />
         </div>
 
         {/* XP numbers */}
-        <div className="flex justify-between text-xs text-gray-500">
-          <span className="font-digital">{Math.round(levelProgress)}%</span>
-          <span className="font-digital">{xpToNextLevel.toLocaleString()} XP to next</span>
+        <div className="flex justify-between text-xs text-text-secondary">
+          <span className="font-mono">{Math.round(levelProgress)}%</span>
+          <span className="font-mono">{xpToNextLevel.toLocaleString()} {theme.labels.xp} to next</span>
         </div>
 
         {/* Pending XP indicator */}
@@ -111,12 +117,12 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 glass rounded-xl p-3 border border-accent-secondary/30"
+            className={`mt-3 p-3 border ${isTrained ? 'bg-surface border-border rounded' : 'glass rounded-xl border-secondary/30'}`}
           >
-            <p className="text-sm text-accent-secondary">
-              <span className="font-digital font-bold">+{pendingXP} XP</span> pending
+            <p className="text-sm text-secondary">
+              <span className="font-mono font-bold">+{pendingXP} {theme.labels.xp}</span> pending
             </p>
-            <p className="text-[10px] text-gray-500 mt-0.5">Claim on Sunday</p>
+            <p className="text-[10px] text-text-secondary mt-0.5">Claim on Sunday</p>
           </motion.div>
         )}
       </div>

@@ -1,28 +1,14 @@
 import { motion } from 'framer-motion'
+import { useTheme } from '@/themes'
 
 interface ProgressBarProps {
   progress: number
   maxProgress?: number
   showLabel?: boolean
   label?: string
-  color?: 'gold' | 'green' | 'cyan' | 'purple' | 'gradient' | 'success'
-  size?: 'sm' | 'md' | 'lg'
+  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'gold' | 'green' | 'cyan' | 'purple' | 'gradient'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   animate?: boolean
-}
-
-const colorClasses = {
-  gold: 'bg-accent-primary',
-  green: 'bg-accent-secondary',
-  cyan: 'bg-accent-primary',      // Map legacy cyan to gold
-  purple: 'bg-accent-secondary',  // Map legacy purple to green
-  gradient: 'progress-gradient',
-  success: 'bg-accent-success'
-}
-
-const sizeClasses = {
-  sm: 'h-1.5',
-  md: 'h-2',
-  lg: 'h-3'
 }
 
 export function ProgressBar({
@@ -30,23 +16,59 @@ export function ProgressBar({
   maxProgress = 100,
   showLabel = false,
   label,
-  color = 'gradient',
+  color = 'primary',
   size = 'md',
   animate = true
 }: ProgressBarProps) {
+  const { themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
   const percentage = Math.min((progress / maxProgress) * 100, 100)
+
+  // Map legacy colors to theme colors
+  const getColorClass = () => {
+    switch (color) {
+      case 'primary':
+      case 'gold':
+      case 'cyan':
+        return 'bg-xp-bar'
+      case 'secondary':
+      case 'green':
+      case 'purple':
+        return 'bg-secondary'
+      case 'success':
+        return 'bg-success'
+      case 'warning':
+        return 'bg-warning'
+      case 'gradient':
+        return isTrained
+          ? 'bg-gradient-to-r from-primary to-primary-hover'
+          : 'bg-gradient-to-r from-primary to-secondary'
+      default:
+        return 'bg-xp-bar'
+    }
+  }
+
+  const sizeClasses = {
+    sm: 'h-1',
+    md: 'h-2',
+    lg: 'h-3',
+    xl: 'h-4'  // Featured size for home screen rank bar
+  }
+
+  const borderRadius = isTrained ? 'rounded-sm' : 'rounded-full'
 
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+        <div className="flex justify-between text-xs text-text-secondary mb-1.5">
           <span>{label}</span>
-          <span className="font-digital">{Math.round(progress)}/{maxProgress}</span>
+          <span className="font-mono">{Math.round(progress)}/{maxProgress}</span>
         </div>
       )}
-      <div className={`w-full bg-white/5 rounded-full overflow-hidden ${sizeClasses[size]}`}>
+      <div className={`w-full bg-xp-bar-bg ${borderRadius} overflow-hidden ${sizeClasses[size]}`}>
         <motion.div
-          className={`h-full rounded-full ${colorClasses[color]}`}
+          className={`h-full ${borderRadius} ${getColorClass()}`}
           initial={animate ? { width: 0 } : { width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}

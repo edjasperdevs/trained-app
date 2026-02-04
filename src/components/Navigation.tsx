@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
+import { useTheme } from '@/themes'
 
 interface NavItem {
   path: string
@@ -18,9 +19,11 @@ const navItems: NavItem[] = [
 
 export function Navigation() {
   const location = useLocation()
+  const { themeId } = useTheme()
+  const isTrained = themeId === 'trained'
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass-elevated border-t border-white/10 safe-bottom z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
         {navItems.map(item => {
           const isActive = location.pathname === item.path
@@ -34,7 +37,7 @@ export function Navigation() {
               {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute -top-0.5 w-8 h-1 bg-accent-primary rounded-full shadow-lg shadow-accent-primary/30"
+                  className={`absolute -top-0.5 h-0.5 bg-primary ${isTrained ? 'w-10' : 'w-8 rounded-full shadow-lg shadow-primary/30'}`}
                 />
               )}
               <motion.div
@@ -43,11 +46,13 @@ export function Navigation() {
               >
                 <item.icon
                   size={22}
-                  strokeWidth={isActive ? 2.5 : 2}
-                  className={isActive ? 'text-accent-primary' : 'text-gray-400'}
+                  strokeWidth={isActive ? 2 : 1.5}
+                  className={isActive ? 'text-primary' : 'text-text-secondary'}
                 />
               </motion.div>
-              <span className={`text-[10px] mt-0.5 font-medium transition-colors duration-150 ${isActive ? 'text-accent-primary' : 'text-gray-500'}`}>
+              <span className={`text-[10px] mt-0.5 transition-colors duration-150 tracking-wider ${
+                isTrained ? 'uppercase font-medium' : 'font-medium'
+              } ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
                 {item.label}
               </span>
             </NavLink>

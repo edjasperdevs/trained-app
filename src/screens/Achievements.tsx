@@ -3,7 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Card, ProgressBar } from '@/components'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores'
-import { Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check } from 'lucide-react'
+import { useTheme } from '@/themes'
+import {
+  Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check, Award,
+  Zap, Star, Gem, Crown, Shield, Play, CheckCircle, LucideIcon
+} from 'lucide-react'
+
+// Map icon names to Lucide components
+const ICON_MAP: Record<string, LucideIcon> = {
+  Flame, Zap, Dumbbell, Shield, Crown, Beef, Target, Star, Sparkles,
+  ArrowUp, Gem, Play, CheckCircle, Trophy, Award
+}
+
+// Helper to render badge icon
+function BadgeIcon({ iconName, size = 24, className = '' }: { iconName: string; size?: number; className?: string }) {
+  const IconComponent = ICON_MAP[iconName] || Award
+  return <IconComponent size={size} className={className} />
+}
 
 const RARITY_ORDER: BadgeRarity[] = ['legendary', 'epic', 'rare', 'common']
 
@@ -37,14 +53,7 @@ const RARITY_GLOW: Record<BadgeRarity, string> = {
 
 type CategoryFilter = 'all' | 'streak' | 'workout' | 'nutrition' | 'level' | 'special'
 
-const categories: { id: CategoryFilter; label: string; icon: typeof Trophy }[] = [
-  { id: 'all', label: 'All', icon: Trophy },
-  { id: 'streak', label: 'Streak', icon: Flame },
-  { id: 'workout', label: 'Workout', icon: Dumbbell },
-  { id: 'nutrition', label: 'Nutrition', icon: Beef },
-  { id: 'level', label: 'Level', icon: ArrowUp },
-  { id: 'special', label: 'Special', icon: Sparkles },
-]
+// Categories are now generated inside the component to access theme
 
 interface BadgeCardProps {
   badge: Badge
@@ -78,10 +87,14 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
         {/* Badge Icon */}
         <div className={`relative ${!earned && 'grayscale opacity-40'}`}>
           <div className={`
-            w-14 h-14 rounded-xl flex items-center justify-center text-3xl
+            w-14 h-14 rounded-xl flex items-center justify-center
             ${earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-bg-secondary'}
           `}>
-            {badge.icon}
+            <BadgeIcon
+              iconName={badge.icon}
+              size={28}
+              className={earned ? RARITY_TEXT[badge.rarity] : 'text-gray-500'}
+            />
           </div>
           {earned && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-accent-success rounded-full flex items-center justify-center">
@@ -136,12 +149,24 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
 
 export function Achievements() {
   const navigate = useNavigate()
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
   const [filter, setFilter] = useState<CategoryFilter>('all')
 
   const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
   const getEarnedBadges = useAchievementsStore((state) => state.getEarnedBadges)
   const hasEarnedBadge = useAchievementsStore((state) => state.hasEarnedBadge)
   const getBadgeProgress = useAchievementsStore((state) => state.getBadgeProgress)
+
+  // Generate categories with theme-aware labels
+  const categories: { id: CategoryFilter; label: string; icon: typeof Trophy }[] = [
+    { id: 'all', label: 'All', icon: isTrained ? Award : Trophy },
+    { id: 'streak', label: isTrained ? 'Obedience' : 'Streak', icon: Flame },
+    { id: 'workout', label: isTrained ? 'Training' : 'Workout', icon: Dumbbell },
+    { id: 'nutrition', label: 'Nutrition', icon: Beef },
+    { id: 'level', label: theme.labels.level, icon: ArrowUp },
+    { id: 'special', label: 'Special', icon: Sparkles },
+  ]
 
   const allBadges = getAllBadges()
   const earnedBadges = getEarnedBadges()
@@ -199,17 +224,21 @@ export function Achievements() {
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-b from-bg-secondary to-bg-primary pt-8 pb-6 px-4">
+      <div className={`pt-8 pb-6 px-4 ${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-bg-secondary to-bg-primary'}`}>
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full bg-bg-card flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+            className={`w-10 h-10 bg-surface-elevated flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors ${isTrained ? 'rounded' : 'rounded-full'}`}
           >
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">Achievements</h1>
-            <p className="text-gray-400 text-sm">Track your progress</p>
+            <h1 className={`text-2xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+              {theme.labels.achievements}
+            </h1>
+            <p className="text-text-secondary text-sm">
+              {isTrained ? 'Track your marks of devotion' : 'Track your progress'}
+            </p>
           </div>
         </div>
 
@@ -263,8 +292,8 @@ export function Achievements() {
               <h3 className="font-semibold text-sm text-gray-400">CLOSEST TO UNLOCK</h3>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center text-2xl">
-                {closestBadge.badge.icon}
+              <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center">
+                <BadgeIcon iconName={closestBadge.badge.icon} size={24} className="text-accent-primary" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold">{closestBadge.badge.name}</p>

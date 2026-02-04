@@ -40,30 +40,30 @@ interface RemindersStore {
 
 const REMINDER_CONFIGS: Record<ReminderType, Omit<ActiveReminder, 'type'>> = {
   logMacros: {
-    title: 'Macro Inputs Incomplete',
-    description: "Log your fuel for today",
-    icon: '🍽️',
+    title: 'Log Macros',
+    description: "Track your nutrition for today.",
+    icon: 'Beef',
     action: 'Log',
     route: '/macros'
   },
   checkIn: {
-    title: 'Daily Standup Pending',
-    description: "Don't skip the retro. Check in today.",
-    icon: '✅',
+    title: 'Daily Check-in',
+    description: "Complete your daily check-in.",
+    icon: 'CheckCircle',
     action: 'Check In',
     route: '/'
   },
   claimXP: {
-    title: 'Weekly Release Ready',
-    description: "Claim your XP before EOD Sunday",
-    icon: '🎁',
-    action: 'Deploy',
+    title: 'Weekly Reward Ready',
+    description: "Claim your points before Sunday ends.",
+    icon: 'Gift',
+    action: 'Claim',
     route: '/'
   },
   workout: {
-    title: 'Scheduled Workout Pending',
-    description: "Time to execute",
-    icon: '🏋️',
+    title: 'Workout Scheduled',
+    description: "Time to train.",
+    icon: 'Dumbbell',
     action: 'Start',
     route: '/workouts'
   }

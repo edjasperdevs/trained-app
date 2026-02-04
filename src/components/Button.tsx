@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
+import { useTheme } from '@/themes'
 
 interface ButtonProps {
   children: ReactNode
@@ -12,19 +13,6 @@ interface ButtonProps {
   className?: string
 }
 
-const variantClasses = {
-  primary: 'bg-accent-primary text-black hover:bg-accent-primary/90 glow-gold font-bold',
-  secondary: 'bg-accent-secondary text-white hover:bg-accent-secondary/90 glow-green',
-  ghost: 'glass text-gray-300 hover:bg-white/10',
-  danger: 'bg-accent-danger text-white hover:bg-accent-danger/90'
-}
-
-const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-5 py-2.5 text-base',
-  lg: 'px-6 py-3 text-lg'
-}
-
 export function Button({
   children,
   onClick,
@@ -35,6 +23,49 @@ export function Button({
   type = 'button',
   className = ''
 }: ButtonProps) {
+  const { themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
+  // Theme-aware variant classes
+  const getVariantClasses = () => {
+    if (isTrained) {
+      switch (variant) {
+        case 'primary':
+          return 'bg-primary text-text-on-primary hover:bg-primary-hover font-heading uppercase tracking-widest font-semibold'
+        case 'secondary':
+          return 'bg-transparent border border-border text-text-primary hover:bg-secondary hover:border-secondary'
+        case 'ghost':
+          return 'bg-surface text-text-primary hover:bg-surface-elevated border border-border'
+        case 'danger':
+          return 'bg-error text-text-on-primary hover:opacity-90'
+        default:
+          return ''
+      }
+    } else {
+      // GYG styling
+      switch (variant) {
+        case 'primary':
+          return 'bg-primary text-text-on-primary hover:bg-primary-hover glow-primary font-bold'
+        case 'secondary':
+          return 'bg-secondary text-white hover:bg-secondary-hover'
+        case 'ghost':
+          return 'glass text-text-secondary hover:bg-white/10'
+        case 'danger':
+          return 'bg-error text-white hover:opacity-90'
+        default:
+          return ''
+      }
+    }
+  }
+
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-5 py-2.5 text-base',
+    lg: isTrained ? 'px-6 py-3.5 text-base' : 'px-6 py-3 text-lg'
+  }
+
+  const borderRadius = isTrained ? 'rounded' : 'rounded-xl'
+
   return (
     <motion.button
       type={type}
@@ -43,11 +74,12 @@ export function Button({
       whileTap={disabled ? undefined : { scale: 0.97 }}
       whileHover={disabled ? undefined : { scale: 1.02 }}
       className={`
-        ${variantClasses[variant]}
+        ${getVariantClasses()}
         ${sizeClasses[size]}
         ${fullWidth ? 'w-full' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-        rounded-xl font-semibold transition-all duration-150
+        ${borderRadius}
+        transition-all duration-150
         flex items-center justify-center gap-2
         ${className}
       `}

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Avatar, XPDisplay, Card, Button, ProgressBar, ReminderList, WeeklySummary, NearestBadges } from '@/components'
+import { Avatar, XPDisplay, Card, Button, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
 import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check } from 'lucide-react'
 import {
   useUserStore,
@@ -11,58 +11,17 @@ import {
   useAvatarStore,
   useRemindersStore
 } from '@/stores'
+import { useTheme, getStandingOrder } from '@/themes'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 
-const MOTIVATIONAL_MESSAGES = [
-  "Your body is a system. Optimize it.",
-  "Consistency is just a cron job you don't skip.",
-  "Progressive overload: version control for your muscles.",
-  "You don't need motivation. You need a system.",
-  "Ship the workout. Refactor later.",
-  "Today's session is a commit. Don't break the build.",
-  "Discipline is just automated decision-making.",
-  "Your future physique is in production. Keep deploying.",
-  "Rest days are garbage collection. They're not optional.",
-  "The best program is the one you actually execute.",
-  "Streak alive? That's uptime, baby.",
-  "Motivation is a runtime error. Systems are compiled.",
-  "Debug your diet. Optimize your training. Ship results.",
-  "One more set is just one more iteration.",
-  "Your PR is a release candidate. Push it to production.",
-  "Treat every workout like a sprint retrospective. What improved?",
-  "The gym doesn't have a staging environment. Every rep is production.",
-  "You're not grinding. You're compiling.",
-  "Abs are made in the kitchen. Like microservices, not monoliths.",
-  "Your body responds to consistent inputs. Be deterministic."
-]
-
-// Get days until next Sunday
-function getDaysUntilSunday(): number {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0 = Sunday
-  if (dayOfWeek === 0) return 0 // Today is Sunday
-  return 7 - dayOfWeek
-}
-
-// Get last 7 days for streak calendar
-function getLast7Days(): { date: string; dayLetter: string }[] {
-  const days = []
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    days.push({
-      date: date.toISOString().split('T')[0],
-      dayLetter: date.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)
-    })
-  }
-  return days
-}
-
 export function Home() {
   const navigate = useNavigate()
+  const { theme, themeId } = useTheme()
+  const isTrained = themeId === 'trained'
+
   const profile = useUserStore((state) => state.profile)
-  const { currentLevel, pendingXP, XP_VALUES, dailyLogs, getTodayLog } = useXPStore()
+  const { currentLevel, pendingXP, XP_VALUES, getTodayLog } = useXPStore()
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
   const { targets, isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore()
   // triggerReaction is handled in XPClaimModal
@@ -73,15 +32,28 @@ export function Home() {
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
-  const [message] = useState(() =>
-    MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]
-  )
 
   // Check if user has already checked in today
   const todayLog = getTodayLog()
   const hasCheckedInToday = todayLog?.checkIn || false
-  const daysUntilClaim = getDaysUntilSunday()
-  const last7Days = getLast7Days()
+
+  const todayWorkout = getTodayWorkout()
+  const workoutCompleted = isWorkoutCompletedToday()
+
+  // Get a contextual standing order/motivational message
+  const message = useMemo(() => {
+    // Determine context for message selection
+    if (profile?.streakPaused) {
+      return getStandingOrder(theme, 'missed')
+    }
+    if (!todayWorkout) {
+      return getStandingOrder(theme, 'rest')
+    }
+    if (canClaimXP) {
+      return getStandingOrder(theme, 'claim')
+    }
+    return getStandingOrder(theme, 'training')
+  }, [theme, profile?.streakPaused, todayWorkout, canClaimXP])
 
   // Reset justCheckedIn after animation
   useEffect(() => {
@@ -91,15 +63,6 @@ export function Home() {
     }
   }, [justCheckedIn])
 
-  // Check which days in the last 7 had check-ins
-  const checkInDays = new Set(
-    dailyLogs
-      .filter(log => log.checkIn)
-      .map(log => log.date)
-  )
-
-  const todayWorkout = getTodayWorkout()
-  const workoutCompleted = isWorkoutCompletedToday()
   const proteinHit = isProteinTargetHit()
   const caloriesHit = isCalorieTargetHit()
   const macroProgress = getTodayProgress()
@@ -118,7 +81,7 @@ export function Home() {
   const quests = [
     {
       id: 'workout',
-      label: todayWorkout ? `Complete ${todayWorkout.name}` : 'Rest Day',
+      label: todayWorkout ? `Complete ${todayWorkout.name}` : (isTrained ? 'Recovery Day' : 'Rest Day'),
       xp: todayWorkout ? XP_VALUES.WORKOUT : 0,
       completed: workoutCompleted || !todayWorkout,
       icon: Dumbbell,
@@ -140,7 +103,7 @@ export function Home() {
     },
     {
       id: 'checkin',
-      label: 'Daily Check-In',
+      label: theme.labels.checkIn,
       xp: XP_VALUES.CHECK_IN,
       completed: false,
       icon: CheckCircle2
@@ -150,25 +113,23 @@ export function Home() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-gradient-to-b from-white/[0.02] to-transparent pt-8 pb-6 px-4">
+      <div className={`${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-white/[0.02] to-transparent'} pt-8 pb-6 px-4`}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-gray-500 text-sm">Welcome back,</p>
-            <h1 className="text-2xl font-bold">{profile?.username || 'Champion'}</h1>
+            <p className={`text-text-secondary text-sm ${isTrained ? 'uppercase tracking-wider text-xs' : ''}`}>
+              {isTrained ? 'Welcome back,' : 'Welcome back,'}
+            </p>
+            <h1 className={`text-2xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+              {profile?.username || (isTrained ? 'Trainee' : 'Champion')}
+            </h1>
           </div>
           {profile?.currentStreak ? (
-            <div className="glass px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-              <Flame size={18} className="text-accent-primary" />
-              <span className="text-accent-primary font-bold font-digital">
-                {profile.currentStreak}
-              </span>
-              <span className="text-gray-400 text-sm">day streak</span>
-            </div>
+            <StreakBadge />
           ) : null}
         </div>
 
-        {/* Motivational message */}
-        <p className="text-gray-600 text-sm italic">{message}</p>
+        {/* Standing Order / Motivational message */}
+        <p className={`text-text-secondary text-sm ${isTrained ? '' : 'italic'}`}>{message}</p>
       </div>
 
       <div className="px-4 space-y-6">
@@ -186,27 +147,35 @@ export function Home() {
               exit={{ opacity: 0, y: -20 }}
             >
               <Card
-                className="bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 border-accent-primary cursor-pointer"
+                className={`cursor-pointer ${
+                  isTrained
+                    ? 'border-l-[3px] border-l-primary'
+                    : 'bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 border-accent-primary'
+                }`}
                 onClick={() => setShowCheckIn(true)}
               >
                 <div className="flex items-center gap-4">
                   <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
+                    animate={isTrained ? undefined : { scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                   >
-                    <Sparkles size={28} className="text-accent-primary" />
+                    <Sparkles size={28} className="text-primary" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className="font-bold text-lg">Daily standup pending</p>
-                    <p className="text-sm text-gray-400">
-                      Log today's progress and earn XP
+                    <p className={`font-bold text-lg ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
+                      {isTrained ? 'Daily Report Pending' : 'Daily Check-in'}
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      {isTrained
+                        ? `Complete your ${theme.labels.checkIn.toLowerCase()} to earn ${theme.labels.xp}`
+                        : `Log today's progress and earn ${theme.labels.xp}`}
                     </p>
                   </div>
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >
-                    <ChevronRight size={20} className="text-accent-primary" />
+                    <ChevronRight size={20} className="text-primary" />
                   </motion.div>
                 </div>
               </Card>
@@ -222,19 +191,21 @@ export function Home() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <Card className="bg-accent-success/20 border-accent-success">
+              <Card className="bg-success/20 border-success">
                 <div className="flex items-center gap-4">
                   <motion.div
                     initial={{ rotate: 0 }}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <Trophy size={28} className="text-accent-success" />
+                    <Trophy size={28} className="text-success" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className="font-bold text-accent-success">Build deployed.</p>
-                    <p className="text-sm text-gray-400">
-                      +{todayLog?.total || 0} XP committed
+                    <p className={`font-bold text-success ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                      {isTrained ? 'Report Submitted.' : 'Build deployed.'}
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      +{todayLog?.total || 0} {theme.labels.xp} {isTrained ? 'earned' : 'committed'}
                     </p>
                   </div>
                 </div>
@@ -266,33 +237,39 @@ export function Home() {
               exit={{ opacity: 0, y: -20 }}
             >
               <Card
-                className="bg-gradient-to-r from-accent-secondary/20 to-accent-primary/20 border-accent-secondary cursor-pointer"
+                className={`cursor-pointer ${
+                  isTrained
+                    ? 'border-l-[3px] border-l-warning'
+                    : 'bg-gradient-to-r from-accent-secondary/20 to-accent-primary/20 border-accent-secondary'
+                }`}
                 onClick={() => setShowClaimModal(true)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <motion.div
-                      animate={{
+                      animate={isTrained ? undefined : {
                         scale: [1, 1.2, 1],
                         rotate: [0, 10, -10, 0]
                       }}
                       transition={{ repeat: Infinity, duration: 1.5 }}
                     >
-                      <Gift size={28} className="text-accent-secondary" />
+                      <Gift size={28} className={isTrained ? 'text-warning' : 'text-accent-secondary'} />
                     </motion.div>
                     <div>
-                      <p className="font-bold text-lg">Weekly Release Ready</p>
-                      <p className="text-sm text-gray-400">
-                        {pendingXP} XP ready to deploy
+                      <p className={`font-bold text-lg ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
+                        {isTrained ? 'Reward Ritual Ready' : 'Weekly Release Ready'}
+                      </p>
+                      <p className="text-sm text-text-secondary">
+                        {pendingXP} {theme.labels.xp} {isTrained ? 'awaiting claim' : 'ready to deploy'}
                       </p>
                     </div>
                   </div>
                   <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
+                    animate={isTrained ? undefined : { scale: [1, 1.1, 1] }}
                     transition={{ repeat: Infinity, duration: 1 }}
                   >
                     <Button variant="secondary">
-                      DEPLOY
+                      {isTrained ? 'CLAIM' : 'DEPLOY'}
                     </Button>
                   </motion.div>
                 </div>
@@ -302,74 +279,35 @@ export function Home() {
         </AnimatePresence>
 
         {/* Streak Calendar */}
-        <Card>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Flame size={18} className="text-accent-primary" />
-              <span className="font-bold">
-                {profile?.currentStreak || 0} Day Uptime
-              </span>
-            </div>
-            {pendingXP > 0 && (
-              <span className="text-xs text-gray-400">
-                {daysUntilClaim === 0 ? 'Deploy today!' : `${daysUntilClaim}d until release`}
-              </span>
-            )}
-          </div>
-          <div className="flex justify-between">
-            {last7Days.map((day, index) => {
-              const isToday = index === 6
-              const hasCheckIn = checkInDays.has(day.date)
+        <StreakDisplay />
 
-              return (
-                <div key={day.date} className="flex flex-col items-center gap-1">
-                  <span className="text-xs text-gray-500">{day.dayLetter}</span>
-                  <motion.div
-                    initial={isToday && hasCheckIn ? { scale: 0 } : false}
-                    animate={{ scale: 1 }}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm
-                      ${hasCheckIn
-                        ? 'bg-accent-success text-white'
-                        : isToday
-                          ? 'bg-bg-card border-2 border-accent-primary border-dashed'
-                          : 'bg-bg-card text-gray-600'
-                      }
-                    `}
-                  >
-                    {hasCheckIn ? '✓' : isToday ? '?' : '·'}
-                  </motion.div>
-                </div>
-              )
-            })}
-          </div>
-          {profile?.longestStreak && profile.longestStreak > (profile?.currentStreak || 0) && (
-            <p className="text-xs text-gray-500 text-center mt-3">
-              Best: {profile.longestStreak} days
-            </p>
-          )}
-        </Card>
-
-        {/* "Never Miss Twice" warning */}
+        {/* "Never Miss Twice" / "Safe Word Recovery" warning */}
         {profile?.streakPaused && (
-          <Card className="bg-accent-warning/10 border-accent-warning/30">
+          <Card className="bg-warning/10 border-warning/30">
             <div className="flex items-center gap-3">
-              <AlertTriangle size={24} className="text-accent-warning" />
+              <AlertTriangle size={24} className="text-warning" />
               <div>
-                <p className="text-accent-warning font-semibold">System downtime detected</p>
-                <p className="text-sm text-gray-400">
-                  You missed yesterday. Check in today to restore uptime.
+                <p className={`text-warning font-semibold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                  {isTrained ? 'Safe Word Activated' : 'System downtime detected'}
+                </p>
+                <p className="text-sm text-text-secondary">
+                  {isTrained
+                    ? 'You missed yesterday. Report in today to maintain your streak.'
+                    : 'You missed yesterday. Check in today to restore uptime.'}
                 </p>
               </div>
             </div>
           </Card>
         )}
 
-        {/* Today's Quests */}
+        {/* Today's Quests / Daily Assignments */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">Today's Quests</h2>
-            <span className="text-sm text-gray-400 font-digital">
-              +{potentialXP} XP possible
+            <h2 className={`text-lg font-bold ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
+              {theme.labels.dailyQuests}
+            </h2>
+            <span className="text-sm text-text-secondary font-mono">
+              +{potentialXP} {theme.labels.xp} possible
             </span>
           </div>
 
@@ -387,28 +325,30 @@ export function Home() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      className={`w-8 h-8 flex items-center justify-center ${
+                        isTrained ? 'rounded' : 'rounded-lg'
+                      } ${
                         quest.completed
-                          ? 'bg-accent-success/20'
-                          : 'bg-bg-secondary'
+                          ? 'bg-success/20'
+                          : 'bg-surface-elevated'
                       }`}
                     >
                       {quest.completed ? (
-                        <Check size={18} className="text-accent-success" />
+                        <Check size={18} className="text-success" />
                       ) : (
-                        <quest.icon size={18} className="text-gray-400" />
+                        <quest.icon size={18} className="text-text-secondary" />
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className={quest.completed ? 'line-through text-gray-500' : ''}>
+                      <p className={quest.completed ? 'line-through text-text-secondary' : ''}>
                         {quest.label}
                       </p>
                     </div>
                     {quest.xp > 0 && !quest.isRest && (
-                      <span className={`text-sm font-digital font-bold ${
-                        quest.completed ? 'text-accent-success' : 'text-accent-primary'
+                      <span className={`text-sm font-mono font-bold ${
+                        quest.completed ? 'text-success' : 'text-primary'
                       }`}>
-                        +{quest.xp} XP
+                        +{quest.xp} {theme.labels.xp}
                       </span>
                     )}
                   </div>
@@ -418,16 +358,16 @@ export function Home() {
 
             {/* Streak Bonus */}
             {profile?.currentStreak ? (
-              <Card className="bg-accent-warning/10 border-accent-warning/20" padding="sm">
+              <Card className="bg-warning/10 border-warning/20" padding="sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent-warning/20">
-                    <Flame size={18} className="text-accent-warning" />
+                  <div className={`w-8 h-8 flex items-center justify-center bg-warning/20 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+                    <Flame size={18} className="text-warning" />
                   </div>
                   <div className="flex-1">
-                    <p>Streak Bonus ({profile.currentStreak} days)</p>
+                    <p>{isTrained ? 'Obedience Bonus' : 'Streak Bonus'} ({profile.currentStreak} days)</p>
                   </div>
-                  <span className="text-sm font-digital font-bold text-accent-warning">
-                    +{streakBonus} XP
+                  <span className="text-sm font-mono font-bold text-warning">
+                    +{streakBonus} {theme.labels.xp}
                   </span>
                 </div>
               </Card>
@@ -435,35 +375,37 @@ export function Home() {
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Macro Progress / Protocol Compliance */}
         {macroProgress && (
           <div>
-            <h2 className="text-lg font-bold mb-3">Macro Progress</h2>
+            <h2 className={`text-lg font-bold mb-3 ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
+              {isTrained ? 'Protocol Compliance' : 'Macro Progress'}
+            </h2>
             <Card>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">Protein</span>
-                    <span className="font-digital">
+                    <span className="text-text-secondary">Protein</span>
+                    <span className="font-mono">
                       {macroProgress.protein.current}g / {macroProgress.protein.target}g
                     </span>
                   </div>
                   <ProgressBar
                     progress={macroProgress.protein.percentage}
-                    color={proteinHit ? 'green' : 'cyan'}
+                    color={proteinHit ? 'success' : 'primary'}
                     size="md"
                   />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-400">Calories</span>
-                    <span className="font-digital">
+                    <span className="text-text-secondary">Calories</span>
+                    <span className="font-mono">
                       {macroProgress.calories.current} / {macroProgress.calories.target}
                     </span>
                   </div>
                   <ProgressBar
                     progress={macroProgress.calories.percentage}
-                    color={caloriesHit ? 'green' : 'purple'}
+                    color={caloriesHit ? 'success' : 'primary'}
                     size="md"
                   />
                 </div>
@@ -480,21 +422,23 @@ export function Home() {
 
         {/* Check-In Button */}
         {hasCheckedInToday ? (
-          <Card className="mt-6 bg-accent-success/10 border-accent-success/30">
+          <Card className="mt-6 bg-success/10 border-success/30">
             <div className="flex items-center justify-center gap-3 py-2">
-              <CheckCircle2 size={24} className="text-accent-success" />
+              <CheckCircle2 size={24} className="text-success" />
               <div className="text-center">
-                <p className="font-bold text-accent-success">Today's Build Complete</p>
-                <p className="text-sm text-gray-400">
-                  +{todayLog?.total || 0} XP committed
-                  {pendingXP > 0 && ` • ${pendingXP} XP pending release`}
+                <p className={`font-bold text-success ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                  {isTrained ? 'Daily Report Complete' : "Today's Build Complete"}
+                </p>
+                <p className="text-sm text-text-secondary">
+                  +{todayLog?.total || 0} {theme.labels.xp} {isTrained ? 'earned' : 'committed'}
+                  {pendingXP > 0 && ` • ${pendingXP} ${theme.labels.xp} ${isTrained ? 'pending claim' : 'pending release'}`}
                 </p>
               </div>
             </div>
           </Card>
         ) : (
           <motion.div
-            animate={{
+            animate={isTrained ? undefined : {
               boxShadow: [
                 '0 0 0 0 rgba(245, 158, 11, 0)',
                 '0 0 0 8px rgba(245, 158, 11, 0.2)',
@@ -502,7 +446,7 @@ export function Home() {
               ]
             }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="mt-6 rounded-xl"
+            className={`mt-6 ${isTrained ? '' : 'rounded-xl'}`}
           >
             <Button
               onClick={() => setShowCheckIn(true)}
@@ -511,12 +455,12 @@ export function Home() {
             >
               <span className="flex items-center justify-center gap-2">
                 <motion.span
-                  animate={{ rotate: [0, 10, -10, 0] }}
+                  animate={isTrained ? undefined : { rotate: [0, 10, -10, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 >
                   <Sparkles size={20} />
                 </motion.span>
-                Run Daily Standup
+                {isTrained ? 'Submit Daily Report' : 'Daily Check-in'}
               </span>
             </Button>
           </motion.div>
