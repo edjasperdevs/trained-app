@@ -61,7 +61,7 @@ Fixed by removing `\n` from all VITE_ variables in `.env.production.local`
 **Severity:** Critical
 **Priority:** P1
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/stores/accessStore.ts` (lines 166-173)
@@ -341,7 +341,7 @@ Demo key has strict limits, food search fails under load
 **Severity:** Medium
 **Priority:** P3
 **Phase Assignment:** Phase 2
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/screens/Onboarding.tsx` (GoalStep)
@@ -523,7 +523,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | Bug ID | Description | Severity | Priority | Phase | Status |
 |--------|-------------|----------|----------|-------|--------|
 | BUG-001 | Env vars corrupted with newlines | Critical | P1 | 2 | FIXED |
-| BUG-002 | Access code security flaw | Critical | P1 | 4 | Open |
+| BUG-002 | Access code security flaw | Critical | P1 | 4 | FIXED |
 | BUG-003 | Streak timezone off-by-one | Critical | P1 | 2 | FIXED |
 | BUG-004 | Auth error messages unclear | High | P1 | 4 | FIXED |
 | BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | Open |
@@ -535,7 +535,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-011 | No React error boundaries | Medium | P2 | 4 | FIXED |
 | BUG-012 | Sync partial failures silent | Medium | P3 | 4 | Open |
 | BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
-| BUG-014 | Goal weight not validated | Medium | P3 | 2 | Open |
+| BUG-014 | Goal weight not validated | Medium | P3 | 2 | FIXED |
 | BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | Open |
 | BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | Open |
 | BUG-017 | Check-in animation performance | Low | P3 | 3 | Open |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 10 |
-| Remaining | 11 |
+| Fixed | 12 |
+| Remaining | 9 |
 
 ---
 

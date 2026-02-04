@@ -67,6 +67,8 @@ export interface DailyMacroLog {
     logged: boolean
   }[]
   loggedMeals: LoggedMeal[]
+  // Snapshot of targets when day's first meal was logged (BUG-005 fix)
+  targetSnapshot?: MacroTargets
 }
 
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active'
@@ -241,11 +243,14 @@ export const useMacroStore = create<MacroStore>()(
             )
           }))
         } else {
+          // Capture target snapshot for the day when first meal is logged
+          const targets = get().targets
           const newLog: DailyMacroLog = {
             date: today,
             ...macros,
             meals: [{ mealNumber, ...macros, logged: true }],
-            loggedMeals: []
+            loggedMeals: [],
+            targetSnapshot: targets ? { ...targets } : undefined
           }
           set((state) => ({
             dailyLogs: [...state.dailyLogs, newLog]
@@ -301,11 +306,14 @@ export const useMacroStore = create<MacroStore>()(
             )
           }))
         } else {
+          // Capture target snapshot for the day when first meal is logged
+          const targets = get().targets
           const newLog: DailyMacroLog = {
             date: today,
             ...macros,
             meals: [],
-            loggedMeals: [newMeal]
+            loggedMeals: [newMeal],
+            targetSnapshot: targets ? { ...targets } : undefined
           }
           set((state) => ({
             dailyLogs: [...state.dailyLogs, newLog]
@@ -332,6 +340,8 @@ export const useMacroStore = create<MacroStore>()(
             )
           }))
         } else {
+          // Capture target snapshot for the day when first macro is logged
+          const targets = get().targets
           set((state) => ({
             dailyLogs: [
               ...state.dailyLogs,
@@ -342,7 +352,8 @@ export const useMacroStore = create<MacroStore>()(
                 carbs: macros.carbs ?? 0,
                 fats: macros.fats ?? 0,
                 meals: [],
-                loggedMeals: []
+                loggedMeals: [],
+                targetSnapshot: targets ? { ...targets } : undefined
               }
             ]
           }))
@@ -447,10 +458,14 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       getTodayProgress: () => {
-        const targets = get().targets
+        const currentTargets = get().targets
         const todayLog = get().getTodayLog()
 
-        if (!targets) return null
+        if (!currentTargets) return null
+
+        // Use the day's target snapshot if available (for consistency if targets changed mid-day)
+        // Fall back to current targets if no snapshot exists (backwards compatibility)
+        const targets = todayLog?.targetSnapshot || currentTargets
 
         const current = todayLog || { protein: 0, calories: 0, carbs: 0, fats: 0 }
 
@@ -479,17 +494,21 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       isProteinTargetHit: () => {
-        const targets = get().targets
+        const currentTargets = get().targets
         const todayLog = get().getTodayLog()
-        if (!targets || !todayLog) return false
+        if (!currentTargets || !todayLog) return false
+        // Use snapshot targets for consistency if available
+        const targets = todayLog.targetSnapshot || currentTargets
         // Within 10g of goal
         return Math.abs(todayLog.protein - targets.protein) <= 10
       },
 
       isCalorieTargetHit: () => {
-        const targets = get().targets
+        const currentTargets = get().targets
         const todayLog = get().getTodayLog()
-        if (!targets || !todayLog) return false
+        if (!currentTargets || !todayLog) return false
+        // Use snapshot targets for consistency if available
+        const targets = todayLog.targetSnapshot || currentTargets
         // Within 100 cal of goal
         return Math.abs(todayLog.calories - targets.calories) <= 100
       },
