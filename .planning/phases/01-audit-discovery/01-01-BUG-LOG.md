@@ -295,7 +295,7 @@ Complete app crash, poor user experience
 **Severity:** Medium
 **Priority:** P3
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/lib/sync.ts` (lines 20-90)
@@ -533,7 +533,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-009 | Missing macro calc loading state | Medium | P2 | 3 | FIXED |
 | BUG-010 | Onboarding progress not persisted | Medium | P2 | 3 | FIXED |
 | BUG-011 | No React error boundaries | Medium | P2 | 4 | FIXED |
-| BUG-012 | Sync partial failures silent | Medium | P3 | 4 | Open |
+| BUG-012 | Sync partial failures silent | Medium | P3 | 4 | FIXED |
 | BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
 | BUG-014 | Goal weight not validated | Medium | P3 | 2 | FIXED |
 | BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | Open |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 16 |
-| Remaining | 5 |
+| Fixed | 17 |
+| Remaining | 4 |
 
 ---
 
