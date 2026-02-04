@@ -205,7 +205,7 @@ Invalid data corrupts workout history and PR calculations
 **Severity:** High
 **Priority:** P2
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - Files: All stores using Zustand persist middleware
@@ -529,7 +529,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-005 | Macro target mid-day mismatch | High | P2 | 2 | FIXED |
 | BUG-006 | XP claim timezone bug | High | P1 | 4 | FIXED |
 | BUG-007 | No workout set validation | High | P2 | 2 | FIXED |
-| BUG-008 | No localStorage schema validation | High | P2 | 4 | Open |
+| BUG-008 | No localStorage schema validation | High | P2 | 4 | FIXED |
 | BUG-009 | Missing macro calc loading state | Medium | P2 | 3 | FIXED |
 | BUG-010 | Onboarding progress not persisted | Medium | P2 | 3 | FIXED |
 | BUG-011 | No React error boundaries | Medium | P2 | 4 | FIXED |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 19 |
-| Remaining | 2 |
+| Fixed | 20 |
+| Remaining | 1 |
 
 ---
 
