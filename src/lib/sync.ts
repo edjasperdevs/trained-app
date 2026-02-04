@@ -7,6 +7,71 @@
  */
 
 import { supabase, getSupabaseClient } from './supabase'
+
+// ==========================================
+// Retry Logic with Exponential Backoff
+// ==========================================
+
+interface RetryOptions {
+  maxRetries?: number
+  baseDelayMs?: number
+  maxDelayMs?: number
+}
+
+/**
+ * Wraps an async function with exponential backoff retry logic
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: RetryOptions = {}
+): Promise<T> {
+  const { maxRetries = 3, baseDelayMs = 500, maxDelayMs = 5000 } = options
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      if (attempt === maxRetries) {
+        break
+      }
+
+      // Exponential backoff with jitter
+      const delay = Math.min(
+        baseDelayMs * Math.pow(2, attempt) + Math.random() * 100,
+        maxDelayMs
+      )
+
+      console.log(`[Sync] Retry ${attempt + 1}/${maxRetries} after ${Math.round(delay)}ms:`, lastError.message)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+
+  throw lastError
+}
+
+/**
+ * Wrapper for sync functions that returns error object instead of throwing
+ */
+async function withRetryResult<T>(
+  fn: () => Promise<{ error: string | null; data?: T }>
+): Promise<{ error: string | null; data?: T }> {
+  try {
+    return await withRetry(async () => {
+      const result = await fn()
+      // If the function itself returns an error, don't retry
+      if (result.error && !result.error.includes('Not configured') && !result.error.includes('Not authenticated')) {
+        // Only retry on network/server errors, not on logical errors
+        throw new Error(result.error)
+      }
+      return result
+    })
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : String(error) }
+  }
+}
 import { useUserStore } from '@/stores/userStore'
 import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
@@ -319,22 +384,23 @@ export async function syncXPToCloud() {
 // ==========================================
 
 export async function syncAllToCloud() {
+  // Use retry wrapper for each sync operation
   const results = {
-    profile: await syncProfileToCloud(),
-    weightLogs: await syncWeightLogsToCloud(),
-    macroTargets: await syncMacroTargetsToCloud(),
-    savedMeals: await syncSavedMealsToCloud(),
-    xp: await syncXPToCloud()
+    profile: await withRetryResult(syncProfileToCloud),
+    weightLogs: await withRetryResult(syncWeightLogsToCloud),
+    macroTargets: await withRetryResult(syncMacroTargetsToCloud),
+    savedMeals: await withRetryResult(syncSavedMealsToCloud),
+    xp: await withRetryResult(syncXPToCloud)
   }
 
   // Sync today's macro log
   const today = new Date().toISOString().split('T')[0]
-  results.macroTargets = await syncDailyMacroLogToCloud(today)
+  results.macroTargets = await withRetryResult(() => syncDailyMacroLogToCloud(today))
 
-  // Sync recent workouts
+  // Sync recent workouts with retry
   const recentWorkouts = useWorkoutStore.getState().workoutLogs.slice(-10)
   for (const workout of recentWorkouts) {
-    await syncWorkoutLogToCloud(workout.id)
+    await withRetryResult(() => syncWorkoutLogToCloud(workout.id))
   }
 
   console.log('Sync results:', results)
@@ -342,9 +408,10 @@ export async function syncAllToCloud() {
 }
 
 export async function loadAllFromCloud() {
+  // Use retry wrapper for each load operation
   const results = {
-    profile: await loadProfileFromCloud(),
-    weightLogs: await loadWeightLogsFromCloud()
+    profile: await withRetryResult(loadProfileFromCloud),
+    weightLogs: await withRetryResult(loadWeightLogsFromCloud)
     // Add more loaders as needed
   }
 
