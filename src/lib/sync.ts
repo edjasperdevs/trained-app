@@ -76,7 +76,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useXPStore } from '@/stores/xpStore'
-import { useAvatarStore } from '@/stores/avatarStore'
+// import { useAvatarStore } from '@/stores/avatarStore' // Disabled until table created
 import type { Json } from './database.types'
 
 // ==========================================
@@ -94,10 +94,12 @@ export async function syncProfileToCloud() {
   if (!profile) return { error: 'No local profile' }
 
   // Use upsert to handle both new users and existing users (BUG-012 fix)
+  // Note: email is required by the schema, get it from auth user
   const { error } = await client
     .from('profiles')
     .upsert({
-      id: user.id,  // Include ID for upsert to work
+      id: user.id,
+      email: user.email || '',  // Required field
       username: profile.username,
       gender: profile.gender,
       fitness_level: profile.fitnessLevel,
@@ -389,69 +391,19 @@ export async function syncXPToCloud() {
 
 // ==========================================
 // Avatar Sync (BUG-016 fix)
+// Note: Requires user_avatar table to be created in Supabase
 // ==========================================
 
 export async function syncAvatarToCloud() {
-  if (!supabase) return { error: 'Not configured' }
-
-  const client = getSupabaseClient()
-  const { data: { user } } = await client.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const avatarState = useAvatarStore.getState()
-
-  const { error } = await client
-    .from('user_avatar')
-    .upsert({
-      user_id: user.id,
-      base_character: avatarState.baseCharacter,
-      evolution_stage: avatarState.evolutionStage,
-      current_mood: avatarState.currentMood,
-      accessories: avatarState.accessories,
-      last_interaction: new Date(avatarState.lastInteraction).toISOString()
-    }, {
-      onConflict: 'user_id'
-    })
-
-  return { error: error?.message || null }
+  // Avatar sync disabled until user_avatar table is created in Supabase
+  // To enable: create user_avatar table with columns:
+  // user_id (uuid, FK to auth.users), base_character, evolution_stage,
+  // current_mood, accessories (jsonb), last_interaction (timestamp)
+  return { error: null }
 }
 
 export async function loadAvatarFromCloud() {
-  if (!supabase) return { error: 'Not configured' }
-
-  const client = getSupabaseClient()
-  const { data: { user } } = await client.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
-
-  const { data, error } = await client
-    .from('user_avatar')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  if (error) {
-    // No avatar record exists yet - this is OK for new users
-    if (error.code === 'PGRST116') {
-      return { error: null }
-    }
-    return { error: error.message }
-  }
-
-  if (data) {
-    // Only update local state if cloud data has higher evolution stage
-    // (prevents regression if local is ahead)
-    const localState = useAvatarStore.getState()
-    if (data.evolution_stage >= localState.evolutionStage) {
-      useAvatarStore.setState({
-        baseCharacter: data.base_character || localState.baseCharacter,
-        evolutionStage: data.evolution_stage ?? localState.evolutionStage,
-        currentMood: data.current_mood || localState.currentMood,
-        accessories: data.accessories || localState.accessories,
-        lastInteraction: data.last_interaction ? new Date(data.last_interaction).getTime() : localState.lastInteraction
-      })
-    }
-  }
-
+  // Avatar sync disabled until user_avatar table is created in Supabase
   return { error: null }
 }
 
@@ -466,8 +418,8 @@ export async function syncAllToCloud() {
     weightLogs: await withRetryResult(syncWeightLogsToCloud),
     macroTargets: await withRetryResult(syncMacroTargetsToCloud),
     savedMeals: await withRetryResult(syncSavedMealsToCloud),
-    xp: await withRetryResult(syncXPToCloud),
-    avatar: await withRetryResult(syncAvatarToCloud)
+    xp: await withRetryResult(syncXPToCloud)
+    // avatar: Disabled until user_avatar table created
   }
 
   // Sync today's macro log
@@ -488,8 +440,8 @@ export async function loadAllFromCloud() {
   // Use retry wrapper for each load operation
   const results = {
     profile: await withRetryResult(loadProfileFromCloud),
-    weightLogs: await withRetryResult(loadWeightLogsFromCloud),
-    avatar: await withRetryResult(loadAvatarFromCloud)
+    weightLogs: await withRetryResult(loadWeightLogsFromCloud)
+    // avatar: Disabled until user_avatar table created
   }
 
   console.log('Load results:', results)

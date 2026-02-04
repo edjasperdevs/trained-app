@@ -626,7 +626,7 @@ export const useMacroStore = create<MacroStore>()(
           }
         }
 
-        return state as MacroStore
+        return state as unknown as MacroStore
       },
       // Log hydration errors
       onRehydrateStorage: () => {
