@@ -29,10 +29,10 @@ Polish and harden the Trained fitness gamification PWA for launch to 90k fitness
 3. PWA install flow verified on iOS Safari and Android Chrome
 4. Offline mode tested (app loads from cache, data persists)
 5. Issue backlog prioritized for remaining phases
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 01-01: Full user journey audit and bug documentation
+- [ ] 01-01-PLAN.md - Full user journey audit with checklist, bug log, and prioritized backlog
 
 ---
 
