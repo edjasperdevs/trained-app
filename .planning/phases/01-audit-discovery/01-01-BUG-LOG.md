@@ -318,7 +318,7 @@ Local data appears synced but cloud is out of sync
 **Severity:** Medium
 **Priority:** P1
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/lib/foodApi.ts` (line 47)
@@ -534,7 +534,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-010 | Onboarding progress not persisted | Medium | P2 | 3 | FIXED |
 | BUG-011 | No React error boundaries | Medium | P2 | 4 | FIXED |
 | BUG-012 | Sync partial failures silent | Medium | P3 | 4 | FIXED |
-| BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
+| BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | FIXED |
 | BUG-014 | Goal weight not validated | Medium | P3 | 2 | FIXED |
 | BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | FIXED |
 | BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | FIXED |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 20 |
-| Remaining | 1 |
+| Fixed | 21 |
+| Remaining | 0 |
 
 ---
 
