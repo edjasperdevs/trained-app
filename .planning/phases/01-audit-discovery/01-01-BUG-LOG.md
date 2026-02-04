@@ -387,7 +387,7 @@ All food searches fail offline
 **Severity:** Medium
 **Priority:** P3
 **Phase Assignment:** Phase 4
-**Status:** Open
+**Status:** FIXED
 
 **Environment:**
 - File: `src/lib/sync.ts`
@@ -537,7 +537,7 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | BUG-013 | USDA API demo key rate limited | Medium | P1 | 4 | Open |
 | BUG-014 | Goal weight not validated | Medium | P3 | 2 | FIXED |
 | BUG-015 | PWA doesn't cache food search | Medium | P3 | 4 | Open |
-| BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | Open |
+| BUG-016 | Avatar evolution not synced | Medium | P3 | 4 | FIXED |
 | BUG-017 | Check-in animation performance | Low | P3 | 3 | FIXED |
 | BUG-018 | Timezone handling inconsistent | High | P2 | 2 | FIXED |
 | BUG-019 | No retry logic for cloud API | Medium | P2 | 4 | FIXED |
@@ -559,8 +559,8 @@ Component tests don't wrap with ThemeProvider, 42/138 tests fail
 | P2 | 10 |
 | P3 | 5 |
 | P4 | 0 |
-| Fixed | 15 |
-| Remaining | 6 |
+| Fixed | 16 |
+| Remaining | 5 |
 
 ---
 
