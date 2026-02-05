@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Button, Card, BadgeUnlockModal } from '@/components'
+import { Button, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
@@ -153,7 +153,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center overflow-hidden"
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center overflow-hidden"
         onClick={phase === 'complete' || phase === 'levelup' ? handleClose : undefined}
       >
         {/* Confetti */}
@@ -166,16 +166,16 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         )}
 
         <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ type: 'spring', damping: 20 }}
-          className="w-full max-w-md mx-4"
+          initial={{ y: '100%' }}
+          animate={{ y: 0 }}
+          exit={{ y: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className="w-full max-w-md bg-surface max-h-[90vh] overflow-y-auto rounded-t-lg sm:rounded-lg"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Preview Phase */}
           {phase === 'preview' && (
-            <Card className="bg-surface">
+            <div className="p-6">
               <div className="text-center mb-6">
                 <div className="mb-4">
                   <Gift size={56} className="mx-auto text-warning" />
@@ -227,12 +227,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                   </span>
                 </Button>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Claiming Phase - XP Count Up */}
           {phase === 'claiming' && (
-            <div className="text-center py-12">
+            <div className="text-center p-6">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -266,7 +266,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
 
           {/* Complete Phase */}
           {phase === 'complete' && claimResult && (
-            <Card className="bg-surface text-center">
+            <div className="p-6 text-center">
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -327,12 +327,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               <Button onClick={handleClose} fullWidth>
                 Continue
               </Button>
-            </Card>
+            </div>
           )}
 
           {/* Level Up Phase */}
           {phase === 'levelup' && claimResult && (
-            <div className="text-center py-8">
+            <div className="text-center p-6">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
