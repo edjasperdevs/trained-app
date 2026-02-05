@@ -47,8 +47,18 @@ const NUTRIENT_IDS = {
 const USDA_API_KEY = import.meta.env.VITE_USDA_API_KEY || 'DEMO_KEY'
 const USDA_API_BASE = 'https://api.nal.usda.gov/fdc/v1'
 
+// Rate limit cooldown: skip USDA for 5 minutes after a 429
+let usdaCooldownUntil = 0
+const USDA_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
+
 export async function searchFoods(query: string): Promise<FoodSearchResult[]> {
   if (!query.trim()) return []
+
+  // Skip USDA if in cooldown from rate limiting
+  if (Date.now() < usdaCooldownUntil) {
+    if (import.meta.env.DEV) console.log('[Food] USDA in cooldown, using Open Food Facts directly')
+    return searchOpenFoodFacts(query)
+  }
 
   // Try USDA first, fall back to Open Food Facts
   try {
@@ -78,6 +88,10 @@ async function searchUSDA(query: string): Promise<FoodSearchResult[]> {
   })
 
   if (!response.ok) {
+    if (response.status === 429) {
+      usdaCooldownUntil = Date.now() + USDA_COOLDOWN_MS
+      console.warn(`[Food] USDA rate limited (429). Cooling down for ${USDA_COOLDOWN_MS / 1000}s`)
+    }
     throw new Error(`USDA API error: ${response.status}`)
   }
 
