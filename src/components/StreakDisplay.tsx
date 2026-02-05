@@ -1,5 +1,4 @@
 import { motion } from 'motion/react'
-import { useTheme } from '@/themes'
 import { useXPStore, useUserStore } from '@/stores'
 import { Card } from './Card'
 import { Flame, Lock } from 'lucide-react'
@@ -31,9 +30,6 @@ function getDaysUntilSunday(): number {
 }
 
 export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const profile = useUserStore((state) => state.profile)
   const { dailyLogs, pendingXP } = useXPStore()
 
@@ -52,15 +48,15 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Flame size={18} className="text-primary" />
-          <span className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-            {profile?.currentStreak || 0} {isTrained ? 'Day' : 'Day Uptime'}
+          <span className="font-bold font-heading uppercase tracking-wide">
+            {profile?.currentStreak || 0} Day
           </span>
         </div>
         {pendingXP > 0 && (
           <span className="text-xs text-text-secondary">
             {daysUntilClaim === 0
-              ? (isTrained ? 'Claim today.' : 'Deploy today!')
-              : `${daysUntilClaim}d until ${isTrained ? 'claim' : 'release'}`
+              ? 'Claim today.'
+              : `${daysUntilClaim}d until claim`
             }
           </span>
         )}
@@ -74,21 +70,21 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
 
           return (
             <div key={day.date} className="flex flex-col items-center gap-1">
-              <span className={`text-xs text-text-secondary ${isTrained ? 'uppercase' : ''}`}>
+              <span className="text-xs text-text-secondary uppercase">
                 {day.dayLetter}
               </span>
               <motion.div
                 initial={isToday && hasCheckIn ? { scale: 0 } : false}
                 animate={{ scale: 1 }}
                 className={`
-                  ${isTrained ? 'w-8 h-8 rounded-sm' : 'w-8 h-8 rounded-full'}
+                  w-8 h-8 rounded-sm
                   flex items-center justify-center text-sm relative
                   ${hasCheckIn
                     ? 'bg-streak-active text-text-on-primary'
                     : isGraceDay
                       ? 'bg-warning text-text-on-primary'
                       : isToday
-                        ? `bg-surface border-2 border-primary ${isTrained ? 'border-dashed' : 'border-dashed'}`
+                        ? 'bg-surface border-2 border-primary border-dashed'
                         : 'bg-streak-inactive text-text-secondary'
                   }
                 `}
@@ -100,7 +96,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
                 ) : isToday ? (
                   '?'
                 ) : (
-                  isTrained ? '' : '·'
+                  ''
                 )}
               </motion.div>
             </div>
@@ -110,7 +106,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
 
       {profile?.longestStreak && profile.longestStreak > (profile?.currentStreak || 0) && (
         <p className="text-xs text-text-secondary text-center mt-3">
-          {isTrained ? 'Record:' : 'Best:'} {profile.longestStreak} days
+          Record: {profile.longestStreak} days
         </p>
       )}
     </>
@@ -125,24 +121,15 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
 
 // Compact inline streak badge
 export function StreakBadge() {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
   const profile = useUserStore((state) => state.profile)
 
   if (!profile?.currentStreak) return null
 
   return (
-    <div className={`px-3 py-1.5 flex items-center gap-1.5 ${
-      isTrained
-        ? 'bg-surface border border-border rounded'
-        : 'glass rounded-xl'
-    }`}>
+    <div className="px-3 py-1.5 flex items-center gap-1.5 bg-surface border border-border rounded">
       <Flame size={18} className="text-primary" />
       <span className="text-primary font-bold font-mono">
         {profile.currentStreak}
-      </span>
-      <span className="text-text-secondary text-sm">
-        {isTrained ? '' : 'day streak'}
       </span>
     </div>
   )

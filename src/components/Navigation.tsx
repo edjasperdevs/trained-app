@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
-import { useTheme } from '@/themes'
 
 interface NavItem {
   path: string
@@ -19,8 +18,6 @@ const navItems: NavItem[] = [
 
 export function Navigation() {
   const location = useLocation()
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   return (
     <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
@@ -39,7 +36,7 @@ export function Navigation() {
               {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className={`absolute -top-0.5 h-0.5 bg-primary ${isTrained ? 'w-10' : 'w-8 rounded-full shadow-lg shadow-primary/30'}`}
+                  className="absolute -top-0.5 h-0.5 bg-primary w-10"
                 />
               )}
               <motion.div
@@ -52,9 +49,7 @@ export function Navigation() {
                   className={isActive ? 'text-primary' : 'text-text-secondary'}
                 />
               </motion.div>
-              <span className={`text-[10px] mt-0.5 transition-colors duration-150 tracking-wider ${
-                isTrained ? 'uppercase font-medium' : 'font-medium'
-              } ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
+              <span className={`text-[10px] mt-0.5 transition-colors duration-150 tracking-wider uppercase font-medium ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
                 {item.label}
               </span>
             </NavLink>

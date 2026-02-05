@@ -1,6 +1,5 @@
 import { motion } from 'motion/react'
 import { ReactNode } from 'react'
-import { useTheme } from '@/themes'
 
 interface CardProps {
   children: ReactNode
@@ -34,36 +33,18 @@ export function Card({
   'aria-label': ariaLabel,
   'aria-disabled': ariaDisabled,
 }: CardProps) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const Component = onClick ? motion.button : motion.div
 
-  // Theme-aware variant classes
   const getVariantClasses = () => {
-    if (isTrained) {
-      switch (variant) {
-        case 'elevated':
-          return 'bg-surface-elevated border border-border'
-        case 'subtle':
-          return 'bg-surface/50 border border-border/50'
-        default:
-          return 'bg-surface border border-border'
-      }
-    } else {
-      // GYG uses glassmorphism
-      switch (variant) {
-        case 'elevated':
-          return 'glass-elevated'
-        case 'subtle':
-          return 'glass-subtle'
-        default:
-          return 'glass'
-      }
+    switch (variant) {
+      case 'elevated':
+        return 'bg-surface-elevated border border-border'
+      case 'subtle':
+        return 'bg-surface/50 border border-border/50'
+      default:
+        return 'bg-surface border border-border'
     }
   }
-
-  const borderRadius = isTrained ? 'rounded-md' : 'rounded-2xl'
 
   return (
     <Component
@@ -76,7 +57,7 @@ export function Card({
       whileTap={onClick ? { scale: 0.98 } : undefined}
       className={`
         ${getVariantClasses()}
-        ${borderRadius}
+        rounded-md
         ${paddingClasses[padding]}
         ${hover ? 'card-hover cursor-pointer' : ''}
         ${onClick ? 'text-left w-full' : ''}

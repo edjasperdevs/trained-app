@@ -7,7 +7,7 @@ import {
 import { Card } from './Card'
 import { ProgressBar } from './ProgressBar'
 import { useAchievementsStore, RARITY_COLORS, Badge, BadgeRarity } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 
 // Map icon names to Lucide components
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -16,13 +16,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 const RARITY_BG: Record<BadgeRarity, string> = {
-  common: 'bg-secondary/10',
-  rare: 'bg-info/10',
-  epic: 'bg-secondary/10',
-  legendary: 'bg-primary/10'
-}
-
-const TRAINED_RARITY_BG: Record<BadgeRarity, string> = {
   common: 'bg-surface-elevated',
   rare: 'bg-info/10',
   epic: 'bg-primary-muted',
@@ -44,11 +37,7 @@ interface BadgeCardProps {
 
 function BadgeCard({ badge, earned, earnedAt, showProgress = false }: BadgeCardProps) {
   const getBadgeProgress = useAchievementsStore((state) => state.getBadgeProgress)
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
   const progress = getBadgeProgress(badge.id)
-
-  const bgClass = isTrained ? TRAINED_RARITY_BG[badge.rarity] : RARITY_BG[badge.rarity]
 
   return (
     <motion.div
@@ -56,9 +45,9 @@ function BadgeCard({ badge, earned, earnedAt, showProgress = false }: BadgeCardP
       animate={{ opacity: 1, scale: 1 }}
       className={`
         relative p-3 border-2 transition-all
-        ${isTrained ? 'rounded' : 'rounded-lg'}
+        rounded
         ${earned ? RARITY_COLORS[badge.rarity] : 'border-border opacity-60'}
-        ${earned ? bgClass : 'bg-surface'}
+        ${earned ? RARITY_BG[badge.rarity] : 'bg-surface'}
       `}
     >
       <div className="flex items-start gap-3">
@@ -70,7 +59,7 @@ function BadgeCard({ badge, earned, earnedAt, showProgress = false }: BadgeCardP
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`font-semibold text-sm ${!earned && 'text-text-secondary'} ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+          <p className={`font-semibold text-sm ${!earned && 'text-text-secondary'} font-heading uppercase tracking-wide`}>
             {badge.name}
           </p>
           <p className="text-xs text-text-secondary truncate">
@@ -98,7 +87,7 @@ function BadgeCard({ badge, earned, earnedAt, showProgress = false }: BadgeCardP
       </div>
       {earned && (
         <div className="absolute -top-1 -right-1">
-          <span className={`text-sm ${isTrained ? 'text-primary' : ''}`}>✓</span>
+          <span className="text-sm text-primary">&#10003;</span>
         </div>
       )}
     </motion.div>
@@ -110,8 +99,6 @@ type CategoryFilter = 'all' | 'streak' | 'workout' | 'nutrition' | 'level' | 'sp
 export function BadgesSection() {
   const [filter, setFilter] = useState<CategoryFilter>('all')
   const [showAll, setShowAll] = useState(false)
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const earnedBadges = useAchievementsStore((state) => state.getEarnedBadges())
   const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
@@ -135,14 +122,14 @@ export function BadgesSection() {
     { id: 'streak', label: 'Streak', icon: <Flame size={14} /> },
     { id: 'workout', label: 'Workout', icon: <Dumbbell size={14} /> },
     { id: 'nutrition', label: 'Nutrition', icon: <Target size={14} /> },
-    { id: 'level', label: isTrained ? 'Rank' : 'Level', icon: <TrendingUp size={14} /> },
+    { id: 'level', label: 'Rank', icon: <TrendingUp size={14} /> },
   ]
 
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className={`text-sm font-semibold text-text-secondary ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
-          {theme.labels.achievements}
+        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider font-heading">
+          {LABELS.achievements}
         </h3>
         <span className="text-xs text-text-secondary">
           {earnedBadges.length}/{allBadges.length} earned
@@ -157,7 +144,7 @@ export function BadgesSection() {
             onClick={() => setFilter(cat.id)}
             className={`
               flex items-center gap-1 px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors
-              ${isTrained ? 'rounded' : 'rounded-full'}
+              rounded
               ${filter === cat.id
                 ? 'bg-primary text-text-on-primary'
                 : 'bg-surface text-text-secondary hover:text-text-primary'}
@@ -212,13 +199,9 @@ export function BadgesSection() {
 // Compact badge display for showing recent achievements
 export function RecentBadges({ limit = 3 }: { limit?: number }) {
   const earnedBadges = useAchievementsStore((state) => state.getEarnedBadges())
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
   const recentBadges = earnedBadges.slice(0, limit)
 
   if (recentBadges.length === 0) return null
-
-  const bgClass = isTrained ? TRAINED_RARITY_BG : RARITY_BG
 
   return (
     <div className="flex gap-2">
@@ -229,8 +212,8 @@ export function RecentBadges({ limit = 3 }: { limit?: number }) {
           animate={{ scale: 1 }}
           className={`
             w-10 h-10 border-2 flex items-center justify-center
-            ${isTrained ? 'rounded' : 'rounded-lg'}
-            ${RARITY_COLORS[badge.rarity]} ${bgClass[badge.rarity]}
+            rounded
+            ${RARITY_COLORS[badge.rarity]} ${RARITY_BG[badge.rarity]}
           `}
           title={`${badge.name}: ${badge.description}`}
         >
@@ -247,13 +230,9 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
   const hasEarnedBadge = useAchievementsStore((state) => state.hasEarnedBadge)
   const getBadgeProgress = useAchievementsStore((state) => state.getBadgeProgress)
   const getEarnedBadges = useAchievementsStore((state) => state.getEarnedBadges)
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const allBadges = getAllBadges()
   const earnedBadges = getEarnedBadges()
-
-  const bgClass = isTrained ? TRAINED_RARITY_BG : RARITY_BG
 
   // Get unearned badges sorted by progress
   const nearestBadges = allBadges
@@ -273,8 +252,8 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Trophy size={18} className="text-text-secondary" />
-          <span className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-            {theme.labels.achievements}
+          <span className="font-bold font-heading uppercase tracking-wide">
+            {LABELS.achievements}
           </span>
         </div>
         {onViewAll && (
@@ -282,7 +261,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
             onClick={onViewAll}
             className="text-xs text-primary font-medium"
           >
-            View All →
+            View All &rarr;
           </button>
         )}
       </div>
@@ -293,9 +272,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
           {earnedBadges.slice(0, 4).map((badge, i) => (
             <div
               key={badge.id}
-              className={`w-8 h-8 border-2 border-surface flex items-center justify-center text-sm ${
-                isTrained ? 'rounded' : 'rounded-full'
-              } ${bgClass[badge.rarity]}`}
+              className={`w-8 h-8 border-2 border-surface flex items-center justify-center text-sm rounded ${RARITY_BG[badge.rarity]}`}
               style={{ zIndex: 4 - i }}
             >
               <BadgeIcon iconName={badge.icon} size={14} />
@@ -310,8 +287,8 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
       {/* Nearest badges */}
       {nearestBadges.length > 0 ? (
         <div className="space-y-3">
-          <p className={`text-xs text-text-secondary uppercase tracking-wider font-semibold ${isTrained ? 'font-heading' : ''}`}>
-            {isTrained ? 'Almost Earned' : 'Almost Unlocked'}
+          <p className="text-xs text-text-secondary uppercase tracking-wider font-semibold font-heading">
+            Almost Earned
           </p>
           {nearestBadges.map(({ badge, progress }) => (
             <motion.div
@@ -320,14 +297,12 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-3"
             >
-              <div className={`w-10 h-10 flex items-center justify-center ${
-                isTrained ? 'rounded' : 'rounded-lg'
-              } ${bgClass[badge.rarity]}`}>
+              <div className={`w-10 h-10 flex items-center justify-center rounded ${RARITY_BG[badge.rarity]}`}>
                 <BadgeIcon iconName={badge.icon} size={20} className="text-text-secondary" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <p className={`text-sm font-medium truncate ${isTrained ? 'font-heading uppercase tracking-wide text-xs' : ''}`}>
+                  <p className="text-sm font-medium truncate font-heading uppercase tracking-wide text-xs">
                     {badge.name}
                   </p>
                   <span className="text-xs text-text-secondary ml-2 font-mono">
@@ -345,7 +320,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
         </div>
       ) : earnedBadges.length > 0 ? (
         <p className="text-sm text-text-secondary text-center py-2">
-          {isTrained ? 'Continue following the protocol to earn more.' : 'Keep going to unlock more badges!'}
+          Continue following the protocol to earn more.
         </p>
       ) : null}
     </Card>

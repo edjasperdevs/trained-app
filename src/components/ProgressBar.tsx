@@ -1,5 +1,4 @@
 import { motion } from 'motion/react'
-import { useTheme } from '@/themes'
 
 interface ProgressBarProps {
   progress: number
@@ -20,9 +19,6 @@ export function ProgressBar({
   size = 'md',
   animate = true
 }: ProgressBarProps) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const percentage = Math.min((progress / maxProgress) * 100, 100)
 
   // Map legacy colors to theme colors
@@ -41,9 +37,7 @@ export function ProgressBar({
       case 'warning':
         return 'bg-warning'
       case 'gradient':
-        return isTrained
-          ? 'bg-gradient-to-r from-primary to-primary-hover'
-          : 'bg-gradient-to-r from-primary to-secondary'
+        return 'bg-gradient-to-r from-primary to-primary-hover'
       default:
         return 'bg-xp-bar'
     }
@@ -56,8 +50,6 @@ export function ProgressBar({
     xl: 'h-4'  // Featured size for home screen rank bar
   }
 
-  const borderRadius = isTrained ? 'rounded-sm' : 'rounded-full'
-
   return (
     <div className="w-full">
       {showLabel && (
@@ -66,9 +58,9 @@ export function ProgressBar({
           <span className="font-mono">{Math.round(progress)}/{maxProgress}</span>
         </div>
       )}
-      <div className={`w-full bg-xp-bar-bg ${borderRadius} overflow-hidden ${sizeClasses[size]}`}>
+      <div className={`w-full bg-xp-bar-bg rounded-sm overflow-hidden ${sizeClasses[size]}`}>
         <motion.div
-          className={`h-full ${borderRadius} ${getColorClass()}`}
+          className={`h-full rounded-sm ${getColorClass()}`}
           initial={animate ? { width: 0 } : { width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}

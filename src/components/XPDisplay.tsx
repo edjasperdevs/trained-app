@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react'
 import { useState, useEffect } from 'react'
 import { useXPStore } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 import { ProgressBar } from './ProgressBar'
 
 interface XPDisplayProps {
@@ -11,8 +11,6 @@ interface XPDisplayProps {
 
 export function XPDisplay({ compact = false, showPending = true }: XPDisplayProps) {
   const { totalXP, currentLevel, pendingXP, getCurrentLevelProgress, getXPForNextLevel, MAX_LEVEL } = useXPStore()
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const [displayXP, setDisplayXP] = useState(totalXP)
   const [xpGains, setXpGains] = useState<{ id: number; amount: number }[]>([])
@@ -57,8 +55,8 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <span className={`text-primary font-bold font-mono ${isTrained ? 'uppercase tracking-wide' : ''}`}>
-          {theme.labels.level} {currentLevel}
+        <span className="text-primary font-bold font-mono uppercase tracking-wide">
+          {LABELS.level} {currentLevel}
         </span>
         <div className="w-20">
           <ProgressBar progress={levelProgress} size="sm" color="primary" />
@@ -79,7 +77,7 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
             exit={{ opacity: 0 }}
             className="absolute left-1/2 -top-2 text-success font-bold font-mono pointer-events-none z-10"
           >
-            +{gain.amount} {theme.labels.xp}
+            +{gain.amount} {LABELS.xp}
           </motion.div>
         ))}
       </AnimatePresence>
@@ -87,11 +85,11 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
       <div className="text-center">
         {/* Level display */}
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className={`text-2xl font-bold text-primary font-mono ${isTrained ? 'uppercase tracking-wider' : 'text-glow-primary'}`}>
-            {theme.labels.level} {currentLevel}
+          <span className="text-2xl font-bold text-primary font-mono uppercase tracking-wider">
+            {LABELS.level} {currentLevel}
           </span>
           {currentLevel >= MAX_LEVEL && (
-            <span className={`text-xs bg-primary-muted text-primary px-2 py-0.5 font-semibold ${isTrained ? 'rounded' : 'rounded-full'}`}>
+            <span className="text-xs bg-primary-muted text-primary px-2 py-0.5 font-semibold rounded">
               MAX
             </span>
           )}
@@ -102,14 +100,14 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
           <ProgressBar
             progress={levelProgress}
             color="gradient"
-            size={isTrained ? 'lg' : 'lg'}
+            size="lg"
           />
         </div>
 
         {/* XP numbers */}
         <div className="flex justify-between text-xs text-text-secondary">
           <span className="font-mono">{Math.round(levelProgress)}%</span>
-          <span className="font-mono">{xpToNextLevel.toLocaleString()} {theme.labels.xp} to next</span>
+          <span className="font-mono">{xpToNextLevel.toLocaleString()} {LABELS.xp} to next</span>
         </div>
 
         {/* Pending XP indicator */}
@@ -117,10 +115,10 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`mt-3 p-3 border ${isTrained ? 'bg-surface border-border rounded' : 'glass rounded-xl border-secondary/30'}`}
+            className="mt-3 p-3 border bg-surface border-border rounded"
           >
             <p className="text-sm text-secondary">
-              <span className="font-mono font-bold">+{pendingXP} {theme.labels.xp}</span> pending
+              <span className="font-mono font-bold">+{pendingXP} {LABELS.xp}</span> pending
             </p>
             <p className="text-[10px] text-text-secondary mt-0.5">Claim on Sunday</p>
           </motion.div>

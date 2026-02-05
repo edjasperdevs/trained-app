@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { Card } from './Card'
 import { useXPStore, useWorkoutStore, useMacroStore, useUserStore } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 import { Dumbbell, CheckCircle2, Target, Star, Zap, Flame } from 'lucide-react'
 
 interface WeeklyStats {
@@ -36,9 +36,6 @@ export function WeeklySummary() {
   const macroLogs = useMacroStore((state) => state.dailyLogs)
   const targets = useMacroStore((state) => state.targets)
   const profile = useUserStore((state) => state.profile)
-
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const stats: WeeklyStats = useMemo(() => {
     const startOfWeek = getStartOfWeek()
@@ -106,8 +103,8 @@ export function WeeklySummary() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className={`text-sm font-semibold text-text-secondary ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
-          {isTrained ? 'WEEKLY SUMMARY' : 'SPRINT SUMMARY'}
+        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider font-heading">
+          WEEKLY SUMMARY
         </h3>
         <span className="text-xs text-text-secondary">
           Day {daysSoFar} of 7
@@ -119,7 +116,7 @@ export function WeeklySummary() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`p-3 ${isTrained ? 'bg-surface-elevated rounded' : 'bg-surface rounded-lg'}`}
+          className="p-3 bg-surface-elevated rounded"
         >
           <div className="flex items-center gap-2 mb-1">
             <Dumbbell size={16} className="text-text-secondary" />
@@ -138,11 +135,11 @@ export function WeeklySummary() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.05 }}
-          className={`p-3 ${isTrained ? 'bg-surface-elevated rounded' : 'bg-surface rounded-lg'}`}
+          className="p-3 bg-surface-elevated rounded"
         >
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">{isTrained ? 'Reports' : 'Check-ins'}</span>
+            <span className="text-xs text-text-secondary">Reports</span>
           </div>
           <p className="text-xl font-bold font-mono">
             {stats.daysLogged}
@@ -157,7 +154,7 @@ export function WeeklySummary() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className={`p-3 ${isTrained ? 'bg-surface-elevated rounded' : 'bg-surface rounded-lg'}`}
+          className="p-3 bg-surface-elevated rounded"
         >
           <div className="flex items-center gap-2 mb-1">
             <Target size={16} className="text-text-secondary" />
@@ -173,11 +170,11 @@ export function WeeklySummary() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15 }}
-          className={`p-3 ${isTrained ? 'bg-surface-elevated rounded' : 'bg-surface rounded-lg'}`}
+          className="p-3 bg-surface-elevated rounded"
         >
           <div className="flex items-center gap-2 mb-1">
             <Star size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">{isTrained ? 'Full Compliance' : 'Perfect Days'}</span>
+            <span className="text-xs text-text-secondary">Full Compliance</span>
           </div>
           <p className="text-xl font-bold font-mono text-warning">
             {stats.perfectDays}
@@ -194,10 +191,10 @@ export function WeeklySummary() {
       >
         <div className="flex items-center gap-2">
           <Zap size={16} className="text-text-secondary" />
-          <span className="text-sm text-text-secondary">{isTrained ? 'Weekly' : 'Sprint'} {theme.labels.xp}</span>
+          <span className="text-sm text-text-secondary">Weekly {LABELS.xp}</span>
         </div>
         <span className="font-bold font-mono text-secondary">
-          +{stats.xpEarned} {theme.labels.xp}
+          +{stats.xpEarned} {LABELS.xp}
         </span>
       </motion.div>
 
@@ -211,7 +208,7 @@ export function WeeklySummary() {
         >
           <div className="flex items-center gap-2">
             <Flame size={16} className="text-text-secondary" />
-            <span className="text-sm text-text-secondary">{isTrained ? theme.labels.streak : 'Uptime'}</span>
+            <span className="text-sm text-text-secondary">{LABELS.streak}</span>
           </div>
           <span className="font-bold font-mono text-warning">
             {stats.currentStreak} days

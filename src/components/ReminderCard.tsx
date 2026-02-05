@@ -3,37 +3,22 @@ import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { Card, Button } from '@/components'
 import { useRemindersStore, ActiveReminder, ReminderType } from '@/stores/remindersStore'
-import { useTheme } from '@/themes'
 
 interface ReminderCardProps {
   reminder: ActiveReminder
   onDismiss?: () => void
 }
 
-const TYPE_STYLES: Record<ReminderType, { gyg: string; trained: string }> = {
-  checkIn: {
-    gyg: 'from-primary/20 to-secondary/20 border-primary',
-    trained: 'border-l-primary'
-  },
-  claimXP: {
-    gyg: 'from-secondary/20 to-primary/20 border-secondary',
-    trained: 'border-l-secondary'
-  },
-  workout: {
-    gyg: 'from-warning/20 to-primary/20 border-warning',
-    trained: 'border-l-warning'
-  },
-  logMacros: {
-    gyg: 'from-info/20 to-secondary/20 border-info',
-    trained: 'border-l-info'
-  }
+const TYPE_STYLES: Record<ReminderType, string> = {
+  checkIn: 'border-l-primary',
+  claimXP: 'border-l-secondary',
+  workout: 'border-l-warning',
+  logMacros: 'border-l-info',
 }
 
 export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
   const navigate = useNavigate()
   const dismissReminder = useRemindersStore((state) => state.dismissReminder)
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const handleAction = () => {
     navigate(reminder.route)
@@ -55,23 +40,15 @@ export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
       transition={{ duration: 0.2 }}
     >
       <Card
-        className={`cursor-pointer ${
-          isTrained
-            ? `border-l-[3px] ${style.trained}`
-            : `bg-gradient-to-r ${style.gyg}`
-        }`}
+        className={`cursor-pointer border-l-[3px] ${style}`}
         onClick={handleAction}
       >
         <div className="flex items-center gap-3">
-          <motion.div
-            animate={isTrained ? undefined : { scale: [1, 1.1, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="text-2xl"
-          >
+          <div className="text-2xl">
             {reminder.icon}
-          </motion.div>
+          </div>
           <div className="flex-1 min-w-0">
-            <p className={`font-bold text-sm ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+            <p className="font-bold text-sm font-heading uppercase tracking-wide">
               {reminder.title}
             </p>
             <p className="text-xs text-text-secondary truncate">{reminder.description}</p>

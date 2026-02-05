@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from './Button'
-import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores/achievementsStore'
-import { useTheme } from '@/themes'
+import { useAchievementsStore, Badge, BadgeRarity } from '@/stores/achievementsStore'
+import { LABELS } from '@/design/constants'
 import { Award, ChevronRight, Sparkles } from 'lucide-react'
 
 interface BadgeUnlockModalProps {
@@ -17,13 +17,6 @@ const RARITY_LABELS: Record<BadgeRarity, string> = {
   legendary: 'Legendary'
 }
 
-const RARITY_GLOW: Record<BadgeRarity, string> = {
-  common: 'shadow-secondary/50',
-  rare: 'shadow-info/50',
-  epic: 'shadow-primary/50',
-  legendary: 'shadow-warning/50'
-}
-
 const RARITY_TEXT: Record<BadgeRarity, string> = {
   common: 'text-text-secondary',
   rare: 'text-info',
@@ -32,25 +25,18 @@ const RARITY_TEXT: Record<BadgeRarity, string> = {
 }
 
 const RARITY_BG: Record<BadgeRarity, string> = {
-  common: 'from-secondary/20 to-secondary/20',
-  rare: 'from-info/20 to-info/20',
-  epic: 'from-primary/20 to-primary/20',
-  legendary: 'from-warning/20 to-warning/10'
-}
-
-// Trained theme rarity styles
-const TRAINED_RARITY_TEXT: Record<BadgeRarity, string> = {
-  common: 'text-text-secondary',
-  rare: 'text-info',
-  epic: 'text-primary',
-  legendary: 'text-warning'
-}
-
-const TRAINED_RARITY_BG: Record<BadgeRarity, string> = {
   common: 'bg-surface-elevated border-border',
   rare: 'bg-info/10 border-info/30',
   epic: 'bg-primary-muted border-primary/30',
   legendary: 'bg-warning/10 border-warning/30'
+}
+
+// Confetti colors by rarity
+const CONFETTI_COLORS: Record<BadgeRarity, string[]> = {
+  common: ['#4A4A4A', '#5C5C5C', '#3A3A3A'],
+  rare: ['#3A5A7A', '#4A6A8A', '#2A4A6A'],
+  epic: ['#8B1A1A', '#A52222', '#6B1010'],
+  legendary: ['#8B6914', '#AB8924', '#6B5004']
 }
 
 // Confetti particle component
@@ -122,7 +108,7 @@ function SparkleEffect({ delay }: { delay: number }) {
   )
 }
 
-function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number; isTrained: boolean }) {
+function BadgeDisplay({ badge, index }: { badge: Badge; index: number }) {
   const [showSparkles, setShowSparkles] = useState(false)
 
   useEffect(() => {
@@ -132,7 +118,7 @@ function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0, rotate: isTrained ? 0 : -180 }}
+      initial={{ opacity: 0, scale: 0, rotate: 0 }}
       animate={{ opacity: 1, scale: 1, rotate: 0 }}
       transition={{
         type: 'spring',
@@ -153,45 +139,14 @@ function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number
           </div>
         )}
 
-        {/* Glow ring for legendary/epic */}
-        {!isTrained && (badge.rarity === 'legendary' || badge.rarity === 'epic') && (
-          <motion.div
-            className={`absolute inset-0 rounded-full blur-xl ${
-              badge.rarity === 'legendary' ? 'bg-warning' : 'bg-primary'
-            }`}
-            animate={{
-              opacity: [0.3, 0.6, 0.3],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }}
-          />
-        )}
-
         {/* Badge icon */}
         <motion.div
           className={`
             relative w-24 h-24 flex items-center justify-center
-            ${isTrained
-              ? `${TRAINED_RARITY_BG[badge.rarity]} border-2 rounded-lg`
-              : `bg-gradient-to-br ${RARITY_BG[badge.rarity]} border-4 ${RARITY_COLORS[badge.rarity]} rounded-full shadow-lg ${RARITY_GLOW[badge.rarity]}`
-            }
+            ${RARITY_BG[badge.rarity]} border-2 rounded-lg
           `}
-          animate={isTrained ? undefined : { y: [0, -5, 0] }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut'
-          }}
         >
-          {isTrained ? (
-            <Award size={48} className={TRAINED_RARITY_TEXT[badge.rarity]} />
-          ) : (
-            <span className="text-5xl">{badge.icon}</span>
-          )}
+          <Award size={48} className={RARITY_TEXT[badge.rarity]} />
         </motion.div>
       </div>
 
@@ -202,10 +157,10 @@ function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number
         transition={{ delay: 0.6 + index * 0.5 }}
         className="mt-4 text-center"
       >
-        <p className={`text-xs font-semibold uppercase tracking-wider ${isTrained ? TRAINED_RARITY_TEXT[badge.rarity] : RARITY_TEXT[badge.rarity]}`}>
+        <p className={`text-xs font-semibold uppercase tracking-wider ${RARITY_TEXT[badge.rarity]}`}>
           {RARITY_LABELS[badge.rarity]}
         </p>
-        <h3 className={`text-xl font-bold mt-1 ${isTrained ? 'font-heading' : ''}`}>{badge.name}</h3>
+        <h3 className="text-xl font-bold mt-1 font-heading">{badge.name}</h3>
         <p className="text-sm text-text-secondary mt-1">{badge.description}</p>
       </motion.div>
     </motion.div>
@@ -215,8 +170,6 @@ function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number
 export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
   const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const allBadges = getAllBadges()
   const badges = badgeIds
@@ -228,22 +181,7 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
   const currentBadge = badges[currentIndex]
   const hasMore = currentIndex < badges.length - 1
 
-  // Confetti colors based on theme and rarity
-  const confettiColors: Record<BadgeRarity, string[]> = isTrained
-    ? {
-        common: ['#4A4A4A', '#5C5C5C', '#3A3A3A'],
-        rare: ['#3A5A7A', '#4A6A8A', '#2A4A6A'],
-        epic: ['#8B1A1A', '#A52222', '#6B1010'],
-        legendary: ['#8B6914', '#AB8924', '#6B5004']
-      }
-    : {
-        common: ['#9CA3AF', '#6B7280', '#D1D5DB', '#E5E7EB'],
-        rare: ['#3B82F6', '#60A5FA', '#93C5FD', '#2563EB'],
-        epic: ['#8B5CF6', '#A78BFA', '#C4B5FD', '#7C3AED'],
-        legendary: ['#F59E0B', '#FBBF24', '#FCD34D', '#D97706', '#FFD700']
-      }
-
-  const colors = confettiColors[currentBadge.rarity]
+  const colors = CONFETTI_COLORS[currentBadge.rarity]
 
   const handleNext = () => {
     if (hasMore) {
@@ -264,10 +202,10 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-background/90 backdrop-blur-sm z-[100] flex items-center justify-center overflow-hidden"
       >
-        {/* Confetti - only for GYG or legendary/epic in Trained */}
-        {(!isTrained || currentBadge.rarity === 'legendary' || currentBadge.rarity === 'epic') && (
+        {/* Confetti for legendary/epic badges */}
+        {(currentBadge.rarity === 'legendary' || currentBadge.rarity === 'epic') && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {Array.from({ length: isTrained ? 30 : 60 }).map((_, i) => (
+            {Array.from({ length: 30 }).map((_, i) => (
               <Confetti
                 key={`${currentIndex}-${i}`}
                 delay={i * 0.03}
@@ -293,14 +231,9 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
             className="mb-8"
           >
             <motion.p
-              className={`text-sm font-semibold text-primary uppercase tracking-widest ${isTrained ? 'font-heading' : ''}`}
-              animate={isTrained ? undefined : { opacity: [1, 0.7, 1] }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity
-              }}
+              className="text-sm font-semibold text-primary uppercase tracking-widest font-heading"
             >
-              {theme.labels.achievements.replace('s', '')} Unlocked
+              {LABELS.achievements.replace('s', '')} Unlocked
             </motion.p>
           </motion.div>
 
@@ -309,7 +242,6 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
             key={currentBadge.id}
             badge={currentBadge}
             index={0}
-            isTrained={isTrained}
           />
 
           {/* Progress indicator for multiple badges */}
@@ -323,9 +255,7 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
               {badges.map((_, i) => (
                 <div
                   key={i}
-                  className={`w-2 h-2 transition-colors ${
-                    isTrained ? 'rounded-sm' : 'rounded-full'
-                  } ${
+                  className={`w-2 h-2 transition-colors rounded-sm ${
                     i === currentIndex ? 'bg-primary' : 'bg-border'
                   }`}
                 />
@@ -343,11 +273,11 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
             <Button onClick={handleNext} fullWidth size="lg">
               {hasMore ? (
                 <span className="flex items-center justify-center gap-2">
-                  {isTrained ? 'NEXT' : 'Next Badge'}
+                  NEXT
                   <ChevronRight size={18} />
                 </span>
               ) : (
-                isTrained ? 'CONTINUE' : 'Awesome!'
+                'CONTINUE'
               )}
             </Button>
           </motion.div>
