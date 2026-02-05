@@ -26,9 +26,9 @@ export const gygTheme: AppTheme = {
     minimalWorkout: 'Quick Workout',
     neverMissTwice: 'Never Miss Twice',
     avatarClasses: {
-      warrior: 'Warrior',
-      mage: 'Mage',
-      rogue: 'Rogue',
+      dominant: 'Warrior',
+      switch: 'Mage',
+      submissive: 'Rogue',
     },
   },
 

@@ -76,7 +76,7 @@ const REACTION_MESSAGES = {
 export const useAvatarStore = create<AvatarStore>()(
   persist(
     (set, get) => ({
-      baseCharacter: 'warrior',
+      baseCharacter: 'dominant',
       evolutionStage: 0,
       currentMood: 'neutral',
       accessories: [],
@@ -159,7 +159,7 @@ export const useAvatarStore = create<AvatarStore>()(
       },
 
       resetAvatar: () => set({
-        baseCharacter: 'warrior',
+        baseCharacter: 'dominant',
         evolutionStage: 0,
         currentMood: 'neutral',
         accessories: [],
@@ -185,7 +185,7 @@ export const useAvatarStore = create<AvatarStore>()(
           const parsed = JSON.parse(data)
           if (parsed.avatar) {
             set({
-              baseCharacter: parsed.avatar.baseCharacter || 'warrior',
+              baseCharacter: parsed.avatar.baseCharacter || 'dominant',
               evolutionStage: parsed.avatar.evolutionStage || 1,
               currentMood: parsed.avatar.currentMood || 'neutral',
               accessories: parsed.avatar.accessories || [],

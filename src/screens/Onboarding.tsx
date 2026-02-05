@@ -147,7 +147,7 @@ const defaultOnboardingData: OnboardingData = {
   height: 68, // 5'8"
   age: 25,
   goal: 'maintain',
-  avatarBase: 'warrior',
+  avatarBase: 'dominant',
   units: 'imperial'
 }
 
@@ -1063,29 +1063,29 @@ function AvatarStep({
   const isTrained = themeId === 'trained'
 
   const gygOptions: { base: AvatarBase; label: string; icon: LucideIcon; color: string; description: string }[] = [
-    { base: 'warrior', label: 'Warrior', icon: Sword, color: 'text-red-400', description: 'Strength and discipline' },
-    { base: 'mage', label: 'Mage', icon: Wand2, color: 'text-purple-400', description: 'Knowledge and power' },
-    { base: 'rogue', label: 'Rogue', icon: Moon, color: 'text-blue-400', description: 'Speed and agility' }
+    { base: 'dominant', label: 'Warrior', icon: Sword, color: 'text-red-400', description: 'Strength and discipline' },
+    { base: 'switch', label: 'Mage', icon: Wand2, color: 'text-purple-400', description: 'Knowledge and power' },
+    { base: 'submissive', label: 'Rogue', icon: Moon, color: 'text-blue-400', description: 'Speed and agility' }
   ]
 
   const trainedOptions: { base: AvatarBase; label: string; description: string; icon: LucideIcon; color: string }[] = [
     {
-      base: 'warrior',
-      label: theme.labels.avatarClasses.warrior,
+      base: 'dominant',
+      label: theme.labels.avatarClasses.dominant,
       description: 'Control. Authority. Leads from the front.',
       icon: Sword,
       color: 'text-red-400'
     },
     {
-      base: 'mage',
-      label: theme.labels.avatarClasses.mage,
+      base: 'switch',
+      label: theme.labels.avatarClasses.switch,
       description: 'Versatile. Adapts to any situation.',
       icon: Wand2,
       color: 'text-purple-400'
     },
     {
-      base: 'rogue',
-      label: theme.labels.avatarClasses.rogue,
+      base: 'submissive',
+      label: theme.labels.avatarClasses.submissive,
       description: 'Obedient. Follows the protocol.',
       icon: Zap,
       color: 'text-yellow-400'
@@ -1449,9 +1449,9 @@ function EvolutionStep({
   const newStageName = theme.avatarStages[1] || newStage.name
 
   const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
-    warrior: { icon: Sword, color: 'text-red-400' },
-    mage: { icon: Wand2, color: 'text-purple-400' },
-    rogue: { icon: isTrained ? Zap : Moon, color: isTrained ? 'text-yellow-400' : 'text-blue-400' }
+    dominant: { icon: Sword, color: 'text-red-400' },
+    switch: { icon: Wand2, color: 'text-purple-400' },
+    submissive: { icon: isTrained ? Zap : Moon, color: isTrained ? 'text-yellow-400' : 'text-blue-400' }
   }
 
   // Trigger the evolution animation after a delay

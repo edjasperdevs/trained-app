@@ -152,7 +152,7 @@ export async function loadProfileFromCloud() {
       height: data.height || 68,
       age: data.age || 25,
       goal: data.goal || 'maintain',
-      avatarBase: data.avatar_base || 'warrior',
+      avatarBase: data.avatar_base || 'dominant',
       currentStreak: data.current_streak || 0,
       longestStreak: data.longest_streak || 0,
       lastCheckInDate: data.last_check_in_date,

@@ -26,9 +26,9 @@ export const trainedTheme: AppTheme = {
     minimalWorkout: 'Quick Compliance',
     neverMissTwice: 'Safe Word Recovery',
     avatarClasses: {
-      warrior: 'The Dom/me',
-      mage: 'The Switch',
-      rogue: 'The Sub',
+      dominant: 'The Dom/me',
+      switch: 'The Switch',
+      submissive: 'The Sub',
     },
   },
 

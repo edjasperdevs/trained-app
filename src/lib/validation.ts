@@ -98,8 +98,8 @@ export function isValidXPState(value: unknown): boolean {
 // Avatar Validation
 // ==========================================
 
-export function isValidAvatarBase(value: unknown): value is 'warrior' | 'mage' | 'rogue' {
-  return value === 'warrior' || value === 'mage' || value === 'rogue'
+export function isValidAvatarBase(value: unknown): value is 'dominant' | 'switch' | 'submissive' {
+  return value === 'dominant' || value === 'switch' || value === 'submissive'
 }
 
 export function isValidEvolutionStage(value: unknown): value is number {

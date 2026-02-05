@@ -137,18 +137,18 @@ export function AvatarScreen() {
           </h3>
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-              {baseCharacter === 'warrior' && <Sword size={24} className="text-red-400" />}
-              {baseCharacter === 'mage' && <Sparkles size={24} className="text-purple-400" />}
-              {baseCharacter === 'rogue' && <Zap size={24} className="text-yellow-400" />}
+              {baseCharacter === 'dominant' && <Sword size={24} className="text-red-400" />}
+              {baseCharacter === 'switch' && <Sparkles size={24} className="text-purple-400" />}
+              {baseCharacter === 'submissive' && <Zap size={24} className="text-yellow-400" />}
             </div>
             <div>
               <p className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : 'capitalize'}`}>
                 {theme.labels.avatarClasses[baseCharacter]}
               </p>
               <p className="text-sm text-text-secondary">
-                {baseCharacter === 'warrior' && 'Strength and discipline'}
-                {baseCharacter === 'mage' && 'Knowledge and power'}
-                {baseCharacter === 'rogue' && 'Speed and agility'}
+                {baseCharacter === 'dominant' && 'Strength and discipline'}
+                {baseCharacter === 'switch' && 'Knowledge and power'}
+                {baseCharacter === 'submissive' && 'Speed and agility'}
               </p>
             </div>
           </div>

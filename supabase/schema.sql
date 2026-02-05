@@ -12,7 +12,7 @@ CREATE TYPE user_role AS ENUM ('client', 'coach', 'admin');
 CREATE TYPE gender AS ENUM ('male', 'female');
 CREATE TYPE fitness_level AS ENUM ('beginner', 'intermediate', 'advanced');
 CREATE TYPE goal_type AS ENUM ('cut', 'recomp', 'maintain', 'bulk');
-CREATE TYPE avatar_base AS ENUM ('warrior', 'mage', 'rogue');
+CREATE TYPE avatar_base AS ENUM ('dominant', 'switch', 'submissive');
 CREATE TYPE activity_level AS ENUM ('sedentary', 'light', 'moderate', 'active');
 CREATE TYPE workout_type AS ENUM ('push', 'pull', 'legs', 'upper', 'lower');
 CREATE TYPE xp_source AS ENUM ('workout', 'protein', 'calories', 'checkin', 'claim');

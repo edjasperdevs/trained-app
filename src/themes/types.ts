@@ -71,9 +71,9 @@ export interface ThemeLabels {
   minimalWorkout: string
   neverMissTwice: string
   avatarClasses: {
-    warrior: string
-    mage: string
-    rogue: string
+    dominant: string
+    switch: string
+    submissive: string
   }
 }
 

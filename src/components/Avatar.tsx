@@ -28,9 +28,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 // Character base icon representations
 const CHARACTER_BASES = {
-  warrior: { icon: Sword, color: 'text-red-400' },
-  mage: { icon: Wand2, color: 'text-purple-400' },
-  rogue: { icon: Moon, color: 'text-blue-400' }
+  dominant: { icon: Sword, color: 'text-red-400' },
+  switch: { icon: Wand2, color: 'text-purple-400' },
+  submissive: { icon: Moon, color: 'text-blue-400' }
 }
 
 // Mood animations

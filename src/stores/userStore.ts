@@ -5,7 +5,7 @@ import { getLocalDateString, getLocalDaysDifference } from '../lib/dateUtils'
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 export type TrainingDays = 3 | 4 | 5
 export type Goal = 'cut' | 'recomp' | 'maintain' | 'bulk'
-export type AvatarBase = 'warrior' | 'mage' | 'rogue'
+export type AvatarBase = 'dominant' | 'switch' | 'submissive'
 export type Gender = 'male' | 'female'
 export type UnitSystem = 'imperial' | 'metric'
 
@@ -79,7 +79,7 @@ const initialProfile: UserProfile = {
   height: 68, // 5'8" default
   age: 25,
   goal: 'maintain',
-  avatarBase: 'warrior',
+  avatarBase: 'dominant',
   createdAt: Date.now(),
   currentStreak: 0,
   longestStreak: 0,
