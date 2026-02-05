@@ -118,11 +118,10 @@ export function Auth() {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <span className="text-6xl block mb-4">🎮</span>
-          <h1 className="text-2xl font-bold">Gamify Your Gains</h1>
+          <h1 className="text-3xl font-heading font-bold tracking-wide">TRAINED</h1>
           <p className="text-text-secondary mt-2">
-            {mode === 'login' && 'Welcome back!'}
-            {mode === 'signup' && 'Level up your fitness journey'}
+            {mode === 'login' && 'Welcome back'}
+            {mode === 'signup' && 'Build discipline through fitness'}
             {mode === 'forgot' && 'Reset your password'}
           </p>
         </div>
