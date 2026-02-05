@@ -4,6 +4,7 @@ import { Button, Card, ProgressBar, EmptyState } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { useTheme } from '@/themes'
 import { analytics } from '@/lib/analytics'
+import { haptics } from '@/lib/haptics'
 import { Clock, Dumbbell } from 'lucide-react'
 
 export function Workouts() {
@@ -120,6 +121,7 @@ export function Workouts() {
       : 0
     analytics.workoutCompleted(activeWorkout.workoutType, duration)
 
+    haptics.success()
     setActiveWorkout(null)
   }
 
@@ -188,6 +190,7 @@ export function Workouts() {
     if (!activeWorkout) return
     logSet(activeWorkout.id, exerciseId, setIndex, { completed: true, skipped: false })
     setActiveWorkout(getCurrentWorkout())
+    haptics.light()
   }
 
   const handleSkipSet = (exerciseId: string, setIndex: number) => {

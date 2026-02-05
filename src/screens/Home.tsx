@@ -12,6 +12,7 @@ import {
   useRemindersStore
 } from '@/stores'
 import { useTheme, getStandingOrder } from '@/themes'
+import { haptics } from '@/lib/haptics'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 
@@ -494,6 +495,7 @@ export function Home() {
           setShowCheckIn(false)
           if (didCheckIn) {
             setJustCheckedIn(true)
+            haptics.success()
           }
         }}
       />

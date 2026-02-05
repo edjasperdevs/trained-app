@@ -4,6 +4,7 @@ import { Button, Card, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 import { useTheme } from '@/themes'
 import { analytics } from '@/lib/analytics'
+import { haptics } from '@/lib/haptics'
 import { Gift, Sparkles, Zap, Trophy, Star, ChevronRight, Gamepad2 } from 'lucide-react'
 
 interface XPClaimModalProps {
@@ -133,6 +134,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
     setClaimResult(result)
     setPhase('claiming')
     setShowConfetti(true)
+    haptics.heavy()
 
     // Track analytics
     analytics.xpClaimed(result.xpClaimed)

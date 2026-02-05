@@ -16,3 +16,4 @@ export {
   loadAllFromCloud
 } from './sync'
 export { friendlyError } from './errors'
+export { haptics } from './haptics'
