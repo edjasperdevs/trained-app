@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** First impression must be flawless - no broken flows, confusing UX, or visual jank
-**Current focus:** Phase 3 - UX Polish (complete)
+**Current focus:** Phase 4 - Resilience Hardening (in progress)
 
 ## Current Position
 
-Phase: 3 of 5 (UX Polish)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-05 - Completed 03-03-PLAN.md
+Phase: 4 of 5 (Resilience Hardening)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-05 - Completed 04-01-PLAN.md
 
-Progress: [==========          ] 50% (7/14 plans)
+Progress: [===========         ] 57% (8/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: ~9 min
-- Total execution time: ~1.1 hours
+- Total plans completed: 8
+- Average duration: ~8 min
+- Total execution time: ~1.15 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [==========          ] 50% (7/14 plans)
 | 1 - Audit | 1 | 30 min | 30 min |
 | 2 - Performance | 2 | 14 min | 7 min |
 | 3 - UX Polish | 3 | 15 min | 5 min |
+| 4 - Resilience | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (verification), 03-01 (skeletons), 03-02 (empty states + errors), 03-03 (haptics + onboarding)
+- Last 5 plans: 03-01 (skeletons), 03-02 (empty states + errors), 03-03 (haptics + onboarding), 04-01 (sync foundation)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -54,6 +55,9 @@ Recent decisions affecting current work:
 - [03-01]: Per-route Suspense boundaries instead of single global Suspense wrapping all routes
 - [03-02]: EmptyState imports Button directly (./Button) to avoid circular barrel dependency
 - [03-02]: authStore sync errors kept as-is (already follow what-happened + impact pattern)
+- [04-01]: syncStore is non-persisted (runtime state only, resets on reload)
+- [04-01]: Direct store imports in sync.ts (not barrel) to avoid circular deps
+- [04-01]: 2s debounce on scheduleSync to batch rapid-fire user actions
 
 ### Pending Todos
 
@@ -66,7 +70,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 03-03-PLAN.md (Phase 3 complete)
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
 
 ## Phase 1 Results
@@ -90,3 +94,7 @@ Resume file: None
 - **03-01 complete:** Route-level skeleton loaders with Suspense boundaries, static animate-pulse (zero JS)
 - **03-02 complete:** EmptyState component, error messages following what-happened + impact pattern, macro empty state on Home
 - **03-03 complete:** Haptic feedback utility (navigator.vibrate), integrated at 4 key actions, onboarding "Step X of Y" counter
+
+## Phase 4 Results
+
+- **04-01 complete:** syncStore (non-persisted), scheduleSync (2s debounce), flushPendingSync, online/offline/visibilitychange listeners, sync triggers after workouts and meals, 429 rate limit handling
