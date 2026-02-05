@@ -467,7 +467,7 @@ export function Workouts() {
               value={minimalNotes}
               onChange={(e) => setMinimalNotes(e.target.value)}
               placeholder="What did you do? (e.g., 20 pushups, 5 min walk, stretching...)"
-              className="w-full h-32 bg-surface-elevated border border-border p-3 text-sm resize-none mb-4 rounded"
+              className="input-base h-32 text-sm resize-none mb-4"
               autoFocus
             />
 
@@ -548,7 +548,7 @@ export function Workouts() {
                           type="text"
                           value={editExercise.name}
                           onChange={(e) => setEditExercise(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-sm"
+                          className="input-base text-sm"
                           autoFocus
                         />
                         <div className="flex gap-2">
@@ -556,7 +556,7 @@ export function Workouts() {
                             type="number"
                             value={editExercise.targetSets}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetSets: e.target.value }))}
-                            className="w-16 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-sm text-center"
+                            className="input-base w-16 text-sm text-center"
                             placeholder="Sets"
                           />
                           <span className="text-gray-500 self-center">×</span>
@@ -564,7 +564,7 @@ export function Workouts() {
                             type="text"
                             value={editExercise.targetReps}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetReps: e.target.value }))}
-                            className="flex-1 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-sm"
+                            className="input-base flex-1 text-sm"
                             placeholder="Reps"
                           />
                         </div>
@@ -658,7 +658,7 @@ export function Workouts() {
                   value={newExercise.name}
                   onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Exercise name"
-                  className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                  className="input-base"
                 />
                 <div className="flex gap-3">
                   <div className="flex-1">
@@ -667,7 +667,7 @@ export function Workouts() {
                       type="number"
                       value={newExercise.targetSets}
                       onChange={(e) => setNewExercise(prev => ({ ...prev, targetSets: e.target.value }))}
-                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
+                      className="input-base font-digital"
                       min={1}
                       max={10}
                     />
@@ -679,7 +679,7 @@ export function Workouts() {
                       value={newExercise.targetReps}
                       onChange={(e) => setNewExercise(prev => ({ ...prev, targetReps: e.target.value }))}
                       placeholder="e.g., 8-12"
-                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                      className="input-base"
                     />
                   </div>
                 </div>
@@ -922,7 +922,7 @@ function ActiveWorkoutView({
                                     placeholder={lastSet ? String(lastSet.weight) : '0'}
                                     value={set.weight || ''}
                                     onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
-                                    className="w-16 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm placeholder:text-gray-600"
+                                    className="input-base w-16 text-center font-digital text-sm"
                                   />
                                 </div>
                                 <span className="text-gray-500 text-sm">×</span>
@@ -931,7 +931,7 @@ function ActiveWorkoutView({
                                   placeholder={lastSet ? String(lastSet.reps) : '0'}
                                   value={set.reps || ''}
                                   onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
-                                  className="w-14 bg-bg-secondary border border-gray-700 rounded px-2 py-1 text-center font-digital text-sm placeholder:text-gray-600"
+                                  className="input-base w-14 text-center font-digital text-sm"
                                 />
                               {set.completed ? (
                                 <div className="flex items-center gap-1">
@@ -1047,7 +1047,7 @@ function ActiveWorkoutView({
                     value={newExerciseForm.name}
                     onChange={(e) => setNewExerciseForm(prev => ({ ...prev, name: e.target.value }))}
                     placeholder="e.g., Bicep Curls"
-                    className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                    className="input-base"
                     autoFocus
                   />
                 </div>
@@ -1059,7 +1059,7 @@ function ActiveWorkoutView({
                       type="number"
                       value={newExerciseForm.targetSets}
                       onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetSets: e.target.value }))}
-                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 font-digital"
+                      className="input-base font-digital"
                       min={1}
                       max={10}
                     />
@@ -1071,7 +1071,7 @@ function ActiveWorkoutView({
                       value={newExerciseForm.targetReps}
                       onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetReps: e.target.value }))}
                       placeholder="e.g., 8-12"
-                      className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2"
+                      className="input-base"
                     />
                   </div>
                 </div>

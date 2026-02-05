@@ -99,7 +99,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 onChange={(e) => handleCodeChange(e.target.value)}
                 placeholder="XXXX-XXXX-XXXX-XXXX"
                 aria-label="License key"
-                className={`w-full glass-input rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider uppercase ${
+                className={`input-base px-4 py-3 text-center text-lg font-mono tracking-wider uppercase ${
                   error ? 'border-accent-danger' : ''
                 }`}
                 maxLength={50}

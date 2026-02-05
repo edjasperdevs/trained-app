@@ -202,7 +202,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="flex-1 bg-bg-card border border-border rounded-lg px-3 py-2 text-xl font-digital text-center"
+              className="input-base flex-1 text-xl font-digital text-center"
               min="0"
               step="1"
               autoFocus
@@ -210,7 +210,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value as Unit)}
-              className="bg-bg-card border border-border rounded-lg px-3 py-2 text-sm"
+              className="input-base w-auto text-sm"
             >
               <option value="g">grams</option>
               <option value="oz">oz</option>
@@ -359,7 +359,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search foods (e.g., chicken breast, rice)"
-          className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 pr-10"
+          className="input-base pr-10"
           onFocus={() => results.length > 0 && setShowResults(true)}
         />
         {isLoading && (

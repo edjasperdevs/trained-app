@@ -272,7 +272,7 @@ export function Settings() {
                 type="text"
                 value={profile?.username || ''}
                 onChange={(e) => setProfile({ username: e.target.value })}
-                className="w-full glass-input rounded-xl px-4 py-2.5"
+                className="input-base"
               />
             </div>
 
@@ -281,7 +281,7 @@ export function Settings() {
               <select
                 value={profile?.fitnessLevel || 'beginner'}
                 onChange={(e) => setProfile({ fitnessLevel: e.target.value as 'beginner' | 'intermediate' | 'advanced' })}
-                className="w-full glass-input rounded-xl px-4 py-2.5"
+                className="input-base"
               >
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
@@ -298,7 +298,7 @@ export function Settings() {
                   setProfile({ trainingDaysPerWeek: days })
                   useWorkoutStore.getState().setPlan(days)
                 }}
-                className="w-full glass-input rounded-xl px-4 py-2.5"
+                className="input-base"
               >
                 <option value={3}>3 Days</option>
                 <option value={4}>4 Days</option>
@@ -351,7 +351,7 @@ export function Settings() {
               className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
                 profile?.units === 'imperial'
                   ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
-                  : 'glass-subtle border-transparent hover:bg-glass-light'
+                  : 'bg-surface border-border hover:bg-surface-elevated'
               }`}
             >
               <p className="font-semibold">Imperial</p>
@@ -362,7 +362,7 @@ export function Settings() {
               className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
                 profile?.units === 'metric'
                   ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
-                  : 'glass-subtle border-transparent hover:bg-glass-light'
+                  : 'bg-surface border-border hover:bg-surface-elevated'
               }`}
             >
               <p className="font-semibold">Metric</p>
@@ -375,13 +375,13 @@ export function Settings() {
         <Card>
           <h3 className="text-sm font-semibold text-text-secondary mb-4">YOUR STATS</h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="glass-subtle rounded-xl p-4 text-center">
+            <div className="bg-surface border border-border rounded-xl p-4 text-center">
               <p className="text-3xl font-bold font-digital text-accent-primary">
                 {profile?.currentStreak || 0}
               </p>
               <p className="text-xs text-text-secondary mt-1">Current Streak</p>
             </div>
-            <div className="glass-subtle rounded-xl p-4 text-center">
+            <div className="bg-surface border border-border rounded-xl p-4 text-center">
               <p className="text-3xl font-bold font-digital text-accent-secondary">
                 {profile?.longestStreak || 0}
               </p>
@@ -430,7 +430,7 @@ export function Settings() {
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
                 placeholder={String(toDisplayWeight(todayWeight?.weight || profile?.weight || 150, units))}
-                className="w-full glass-input rounded-xl px-4 py-2.5 pr-12 font-digital"
+                className="input-base pr-12 font-digital"
                 min={units === 'metric' ? 35 : 80}
                 max={units === 'metric' ? 180 : 400}
                 step={0.1}
@@ -447,7 +447,7 @@ export function Settings() {
           {/* Current & Goal Weight Display */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             {/* Current Weight */}
-            <div className="glass-subtle rounded-xl p-3">
+            <div className="bg-surface border border-border rounded-xl p-3">
               <p className="text-xs text-text-secondary mb-1">Current</p>
               <p className="font-digital font-bold text-xl text-text-primary">
                 {formatWeight(profile?.weight || 0, units)}
@@ -458,7 +458,7 @@ export function Settings() {
             </div>
 
             {/* Goal Weight */}
-            <div className="glass-subtle rounded-xl p-3">
+            <div className="bg-surface border border-border rounded-xl p-3">
               <p className="text-xs text-text-secondary mb-1">Goal</p>
               {profile?.goalWeight ? (
                 <>
@@ -810,7 +810,7 @@ export function Settings() {
                   value={importData}
                   onChange={(e) => setImportData(e.target.value)}
                   placeholder="Or paste JSON data here..."
-                  className="w-full h-32 bg-bg-card border border-border rounded-lg p-3 text-sm font-mono resize-none mb-4"
+                  className="input-base h-32 text-sm font-mono resize-none mb-4"
                 />
 
                 {importStatus === 'error' && (

@@ -219,7 +219,7 @@ function DailyView({
               value={quickLog.protein}
               onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
               placeholder={String(targets.protein)}
-              className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 font-digital"
+              className="input-base font-digital"
             />
           </div>
           <div>
@@ -229,7 +229,7 @@ function DailyView({
               value={quickLog.calories}
               onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
               placeholder={String(targets.calories)}
-              className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 font-digital"
+              className="input-base font-digital"
             />
           </div>
         </div>
@@ -501,7 +501,7 @@ function CalculatorView({
           type="number"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
-          className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
+          className="input-base text-2xl font-digital text-center py-3"
           min={80}
           max={400}
         />
@@ -519,7 +519,7 @@ function CalculatorView({
                 type="number"
                 value={heightFeet}
                 onChange={(e) => setHeightFeet(e.target.value)}
-                className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
+                className="input-base text-2xl font-digital text-center py-3"
                 min={4}
                 max={7}
               />
@@ -532,7 +532,7 @@ function CalculatorView({
                 type="number"
                 value={heightInches}
                 onChange={(e) => setHeightInches(e.target.value)}
-                className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
+                className="input-base text-2xl font-digital text-center py-3"
                 min={0}
                 max={11}
               />
@@ -551,7 +551,7 @@ function CalculatorView({
           type="number"
           value={age}
           onChange={(e) => setAge(e.target.value)}
-          className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
+          className="input-base text-2xl font-digital text-center py-3"
           min={16}
           max={80}
         />

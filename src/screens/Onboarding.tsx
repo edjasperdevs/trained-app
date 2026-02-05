@@ -403,7 +403,7 @@ function NameStep({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter your name..."
-        className="w-full bg-bg-secondary border border-border px-4 py-3 text-text-on-primary placeholder-gray-500 focus:outline-none focus:border-accent-primary mb-6 rounded"
+        className="input-base py-3 mb-6"
         maxLength={20}
         autoFocus
       />
@@ -767,7 +767,7 @@ function GoalStep({
   const feet = Math.floor(height / 12)
   const inches = height % 12
 
-  const inputClass = 'w-full bg-bg-secondary border border-border rounded px-4 py-3 text-text-on-primary font-digital text-xl'
+  const inputClass = 'input-base py-3 font-digital text-xl'
   const inputErrorClass = 'border-error'
 
   return (

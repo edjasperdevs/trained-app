@@ -106,7 +106,7 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
             placeholder="e.g., Post-Workout Shake"
-            className="w-full bg-bg-card border border-border rounded-lg px-4 py-3 text-lg"
+            className="input-base py-3 text-lg"
             autoFocus
           />
         </div>

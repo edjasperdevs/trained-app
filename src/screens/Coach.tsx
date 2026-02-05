@@ -583,7 +583,7 @@ export function Coach() {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="client@example.com"
-                className="w-full bg-bg-card border border-gray-700 rounded-lg px-3 py-2 mb-4"
+                className="input-base mb-4"
                 autoFocus
               />
 

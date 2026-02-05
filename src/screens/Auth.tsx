@@ -160,7 +160,7 @@ export function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
+                className="input-base"
                 required
               />
             </div>
@@ -174,7 +174,7 @@ export function Auth() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
+                  className="input-base"
                   required
                 />
               </div>
@@ -189,7 +189,7 @@ export function Auth() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
+                  className="input-base"
                   required
                 />
               </div>
