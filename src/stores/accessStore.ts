@@ -91,7 +91,7 @@ export const useAccessStore = create<AccessState>()(
         // Check for master code (set via environment variable)
         const masterCode = import.meta.env.VITE_MASTER_ACCESS_CODE
         if (masterCode && trimmedCode === masterCode.toUpperCase()) {
-          console.log('[Access] Master code used')
+          if (import.meta.env.DEV) console.log('[Access] Master code used')
           set({
             hasAccess: true,
             licenseKey: 'MASTER',
@@ -107,7 +107,7 @@ export const useAccessStore = create<AccessState>()(
 
         if (!apiUrl) {
           // Fallback: In development or if not configured, accept any 8+ char code
-          console.log('[Access] Lemon Squeezy not configured, using fallback validation')
+          if (import.meta.env.DEV) console.log('[Access] Lemon Squeezy not configured, using fallback validation')
           if (trimmedCode.length >= 8) {
             set({
               hasAccess: true,

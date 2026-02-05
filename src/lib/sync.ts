@@ -44,7 +44,7 @@ async function withRetry<T>(
         maxDelayMs
       )
 
-      console.log(`[Sync] Retry ${attempt + 1}/${maxRetries} after ${Math.round(delay)}ms:`, lastError.message)
+      if (import.meta.env.DEV) console.log(`[Sync] Retry ${attempt + 1}/${maxRetries} after ${Math.round(delay)}ms:`, lastError.message)
       await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
@@ -119,7 +119,7 @@ export async function syncProfileToCloud() {
     })
 
   if (error) {
-    console.error('[Sync] Profile sync failed:', error.message)
+    if (import.meta.env.DEV) console.error('[Sync] Profile sync failed:', error.message)
   }
 
   return { error: error?.message || null }
@@ -432,7 +432,7 @@ export async function syncAllToCloud() {
     await withRetryResult(() => syncWorkoutLogToCloud(workout.id))
   }
 
-  console.log('Sync results:', results)
+  if (import.meta.env.DEV) console.log('Sync results:', results)
   return results
 }
 
@@ -444,6 +444,6 @@ export async function loadAllFromCloud() {
     // avatar: Disabled until user_avatar table created
   }
 
-  console.log('Load results:', results)
+  if (import.meta.env.DEV) console.log('Load results:', results)
   return results
 }

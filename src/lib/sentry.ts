@@ -62,7 +62,7 @@ export function initSentry() {
     },
   })
 
-  console.log('[Sentry] Initialized')
+  if (import.meta.env.DEV) console.log('[Sentry] Initialized')
 }
 
 /**

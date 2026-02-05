@@ -548,21 +548,21 @@ export const useMacroStore = create<MacroStore>()(
           // Validate targets if provided (BUG-020 fix)
           if (macros.targets !== null && macros.targets !== undefined) {
             if (!isValidMacroTargets(macros.targets)) {
-              console.error('[Import] Invalid macro targets structure')
+              if (import.meta.env.DEV) console.error('[Import] Invalid macro targets structure')
               return false
             }
           }
 
           // Validate activity level
           if (macros.activityLevel && !isValidActivityLevel(macros.activityLevel)) {
-            console.error('[Import] Invalid activity level')
+            if (import.meta.env.DEV) console.error('[Import] Invalid activity level')
             return false
           }
 
           // Validate daily logs array
           if (macros.dailyLogs && isArray(macros.dailyLogs)) {
             const validLogs = macros.dailyLogs.filter(isValidDailyLog)
-            if (validLogs.length !== macros.dailyLogs.length) {
+            if (import.meta.env.DEV && validLogs.length !== macros.dailyLogs.length) {
               console.warn(`[Import] Filtered out ${macros.dailyLogs.length - validLogs.length} invalid daily logs`)
             }
             macros.dailyLogs = validLogs
@@ -576,7 +576,7 @@ export const useMacroStore = create<MacroStore>()(
           })
           return true
         } catch (err) {
-          console.error('[Import] Failed to parse macro data:', err)
+          if (import.meta.env.DEV) console.error('[Import] Failed to parse macro data:', err)
           return false
         }
       }
@@ -590,26 +590,26 @@ export const useMacroStore = create<MacroStore>()(
 
         // If coming from version 0 or 1, validate the data structure
         if (version < 2) {
-          console.log('[Macros] Migrating from version', version)
+          if (import.meta.env.DEV) console.log('[Macros] Migrating from version', version)
 
           // Validate targets
           if (state.targets !== null && state.targets !== undefined) {
             if (!isValidMacroTargets(state.targets)) {
-              console.warn('[Macros] Invalid targets found during migration, resetting')
+              if (import.meta.env.DEV) console.warn('[Macros] Invalid targets found during migration, resetting')
               state.targets = null
             }
           }
 
           // Validate activity level
           if (state.activityLevel && !isValidActivityLevel(state.activityLevel)) {
-            console.warn('[Macros] Invalid activity level found during migration, resetting')
+            if (import.meta.env.DEV) console.warn('[Macros] Invalid activity level found during migration, resetting')
             state.activityLevel = 'moderate'
           }
 
           // Validate daily logs
           if (state.dailyLogs && isArray(state.dailyLogs)) {
             const validLogs = (state.dailyLogs as unknown[]).filter(isValidDailyLog)
-            if (validLogs.length !== (state.dailyLogs as unknown[]).length) {
+            if (import.meta.env.DEV && validLogs.length !== (state.dailyLogs as unknown[]).length) {
               console.warn(`[Macros] Filtered ${(state.dailyLogs as unknown[]).length - validLogs.length} invalid logs`)
             }
             state.dailyLogs = validLogs
@@ -631,10 +631,12 @@ export const useMacroStore = create<MacroStore>()(
       // Log hydration errors
       onRehydrateStorage: () => {
         return (state, error) => {
-          if (error) {
-            console.error('[Macros] Failed to rehydrate from storage:', error)
-          } else if (state) {
-            console.log('[Macros] Hydrated from storage')
+          if (import.meta.env.DEV) {
+            if (error) {
+              console.error('[Macros] Failed to rehydrate from storage:', error)
+            } else if (state) {
+              console.log('[Macros] Hydrated from storage')
+            }
           }
         }
       }
