@@ -1,545 +1,424 @@
-# Pre-Launch PWA Audit Guide
+# Architecture: Design System Refresh
 
-> **Context**: React 18 + Vite + TypeScript PWA with offline-first architecture and Supabase sync
-> **Goal**: Find issues before 90k users do
-> **Timeline**: Launch this week
-
----
-
-## Priority Order (What to Test First)
-
-1. **Critical Path Testing** (1-2 hours) - Core user journey that MUST work
-2. **PWA Installation** (30 min) - Installability on target devices
-3. **Offline Mode** (1 hour) - Core offline functionality
-4. **Data Persistence** (45 min) - Data survives restarts/updates
-5. **Sync Integrity** (1 hour) - Cloud sync doesn't lose data
-6. **Edge Cases** (1 hour) - Timezone, storage limits, network transitions
+**Domain:** Removing dual-theme system, implementing single premium design in React + Tailwind
+**Researched:** 2026-02-05
+**Confidence:** HIGH (based on direct codebase analysis, not external sources)
 
 ---
 
-## 1. Critical Path Testing
+## Current Architecture (What Exists)
 
-### Full User Journey Checklist
-
-Test the complete flow a new user experiences:
+### Layer Diagram
 
 ```
-[ ] 1. Access code entry (AccessGate)
-    - Enter valid code
-    - Try invalid code (should fail gracefully)
-    - Try used code (verify behavior)
-
-[ ] 2. Authentication (Auth.tsx)
-    - Sign up with new email
-    - Sign in with existing account
-    - Password reset flow
-    - Test "forgot password" email delivery
-
-[ ] 3. Onboarding (8 steps)
-    - Name entry
-    - Gender selection
-    - Body stats (weight/height/age)
-    - Fitness level selection
-    - Training days + day selection
-    - Goal selection
-    - Avatar reveal animation
-
-[ ] 4. Home Screen (Home.tsx)
-    - Daily quests display correctly
-    - Streak display accurate
-    - Reminder cards show when expected
-    - Motivational message appears
-
-[ ] 5. Workout Flow (Workouts.tsx)
-    - Start scheduled workout
-    - Log sets with weight/reps
-    - Complete workout
-    - End workout early (partial completion)
-    - Quick/minimal workout logging
-    - Exercise customization persists
-
-[ ] 6. Macro Tracking (Macros.tsx)
-    - Quick log macros
-    - Food search API works
-    - Save meal flow
-    - Use saved meal
-    - Delete logged meal
-    - Daily totals calculate correctly
-
-[ ] 7. Check-in Flow (CheckInModal.tsx)
-    - Complete daily check-in
-    - XP awarded correctly
-    - Streak updates
-
-[ ] 8. Weekly XP Claim (Sunday only)
-    - XP claim modal appears on Sunday
-    - XP transfers to permanent total
-    - Level-up celebration works
-
-[ ] 9. Settings (Settings.tsx)
-    - Weight logging
-    - Weight chart displays (needs 2+ entries)
-    - Data export downloads JSON
-    - Data import restores state
-    - Sign out works
+                    +-------------------+
+                    |    App.tsx        |
+                    |  <ThemeProvider>  |
+                    +--------+----------+
+                             |
+            +----------------+------------------+
+            |                                   |
+     +------+------+                    +-------+-------+
+     |   Screens   |                    |  Components   |
+     | (10 files)  |                    |  (13 files)   |
+     | useTheme()  |                    |  useTheme()   |
+     | isTrained?  |                    |  isTrained?   |
+     +------+------+                    +-------+-------+
+            |                                   |
+            +----------------+------------------+
+                             |
+        +--------------------+----------------------+
+        |                    |                      |
+  +-----+-----+     +-------+-------+    +---------+---------+
+  | CSS Vars  |     | Theme Object  |    | isTrained Branch  |
+  | (tokens)  |     | (labels,      |    | (394 occurrences  |
+  | Tailwind  |     |  stages,      |    |  across 21 files) |
+  | classes   |     |  orders)      |    |                   |
+  +-----------+     +---------------+    +-------------------+
 ```
 
-### Commands to Run
+### Three Consumption Patterns
 
-```bash
-# Build and preview production build
-npm run build && npm run preview
+The theme system is consumed in three distinct ways. Each requires a different migration strategy.
 
-# Run existing tests
-npm run test:run
+**Pattern 1: CSS Variables / Tailwind tokens (LOW risk)**
+- `:root` CSS variables in `index.css` define color, typography, spacing, shadow tokens
+- `tailwind.config.js` maps these to Tailwind utility classes (`bg-surface`, `text-primary`, etc.)
+- `ThemeProvider.injectCSSVariables()` overwrites `:root` vars at runtime based on active theme
+- Components use Tailwind classes like `bg-surface`, `text-text-primary`, `rounded-card`
+- **Migration:** Collapse to static values. Remove runtime injection. Keep CSS variables but make them the single source of truth.
 
-# Type checking
-npx tsc --noEmit
+**Pattern 2: Theme object properties (MEDIUM risk)**
+- `theme.labels.*` -- 18 string labels (e.g., "DP" vs "XP", "Dom/me" vs "Coach")
+- `theme.avatarStages` -- 13 stage name strings
+- `theme.standingOrders` -- 4 categories of motivational text
+- Used via `const { theme } = useTheme()` then `theme.labels.xp`, etc.
+- **Migration:** Inline the Trained values directly. Replace `theme.labels.xp` with `"DP"`. The labels are the Trained identity -- they stay, just no longer need indirection.
 
-# Lint check
-npm run lint
-```
+**Pattern 3: `isTrained` conditional branching (HIGH risk, HIGH volume)**
+- **394 occurrences across 21 files**
+- `const isTrained = themeId === 'trained'` then ternary everywhere
+- Controls: border radius, font-family, text-transform, letter-spacing, copy text, layout choices, animation presence, icon selection, color variants
+- Examples from `Button.tsx`:
+  - `isTrained ? 'rounded' : 'rounded-xl'`
+  - `isTrained ? 'font-heading uppercase tracking-widest' : 'font-bold'`
+- Examples from `Home.tsx`:
+  - `isTrained ? 'Daily Report Pending' : 'Daily Check-in'`
+  - `isTrained ? 'Recovery Day' : 'Rest Day'`
+- **Migration:** Resolve every ternary to the Trained branch. Delete the GYG branch. This is the bulk of the work.
+
+### File-by-File Impact Assessment
+
+| File | `isTrained` count | `theme.*` usage | Risk | Notes |
+|------|-------------------|-----------------|------|-------|
+| `Onboarding.tsx` | 63 | labels, stages | HIGH | Heaviest file. 8 sub-components each with own `useTheme()`. |
+| `Home.tsx` | 45 | labels, orders | HIGH | Core screen. Heavy label + branch usage. |
+| `Settings.tsx` | 38 | labels | HIGH | Theme toggle UI must be removed. Coach labels. |
+| `XPClaimModal.tsx` | 38 | labels | HIGH | Multi-step modal with confetti/animation branching. |
+| `AvatarScreen.tsx` | 33 | labels, stages | HIGH | Deep theme integration. |
+| `AccessGate.tsx` | 32 | -- | MEDIUM | Entry screen. Lots of copy differences. |
+| `CheckInModal.tsx` | 23 | labels | MEDIUM | Multi-step. Passes `isTrained` as prop to children. |
+| `Badges.tsx` | 21 | labels | MEDIUM | 4 sub-components. Rarity styling branches. |
+| `BadgeUnlockModal.tsx` | 18 | labels | MEDIUM | Animation branching (confetti count, rotation). |
+| `Workouts.tsx` | 14 | labels | MEDIUM | Workout vs Training copy. |
+| `StreakDisplay.tsx` | 13 | -- | LOW | Mostly border-radius + copy differences. |
+| `WeeklySummary.tsx` | 11 | labels | LOW | Summary vs Sprint copy. |
+| `Avatar.tsx` | 8 | stages | LOW | Mood animation branching. |
+| `XPDisplay.tsx` | 6 | labels | LOW | Small, focused. |
+| `Toast.tsx` | 6 | -- | LOW | Position + border-radius. |
+| `Button.tsx` | 4 | -- | LOW | Variant styling. Core primitive. |
+| `ProgressBar.tsx` | 3 | -- | LOW | Color + border-radius. |
+| `Card.tsx` | 3 | -- | LOW | Glass vs solid variant. |
+| `Navigation.tsx` | 3 | -- | LOW | Minor styling. |
+| `ReminderCard.tsx` | 4 | -- | LOW | Border-radius + animation. |
+| `Achievements.tsx` | 8 | labels | LOW | Tab labels + minor styling. |
+
+### Files NOT Using Theme (Already Clean)
+
+These screens and components need no theme removal -- only visual refresh:
+
+- `Macros.tsx` -- no theme usage
+- `Auth.tsx` -- no theme usage
+- `Coach.tsx` -- no theme usage
+- `Skeleton.tsx` -- no theme usage
+- `EmptyState.tsx` -- no theme usage
+- `ErrorBoundary.tsx` -- no theme usage
+- `UpdatePrompt.tsx` -- no theme usage
+- `NotFound.tsx` -- no theme usage
+- `FoodSearch.tsx` -- no theme usage
+- `MealBuilder.tsx` -- no theme usage
+- `WeightChart.tsx` -- no theme usage
+- `ClientMacroAdherence.tsx` -- no theme usage
+- `ClientActivityFeed.tsx` -- no theme usage
+- `SyncStatusIndicator.tsx` -- no theme usage
 
 ---
 
-## 2. Device/Browser Test Matrix
+## Recommended Architecture (What to Build)
 
-### Minimum Viable Matrix (Time-Boxed)
+### Target State
 
-| Priority | Device | Browser | Reason |
-|----------|--------|---------|--------|
-| HIGH | iPhone 14+ | Safari | Largest PWA user segment |
-| HIGH | Android (Pixel/Samsung) | Chrome | Second largest segment |
-| MEDIUM | iPad | Safari | Tablet users |
-| MEDIUM | MacOS | Chrome/Safari | Desktop fallback |
-| LOW | Windows | Chrome/Edge | Desktop fallback |
-
-### Specific Test Points Per Device
-
-**iOS Safari (Critical)**
 ```
-[ ] PWA installs via "Add to Home Screen"
-[ ] App launches in standalone mode (no Safari UI)
-[ ] Splash screen displays correctly
-[ ] Touch targets are 44x44px minimum
-[ ] No horizontal scroll on any screen
-[ ] Safe area insets respected (notch devices)
-[ ] Keyboard doesn't obscure input fields
-[ ] Pull-to-refresh doesn't break navigation
+                    +-------------------+
+                    |    App.tsx        |
+                    | (no ThemeProvider)|
+                    +--------+----------+
+                             |
+            +----------------+------------------+
+            |                                   |
+     +------+------+                    +-------+-------+
+     |   Screens   |                    |  Components   |
+     | Direct      |                    |  Direct       |
+     | Tailwind    |                    |  Tailwind     |
+     | classes     |                    |  classes      |
+     +------+------+                    +-------+-------+
+            |                                   |
+            +----------------+------------------+
+                             |
+              +--------------+---------------+
+              |                              |
+       +------+------+            +---------+---------+
+       | CSS Vars    |            | Design Constants  |
+       | in :root    |            | (labels, stages,  |
+       | (tokens =   |            |  orders)          |
+       | single      |            | Plain TS exports  |
+       | source)     |            +---------+---------+
+       +------+------+
+              |
+       +------+------+
+       | Tailwind    |
+       | config      |
+       | (references |
+       |  CSS vars)  |
+       +-------------+
 ```
 
-**Android Chrome**
-```
-[ ] PWA install prompt appears
-[ ] App installs to home screen
-[ ] Splash screen and theme color correct
-[ ] Back button behavior is correct
-[ ] Notifications permission (if used)
-```
+### Component Boundaries After Migration
 
-### Responsive Breakpoints to Test
+**Layer 1: Design Tokens (CSS Variables)**
+- Single source of truth: `src/index.css` `:root` block
+- Contains all color, typography, spacing, shadow values
+- Tailwind config references these via `var(--token-name)`
+- No runtime injection. No ThemeProvider. Static values.
 
-- 320px (iPhone SE)
-- 375px (iPhone 12/13)
-- 390px (iPhone 14/15)
-- 428px (iPhone Pro Max)
-- 768px (iPad portrait)
-- 1024px (iPad landscape)
+**Layer 2: Design Constants (TypeScript)**
+- New file: `src/design/constants.ts` (or inline where used)
+- Contains the Trained-specific labels, avatar stages, standing orders
+- Plain exports, no React context needed
+- Example: `export const LABELS = { xp: 'DP', xpFull: 'Discipline Points', ... }`
+- Example: `export const AVATAR_STAGES = ['Uninitiated', 'Novice', ...]`
+
+**Layer 3: Primitive Components**
+- `Button`, `Card`, `ProgressBar`, `Toast` -- no theme branching
+- Single styling path. Tailwind classes only.
+- These become the "design system primitives" that all screens use.
+
+**Layer 4: Composite Components**
+- `Avatar`, `XPDisplay`, `StreakDisplay`, `Badges`, `WeeklySummary`, `BadgeUnlockModal`, `ReminderCard`, `Navigation`
+- Import constants directly, no `useTheme()`
+- Single visual path.
+
+**Layer 5: Screens**
+- All 13 screens use primitives + composites
+- Import constants where labels/stages/orders are needed
+- No conditional branching based on theme identity.
 
 ---
 
-## 3. Offline Mode Testing
+## Migration Strategy: Incremental, Bottom-Up
 
-### Setup
+### Why NOT Big-Bang
 
-1. Enable DevTools > Network > Offline
-2. Or use airplane mode on device
+A big-bang rewrite (change everything at once) is tempting because it's "one PR." But it's wrong here because:
 
-### Test Scenarios
+1. **394 isTrained branches** means 394 decisions about which branch to keep. Each is a potential regression.
+2. **No automated visual testing** -- you can't catch visual regressions without manually checking each screen.
+3. **One broken import** from removing the theme system crashes the entire app.
+4. **Can't ship partial progress** -- if you get 80% done and hit a problem, you have zero shippable state.
+
+### Why Incremental Bottom-Up
+
+1. **Each step is shippable** -- the app works after every phase.
+2. **CSS variables already exist** -- Tailwind already references them. The token layer can stay unchanged initially.
+3. **Bottom-up means primitives first** -- `Button`, `Card`, `ProgressBar` have only 3-4 `isTrained` branches each. Quick wins that prove the pattern.
+4. **The ThemeProvider can stay until the very end** -- as long as it returns `trained` theme, all code works. Remove it last.
+
+### Build Order
 
 ```
-SCENARIO 1: Fresh Offline Start
-[ ] App loads from cache when offline
-[ ] Service worker serves all routes
-[ ] No network error screens
-
-SCENARIO 2: Offline Data Entry
-[ ] Can log workout while offline
-[ ] Can log macros while offline
-[ ] Can complete check-in while offline
-[ ] Toast shows "saved locally" (not error)
-
-SCENARIO 3: Offline-to-Online Transition
-[ ] App detects network return
-[ ] Data syncs automatically
-[ ] No duplicate entries created
-[ ] User notified of sync completion
-
-SCENARIO 4: Mid-Action Network Loss
-[ ] Start workout online
-[ ] Go offline during workout
-[ ] Complete workout offline
-[ ] Return online - workout syncs
-
-SCENARIO 5: Food Search Offline
-[ ] Food search shows appropriate message
-[ ] Can still use saved meals
-[ ] Can still quick-log macros
+Phase 1: FOUNDATION (tokens + primitives)
+  |
+  |-- Step 1a: Lock theme to "trained" (prevent switching)
+  |-- Step 1b: Hardcode new design tokens in :root
+  |-- Step 1c: De-branch primitive components (Button, Card, ProgressBar, Toast)
+  |
+Phase 2: COMPOSITE COMPONENTS
+  |
+  |-- Step 2a: De-branch Avatar, Navigation, StreakDisplay
+  |-- Step 2b: De-branch XPDisplay, ReminderCard, WeeklySummary
+  |-- Step 2c: De-branch Badges, BadgeUnlockModal
+  |
+Phase 3: SCREENS (order by complexity, LOW to HIGH)
+  |
+  |-- Step 3a: Achievements, Workouts (8-14 branches each)
+  |-- Step 3b: AccessGate, CheckInModal (23-32 branches)
+  |-- Step 3c: XPClaimModal, AvatarScreen, Settings (33-38 branches)
+  |-- Step 3d: Home, Onboarding (45-63 branches -- the big ones)
+  |
+Phase 4: REMOVE THEME INFRASTRUCTURE
+  |
+  |-- Step 4a: Replace useTheme() with direct constant imports
+  |-- Step 4b: Remove ThemeProvider from App.tsx
+  |-- Step 4c: Delete src/themes/ directory entirely
+  |-- Step 4d: Delete gyg.ts, remove theme toggle from Settings
+  |-- Step 4e: Clean up: remove THEME_STORAGE_KEY from localStorage, body class logic
+  |-- Step 4f: Remove legacy Tailwind color mappings (bg.primary, accent.*, glass.*)
 ```
 
-### Service Worker Verification
+### Critical Ordering Rationale
 
-```bash
-# Check service worker is registered
-# In Chrome DevTools > Application > Service Workers
+**Why tokens first:** Everything downstream depends on the token values. If you change a component's styling but the tokens are still the old values, you can't see the real result.
 
-# Verify cached assets
-# In Chrome DevTools > Application > Cache Storage
-```
+**Why primitives before composites:** Composites use primitives. If `Card` still has `isTrained` branching when you're refreshing `Badges` (which uses `Card`), you'll fight two layers of branching at once.
 
-### Workbox Configuration Check
+**Why screens last:** Screens are the most complex and most likely to have regressions. By the time you get to screens, the components they use are already clean.
 
-From `vite.config.ts`, the app uses:
-- `registerType: 'autoUpdate'`
-- Cached patterns: `**/*.{js,css,html,ico,png,svg,woff2}`
+**Why infrastructure removal at the very end:** The `useTheme()` hook is a harmless no-op when there's only one theme. Removing it too early means you have to fix every import simultaneously. Leave it as a compatibility layer until all consumers are migrated, then do a clean sweep.
 
 ---
 
-## 4. Data Persistence Testing
+## Detailed Migration Steps
 
-### LocalStorage Keys to Verify
+### Step 1a: Lock to Trained Theme
 
-The app uses Zustand persist with these storage keys:
-- `gamify-gains-user` (profile, weight history)
-- `gamify-gains-macros` (targets, daily logs, saved meals)
-- `gamify-gains-workouts` (plan, logs, customizations)
-- `gamify-gains-xp` (XP state)
-- `gamify-gains-access` (access code validation)
+**What:** Ensure the app always uses the Trained theme. Make theme switching impossible.
 
-### Persistence Test Scenarios
+**How:**
+- In `Settings.tsx`: Remove the theme toggle UI section
+- In `ThemeProvider`: Hardcode `trained` as the only theme, or just remove `toggleTheme`/`setTheme` functionality
+- Delete `localStorage.getItem(THEME_STORAGE_KEY)` logic
+- Remove the `VITE_DEFAULT_THEME` env var check
 
+**Why first:** This is the safety net. Once the theme is locked, you can't accidentally switch to GYG and see broken styling during migration. Everything renders as Trained. You can make changes to components knowing they'll always render in Trained mode.
+
+**Risk:** VERY LOW. The app already defaults to Trained.
+
+### Step 1b: Refresh Design Tokens
+
+**What:** Update the CSS variable values in `:root` to the new premium palette.
+
+**Where:** `src/index.css` `:root` block + `src/themes/trained.ts` (keep in sync until infrastructure is removed)
+
+**What changes:**
+- Colors: new premium palette (Equinox-inspired)
+- Typography: potentially new font stack
+- Spacing: adjust border-radius, spacing-unit if needed
+- Shadows: refine for premium feel
+
+**Why here:** Every component immediately reflects the new tokens through Tailwind utilities. One change, app-wide effect. This is the highest-leverage step.
+
+**Risk:** MEDIUM. Color contrast regressions possible. Must verify WCAG AA compliance.
+
+### Step 1c: De-branch Primitive Components
+
+**What:** Remove `isTrained` branching from `Button.tsx`, `Card.tsx`, `ProgressBar.tsx`, `Toast.tsx`.
+
+**Total branches to resolve:** ~16 across 4 files.
+
+**Pattern for each branch:**
+```typescript
+// BEFORE
+const borderRadius = isTrained ? 'rounded' : 'rounded-xl'
+
+// AFTER (keep Trained branch, or redesign)
+const borderRadius = 'rounded'  // or whatever the new design specifies
 ```
-SCENARIO 1: Basic Persistence
-[ ] Log workout, close app, reopen - workout still there
-[ ] Log macros, force close app, reopen - macros still there
-[ ] Complete onboarding, clear browser tab, reopen - still onboarded
 
-SCENARIO 2: App Update Simulation
-[ ] Have data in app
-[ ] Clear service worker cache (DevTools > Application > Clear Storage, keep localStorage)
-[ ] Reload - data should survive
+**Then remove:** `const { themeId } = useTheme()` and `const isTrained = themeId === 'trained'` from each file.
 
-SCENARIO 3: Browser Storage Pressure
-[ ] Fill localStorage to 4.5MB+ with other sites
-[ ] App should still work
-[ ] Check for "quota exceeded" errors in console
+**Risk:** LOW. Small files, few branches, highly testable.
 
-SCENARIO 4: Cross-Device Login
-[ ] Create account on device A
-[ ] Log data on device A
-[ ] Login on device B
-[ ] Verify data synced from cloud
-```
+### Steps 2a-2c: De-branch Composite Components
 
-### Storage Size Check
+**Same pattern as primitives but more branches.** Work through each component:
 
-```javascript
-// Run in console to check current storage usage
-const checkStorage = () => {
-  let total = 0;
-  for (let key in localStorage) {
-    if (localStorage.hasOwnProperty(key)) {
-      total += localStorage[key].length * 2; // UTF-16
-    }
-  }
-  console.log(`LocalStorage: ${(total / 1024).toFixed(2)} KB`);
-};
-checkStorage();
-```
+1. Resolve every `isTrained` ternary to the Trained value (or the new design value)
+2. Replace `theme.labels.*` with direct string values
+3. Replace `theme.avatarStages` with direct array reference
+4. Remove `useTheme()` import and call
+
+**Order within composites:** Start with the ones that don't depend on other composites:
+- `Navigation` (3 branches, standalone)
+- `StreakDisplay` (13 branches, standalone)
+- `Avatar` (8 branches, standalone)
+- Then `XPDisplay`, `ReminderCard`, `WeeklySummary`
+- Then `Badges`, `BadgeUnlockModal` (these are more complex)
+
+### Steps 3a-3d: De-branch Screens
+
+**Same pattern but at screen scale.** Each screen will:
+
+1. Resolve all `isTrained` ternaries
+2. Replace all `theme.labels.*` / `theme.avatarStages` / `theme.standingOrders` references
+3. Remove `useTheme()` import and call
+4. Visual refresh: apply new design language to layout, spacing, typography
+
+**Order matters:** Do simpler screens first to build confidence and establish the visual language. Then tackle the complex ones (Onboarding with 63 branches, Home with 45).
+
+### Step 4: Remove Infrastructure
+
+**Only after every consumer is migrated:**
+
+1. Remove `ThemeProvider` wrapper from `App.tsx`
+2. Delete `src/themes/index.ts`, `src/themes/types.ts`, `src/themes/gyg.ts`, `src/themes/trained.ts`
+3. Move any retained constants (labels, stages, orders) to `src/design/constants.ts`
+4. Remove `injectCSSVariables()` -- tokens are now purely in `:root`
+5. Clean `tailwind.config.js` -- remove legacy `bg.*`, `accent.*`, `glass.*` color mappings
+6. Remove `theme-trained` body class from `index.css`
+7. Clear `app-theme` key from localStorage (migration cleanup)
+8. Remove test utils `ThemeProvider` wrapper (`src/test/utils.tsx`)
 
 ---
 
-## 5. Data Sync Testing
+## Risk Areas
 
-### Known Sync Limitations
+### Highest Risk: Onboarding.tsx (63 branches)
 
-From `sync.ts` analysis:
+This file has 8 sub-components, each with its own `useTheme()` call. It's the most complex file in the migration. Sub-components: Welcome, NameStep, GenderStep, BodyStatsStep, FitnessLevelStep, TrainingDaysStep, GoalStep, FeaturesStep, DPExplainStep, AvatarClassStep, AvatarReveal.
 
-1. **Weight history merge incomplete** - Line 145 notes `setWeightHistory` method missing
-2. **One-way sync dominant** - Cloud overwrites local on login
-3. **No offline queue** - Failed syncs aren't retried automatically
+**Mitigation:** Migrate each sub-component individually within the file. Test each onboarding step after changes.
 
-### Safe Sync Testing (Without Losing Data)
+### Moderate Risk: Copy Changes
 
-**Option A: Test Account**
-```
-1. Create a fresh test account (test+[timestamp]@yourdomain.com)
-2. Complete onboarding with test data
-3. Log workout/macros
-4. Test sync scenarios
-5. Delete test account when done
-```
+Many `isTrained` branches change user-facing text:
+- "Recovery Day" vs "Rest Day"
+- "Report Submitted" vs "Build deployed"
+- "Claim Reward" vs "Deploy"
+- "Dom/me" vs "Coach"
 
-**Option B: Data Export First**
-```
-1. Export data via Settings > Data Management > Export
-2. Save JSON file safely
-3. Run sync tests
-4. If needed, restore via Import
-```
+When resolving to the Trained branch, verify the copy still makes sense in context. Some Trained copy references the BDSM theme metaphor heavily -- the design refresh may want to refine some of this language.
 
-### Sync Test Scenarios
+**Mitigation:** Create a copy review pass after de-branching. Flag any copy that feels off in the new premium context.
 
-```
-SCENARIO 1: Initial Sync After Signup
-[ ] Complete onboarding
-[ ] Data syncs to Supabase
-[ ] Verify in Supabase dashboard
+### Moderate Risk: Animation Differences
 
-SCENARIO 2: Login From Fresh Device
-[ ] Clear localStorage (use ?reset=true URL param)
-[ ] Login with existing account
-[ ] Profile data loads from cloud
-[ ] Workout history loads from cloud
+GYG theme has more exuberant animations (bouncy scales, rotations, particle counts). Trained theme has more restrained animations. When de-branching, you're keeping the Trained (restrained) animations -- verify they still feel premium, not empty.
 
-SCENARIO 3: Conflict Resolution
-[ ] Log data on Device A (offline)
-[ ] Log different data on Device B (online)
-[ ] Bring Device A online
-[ ] Verify no data loss
+Examples:
+- Confetti count: `isTrained ? 25 : 50` (Trained uses fewer)
+- Scale animations: `isTrained ? undefined : { scale: [1, 1.2, 1] }` (Trained often has NONE)
+- Rotation: `isTrained ? 0 : -180` (Trained has no rotation)
 
-SCENARIO 4: Partial Network Failure
-[ ] Start sync
-[ ] Kill network mid-sync
-[ ] Restore network
-[ ] Verify data integrity
-```
+**Mitigation:** Animation refinement should happen AFTER de-branching, not during. First remove branches, then review motion design holistically.
+
+### Low Risk: CSS Variable Duplication
+
+Currently tokens exist in TWO places: `src/index.css` `:root` AND `src/themes/trained.ts`. The ThemeProvider overwrites `:root` at runtime. During migration, these must stay in sync. After infrastructure removal, only `:root` remains.
+
+**Mitigation:** Update both files in lockstep during token refresh. Delete the TS version when ThemeProvider is removed.
+
+### Low Risk: Test Utils
+
+`src/test/utils.tsx` wraps test renders in `<ThemeProvider>`. This must be updated when ThemeProvider is removed.
 
 ---
 
-## 6. Edge Case Testing
+## What NOT to Do
 
-### Timezone Issues
+### Anti-Pattern: New Abstraction Layer
 
-```
-SCENARIO 1: Date Boundary
-[ ] Log workout at 11:55 PM
-[ ] Verify it's recorded on correct date
-[ ] Check "today's workout" logic at midnight
+Do NOT replace the old theme system with a new abstraction. No `DesignSystemProvider`, no `useDesignSystem()` hook, no `design.tokens.colorPrimary`. The whole point is to remove indirection. CSS variables + Tailwind classes + plain TS constants is the right level of abstraction.
 
-SCENARIO 2: Timezone Change (travel)
-[ ] Set device to PST, log workout
-[ ] Change device to EST
-[ ] Verify workout still appears on correct date
-[ ] Verify streak not broken incorrectly
+### Anti-Pattern: Gradual Feature Flags
 
-SCENARIO 3: Streak at Midnight
-[ ] Test streak calculation at 11:59 PM
-[ ] Test streak calculation at 12:01 AM
-[ ] Verify "Never Miss Twice" grace period works
-```
+Do NOT implement a "new design" / "old design" toggle. This recreates the dual-theme problem. The migration is directional -- old code gets replaced, not wrapped.
 
-### Network Edge Cases
+### Anti-Pattern: Component-by-Component Visual Refresh Mixed with De-branching
 
-```
-[ ] Slow 3G network (DevTools throttling)
-[ ] Intermittent connection (toggle WiFi rapidly)
-[ ] VPN connection
-[ ] Network change during use (WiFi to cellular)
-```
+Do NOT try to refresh the visual design of a component at the same time you de-branch it. These are separate concerns:
+1. De-branching = removing `isTrained` ternaries, keeping Trained values
+2. Visual refresh = changing the actual design (colors, spacing, typography, layout)
 
-### Storage Edge Cases
+Mixing them makes it impossible to tell if a visual regression is from de-branching (bug) or from intentional design changes.
 
-```
-[ ] User with 1 year of data (heavy localStorage)
-[ ] Import corrupt/malformed JSON
-[ ] Import JSON from older app version
-[ ] Export on one device, import on another
-```
+**Recommended approach:** De-branch first (resolve to Trained values), then do visual refresh (apply new premium design). These can happen in the same phase but should be separate commits.
 
-### Input Validation Edge Cases
+### Anti-Pattern: Deleting Theme Files First
 
-```
-[ ] Weight: 0 lbs (should reject)
-[ ] Weight: 9999 lbs (should reject)
-[ ] Age: 0 (should reject)
-[ ] Age: 150 (should reject)
-[ ] Negative values for macros
-[ ] Special characters in meal names
-[ ] Very long meal names (100+ chars)
-[ ] Empty required fields
-```
-
-### Day-of-Week Edge Cases
-
-```
-[ ] Sunday XP claim timing
-[ ] Mid-week signup (workout sequence)
-[ ] Changing workout days mid-week
-[ ] Skip days in workout schedule
-```
+Do NOT delete `src/themes/` before migrating all consumers. This creates a wall of import errors that must all be fixed simultaneously. Leave the infrastructure as a compatibility layer and remove it last.
 
 ---
 
-## 7. Automated Checks
+## Sources
 
-### Lighthouse Audit
-
-```bash
-# Run Lighthouse CLI
-npx lighthouse https://your-app.vercel.app --view
-
-# Or run via Chrome DevTools > Lighthouse tab
-# Check these scores:
-# - Performance: Target 90+
-# - Accessibility: Target 90+
-# - Best Practices: Target 90+
-# - SEO: Target 90+
-# - PWA: All checks pass
-```
-
-### Lighthouse PWA Checklist
-
-```
-[ ] Registers a service worker
-[ ] Responds with 200 when offline
-[ ] Has a `<meta name="viewport">` tag
-[ ] Contains installability criteria
-[ ] Configured for custom splash screen
-[ ] Sets a theme color for address bar
-[ ] Content sized correctly for viewport
-[ ] Has a manifest with proper icons
-```
-
-### Bundle Analysis
-
-```bash
-# Check bundle size
-npm run build
-npx vite-bundle-analyzer dist/stats.html
-
-# Target: Main bundle < 200KB gzipped
-```
-
-### Accessibility Audit
-
-```bash
-# Using axe-core
-npx @axe-core/cli https://your-app.vercel.app
-
-# Or use browser extension:
-# - axe DevTools (Chrome)
-# - WAVE (Chrome/Firefox)
-```
-
-### Security Headers Check
-
-```bash
-# Check security headers
-curl -I https://your-app.vercel.app
-
-# Should have:
-# - Content-Security-Policy
-# - X-Frame-Options
-# - X-Content-Type-Options
-# - Referrer-Policy
-```
-
----
-
-## 8. Quick Reference Commands
-
-```bash
-# Development
-npm run dev                    # Start dev server
-npm run build                  # Production build
-npm run preview                # Preview production build
-
-# Testing
-npm run test                   # Run tests in watch mode
-npm run test:run               # Run tests once
-npm run test:coverage          # Run with coverage
-
-# Quality
-npm run lint                   # ESLint check
-npx tsc --noEmit              # TypeScript check
-
-# PWA Testing
-# Chrome DevTools > Application > Service Workers
-# Chrome DevTools > Application > Manifest
-# Chrome DevTools > Network > Offline checkbox
-
-# Data Reset (USE CAREFULLY)
-# Navigate to: https://your-app.vercel.app?reset=true
-```
-
----
-
-## 9. Known Issues to Verify Fixed
-
-From `AUDIT.md` analysis:
-
-| Issue | Status | Verify |
-|-------|--------|--------|
-| PWA icons missing | Fixed | Check `/public/pwa-*.png` files exist |
-| Weight history merge incomplete | Known | Document as limitation |
-| No input validation | Known | Add to tech debt backlog |
-| No offline queue | Known | Document as limitation |
-
----
-
-## 10. Pre-Launch Sign-Off Checklist
-
-```
-CRITICAL (Must Pass)
-[ ] Full user journey completes without errors
-[ ] PWA installs on iOS Safari
-[ ] PWA installs on Android Chrome
-[ ] App loads when offline (after first visit)
-[ ] Data persists after app restart
-[ ] No console errors in production build
-[ ] Lighthouse PWA audit passes
-
-HIGH (Should Pass)
-[ ] Lighthouse Performance > 80
-[ ] Lighthouse Accessibility > 80
-[ ] All existing tests pass
-[ ] TypeScript compiles without errors
-[ ] ESLint passes
-
-MEDIUM (Nice to Have)
-[ ] Lighthouse Performance > 90
-[ ] Lighthouse Accessibility > 90
-[ ] Bundle size < 200KB gzipped
-[ ] All edge cases documented
-```
-
----
-
-## Appendix: Quick Bug Report Template
-
-When you find an issue, document it with:
-
-```markdown
-## Bug: [Short Description]
-
-**Severity**: Critical / High / Medium / Low
-**Device**: [Device + OS version]
-**Browser**: [Browser + version]
-
-**Steps to Reproduce**:
-1.
-2.
-3.
-
-**Expected**:
-**Actual**:
-
-**Console Errors**:
-**Screenshot**:
-```
-
----
-
-*Generated: February 2026*
-*App Version: 1.6.0*
+All findings are from direct codebase analysis:
+- `src/themes/index.ts` -- ThemeProvider, useTheme, injectCSSVariables
+- `src/themes/types.ts` -- DesignTokens, AppTheme, ThemeLabels interfaces
+- `src/themes/trained.ts` -- Trained theme values (the ones to keep)
+- `src/themes/gyg.ts` -- GYG theme values (being removed)
+- `src/index.css` -- `:root` CSS variables, utility classes, theme-specific selectors
+- `tailwind.config.js` -- CSS variable -> Tailwind mapping
+- `src/App.tsx` -- ThemeProvider wrapper location
+- `src/test/utils.tsx` -- ThemeProvider in test harness
+- `grep -r "isTrained"` -- 394 occurrences across 21 files
+- `grep -r "useTheme"` -- 22 files importing the hook
