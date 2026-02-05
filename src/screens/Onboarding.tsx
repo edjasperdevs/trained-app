@@ -1230,8 +1230,8 @@ function EvolutionStep({
               }}
               transition={{
                 type: 'spring',
-                stiffness: 200,
-                damping: 15
+                stiffness: 300,
+                damping: 25
               }}
               className="text-center"
             >

@@ -122,8 +122,8 @@ function BadgeDisplay({ badge, index }: { badge: Badge; index: number }) {
       animate={{ opacity: 1, scale: 1, rotate: 0 }}
       transition={{
         type: 'spring',
-        stiffness: 200,
-        damping: 15,
+        stiffness: 300,
+        damping: 25,
         delay: 0.3 + index * 0.5
       }}
       className="flex flex-col items-center"
@@ -220,7 +220,7 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.8, opacity: 0 }}
-          transition={{ type: 'spring', damping: 20 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="w-full max-w-sm mx-4 text-center"
         >
           {/* Header */}

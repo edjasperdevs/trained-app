@@ -52,7 +52,7 @@ export function AvatarScreen() {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', delay: 0.1 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
           >
             <Avatar size="xl" showMood showLevel level={currentLevel} />
           </motion.div>
