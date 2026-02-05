@@ -204,55 +204,9 @@ body {
 
 /* Glassmorphism surfaces */
 /* .glass and .glass-elevated removed (VIS-02: solid surfaces for standard components) */
+/* .glass-subtle removed (03-02: replaced with solid surface styling) */
 
-.glass-subtle {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--color-border);
-}
-
-/* Glow effects */
-.glow-primary {
-  box-shadow: var(--shadow-glow);
-}
-
-.glow-gold {
-  box-shadow: var(--shadow-glow);
-}
-
-.glow-green {
-  box-shadow: 0 0 20px var(--color-success);
-}
-
-.glow-primary-intense {
-  box-shadow: 0 0 30px var(--color-primary);
-}
-
-.text-glow-primary {
-  text-shadow: 0 0 10px var(--color-primary);
-}
-
-.text-glow-gold {
-  text-shadow: 0 0 10px var(--color-primary);
-}
-
-/* Legacy glow classes */
-.glow-cyan {
-  box-shadow: var(--shadow-glow);
-}
-
-.glow-purple {
-  box-shadow: var(--shadow-glow);
-}
-
-.glow-gold-intense {
-  box-shadow: 0 0 30px var(--color-primary);
-}
-
-.text-glow-green {
-  text-shadow: 0 0 10px var(--color-success);
-}
+/* Glow utility classes removed (03-02: only shadow-glow/shadow-glow-intense tokens remain in @theme) */
 
 /* ================================================================
    LAYOUT UTILITIES
@@ -297,19 +251,43 @@ button, a, input, select, textarea {
   transition: all 0.15s ease;
 }
 
-/* Glass input styling */
-.glass-input {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+/* WCAG AA focus indicator for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
-.glass-input:focus {
-  background: var(--color-surface-elevated);
+/* Unified input base class */
+.input-base {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-base:focus {
   border-color: var(--color-primary);
   outline: none;
   box-shadow: 0 0 0 2px var(--color-primary-muted);
+}
+
+/* Inputs already have box-shadow focus, suppress double outline */
+.input-base:focus-visible {
+  outline: none;
+}
+
+.input-base::placeholder {
+  color: var(--color-text-secondary);
 }
 
 /* Glass modal overlay */
