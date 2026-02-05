@@ -333,20 +333,20 @@ button, a, input, select, textarea {
 }
 
 /* ================================================================
-   THEME-SPECIFIC STYLES
+   GLOBAL HEADING & BUTTON STYLES
    ================================================================ */
 
-/* Theme heading styles */
-.theme-trained h1,
-.theme-trained h2,
-.theme-trained h3 {
+/* Heading styles (Oswald uppercase) */
+h1,
+h2,
+h3 {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-/* Trained theme button styles */
-.theme-trained .btn-primary {
+/* Primary button styles */
+.btn-primary {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.08em;
