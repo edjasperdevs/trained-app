@@ -22,7 +22,7 @@ export function HomeSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-4">
+      <div className="bg-surface pt-8 pb-6 px-5">
         <div className="flex items-center justify-between mb-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-24" />
@@ -33,7 +33,7 @@ export function HomeSkeleton() {
         <Skeleton className="h-4 w-56" />
       </div>
 
-      <div className="px-4 space-y-6 mt-6">
+      <div className="px-5 space-y-6 mt-6">
         {/* Check-in banner */}
         <SkeletonCard />
 
@@ -72,12 +72,12 @@ export function WorkoutsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-4">
+      <div className="bg-surface pt-8 pb-6 px-5">
         <Skeleton className="h-8 w-32 mb-2" />
         <Skeleton className="h-4 w-24" />
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Tab bar */}
         <div className="flex gap-2">
           <Skeleton className="h-10 w-24 rounded-lg" />
@@ -98,7 +98,7 @@ export function MacrosSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-4 px-4">
+      <div className="bg-surface pt-8 pb-4 px-5">
         <Skeleton className="h-8 w-28 mb-4" />
         {/* Tabs */}
         <div className="flex gap-2">
@@ -109,7 +109,7 @@ export function MacrosSkeleton() {
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Circular progress placeholder */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-surface border border-border rounded-lg p-4 flex flex-col items-center">
@@ -141,7 +141,7 @@ export function AchievementsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-4">
+      <div className="bg-surface pt-8 pb-6 px-5">
         <div className="flex items-center gap-4 mb-6">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="space-y-2">
@@ -162,7 +162,7 @@ export function AchievementsSkeleton() {
         </div>
       </div>
 
-      <div className="px-4 space-y-6">
+      <div className="px-5 space-y-6">
         {/* Rarity breakdown */}
         <div className="grid grid-cols-4 gap-2">
           <Skeleton className="h-16 rounded-lg" />
@@ -195,7 +195,7 @@ export function AvatarSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-12 px-4">
+      <div className="bg-surface pt-8 pb-12 px-5">
         <Skeleton className="h-8 w-32 mx-auto mb-6" />
         {/* Large avatar placeholder */}
         <div className="flex justify-center">
@@ -203,7 +203,7 @@ export function AvatarSkeleton() {
         </div>
       </div>
 
-      <div className="px-4 space-y-6 -mt-4">
+      <div className="px-5 space-y-6 -mt-4">
         {/* Stats card */}
         <div className="bg-surface border border-border rounded-lg p-4">
           <div className="grid grid-cols-3 gap-4 text-center">
@@ -236,11 +236,11 @@ export function SettingsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-4">
+      <div className="bg-surface pt-8 pb-6 px-5">
         <Skeleton className="h-8 w-28" />
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Setting rows */}
         <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
           <Skeleton className="h-4 w-20" />
@@ -265,7 +265,7 @@ export function SettingsSkeleton() {
 
 export function OnboardingSkeleton() {
   return (
-    <div className="min-h-screen bg-background flex flex-col px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col px-5 py-8">
       {/* Progress bar placeholder */}
       <div className="flex gap-1 mb-8 justify-center">
         <Skeleton className="h-1 w-8 rounded-full" />

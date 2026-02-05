@@ -226,7 +226,7 @@ export function Coach() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center px-4">
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center px-5">
         <Card className="text-center">
           <span className="text-4xl block mb-4">⚠️</span>
           <p className="text-accent-danger mb-4">{error}</p>
@@ -239,7 +239,7 @@ export function Coach() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-bg-secondary pt-8 pb-6 px-4">
+      <div className="bg-bg-secondary pt-8 pb-6 px-5">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Coach Dashboard</h1>
@@ -251,7 +251,7 @@ export function Coach() {
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-4">
+      <div className="px-5 py-6 space-y-4">
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-3">
           <Card padding="sm" className="text-center">

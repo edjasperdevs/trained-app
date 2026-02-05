@@ -112,7 +112,7 @@ export function Home() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-4">
+      <div className="bg-surface pt-8 pb-6 px-5">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-text-secondary text-sm text-xs">
@@ -131,7 +131,7 @@ export function Home() {
         <p className="text-text-secondary text-sm">{message}</p>
       </div>
 
-      <div className="px-4 space-y-6">
+      <div className="px-5 space-y-6">
         {/* Active Reminders */}
         {activeReminders.length > 0 && !hasCheckedInToday && (
           <ReminderList maxReminders={2} />

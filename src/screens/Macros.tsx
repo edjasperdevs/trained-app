@@ -48,7 +48,7 @@ export function Macros() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-bg-secondary pt-8 pb-4 px-4">
+      <div className="bg-bg-secondary pt-8 pb-4 px-5">
         <h1 className="text-2xl font-bold mb-4">Macros</h1>
 
         {/* Tabs */}
@@ -70,7 +70,7 @@ export function Macros() {
         </div>
       </div>
 
-      <div className="px-4 py-6">
+      <div className="px-5 py-6">
         {activeTab === 'daily' && (
           <DailyView
             progress={progress}

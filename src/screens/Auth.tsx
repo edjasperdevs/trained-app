@@ -97,7 +97,7 @@ export function Auth() {
 
   if (!isConfigured) {
     return (
-      <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-5">
         <Card className="w-full max-w-md text-center">
           <span className="text-4xl block mb-4">🔧</span>
           <h2 className="text-xl font-bold mb-2">Setup Required</h2>
@@ -110,7 +110,7 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-5">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

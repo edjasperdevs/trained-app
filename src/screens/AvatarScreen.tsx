@@ -42,7 +42,7 @@ export function AvatarScreen() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="pt-8 pb-12 px-4 bg-surface">
+      <div className="pt-8 pb-12 px-5 bg-surface">
         <h1 className="text-2xl font-bold mb-6 text-center">
           Your Status
         </h1>
@@ -59,7 +59,7 @@ export function AvatarScreen() {
         </div>
       </div>
 
-      <div className="px-4 space-y-6 -mt-4">
+      <div className="px-5 space-y-6 -mt-4">
         {/* Current Stats */}
         <Card>
           <div className="grid grid-cols-3 gap-4 text-center">

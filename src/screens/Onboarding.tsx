@@ -212,7 +212,7 @@ export function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col px-4 py-8">
+    <div className="min-h-screen bg-bg-primary flex flex-col px-5 py-8">
       {/* Progress indicator */}
       {step !== 'welcome' && (
         <div className="mb-8">

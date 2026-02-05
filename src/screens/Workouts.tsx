@@ -221,7 +221,7 @@ export function Workouts() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className="pt-8 pb-6 px-4 bg-surface">
+      <div className="pt-8 pb-6 px-5 bg-surface">
         <h1 className="text-2xl font-bold mb-2">
           Training
         </h1>
@@ -232,7 +232,7 @@ export function Workouts() {
         )}
       </div>
 
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-5 py-6 space-y-6">
         {/* Active Workout */}
         {activeWorkout ? (
           <ActiveWorkoutView

@@ -56,7 +56,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-5">
       {/* Logo/Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

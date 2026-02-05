@@ -220,7 +220,7 @@ export function Achievements() {
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
       {/* Header */}
-      <div className="pt-8 pb-6 px-4 bg-surface">
+      <div className="pt-8 pb-6 px-5 bg-surface">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -261,7 +261,7 @@ export function Achievements() {
         </Card>
       </div>
 
-      <div className="px-4 space-y-6">
+      <div className="px-5 space-y-6">
         {/* Rarity Breakdown */}
         <div className="grid grid-cols-4 gap-2">
           {(['legendary', 'epic', 'rare', 'common'] as BadgeRarity[]).map(rarity => (
@@ -309,7 +309,7 @@ export function Achievements() {
         )}
 
         {/* Category Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5">
           {categories.map(cat => {
             const Icon = cat.icon
             return (
