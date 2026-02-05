@@ -1,124 +1,158 @@
-# Roadmap: Trained MVP Launch Polish
+# Roadmap: Trained Design Refresh
 
 ## Overview
 
-Polish and harden the Trained fitness gamification PWA for launch to 90k fitness enthusiast followers. This roadmap takes the app from unknown current state through audit, performance optimization, UX polish, resilience hardening, and launch preparation. Timeline is this week, requiring ruthless prioritization. Core principle: first impression must be flawless.
+Full visual overhaul across 7 phases transforming Trained from playful gamified to premium Equinox-tier. The phases follow a strict dependency chain: foundation tokens enable theme removal, which enables visual refresh of components, then screens, then animation tuning, with cleanup and deploy as the final sweep. 25 requirements, standard depth, targeting completion this week.
 
-**Phases:** 5
-**Requirements:** 16 mapped
+**Phases:** 7
+**Requirements:** 25 mapped
 **Depth:** Standard
 **Timeline:** This week
 
 ## Phases
 
-- [ ] **Phase 1: Audit & Discovery** - Understand current state before fixing anything
-- [ ] **Phase 2: Performance Foundation** - Bundle optimization, service worker, Lighthouse targets
-- [ ] **Phase 3: UX Polish** - Loading states, empty states, error messages, haptics
-- [ ] **Phase 4: Resilience Hardening** - Network failures, API fallbacks, sync reliability
-- [ ] **Phase 5: Launch Preparation** - Monitoring, marketing assets, final verification
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
+- [ ] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
+- [ ] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
+- [ ] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
+- [ ] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
+- [ ] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
+- [ ] **Phase 7: Deploy** - Service worker strategy, "What's New" interstitial
 
 ## Phase Details
 
-### Phase 1: Audit & Discovery
-**Goal:** Understand the current state of the app before making any fixes
-**Depends on:** Nothing (first phase)
-**Requirements:** AUDIT-01
+### Phase 1: Foundation
+**Goal**: Every color, font, spacing, and radius token flows from a single CSS source of truth with zero runtime cost
+**Depends on**: Nothing (first phase)
+**Requirements**: FOUND-01, FOUND-02, FOUND-03, FOUND-04, FOUND-05, FOUND-06
 **Success Criteria** (what must be TRUE):
-1. Full user journey tested (access code -> onboarding -> workout -> macros -> XP claim)
-2. All critical bugs documented with severity and location
-3. PWA install flow verified on iOS Safari and Android Chrome
-4. Offline mode tested (app loads from cache, data persists)
-5. Issue backlog prioritized for remaining phases
-**Plans:** 1 plan
+  1. App builds and runs on Tailwind v4 with `@theme` directive -- no `tailwind.config.js` token definitions remain active
+  2. All 67 previously-hardcoded color values reference design tokens (no raw hex/rgba in component files)
+  3. `cn()` utility and CVA are importable and used in at least one component as proof of concept
+  4. Fonts load from local bundles (no Google Fonts CDN requests visible in Network tab)
+  5. All `framer-motion` imports replaced with `motion/react` -- app animations still function
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md - Full user journey audit with checklist, bug log, and prioritized backlog
+- [ ] 01-01: Tailwind v4 migration, @theme token system, cn() utility, CVA + tailwind-merge install
+- [ ] 01-02: Hardcoded color audit + replacement, font self-hosting, motion v12 upgrade
 
 ---
 
-### Phase 2: Performance Foundation
-**Goal:** App loads fast and updates reliably without trapping users on broken versions
-**Depends on:** Phase 1
-**Requirements:** PERF-01, PERF-02, PERF-03, PERF-04
+### Phase 2: Theme Removal
+**Goal**: The codebase has exactly one styling path -- no conditional branching, no theme selection, no GYG remnants
+**Depends on**: Phase 1
+**Requirements**: THEME-01, THEME-02, THEME-03
 **Success Criteria** (what must be TRUE):
-1. Routes lazy load (Home, Workouts, Macros load on demand, not in initial bundle)
-2. Service worker uses prompt mode with visible update banner
-3. Lighthouse Performance score exceeds 90
-4. Lighthouse Accessibility score exceeds 90
-5. Supabase API calls cache with NetworkFirst strategy
-**Plans:** 2 plans
+  1. Zero `isTrained` ternaries remain in the codebase (was 394 across 21 files)
+  2. No `useTheme()` hook calls exist -- components import constants directly
+  3. Settings screen has no theme toggle -- the option is gone
+  4. A user with `gyg` stored in localStorage sees the Trained theme on next visit (migration works)
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Supabase API caching, viewport fix, color contrast accessibility fixes
-- [ ] 02-02-PLAN.md -- Lighthouse verification and human sign-off
+- [ ] 02-01: De-branch primitive and composite components (Button, Card, Navigation, Avatar, etc.)
+- [ ] 02-02: De-branch screens (Workouts, AccessGate, CheckIn, XPClaim, Settings, Avatar, Home, Onboarding)
+- [ ] 02-03: Delete GYG theme, ThemeProvider, useTheme hook; add localStorage migration
 
 ---
 
-### Phase 3: UX Polish
-**Goal:** App feels premium with smooth loading states, helpful empty states, and clear feedback
-**Depends on:** Phase 2
-**Requirements:** UX-01, UX-02, UX-03, UX-04, UX-05
+### Phase 3: Component Primitives
+**Goal**: Core UI components look premium -- solid surfaces, restrained accents, refined inputs -- and expose typed variant APIs
+**Depends on**: Phase 2
+**Requirements**: VIS-01, VIS-02, VIS-03, VIS-04
 **Success Criteria** (what must be TRUE):
-1. All data-loading screens show skeleton placeholders instead of spinners
-2. Empty states for workouts, macros, and achievements show helpful actions
-3. Error messages explain what went wrong and how to fix it
-4. Key actions (set completion, workout finish) provide haptic feedback
-5. Onboarding shows clear progress indicator (step X of Y)
-**Plans:** 3 plans
+  1. Button, Card, ProgressBar, Toast, and input components use CVA variant definitions (not raw conditional classes)
+  2. Standard cards use solid surface colors with subtle borders -- glass effects only appear on overlays/modals
+  3. No screen has more than one glow effect (hero glow maximum)
+  4. Focus rings and input fields have consistent, refined styling that meets WCAG AA focus indicator requirements
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Screen-specific skeleton loading states replacing generic spinner
-- [ ] 03-02-PLAN.md -- Reusable EmptyState component, error message improvements
-- [ ] 03-03-PLAN.md -- Haptic feedback on key actions, onboarding progress indicator
+- [ ] 03-01: Redesign Button, Card, ProgressBar, Toast with CVA variants; replace glass with solid surfaces
+- [ ] 03-02: Refine inputs, focus rings, form styling; strip/mute glow effects to one-per-screen max
 
 ---
 
-### Phase 4: Resilience Hardening
-**Goal:** App works reliably even when network fails, APIs rate limit, or sync conflicts occur
-**Depends on:** Phase 3
-**Requirements:** RES-01, RES-02, RES-03
+### Phase 4: Screen Refresh
+**Goal**: Every screen communicates premium discipline through typography hierarchy, generous spacing, and purposeful layout
+**Depends on**: Phase 3
+**Requirements**: SCREEN-01, SCREEN-02, SCREEN-03, SCREEN-04, SCREEN-05
 **Success Criteria** (what must be TRUE):
-1. Workout logging works completely offline with "saved locally" feedback
-2. Food search falls back to Open Food Facts when USDA rate limits
-3. Failed cloud syncs retry automatically with exponential backoff
-4. User sees clear sync status indicator (synced/syncing/offline)
-**Plans:** 2 plans
+  1. Typography uses 3-4 size stops with weight-driven hierarchy -- no more than 2 uppercase elements per screen (section headers and primary CTAs only)
+  2. Screen padding is 20-24px and card padding is 16-24px consistently across all screens
+  3. CheckInModal and XPClaimModal render as bottom sheets (slide up from bottom, not centered modals)
+  4. Skeleton loaders and empty states use colors from the new palette (no old theme colors visible during loading)
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- syncStore, offline detection, incremental sync triggers, "saved locally" feedback
-- [ ] 04-02-PLAN.md -- Food API 429 cooldown, SyncStatusIndicator component
+- [ ] 04-01: Apply typography scale, fix uppercase overuse, apply spacing system across all screens
+- [ ] 04-02: Convert CheckInModal and XPClaimModal to bottom sheets; update skeleton and empty state colors
 
 ---
 
-### Phase 5: Launch Preparation
-**Goal:** Monitoring in place and marketing assets ready for launch announcement
-**Depends on:** Phase 4
-**Requirements:** LAUNCH-01, LAUNCH-02, LAUNCH-03
+### Phase 5: Animation Refinement
+**Goal**: All motion feels purposeful and premium -- fast, critically damped, never bouncy or playful
+**Depends on**: Phase 4
+**Requirements**: ANIM-01, ANIM-02, ANIM-03
 **Success Criteria** (what must be TRUE):
-1. Supabase dashboard shows alerts for connection limits, query latency, auth errors
-2. App Store-style marketing screenshots exist for key screens
-3. OG images configured for social media link previews
-4. Pre-launch checklist completed (all critical items pass)
-**Plans:** 2 plans
+  1. All spring animations use critically damped parameters (damping 25-30, stiffness 300+) -- no overshoot/bounce visible
+  2. `float` and `xp-pop` keyframe animations are removed; `pulse-glow` is muted to a subtle fade
+  3. With `prefers-reduced-motion: reduce` enabled in OS settings, no animations play (motion v12 compliance)
+**Plans**: 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md -- Fix OG image (1200x630), wire Sentry into error paths, add robots.txt
-- [ ] 05-02-PLAN.md -- Pre-launch verification checklist, manual task documentation, human sign-off
+- [ ] 05-01: Replace bouncy springs with critically damped; remove playful keyframes; verify reduced-motion compliance
 
 ---
+
+### Phase 6: Cleanup
+**Goal**: Zero dead code from the old theme system remains -- the codebase is clean and the build is verified
+**Depends on**: Phase 5
+**Requirements**: CLEAN-01, CLEAN-02
+**Success Criteria** (what must be TRUE):
+  1. `src/themes/` directory does not exist (retained constants moved to `src/design/constants.ts` or equivalent)
+  2. No legacy CSS rules (`.theme-trained`, `.theme-gyg`, `injectCSSVariables`) exist in any file
+  3. `tsc --noEmit` passes with zero errors and the full test suite passes
+**Plans**: 1 plan
+
+Plans:
+- [ ] 06-01: Delete theme infrastructure, remove legacy CSS rules, run tsc + test suite verification
+
+---
+
+### Phase 7: Deploy
+**Goal**: Returning users get the new design atomically with clear communication about what changed
+**Depends on**: Phase 6
+**Requirements**: DEPLOY-01, DEPLOY-02
+**Success Criteria** (what must be TRUE):
+  1. Service worker serves new assets atomically -- no partial old/new design mashup possible
+  2. A returning user sees a "What's New" interstitial or update prompt on first visit after deploy
+  3. All Vite-generated assets have content hashes (cache-busting confirmed)
+**Plans**: 1 plan
+
+Plans:
+- [ ] 07-01: Service worker atomic deploy strategy, "What's New" interstitial, asset hash verification
 
 ## Progress
 
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+
 | Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Audit & Discovery | 1/1 | Complete | 2026-02-04 |
-| 2. Performance Foundation | 2/2 | Complete | 2026-02-05 |
-| 3. UX Polish | 3/3 | Complete | 2026-02-05 |
-| 4. Resilience Hardening | 2/2 | Complete | 2026-02-05 |
-| 5. Launch Preparation | 2/2 | Complete | 2026-02-05 |
+|-------|---------------|--------|-----------|
+| 1. Foundation | 0/2 | Not started | - |
+| 2. Theme Removal | 0/3 | Not started | - |
+| 3. Component Primitives | 0/2 | Not started | - |
+| 4. Screen Refresh | 0/2 | Not started | - |
+| 5. Animation Refinement | 0/1 | Not started | - |
+| 6. Cleanup | 0/1 | Not started | - |
+| 7. Deploy | 0/1 | Not started | - |
 
 ---
-
-*Roadmap created: 2026-02-04*
-*Depth: Standard (5 phases)*
-*Coverage: 16/16 v1 requirements mapped*
+*Roadmap created: 2026-02-05*
+*Total: 7 phases, 12 plans, 25 requirements*

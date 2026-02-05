@@ -1,102 +1,121 @@
-# Requirements: Trained MVP Launch Polish
+# Requirements: Trained Design Refresh
 
-**Defined:** 2026-02-04
-**Core Value:** First impression must be flawless - no broken flows, confusing UX, or visual jank
+**Defined:** 2026-02-05
+**Core Value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
+
+## Previous Milestone (Launch Polish) -- Complete
+
+All 16 requirements delivered. See archived milestone for details.
 
 ## v1 Requirements
 
-Requirements for launch to 90k fitness enthusiast followers.
+Requirements for design refresh -- full visual overhaul with theme system simplification.
 
-### Audit
+### Foundation
 
-- [ ] **AUDIT-01**: Complete full user journey test (access -> onboarding -> workout -> macros -> XP claim)
+- [ ] **FOUND-01**: Migrate Tailwind CSS v3 to v4 with `@theme` directive replacing JS token system
+- [ ] **FOUND-02**: Define premium design tokens (surface hierarchy, border radius 12-16px, spacing scale, subtle borders)
+- [ ] **FOUND-03**: Audit and replace all hardcoded colors (67 identified) with token references
+- [ ] **FOUND-04**: Upgrade framer-motion to motion v12 (find-and-replace imports)
+- [ ] **FOUND-05**: Self-host fonts via Fontsource (replace Google Fonts CDN)
+- [ ] **FOUND-06**: Create `cn()` utility + install CVA, tailwind-merge, clsx
 
-### Performance
+### Theme Removal
 
-- [x] **PERF-01**: Implement route lazy loading and vendor chunk splitting
-- [x] **PERF-02**: Switch service worker from autoUpdate to prompt mode with update banner
-- [x] **PERF-03**: Achieve Lighthouse scores >90 (Performance, Accessibility, PWA)
-- [x] **PERF-04**: Add runtime caching for Supabase API calls
+- [ ] **THEME-01**: Remove all `isTrained` branching (394 ternaries across 21 files) -- resolve to Trained values
+- [ ] **THEME-02**: Delete GYG theme, ThemeProvider, useTheme hook, theme toggle
+- [ ] **THEME-03**: Add localStorage migration for `app-theme` key on boot
 
-### UX Polish
+### Visual Refresh -- Components
 
-- [x] **UX-01**: Replace loading spinners with skeleton placeholders
-- [x] **UX-02**: Add actionable empty states for all data-dependent screens
-- [x] **UX-03**: Improve error messages to be user-friendly and explain fixes
-- [x] **UX-04**: Add haptic feedback on key actions
-- [x] **UX-05**: Add progress indicator to onboarding flow
+- [ ] **VIS-01**: Redesign primitive components with CVA variants (Button, Card, ProgressBar, Toast, inputs)
+- [ ] **VIS-02**: Replace glass effects on standard cards with solid surface colors (keep glass for overlays only)
+- [ ] **VIS-03**: Remove/mute glow effects -- keep ONE hero glow per screen maximum
+- [ ] **VIS-04**: Refine focus rings, input styling, and form design to premium standard
 
-### Resilience
+### Visual Refresh -- Screens
 
-- [x] **RES-01**: Implement graceful degradation for network failures
-- [x] **RES-02**: Add food API fallback when rate limited
-- [x] **RES-03**: Implement sync retry logic for failed cloud syncs
+- [ ] **SCREEN-01**: Apply premium typography scale across all screens (3-4 sizes, weight-driven hierarchy)
+- [ ] **SCREEN-02**: Fix uppercase overuse (restrict to section headers and primary CTAs only)
+- [ ] **SCREEN-03**: Apply generous spacing system (20-24px screen padding, 16-24px card padding)
+- [ ] **SCREEN-04**: Convert CheckInModal and XPClaimModal to bottom sheet pattern
+- [ ] **SCREEN-05**: Update skeleton loading and empty state colors to match new palette
 
-### Launch Prep
+### Animation
 
-- [x] **LAUNCH-01**: Set up Supabase monitoring and alerts
-- [x] **LAUNCH-02**: Create marketing screenshots (App Store-style)
-- [x] **LAUNCH-03**: Create OG images for social media sharing
+- [ ] **ANIM-01**: Replace bouncy animations with critically damped springs (damping 25-30, stiffness 300+)
+- [ ] **ANIM-02**: Remove playful keyframe animations (float, xp-pop); mute pulse-glow
+- [ ] **ANIM-03**: Ensure `prefers-reduced-motion` compliance via motion v12
+
+### Cleanup & Deploy
+
+- [ ] **CLEAN-01**: Delete all theme infrastructure (`src/themes/` directory, tailwind.config.js, legacy CSS rules)
+- [ ] **CLEAN-02**: Final `tsc --noEmit` verification + full test suite pass
+- [ ] **DEPLOY-01**: Service worker strategy for atomic design refresh release (force-update consideration)
+- [ ] **DEPLOY-02**: Build "What's New" interstitial or update prompt for returning users
 
 ## v2 Requirements
 
-Deferred to post-launch or design refresh project.
+Deferred to post-refresh.
 
-### Design Refresh
-- **DESIGN-01**: Explore Equinox/luxury gym aesthetic
-- **DESIGN-02**: New color palette (darker, cleaner, more masculine)
-- **DESIGN-03**: Typography refresh
-- **DESIGN-04**: Component library redesign
+### Advanced Visual
+- **ADV-01**: OKLCH color space conversion
+- **ADV-02**: Circular progress gauges (Whoop-style strain/recovery dials)
+- **ADV-03**: Icon library evaluation (Phosphor thin weight)
+- **ADV-04**: Storybook for component documentation
 
 ### Extended Testing
 - **TEST-01**: Device matrix testing (iOS Safari, Android Chrome, desktop)
-- **TEST-02**: Comprehensive offline mode testing
+- **TEST-02**: Comprehensive offline mode testing post-refresh
 - **TEST-03**: Cross-device sync testing
-- **TEST-04**: Load testing at 10x expected volume
-
-### Documentation
-- **DOC-01**: FAQ for common questions
-- **DOC-02**: Support response templates
-- **DOC-03**: Known issues documentation
+- **TEST-04**: WCAG AAA contrast compliance (beyond AA)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Coach dashboard polish | Client experience only for this launch |
-| New features | Polish existing, don't add complexity |
-| GYG theme polish | Trained theme only |
-| Full design redesign | Deferred to next project |
-| Comprehensive QA | Time-boxed audit, not full QA cycle |
+| Coach dashboard redesign | Client experience only |
+| New features or functionality | Visual refresh only, no behavior changes |
+| Light mode | Dark-only, matches luxury gym aesthetic |
+| Native mobile app | Still PWA |
+| Marketing site | App screens only |
+| Data/store changes | Zero state changes that could affect user data |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUDIT-01 | Phase 1: Audit & Discovery | Pending |
-| PERF-01 | Phase 2: Performance Foundation | Complete |
-| PERF-02 | Phase 2: Performance Foundation | Complete |
-| PERF-03 | Phase 2: Performance Foundation | Complete |
-| PERF-04 | Phase 2: Performance Foundation | Complete |
-| UX-01 | Phase 3: UX Polish | Complete |
-| UX-02 | Phase 3: UX Polish | Complete |
-| UX-03 | Phase 3: UX Polish | Complete |
-| UX-04 | Phase 3: UX Polish | Complete |
-| UX-05 | Phase 3: UX Polish | Complete |
-| RES-01 | Phase 4: Resilience Hardening | Complete |
-| RES-02 | Phase 4: Resilience Hardening | Complete |
-| RES-03 | Phase 4: Resilience Hardening | Complete |
-| LAUNCH-01 | Phase 5: Launch Preparation | Complete |
-| LAUNCH-02 | Phase 5: Launch Preparation | Complete |
-| LAUNCH-03 | Phase 5: Launch Preparation | Complete |
+| FOUND-01 | Phase 1: Foundation | Pending |
+| FOUND-02 | Phase 1: Foundation | Pending |
+| FOUND-03 | Phase 1: Foundation | Pending |
+| FOUND-04 | Phase 1: Foundation | Pending |
+| FOUND-05 | Phase 1: Foundation | Pending |
+| FOUND-06 | Phase 1: Foundation | Pending |
+| THEME-01 | Phase 2: Theme Removal | Pending |
+| THEME-02 | Phase 2: Theme Removal | Pending |
+| THEME-03 | Phase 2: Theme Removal | Pending |
+| VIS-01 | Phase 3: Component Primitives | Pending |
+| VIS-02 | Phase 3: Component Primitives | Pending |
+| VIS-03 | Phase 3: Component Primitives | Pending |
+| VIS-04 | Phase 3: Component Primitives | Pending |
+| SCREEN-01 | Phase 4: Screen Refresh | Pending |
+| SCREEN-02 | Phase 4: Screen Refresh | Pending |
+| SCREEN-03 | Phase 4: Screen Refresh | Pending |
+| SCREEN-04 | Phase 4: Screen Refresh | Pending |
+| SCREEN-05 | Phase 4: Screen Refresh | Pending |
+| ANIM-01 | Phase 5: Animation Refinement | Pending |
+| ANIM-02 | Phase 5: Animation Refinement | Pending |
+| ANIM-03 | Phase 5: Animation Refinement | Pending |
+| CLEAN-01 | Phase 6: Cleanup | Pending |
+| CLEAN-02 | Phase 6: Cleanup | Pending |
+| DEPLOY-01 | Phase 7: Deploy | Pending |
+| DEPLOY-02 | Phase 7: Deploy | Pending |
 
 **Coverage:**
-- v1 requirements: 16 total
-- Mapped to phases: 16
+- v1 requirements: 25 total
+- Mapped to phases: 25
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-02-04*
-*Last updated: 2026-02-05 - ALL PHASES COMPLETE*
+*Requirements defined: 2026-02-05*
+*Last updated: 2026-02-05 -- Phase mappings added*
