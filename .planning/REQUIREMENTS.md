@@ -51,8 +51,8 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 - [x] **CLEAN-01**: Delete all theme infrastructure (`src/themes/` directory, tailwind.config.js, legacy CSS rules)
 - [x] **CLEAN-02**: Final `tsc --noEmit` verification + full test suite pass
-- [ ] **DEPLOY-01**: Service worker strategy for atomic design refresh release (force-update consideration)
-- [ ] **DEPLOY-02**: Build "What's New" interstitial or update prompt for returning users
+- [x] **DEPLOY-01**: Service worker strategy for atomic design refresh release (force-update consideration)
+- [x] **DEPLOY-02**: Build "What's New" interstitial or update prompt for returning users
 
 ## v2 Requirements
 
@@ -108,8 +108,8 @@ Deferred to post-refresh.
 | ANIM-03 | Phase 5: Animation Refinement | Complete |
 | CLEAN-01 | Phase 6: Cleanup | Complete |
 | CLEAN-02 | Phase 6: Cleanup | Complete |
-| DEPLOY-01 | Phase 7: Deploy | Pending |
-| DEPLOY-02 | Phase 7: Deploy | Pending |
+| DEPLOY-01 | Phase 7: Deploy | Complete |
+| DEPLOY-02 | Phase 7: Deploy | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total
