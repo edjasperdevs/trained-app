@@ -376,11 +376,11 @@ export function Home() {
         </div>
 
         {/* Macro Progress / Protocol Compliance */}
-        {macroProgress && (
-          <div>
-            <h2 className={`text-lg font-bold mb-3 ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
-              {isTrained ? 'Protocol Compliance' : 'Macro Progress'}
-            </h2>
+        <div>
+          <h2 className={`text-lg font-bold mb-3 ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
+            {isTrained ? 'Protocol Compliance' : 'Macro Progress'}
+          </h2>
+          {macroProgress ? (
             <Card>
               <div className="space-y-4">
                 <div>
@@ -411,8 +411,28 @@ export function Home() {
                 </div>
               </div>
             </Card>
-          </div>
-        )}
+          ) : (
+            <Card>
+              <button
+                onClick={() => navigate('/macros')}
+                className="w-full flex items-center gap-3 py-2 text-left"
+              >
+                <div className={`w-10 h-10 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-full'}`}>
+                  <Beef size={20} className="text-text-secondary" />
+                </div>
+                <div className="flex-1">
+                  <p className={`font-semibold text-sm ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                    {isTrained ? 'No intake logged' : 'No meals logged yet'}
+                  </p>
+                  <p className="text-xs text-text-secondary">
+                    {isTrained ? 'Log your intake to track compliance.' : 'Tap to log your first meal.'}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="text-text-secondary" />
+              </button>
+            </Card>
+          )}
+        </div>
 
         {/* Achievements */}
         <NearestBadges
