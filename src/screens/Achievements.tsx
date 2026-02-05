@@ -130,7 +130,7 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
               <ProgressBar
                 progress={progress.percentage}
                 size="sm"
-                color={progress.percentage >= 80 ? 'green' : progress.percentage >= 50 ? 'cyan' : 'purple'}
+                color={progress.percentage >= 80 ? 'success' : progress.percentage >= 50 ? 'primary' : 'secondary'}
               />
               {progress.percentage >= 80 && (
                 <p className="text-xs text-accent-success mt-1 font-medium flex items-center gap-1">
@@ -297,7 +297,7 @@ export function Achievements() {
                 <p className="text-xs text-text-secondary">{closestBadge.badge.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1">
-                    <ProgressBar progress={closestBadge.progress.percentage} size="sm" color="cyan" />
+                    <ProgressBar progress={closestBadge.progress.percentage} size="sm" color="primary" />
                   </div>
                   <span className="text-xs text-accent-primary font-medium">
                     {closestBadge.progress.current}/{closestBadge.progress.required}

@@ -1,11 +1,37 @@
 import { motion } from 'motion/react'
 import { ReactNode } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/cn'
 
-interface ButtonProps {
+export const buttonVariants = cva(
+  'rounded transition-all duration-150 flex items-center justify-center gap-2',
+  {
+    variants: {
+      variant: {
+        primary:
+          'bg-primary text-text-on-primary hover:bg-primary-hover font-heading uppercase tracking-widest font-semibold',
+        secondary:
+          'bg-transparent border border-border text-text-primary hover:bg-secondary hover:border-secondary',
+        ghost:
+          'bg-surface text-text-primary hover:bg-surface-elevated border border-border',
+        danger: 'bg-error text-text-on-primary hover:opacity-90',
+      },
+      size: {
+        sm: 'px-3 py-1.5 text-sm',
+        md: 'px-5 py-2.5 text-base',
+        lg: 'px-6 py-3.5 text-base',
+      },
+    },
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+    },
+  }
+)
+
+interface ButtonProps extends VariantProps<typeof buttonVariants> {
   children: ReactNode
   onClick?: () => void
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
-  size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
   disabled?: boolean
   type?: 'button' | 'submit'
@@ -20,29 +46,8 @@ export function Button({
   fullWidth = false,
   disabled = false,
   type = 'button',
-  className = ''
+  className,
 }: ButtonProps) {
-  const getVariantClasses = () => {
-    switch (variant) {
-      case 'primary':
-        return 'bg-primary text-text-on-primary hover:bg-primary-hover font-heading uppercase tracking-widest font-semibold'
-      case 'secondary':
-        return 'bg-transparent border border-border text-text-primary hover:bg-secondary hover:border-secondary'
-      case 'ghost':
-        return 'bg-surface text-text-primary hover:bg-surface-elevated border border-border'
-      case 'danger':
-        return 'bg-error text-text-on-primary hover:opacity-90'
-      default:
-        return ''
-    }
-  }
-
-  const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-5 py-2.5 text-base',
-    lg: 'px-6 py-3.5 text-base'
-  }
-
   return (
     <motion.button
       type={type}
@@ -50,16 +55,12 @@ export function Button({
       disabled={disabled}
       whileTap={disabled ? undefined : { scale: 0.97 }}
       whileHover={disabled ? undefined : { scale: 1.02 }}
-      className={`
-        ${getVariantClasses()}
-        ${sizeClasses[size]}
-        ${fullWidth ? 'w-full' : ''}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-        rounded
-        transition-all duration-150
-        flex items-center justify-center gap-2
-        ${className}
-      `}
+      className={cn(
+        buttonVariants({ variant, size }),
+        fullWidth && 'w-full',
+        disabled && 'opacity-50 cursor-not-allowed',
+        className
+      )}
     >
       {children}
     </motion.button>

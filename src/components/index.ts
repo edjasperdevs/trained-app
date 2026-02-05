@@ -1,6 +1,6 @@
 export { ProgressBar } from './ProgressBar'
-export { Button } from './Button'
-export { Card } from './Card'
+export { Button, buttonVariants } from './Button'
+export { Card, cardVariants } from './Card'
 export { Avatar } from './Avatar'
 export { XPDisplay } from './XPDisplay'
 export { Navigation } from './Navigation'

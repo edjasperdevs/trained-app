@@ -65,7 +65,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
           </div>
           <ProgressBar
             progress={proteinRate}
-            color={proteinRate >= 80 ? 'green' : proteinRate >= 60 ? 'cyan' : 'purple'}
+            color={proteinRate >= 80 ? 'success' : proteinRate >= 60 ? 'primary' : 'secondary'}
             size="sm"
           />
         </div>
@@ -76,7 +76,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
           </div>
           <ProgressBar
             progress={caloriesRate}
-            color={caloriesRate >= 80 ? 'green' : caloriesRate >= 60 ? 'cyan' : 'purple'}
+            color={caloriesRate >= 80 ? 'success' : caloriesRate >= 60 ? 'primary' : 'secondary'}
             size="sm"
           />
         </div>

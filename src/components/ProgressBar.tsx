@@ -1,12 +1,49 @@
 import { motion } from 'motion/react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/cn'
 
-interface ProgressBarProps {
+const progressBarVariants = cva(
+  'h-full rounded-sm',
+  {
+    variants: {
+      color: {
+        primary: 'bg-xp-bar',
+        secondary: 'bg-secondary',
+        success: 'bg-success',
+        warning: 'bg-warning',
+        gradient: 'bg-gradient-to-r from-primary to-primary-hover',
+      },
+    },
+    defaultVariants: {
+      color: 'primary',
+    },
+  }
+)
+
+const progressTrackVariants = cva(
+  'w-full bg-xp-bar-bg rounded-sm overflow-hidden',
+  {
+    variants: {
+      size: {
+        sm: 'h-1',
+        md: 'h-2',
+        lg: 'h-3',
+        xl: 'h-4',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+    },
+  }
+)
+
+interface ProgressBarProps
+  extends VariantProps<typeof progressBarVariants>,
+    VariantProps<typeof progressTrackVariants> {
   progress: number
   maxProgress?: number
   showLabel?: boolean
   label?: string
-  color?: 'primary' | 'secondary' | 'success' | 'warning' | 'gold' | 'green' | 'cyan' | 'purple' | 'gradient'
-  size?: 'sm' | 'md' | 'lg' | 'xl'
   animate?: boolean
 }
 
@@ -17,38 +54,9 @@ export function ProgressBar({
   label,
   color = 'primary',
   size = 'md',
-  animate = true
+  animate = true,
 }: ProgressBarProps) {
   const percentage = Math.min((progress / maxProgress) * 100, 100)
-
-  // Map legacy colors to theme colors
-  const getColorClass = () => {
-    switch (color) {
-      case 'primary':
-      case 'gold':
-      case 'cyan':
-        return 'bg-xp-bar'
-      case 'secondary':
-      case 'green':
-      case 'purple':
-        return 'bg-secondary'
-      case 'success':
-        return 'bg-success'
-      case 'warning':
-        return 'bg-warning'
-      case 'gradient':
-        return 'bg-gradient-to-r from-primary to-primary-hover'
-      default:
-        return 'bg-xp-bar'
-    }
-  }
-
-  const sizeClasses = {
-    sm: 'h-1',
-    md: 'h-2',
-    lg: 'h-3',
-    xl: 'h-4'  // Featured size for home screen rank bar
-  }
 
   return (
     <div className="w-full">
@@ -58,9 +66,9 @@ export function ProgressBar({
           <span className="font-mono">{Math.round(progress)}/{maxProgress}</span>
         </div>
       )}
-      <div className={`w-full bg-xp-bar-bg rounded-sm overflow-hidden ${sizeClasses[size]}`}>
+      <div className={cn(progressTrackVariants({ size }))}>
         <motion.div
-          className={`h-full rounded-sm ${getColorClass()}`}
+          className={cn(progressBarVariants({ color }))}
           initial={animate ? { width: 0 } : { width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}

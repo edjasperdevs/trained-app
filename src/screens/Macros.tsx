@@ -194,7 +194,7 @@ function DailyView({
                 {progress.carbs.current}g / {progress.carbs.target}g
               </span>
             </div>
-            <ProgressBar progress={progress.carbs.percentage} color="cyan" size="sm" />
+            <ProgressBar progress={progress.carbs.percentage} color="primary" size="sm" />
           </div>
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -203,7 +203,7 @@ function DailyView({
                 {progress.fats.current}g / {progress.fats.target}g
               </span>
             </div>
-            <ProgressBar progress={progress.fats.percentage} color="purple" size="sm" />
+            <ProgressBar progress={progress.fats.percentage} color="secondary" size="sm" />
           </div>
         </div>
       </Card>
