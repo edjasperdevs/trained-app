@@ -9,29 +9,30 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 ## Current Position
 
-Phase: 1 of 7 (Foundation) -- COMPLETE
-Plan: 2 of 2 in current phase -- COMPLETE
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-02-05 -- Completed 01-02-PLAN.md (Hardcoded color audit, font self-hosting, motion v12)
+Phase: 2 of 7 (Theme Removal)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-05 -- Completed 02-01-PLAN.md (Component de-branching + constants file)
 
-Progress: [██░░░░░░░░░░░░░░░░░░] 17% (2/12 plans)
+Progress: [███░░░░░░░░░░░░░░░░░] 25% (3/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 16min
-- Total execution time: 0.53 hours
+- Total plans completed: 3
+- Average duration: 13min
+- Total execution time: 0.65 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 32min | 16min |
+| 02-theme-removal | 1/3 | 7min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 7min, 25min
-- Trend: --
+- Last 5 plans: 7min, 25min, 7min
+- Trend: fast
 
 *Updated after each plan completion*
 
@@ -56,6 +57,11 @@ Recent decisions affecting current work:
 - [01-02]: text-purple-400 mapped to text-primary (blood-red accent replaces purple)
 - [01-02]: Font family declarations include non-Variable fallbacks for robustness
 - [01-02]: motion v12 vendor chunk reduced from 115.26KB to 92.52KB gzipped
+- [02-01]: Trained moodAnimations kept as sole set (renamed from trainedMoodAnimations)
+- [02-01]: Confetti only for epic/legendary badges (Trained: restrained celebration)
+- [02-01]: LABELS/AVATAR_STAGES imported from @/design/constants (decoupled from theme)
+- [02-01]: Confetti hex arrays simplified to single CONFETTI_COLORS constant (no branching)
+- [02-01]: RARITY_BG in Badges/BadgeUnlockModal uses Trained palette only
 
 ### Pending Todos
 
@@ -67,6 +73,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T17:01:20Z
-Stopped at: Completed 01-02-PLAN.md (Phase 1 Foundation complete)
+Last session: 2026-02-05T18:49:13Z
+Stopped at: Completed 02-01-PLAN.md (Component de-branching)
 Resume file: None
