@@ -234,7 +234,7 @@ export function Onboarding() {
               <div
                 key={s}
                 className={`h-1 w-8 rounded-full transition-colors ${
-                  i < currentIndex ? 'bg-accent-primary' : 'bg-gray-700'
+                  i < currentIndex ? 'bg-accent-primary' : 'bg-secondary'
                 }`}
               />
             ))}
@@ -403,21 +403,21 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         <Gamepad2 size={80} className="mx-auto text-accent-primary" />
       </motion.div>
       <h1 className="text-3xl font-bold mb-2">Your Fitness Operating System</h1>
-      <p className="text-gray-400 mb-8">
+      <p className="text-text-secondary mb-8">
         Built by an engineer. Powered by game mechanics. Designed for people who think in systems.
       </p>
       <div className="space-y-3 text-left mb-8">
         <div className="flex items-center gap-3 text-sm">
           <Sparkles size={24} className="text-accent-secondary flex-shrink-0" />
-          <span className="text-gray-300">Earn XP for workouts, hitting macros, and consistency</span>
+          <span className="text-text-primary">Earn XP for workouts, hitting macros, and consistency</span>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Dumbbell size={24} className="text-accent-primary flex-shrink-0" />
-          <span className="text-gray-300">Watch your avatar evolve as you progress</span>
+          <span className="text-text-primary">Watch your avatar evolve as you progress</span>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Flame size={24} className="text-accent-warning flex-shrink-0" />
-          <span className="text-gray-300">Build streaks and unlock achievements</span>
+          <span className="text-text-primary">Build streaks and unlock achievements</span>
         </div>
       </div>
       <Button onClick={onNext} fullWidth size="lg">
@@ -446,7 +446,7 @@ function NameStep({
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         What should we call you?
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained ? 'This is how the protocol will address you.' : 'Your handle for the system.'}
       </p>
 
@@ -455,7 +455,7 @@ function NameStep({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter your name..."
-        className={`w-full bg-bg-secondary border border-gray-700 px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent-primary mb-6 ${isTrained ? 'rounded' : 'rounded-lg'}`}
+        className={`w-full bg-bg-secondary border border-border px-4 py-3 text-text-on-primary placeholder-gray-500 focus:outline-none focus:border-accent-primary mb-6 ${isTrained ? 'rounded' : 'rounded-lg'}`}
         maxLength={20}
         autoFocus
       />
@@ -487,8 +487,8 @@ function GenderStep({
   const isTrained = themeId === 'trained'
 
   const options: { gender: Gender; label: string; icon: LucideIcon; color: string }[] = [
-    { gender: 'male', label: 'Male', icon: TrendingUp, color: 'text-blue-400' },
-    { gender: 'female', label: 'Female', icon: Sparkles, color: 'text-pink-400' }
+    { gender: 'male', label: 'Male', icon: TrendingUp, color: 'text-info' },
+    { gender: 'female', label: 'Female', icon: Sparkles, color: 'text-primary' }
   ]
 
   return (
@@ -496,7 +496,7 @@ function GenderStep({
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         {isTrained ? 'Biological sex' : 'Calibrating baseline metrics'}
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained ? 'Used for accurate metabolic calculations only.' : 'Biological sex affects metabolism calculations.'}
       </p>
 
@@ -548,7 +548,7 @@ function FitnessStep({
   const isTrained = themeId === 'trained'
 
   const gygOptions: { level: FitnessLevel; label: string; description: string; icon: LucideIcon; color: string }[] = [
-    { level: 'beginner', label: 'Beginner', description: 'New to lifting or returning after a break', icon: Sprout, color: 'text-green-400' },
+    { level: 'beginner', label: 'Beginner', description: 'New to lifting or returning after a break', icon: Sprout, color: 'text-success' },
     { level: 'intermediate', label: 'Intermediate', description: '1-3 years of consistent training', icon: Dumbbell, color: 'text-accent-primary' },
     { level: 'advanced', label: 'Advanced', description: '3+ years, know your way around the gym', icon: Flame, color: 'text-accent-warning' }
   ]
@@ -565,7 +565,7 @@ function FitnessStep({
         <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
           Training experience
         </h2>
-        <p className="text-gray-400 mb-6">
+        <p className="text-text-secondary mb-6">
           How would you describe your current relationship with the gym?
         </p>
 
@@ -579,7 +579,7 @@ function FitnessStep({
             >
               <div>
                 <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.description}</p>
+                <p className="text-sm text-text-secondary">{opt.description}</p>
               </div>
             </Card>
           ))}
@@ -600,7 +600,7 @@ function FitnessStep({
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">Current system state</h2>
-      <p className="text-gray-400 mb-6">Where are you starting from?</p>
+      <p className="text-text-secondary mb-6">Where are you starting from?</p>
 
       <div className="space-y-3 mb-6">
         {gygOptions.map((opt) => {
@@ -616,7 +616,7 @@ function FitnessStep({
                 <Icon size={28} className={opt.color} />
                 <div>
                   <p className="font-semibold">{opt.label}</p>
-                  <p className="text-sm text-gray-400">{opt.description}</p>
+                  <p className="text-sm text-text-secondary">{opt.description}</p>
                 </div>
               </div>
             </Card>
@@ -661,7 +661,7 @@ function DaysStep({
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         {isTrained ? 'Weekly commitment' : 'Configure your training schedule'}
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained
           ? 'A commitment is a commitment. Choose what you can sustain.'
           : 'Be realistic. Consistency beats intensity.'}
@@ -680,7 +680,7 @@ function DaysStep({
                 <p className={`font-semibold text-lg ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
                   {opt.label}
                 </p>
-                {!isTrained && <p className="text-sm text-gray-400">{opt.description}</p>}
+                {!isTrained && <p className="text-sm text-text-secondary">{opt.description}</p>}
               </div>
               <div className="text-2xl font-bold text-accent-primary font-digital">
                 {opt.days}x
@@ -749,7 +749,7 @@ function ScheduleStep({
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         {isTrained ? 'Select your training days' : 'Pick your workout days'}
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained
           ? `Choose ${trainingDays} days. These can be changed later in settings.`
           : `Select ${trainingDays} days that work best for your schedule.`}
@@ -769,10 +769,10 @@ function ScheduleStep({
                 py-3 text-center text-sm font-medium transition-all
                 ${isTrained ? 'rounded' : 'rounded-lg'}
                 ${isSelected
-                  ? 'bg-accent-primary text-white'
+                  ? 'bg-accent-primary text-text-on-primary'
                   : canAdd
-                    ? 'bg-bg-secondary text-gray-400 hover:bg-bg-card hover:text-white'
-                    : 'bg-bg-secondary text-gray-600 cursor-not-allowed'
+                    ? 'bg-bg-secondary text-text-secondary hover:bg-bg-card hover:text-text-primary'
+                    : 'bg-bg-secondary text-text-secondary cursor-not-allowed'
                 }
               `}
             >
@@ -783,8 +783,8 @@ function ScheduleStep({
       </div>
 
       {/* Selected days summary */}
-      <div className={`p-3 mb-6 bg-bg-card border border-gray-700/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-        <p className="text-sm text-gray-400 mb-2">
+      <div className={`p-3 mb-6 bg-bg-card border border-border/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+        <p className="text-sm text-text-secondary mb-2">
           {selectedDays.length} of {trainingDays} days selected:
         </p>
         <p className="text-sm font-medium">
@@ -831,10 +831,10 @@ function GoalStep({
   const isTrained = themeId === 'trained'
 
   const gygGoals: { value: Goal; label: string; description: string; icon: LucideIcon; color: string }[] = [
-    { value: 'cut', label: 'Cut', description: 'Lose fat, maintain muscle', icon: TrendingDown, color: 'text-red-400' },
-    { value: 'recomp', label: 'Recomp', description: 'Build muscle while losing fat', icon: RefreshCw, color: 'text-purple-400' },
-    { value: 'maintain', label: 'Maintain', description: 'Stay at current weight', icon: Scale, color: 'text-blue-400' },
-    { value: 'bulk', label: 'Bulk', description: 'Build muscle, gain weight', icon: TrendingUp, color: 'text-green-400' }
+    { value: 'cut', label: 'Cut', description: 'Lose fat, maintain muscle', icon: TrendingDown, color: 'text-error' },
+    { value: 'recomp', label: 'Recomp', description: 'Build muscle while losing fat', icon: RefreshCw, color: 'text-primary' },
+    { value: 'maintain', label: 'Maintain', description: 'Stay at current weight', icon: Scale, color: 'text-info' },
+    { value: 'bulk', label: 'Bulk', description: 'Build muscle, gain weight', icon: TrendingUp, color: 'text-success' }
   ]
 
   const trainedGoals: { value: Goal; label: string; description: string }[] = [
@@ -898,17 +898,17 @@ function GoalStep({
   const inches = height % 12
 
   const inputClass = isTrained
-    ? 'w-full bg-bg-secondary border border-gray-700 rounded px-4 py-3 text-white font-digital text-xl'
-    : 'w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-white font-digital text-xl'
+    ? 'w-full bg-bg-secondary border border-border rounded px-4 py-3 text-text-on-primary font-digital text-xl'
+    : 'w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-text-on-primary font-digital text-xl'
 
-  const inputErrorClass = 'border-red-500'
+  const inputErrorClass = 'border-error'
 
   return (
     <div>
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         {isTrained ? 'Current stats' : 'Select your optimization target'}
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained
           ? 'These numbers are where you start. Not where you stay.'
           : "We'll calculate your macros based on these inputs."}
@@ -916,7 +916,7 @@ function GoalStep({
 
       {/* Height */}
       <div className="mb-4">
-        <label className={`block text-sm text-gray-400 mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+        <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
           Height
         </label>
         <div className="flex gap-3">
@@ -930,7 +930,7 @@ function GoalStep({
                 min={4}
                 max={8}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">ft</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">ft</span>
             </div>
           </div>
           <div className="flex-1">
@@ -943,7 +943,7 @@ function GoalStep({
                 min={0}
                 max={11}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">in</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">in</span>
             </div>
           </div>
         </div>
@@ -952,7 +952,7 @@ function GoalStep({
       {/* Weight and Age side by side */}
       <div className="flex gap-3 mb-4">
         <div className="flex-1">
-          <label className={`block text-sm text-gray-400 mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+          <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
             Weight (lbs)
           </label>
           <input
@@ -965,7 +965,7 @@ function GoalStep({
           />
         </div>
         <div className="flex-1">
-          <label className={`block text-sm text-gray-400 mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+          <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
             Age
           </label>
           <input
@@ -981,9 +981,9 @@ function GoalStep({
 
       {/* Validation errors */}
       {validationErrors.length > 0 && (
-        <div className={`p-3 mb-4 bg-red-500/10 border border-red-500/30 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+        <div className={`p-3 mb-4 bg-error/10 border border-error/30 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
           {validationErrors.map((error, index) => (
-            <p key={index} className="text-sm text-red-400">{error}</p>
+            <p key={index} className="text-sm text-error">{error}</p>
           ))}
         </div>
       )}
@@ -1005,7 +1005,7 @@ function GoalStep({
             >
               <div className="flex items-center justify-between">
                 <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                <p className="text-sm text-gray-400">{opt.description}</p>
+                <p className="text-sm text-text-secondary">{opt.description}</p>
               </div>
             </Card>
           ))
@@ -1023,7 +1023,7 @@ function GoalStep({
                   <Icon size={28} className={opt.color} />
                   <div>
                     <p className="font-semibold">{opt.label}</p>
-                    <p className="text-sm text-gray-400">{opt.description}</p>
+                    <p className="text-sm text-text-secondary">{opt.description}</p>
                   </div>
                 </div>
               </Card>
@@ -1034,8 +1034,8 @@ function GoalStep({
 
       {/* Helper text for selected objective */}
       {goal && (
-        <div className={`p-3 mb-6 bg-bg-card border border-gray-700/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-          <p className="text-sm text-gray-400 leading-relaxed">
+        <div className={`p-3 mb-6 bg-bg-card border border-border/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+          <p className="text-sm text-text-secondary leading-relaxed">
             {goalHelperText[goal]}
           </p>
         </div>
@@ -1068,9 +1068,9 @@ function AvatarStep({
   const isTrained = themeId === 'trained'
 
   const gygOptions: { base: AvatarBase; label: string; icon: LucideIcon; color: string; description: string }[] = [
-    { base: 'dominant', label: 'Warrior', icon: Sword, color: 'text-red-400', description: 'Strength and discipline' },
-    { base: 'switch', label: 'Mage', icon: Wand2, color: 'text-purple-400', description: 'Knowledge and power' },
-    { base: 'submissive', label: 'Rogue', icon: Moon, color: 'text-blue-400', description: 'Speed and agility' }
+    { base: 'dominant', label: 'Warrior', icon: Sword, color: 'text-error', description: 'Strength and discipline' },
+    { base: 'switch', label: 'Mage', icon: Wand2, color: 'text-primary', description: 'Knowledge and power' },
+    { base: 'submissive', label: 'Rogue', icon: Moon, color: 'text-info', description: 'Speed and agility' }
   ]
 
   const trainedOptions: { base: AvatarBase; label: string; description: string; icon: LucideIcon; color: string }[] = [
@@ -1079,21 +1079,21 @@ function AvatarStep({
       label: theme.labels.avatarClasses.dominant,
       description: 'Control. Authority. Leads from the front.',
       icon: Sword,
-      color: 'text-red-400'
+      color: 'text-error'
     },
     {
       base: 'switch',
       label: theme.labels.avatarClasses.switch,
       description: 'Versatile. Adapts to any situation.',
       icon: Wand2,
-      color: 'text-purple-400'
+      color: 'text-primary'
     },
     {
       base: 'submissive',
       label: theme.labels.avatarClasses.submissive,
       description: 'Obedient. Follows the protocol.',
       icon: Zap,
-      color: 'text-yellow-400'
+      color: 'text-warning'
     }
   ]
 
@@ -1103,7 +1103,7 @@ function AvatarStep({
         <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
           Choose your persona
         </h2>
-        <p className="text-gray-400 mb-6">
+        <p className="text-text-secondary mb-6">
           This represents your avatar identity as you progress.
         </p>
 
@@ -1123,7 +1123,7 @@ function AvatarStep({
                   </div>
                   <div>
                     <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                    <p className="text-sm text-gray-400">{opt.description}</p>
+                    <p className="text-sm text-text-secondary">{opt.description}</p>
                   </div>
                 </div>
               </Card>
@@ -1146,7 +1146,7 @@ function AvatarStep({
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">Deploy your avatar</h2>
-      <p className="text-gray-400 mb-6">This character will evolve with your progress.</p>
+      <p className="text-text-secondary mb-6">This character will evolve with your progress.</p>
 
       <div className="space-y-3 mb-6">
         {gygOptions.map((opt) => {
@@ -1164,7 +1164,7 @@ function AvatarStep({
                 </div>
                 <div>
                   <p className="font-semibold text-lg">{opt.label}</p>
-                  <p className="text-sm text-gray-400">{opt.description}</p>
+                  <p className="text-sm text-text-secondary">{opt.description}</p>
                 </div>
               </div>
             </Card>
@@ -1247,7 +1247,7 @@ function FeaturesStep({
       <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
         {isTrained ? 'How the protocol works' : 'How the app works'}
       </h2>
-      <p className="text-gray-400 mb-6">
+      <p className="text-text-secondary mb-6">
         {isTrained
           ? 'Four areas of focus. Master them all.'
           : 'Everything you need to level up your fitness.'}
@@ -1272,7 +1272,7 @@ function FeaturesStep({
                     <p className={`font-semibold mb-1 ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
                       {feature.title}
                     </p>
-                    <p className="text-sm text-gray-400">{feature.description}</p>
+                    <p className="text-sm text-text-secondary">{feature.description}</p>
                   </div>
                 </div>
               </Card>
@@ -1320,7 +1320,7 @@ function TutorialStep({
         <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
           Protocol initialized, {username}.
         </h2>
-        <p className="text-gray-400 mb-6">Earn {theme.labels.xpFull} ({xpLabel}) through:</p>
+        <p className="text-text-secondary mb-6">Earn {theme.labels.xpFull} ({xpLabel}) through:</p>
 
         <div className="space-y-3 text-left mb-8">
           <Card>
@@ -1349,7 +1349,7 @@ function TutorialStep({
           </Card>
         </div>
 
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-text-secondary mb-6">
           {xpLabel} accumulates all week. Claim your reward every Sunday.
         </p>
 
@@ -1376,7 +1376,7 @@ function TutorialStep({
         <PartyPopper size={56} className="mx-auto text-accent-success" />
       </motion.div>
       <h2 className="text-2xl font-bold mb-2">You're all set, {username}!</h2>
-      <p className="text-gray-400 mb-6">Here's how to earn {xpLabel}:</p>
+      <p className="text-text-secondary mb-6">Here's how to earn {xpLabel}:</p>
 
       <div className="space-y-4 text-left mb-8">
         <Card>
@@ -1417,7 +1417,7 @@ function TutorialStep({
         </Card>
       </div>
 
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-text-secondary mb-6">
         {xpLabel} accumulates all week and can be claimed every Sunday!
       </p>
 
@@ -1454,9 +1454,9 @@ function EvolutionStep({
   const newStageName = theme.avatarStages[1] || newStage.name
 
   const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
-    dominant: { icon: Sword, color: 'text-red-400' },
-    switch: { icon: Wand2, color: 'text-purple-400' },
-    submissive: { icon: isTrained ? Zap : Moon, color: isTrained ? 'text-yellow-400' : 'text-blue-400' }
+    dominant: { icon: Sword, color: 'text-error' },
+    switch: { icon: Wand2, color: 'text-primary' },
+    submissive: { icon: isTrained ? Zap : Moon, color: isTrained ? 'text-warning' : 'text-info' }
   }
 
   // Trigger the evolution animation after a delay
@@ -1525,7 +1525,7 @@ function EvolutionStep({
                     <div className="mb-2">
                       <OldIcon size={80} className="mx-auto text-text-secondary" />
                     </div>
-                    <p className="text-gray-400">{oldStageName}</p>
+                    <p className="text-text-secondary">{oldStageName}</p>
                   </>
                 )
               })()}
@@ -1623,10 +1623,10 @@ function EvolutionStep({
         <Card className="inline-block px-6">
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <p className={`text-xs text-gray-500 uppercase ${isTrained ? 'tracking-wider' : ''}`}>
+              <p className={`text-xs text-text-secondary uppercase ${isTrained ? 'tracking-wider' : ''}`}>
                 {theme.labels.level}
               </p>
-              <p className="text-2xl font-bold font-digital text-gray-400">0</p>
+              <p className="text-2xl font-bold font-digital text-text-secondary">0</p>
             </div>
             <motion.div
               animate={{ x: [0, 5, 0] }}
@@ -1636,7 +1636,7 @@ function EvolutionStep({
               →
             </motion.div>
             <div className="text-center">
-              <p className={`text-xs text-gray-500 uppercase ${isTrained ? 'tracking-wider' : ''}`}>
+              <p className={`text-xs text-text-secondary uppercase ${isTrained ? 'tracking-wider' : ''}`}>
                 {theme.labels.level}
               </p>
               <p className="text-2xl font-bold font-digital text-accent-primary">1</p>
@@ -1655,7 +1655,7 @@ function EvolutionStep({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: showNew ? 0.7 : 2.2 }}
-        className="text-gray-400 mb-8"
+        className="text-text-secondary mb-8"
       >
         {isTrained
           ? 'The protocol begins now.'

@@ -31,24 +31,24 @@ const RARITY_LABELS: Record<BadgeRarity, string> = {
 }
 
 const RARITY_BG: Record<BadgeRarity, string> = {
-  common: 'from-gray-500/20 to-gray-600/10',
-  rare: 'from-blue-500/20 to-blue-600/10',
-  epic: 'from-purple-500/20 to-purple-600/10',
-  legendary: 'from-yellow-500/20 to-amber-600/10'
+  common: 'from-secondary/20 to-secondary/10',
+  rare: 'from-info/20 to-info/10',
+  epic: 'from-primary/20 to-primary/10',
+  legendary: 'from-warning/20 to-warning/10'
 }
 
 const RARITY_TEXT: Record<BadgeRarity, string> = {
-  common: 'text-gray-400',
-  rare: 'text-blue-400',
-  epic: 'text-purple-400',
-  legendary: 'text-yellow-400'
+  common: 'text-text-secondary',
+  rare: 'text-info',
+  epic: 'text-primary',
+  legendary: 'text-warning'
 }
 
 const RARITY_GLOW: Record<BadgeRarity, string> = {
   common: '',
   rare: '',
-  epic: 'shadow-lg shadow-purple-500/20',
-  legendary: 'shadow-lg shadow-yellow-500/30'
+  epic: 'shadow-lg shadow-primary/20',
+  legendary: 'shadow-lg shadow-warning/30'
 }
 
 type CategoryFilter = 'all' | 'streak' | 'workout' | 'nutrition' | 'level' | 'special'
@@ -71,14 +71,14 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
       transition={{ delay: index * 0.05 }}
       className={`
         relative p-4 rounded-xl border-2 transition-all
-        ${earned ? RARITY_COLORS[badge.rarity] : 'border-gray-700/50'}
+        ${earned ? RARITY_COLORS[badge.rarity] : 'border-border/50'}
         ${earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-bg-card/50'}
         ${earned ? RARITY_GLOW[badge.rarity] : ''}
       `}
     >
       {/* Rarity Label */}
       <div className="absolute top-2 right-2">
-        <span className={`text-[10px] font-semibold uppercase tracking-wider ${earned ? RARITY_TEXT[badge.rarity] : 'text-gray-600'}`}>
+        <span className={`text-[10px] font-semibold uppercase tracking-wider ${earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}`}>
           {RARITY_LABELS[badge.rarity]}
         </span>
       </div>
@@ -93,28 +93,28 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
             <BadgeIcon
               iconName={badge.icon}
               size={28}
-              className={earned ? RARITY_TEXT[badge.rarity] : 'text-gray-500'}
+              className={earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}
             />
           </div>
           {earned && (
             <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-accent-success rounded-full flex items-center justify-center">
-              <Check size={12} className="text-white" />
+              <Check size={12} className="text-text-on-primary" />
             </div>
           )}
         </div>
 
         {/* Badge Info */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-bold ${!earned && 'text-gray-500'}`}>
+          <h3 className={`font-bold ${!earned && 'text-text-secondary'}`}>
             {badge.name}
           </h3>
-          <p className={`text-sm mt-0.5 ${earned ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className={`text-sm mt-0.5 ${earned ? 'text-text-secondary' : 'text-text-secondary'}`}>
             {badge.description}
           </p>
 
           {/* Progress or Earned Date */}
           {earned ? (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-text-secondary mt-2">
               Unlocked {new Date(earnedAt!).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -124,8 +124,8 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
           ) : (
             <div className="mt-3">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-500">Progress</span>
-                <span className={`font-medium ${progress.percentage >= 80 ? 'text-accent-success' : 'text-gray-400'}`}>
+                <span className="text-text-secondary">Progress</span>
+                <span className={`font-medium ${progress.percentage >= 80 ? 'text-accent-success' : 'text-text-secondary'}`}>
                   {progress.current} / {progress.required}
                 </span>
               </div>
@@ -256,9 +256,9 @@ export function Achievements() {
             </div>
             <div className="flex-1">
               <p className="text-2xl font-bold">
-                {totalEarned} <span className="text-gray-500 font-normal">/ {totalBadges}</span>
+                {totalEarned} <span className="text-text-secondary font-normal">/ {totalBadges}</span>
               </p>
-              <p className="text-sm text-gray-400 mb-2">Badges Earned</p>
+              <p className="text-sm text-text-secondary mb-2">Badges Earned</p>
               <ProgressBar progress={percentComplete} size="md" color="gradient" />
             </div>
           </div>
@@ -272,7 +272,7 @@ export function Achievements() {
             <div
               key={rarity}
               className={`p-3 rounded-lg bg-gradient-to-br ${RARITY_BG[rarity]} border ${
-                earnedByRarity[rarity] > 0 ? RARITY_COLORS[rarity] : 'border-gray-700/30'
+                earnedByRarity[rarity] > 0 ? RARITY_COLORS[rarity] : 'border-border/30'
               }`}
             >
               <p className={`text-xs font-semibold uppercase ${RARITY_TEXT[rarity]}`}>
@@ -290,7 +290,7 @@ export function Achievements() {
           <Card className="border-accent-primary/30">
             <div className="flex items-center gap-2 mb-3">
               <Target size={18} className="text-accent-primary" />
-              <h3 className="font-semibold text-sm text-gray-400">CLOSEST TO UNLOCK</h3>
+              <h3 className="font-semibold text-sm text-text-secondary">CLOSEST TO UNLOCK</h3>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center">
@@ -298,7 +298,7 @@ export function Achievements() {
               </div>
               <div className="flex-1">
                 <p className="font-semibold">{closestBadge.badge.name}</p>
-                <p className="text-xs text-gray-500">{closestBadge.badge.description}</p>
+                <p className="text-xs text-text-secondary">{closestBadge.badge.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className="flex-1">
                     <ProgressBar progress={closestBadge.progress.percentage} size="sm" color="cyan" />
@@ -324,7 +324,7 @@ export function Achievements() {
                   flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
                   ${filter === cat.id
                     ? 'bg-accent-primary text-bg-primary shadow-lg shadow-accent-primary/20'
-                    : 'bg-bg-card text-gray-400 hover:text-white'}
+                    : 'bg-bg-card text-text-secondary hover:text-text-primary'}
                 `}
               >
                 <Icon size={16} />

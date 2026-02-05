@@ -14,7 +14,7 @@ interface GroupedActivities {
 export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
   if (activities.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-text-secondary">
         <span className="text-3xl block mb-2">📭</span>
         <p className="text-sm">No recent activity</p>
       </div>
@@ -89,7 +89,7 @@ export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: groupIndex * 0.05 }}
         >
-          <p className="text-xs font-semibold text-gray-500 mb-2">{group.label}</p>
+          <p className="text-xs font-semibold text-text-secondary mb-2">{group.label}</p>
           <div className="space-y-2">
             {group.items.map((activity, itemIndex) => (
               <motion.div
@@ -103,7 +103,7 @@ export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">{activity.description}</p>
                   {activity.detail && (
-                    <p className="text-xs text-gray-500">{activity.detail}</p>
+                    <p className="text-xs text-text-secondary">{activity.detail}</p>
                   )}
                 </div>
                 {activity.xpAmount && (

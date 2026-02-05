@@ -157,7 +157,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center overflow-hidden"
+        className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center overflow-hidden"
         onClick={phase === 'complete' || phase === 'levelup' ? handleClose : undefined}
       >
         {/* Confetti */}

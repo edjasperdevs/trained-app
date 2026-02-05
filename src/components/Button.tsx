@@ -48,11 +48,11 @@ export function Button({
         case 'primary':
           return 'bg-primary text-text-on-primary hover:bg-primary-hover glow-primary font-bold'
         case 'secondary':
-          return 'bg-secondary text-white hover:bg-secondary-hover'
+          return 'bg-secondary text-text-on-primary hover:bg-secondary-hover'
         case 'ghost':
-          return 'glass text-text-secondary hover:bg-white/10'
+          return 'glass text-text-secondary hover:bg-glass-light'
         case 'danger':
-          return 'bg-error text-white hover:opacity-90'
+          return 'bg-error text-text-on-primary hover:opacity-90'
         default:
           return ''
       }

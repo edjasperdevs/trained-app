@@ -135,12 +135,12 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
               width: dropdownPosition.width,
               zIndex: 10001,
             }}
-            className="max-h-60 overflow-y-auto bg-bg-secondary rounded-lg border border-gray-700 shadow-xl"
+            className="max-h-60 overflow-y-auto bg-bg-secondary rounded-lg border border-border shadow-xl"
           >
             {error && <div className="p-4 text-center text-accent-danger text-sm">{error}</div>}
 
             {!error && results.length === 0 && !isLoading && query && (
-              <div className="p-4 text-center text-gray-500 text-sm">No foods found for "{query}"</div>
+              <div className="p-4 text-center text-text-secondary text-sm">No foods found for "{query}"</div>
             )}
 
             {results.map((food) => (
@@ -150,12 +150,12 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
                   e.stopPropagation()
                   handleFoodClick(food)
                 }}
-                className="w-full p-3 text-left hover:bg-bg-card active:bg-bg-card transition-colors border-b border-gray-800 last:border-b-0"
+                className="w-full p-3 text-left hover:bg-bg-card active:bg-bg-card transition-colors border-b border-border last:border-b-0"
               >
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm truncate">{food.name}</p>
-                  {food.brand && <p className="text-xs text-gray-500 truncate">{food.brand}</p>}
-                  <p className="text-xs text-gray-400 mt-1">
+                  {food.brand && <p className="text-xs text-text-secondary truncate">{food.brand}</p>}
+                  <p className="text-xs text-text-secondary mt-1">
                     Per 100g: P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
                   </p>
                   {food.servingDescription && food.servingDescription !== '100g' && (
@@ -179,7 +179,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       style={{ position: 'fixed', inset: 0, zIndex: 10002 }}
-      className="bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+      className="bg-background/90 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={handleCancel}
     >
       <motion.div
@@ -191,18 +191,18 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
       >
         <h3 className="font-bold text-lg mb-1 truncate">{selectedFood.name}</h3>
         {selectedFood.brand && (
-          <p className="text-sm text-gray-500 mb-4 truncate">{selectedFood.brand}</p>
+          <p className="text-sm text-text-secondary mb-4 truncate">{selectedFood.brand}</p>
         )}
 
         {/* Quantity Input */}
         <div className="mb-4">
-          <label className="text-xs text-gray-400 block mb-2">QUANTITY</label>
+          <label className="text-xs text-text-secondary block mb-2">QUANTITY</label>
           <div className="flex gap-2">
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="flex-1 bg-bg-card border border-gray-700 rounded-lg px-3 py-2 text-xl font-digital text-center"
+              className="flex-1 bg-bg-card border border-border rounded-lg px-3 py-2 text-xl font-digital text-center"
               min="0"
               step="1"
               autoFocus
@@ -210,7 +210,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value as Unit)}
-              className="bg-bg-card border border-gray-700 rounded-lg px-3 py-2 text-sm"
+              className="bg-bg-card border border-border rounded-lg px-3 py-2 text-sm"
             >
               <option value="g">grams</option>
               <option value="oz">oz</option>
@@ -314,23 +314,23 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
         {/* Macro Preview */}
         {previewMacros && (
           <div className="bg-bg-card rounded-lg p-3 mb-4">
-            <p className="text-xs text-gray-400 mb-2">NUTRITION FOR THIS AMOUNT</p>
+            <p className="text-xs text-text-secondary mb-2">NUTRITION FOR THIS AMOUNT</p>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
                 <p className="text-lg font-bold font-digital text-accent-primary">{previewMacros.protein}</p>
-                <p className="text-xs text-gray-500">Protein</p>
+                <p className="text-xs text-text-secondary">Protein</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{previewMacros.carbs}</p>
-                <p className="text-xs text-gray-500">Carbs</p>
+                <p className="text-xs text-text-secondary">Carbs</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{previewMacros.fats}</p>
-                <p className="text-xs text-gray-500">Fats</p>
+                <p className="text-xs text-text-secondary">Fats</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital text-accent-secondary">{previewMacros.calories}</p>
-                <p className="text-xs text-gray-500">Cals</p>
+                <p className="text-xs text-text-secondary">Cals</p>
               </div>
             </div>
           </div>
@@ -359,7 +359,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search foods (e.g., chicken breast, rice)"
-          className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 pr-10"
+          className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 pr-10"
           onFocus={() => results.length > 0 && setShowResults(true)}
         />
         {isLoading && (
@@ -378,7 +378,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
               setResults([])
               setShowResults(false)
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
           >
             ✕
           </button>

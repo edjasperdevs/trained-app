@@ -17,7 +17,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
 
   if (!targets) {
     return (
-      <div className="text-center py-4 text-gray-500 text-sm">
+      <div className="text-center py-4 text-text-secondary text-sm">
         No macro targets set
       </div>
     )
@@ -25,7 +25,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
 
   if (logs.length === 0) {
     return (
-      <div className="text-center py-4 text-gray-500 text-sm">
+      <div className="text-center py-4 text-text-secondary text-sm">
         No macro data logged
       </div>
     )
@@ -60,7 +60,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
       <div className="space-y-3">
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-400">Protein</span>
+            <span className="text-text-secondary">Protein</span>
             <span className="font-digital text-accent-success">{proteinRate}%</span>
           </div>
           <ProgressBar
@@ -71,7 +71,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
         </div>
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-400">Calories</span>
+            <span className="text-text-secondary">Calories</span>
             <span className="font-digital text-accent-primary">{caloriesRate}%</span>
           </div>
           <ProgressBar
@@ -84,13 +84,13 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
 
       {/* Daily bar chart */}
       <div>
-        <p className="text-xs text-gray-500 mb-2">Last {totalDays} days</p>
+        <p className="text-xs text-text-secondary mb-2">Last {totalDays} days</p>
         <div className="flex gap-1 items-end h-12">
           {dailyStatus.map((day, index) => {
             const bothHit = day.proteinHit && day.caloriesHit
             const oneHit = day.proteinHit || day.caloriesHit
 
-            let bgColor = 'bg-gray-700' // neither hit
+            let bgColor = 'bg-secondary' // neither hit
             if (bothHit) bgColor = 'bg-accent-success'
             else if (oneHit) bgColor = 'bg-accent-warning'
 
@@ -121,14 +121,14 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
           })}
         </div>
         {/* Date labels for first and last */}
-        <div className="flex justify-between text-xs text-gray-600 mt-1">
+        <div className="flex justify-between text-xs text-text-secondary mt-1">
           <span>{formatDay(dailyStatus[0]?.date || '')}</span>
           <span>{formatDay(dailyStatus[dailyStatus.length - 1]?.date || '')}</span>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 text-xs text-gray-500">
+      <div className="flex gap-4 text-xs text-text-secondary">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded bg-accent-success" />
           <span>Both</span>
@@ -138,7 +138,7 @@ export function ClientMacroAdherence({ data }: ClientMacroAdherenceProps) {
           <span>One</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded bg-gray-700" />
+          <div className="w-2 h-2 rounded bg-secondary" />
           <span>Neither</span>
         </div>
       </div>

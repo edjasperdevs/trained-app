@@ -18,24 +18,24 @@ const RARITY_LABELS: Record<BadgeRarity, string> = {
 }
 
 const RARITY_GLOW: Record<BadgeRarity, string> = {
-  common: 'shadow-gray-500/50',
-  rare: 'shadow-blue-500/50',
-  epic: 'shadow-purple-500/50',
-  legendary: 'shadow-yellow-500/50'
+  common: 'shadow-secondary/50',
+  rare: 'shadow-info/50',
+  epic: 'shadow-primary/50',
+  legendary: 'shadow-warning/50'
 }
 
 const RARITY_TEXT: Record<BadgeRarity, string> = {
-  common: 'text-gray-400',
-  rare: 'text-blue-400',
-  epic: 'text-purple-400',
-  legendary: 'text-yellow-400'
+  common: 'text-text-secondary',
+  rare: 'text-info',
+  epic: 'text-primary',
+  legendary: 'text-warning'
 }
 
 const RARITY_BG: Record<BadgeRarity, string> = {
-  common: 'from-gray-500/20 to-gray-600/20',
-  rare: 'from-blue-500/20 to-blue-600/20',
-  epic: 'from-purple-500/20 to-purple-600/20',
-  legendary: 'from-yellow-500/20 to-amber-600/20'
+  common: 'from-secondary/20 to-secondary/20',
+  rare: 'from-info/20 to-info/20',
+  epic: 'from-primary/20 to-primary/20',
+  legendary: 'from-warning/20 to-warning/10'
 }
 
 // Trained theme rarity styles
@@ -157,7 +157,7 @@ function BadgeDisplay({ badge, index, isTrained }: { badge: Badge; index: number
         {!isTrained && (badge.rarity === 'legendary' || badge.rarity === 'epic') && (
           <motion.div
             className={`absolute inset-0 rounded-full blur-xl ${
-              badge.rarity === 'legendary' ? 'bg-yellow-400' : 'bg-purple-500'
+              badge.rarity === 'legendary' ? 'bg-warning' : 'bg-primary'
             }`}
             animate={{
               opacity: [0.3, 0.6, 0.3],
@@ -262,7 +262,7 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center overflow-hidden"
+        className="fixed inset-0 bg-background/90 backdrop-blur-sm z-[100] flex items-center justify-center overflow-hidden"
       >
         {/* Confetti - only for GYG or legendary/epic in Trained */}
         {(!isTrained || currentBadge.rarity === 'legendary' || currentBadge.rarity === 'epic') && (

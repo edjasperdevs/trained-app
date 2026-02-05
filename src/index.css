@@ -127,6 +127,21 @@
 }
 
 /* ================================================================
+   CHART COLORS - CSS custom properties for chart libraries that
+   need direct color strings (not Tailwind classes).
+   ================================================================ */
+
+:root {
+  --chart-goal: var(--color-warning);
+  --chart-goal-alpha: rgba(212, 168, 67, 0.6);
+  --chart-goal-text: rgba(212, 168, 67, 0.8);
+  --chart-area-start: rgba(212, 168, 67, 0.4);
+  --chart-line-start: rgb(212, 168, 67);
+  --chart-line-end: rgb(76, 175, 80);
+  --chart-avg-stroke: rgba(76, 175, 80, 0.8);
+}
+
+/* ================================================================
    BASE STYLES
    ================================================================ */
 

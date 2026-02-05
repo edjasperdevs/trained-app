@@ -61,7 +61,7 @@ export function Macros() {
                 flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors
                 ${activeTab === tab.id
                   ? 'bg-accent-primary text-bg-primary'
-                  : 'bg-bg-card text-gray-400 hover:text-white'}
+                  : 'bg-bg-card text-text-secondary hover:text-text-primary'}
               `}
             >
               {tab.label}
@@ -185,7 +185,7 @@ function DailyView({
 
       {/* Secondary Macros */}
       <Card>
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">MACRONUTRIENTS</h3>
+        <h3 className="text-sm font-semibold text-text-secondary mb-4">MACRONUTRIENTS</h3>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between text-sm mb-1">
@@ -210,26 +210,26 @@ function DailyView({
 
       {/* Quick Log */}
       <Card>
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">QUICK LOG</h3>
+        <h3 className="text-sm font-semibold text-text-secondary mb-4">QUICK LOG</h3>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Protein (g)</label>
+            <label className="text-xs text-text-secondary block mb-1">Protein (g)</label>
             <input
               type="number"
               value={quickLog.protein}
               onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
               placeholder={String(targets.protein)}
-              className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
+              className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 font-digital"
             />
           </div>
           <div>
-            <label className="text-xs text-gray-500 block mb-1">Calories</label>
+            <label className="text-xs text-text-secondary block mb-1">Calories</label>
             <input
               type="number"
               value={quickLog.calories}
               onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
               placeholder={String(targets.calories)}
-              className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2 font-digital"
+              className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2 font-digital"
             />
           </div>
         </div>
@@ -249,11 +249,11 @@ function DailyView({
             {proteinHit ? (
               <Check size={20} className="text-accent-success" />
             ) : (
-              <Beef size={20} className="text-gray-400" />
+              <Beef size={20} className="text-text-secondary" />
             )}
             <div>
               <p className="text-sm font-semibold">Protein Target</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">
                 {proteinHit ? '+50 XP earned' : 'Within 10g for +50 XP'}
               </p>
             </div>
@@ -264,11 +264,11 @@ function DailyView({
             {caloriesHit ? (
               <Check size={20} className="text-accent-success" />
             ) : (
-              <Zap size={20} className="text-gray-400" />
+              <Zap size={20} className="text-text-secondary" />
             )}
             <div>
               <p className="text-sm font-semibold">Calorie Target</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">
                 {caloriesHit ? '+50 XP earned' : 'Within 100 for +50 XP'}
               </p>
             </div>
@@ -283,12 +283,12 @@ function DailyView({
             onClick={() => setShowMeals(!showMeals)}
             className="w-full flex items-center justify-between"
           >
-            <h3 className="text-sm font-semibold text-gray-400">
+            <h3 className="text-sm font-semibold text-text-secondary">
               TODAY'S MEALS ({todayMeals.length})
             </h3>
             <ChevronDown
               size={16}
-              className={`text-gray-400 transition-transform ${showMeals ? 'rotate-180' : ''}`}
+              className={`text-text-secondary transition-transform ${showMeals ? 'rotate-180' : ''}`}
             />
           </button>
 
@@ -307,13 +307,13 @@ function DailyView({
                   >
                     <div>
                       <p className="font-semibold text-sm">{meal.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
                       </p>
                     </div>
                     <button
                       onClick={() => onDeleteMeal(meal.id)}
-                      className="text-gray-500 hover:text-accent-danger p-1"
+                      className="text-text-secondary hover:text-accent-danger p-1"
                     >
                       ✕
                     </button>
@@ -378,11 +378,11 @@ function MacroRing({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold font-digital">{current}</span>
-          <span className="text-xs text-gray-500">{unit}</span>
+          <span className="text-xs text-text-secondary">{unit}</span>
         </div>
       </div>
       <p className="mt-2 font-semibold">{label}</p>
-      <p className="text-xs text-gray-500">of {target}{unit}</p>
+      <p className="text-xs text-text-secondary">of {target}{unit}</p>
       {hit && <span className="text-xs text-accent-success mt-1">Target Hit!</span>}
     </Card>
   )
@@ -392,16 +392,16 @@ function MealsView({ mealPlan }: { mealPlan: MealPlan[] }) {
   if (!mealPlan || mealPlan.length === 0) {
     return (
       <Card className="text-center py-8">
-        <UtensilsCrossed size={40} className="mx-auto mb-4 text-gray-500" />
+        <UtensilsCrossed size={40} className="mx-auto mb-4 text-text-secondary" />
         <p className="text-xl font-bold mb-2">No Meal Plan</p>
-        <p className="text-gray-400">Set your macros in Calculator to generate a meal plan</p>
+        <p className="text-text-secondary">Set your macros in Calculator to generate a meal plan</p>
       </Card>
     )
   }
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm text-text-secondary mb-4">
         Suggested meal breakdown based on your targets
       </p>
       {mealPlan.map((meal, index) => (
@@ -420,15 +420,15 @@ function MealsView({ mealPlan }: { mealPlan: MealPlan[] }) {
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-gray-500">Protein</p>
+                <p className="text-xs text-text-secondary">Protein</p>
                 <p className="font-digital font-semibold">{meal.protein}g</p>
               </div>
               <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-gray-500">Carbs</p>
+                <p className="text-xs text-text-secondary">Carbs</p>
                 <p className="font-digital font-semibold">{meal.carbs}g</p>
               </div>
               <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-gray-500">Fats</p>
+                <p className="text-xs text-text-secondary">Fats</p>
                 <p className="font-digital font-semibold">{meal.fats}g</p>
               </div>
             </div>
@@ -494,14 +494,14 @@ function CalculatorView({
     <div className="space-y-6">
       {/* Weight */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-2">
+        <label className="text-sm font-semibold text-text-secondary block mb-2">
           BODY WEIGHT (LBS)
         </label>
         <input
           type="number"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
-          className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-2xl font-digital text-center"
+          className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
           min={80}
           max={400}
         />
@@ -509,7 +509,7 @@ function CalculatorView({
 
       {/* Height */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-2">
+        <label className="text-sm font-semibold text-text-secondary block mb-2">
           HEIGHT
         </label>
         <div className="flex gap-3">
@@ -519,11 +519,11 @@ function CalculatorView({
                 type="number"
                 value={heightFeet}
                 onChange={(e) => setHeightFeet(e.target.value)}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-2xl font-digital text-center"
+                className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
                 min={4}
                 max={7}
               />
-              <span className="text-gray-400">ft</span>
+              <span className="text-text-secondary">ft</span>
             </div>
           </div>
           <div className="flex-1">
@@ -532,11 +532,11 @@ function CalculatorView({
                 type="number"
                 value={heightInches}
                 onChange={(e) => setHeightInches(e.target.value)}
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-2xl font-digital text-center"
+                className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
                 min={0}
                 max={11}
               />
-              <span className="text-gray-400">in</span>
+              <span className="text-text-secondary">in</span>
             </div>
           </div>
         </div>
@@ -544,14 +544,14 @@ function CalculatorView({
 
       {/* Age */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-2">
+        <label className="text-sm font-semibold text-text-secondary block mb-2">
           AGE
         </label>
         <input
           type="number"
           value={age}
           onChange={(e) => setAge(e.target.value)}
-          className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-4 py-3 text-2xl font-digital text-center"
+          className="w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-2xl font-digital text-center"
           min={16}
           max={80}
         />
@@ -559,7 +559,7 @@ function CalculatorView({
 
       {/* Gender */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-3">
+        <label className="text-sm font-semibold text-text-secondary block mb-3">
           BIOLOGICAL SEX
         </label>
         <div className="grid grid-cols-2 gap-3">
@@ -569,7 +569,7 @@ function CalculatorView({
               p-3 rounded-lg border-2 transition-colors
               ${gender === 'male'
                 ? 'border-accent-primary bg-accent-primary/10'
-                : 'border-gray-700 hover:border-gray-600'}
+                : 'border-border hover:border-border'}
             `}
           >
             <span className="text-2xl block mb-1">♂️</span>
@@ -581,7 +581,7 @@ function CalculatorView({
               p-3 rounded-lg border-2 transition-colors
               ${gender === 'female'
                 ? 'border-accent-primary bg-accent-primary/10'
-                : 'border-gray-700 hover:border-gray-600'}
+                : 'border-border hover:border-border'}
             `}
           >
             <span className="text-2xl block mb-1">♀️</span>
@@ -592,7 +592,7 @@ function CalculatorView({
 
       {/* Goal */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-3">
+        <label className="text-sm font-semibold text-text-secondary block mb-3">
           GOAL
         </label>
         <div className="grid grid-cols-3 gap-2">
@@ -604,10 +604,10 @@ function CalculatorView({
                 p-3 rounded-lg border-2 transition-colors
                 ${goal === g.value
                   ? 'border-accent-primary bg-accent-primary/10'
-                  : 'border-gray-700 hover:border-gray-600'}
+                  : 'border-border hover:border-border'}
               `}
             >
-              <g.icon size={24} className={`mb-1 ${goal === g.value ? 'text-accent-primary' : 'text-gray-400'}`} />
+              <g.icon size={24} className={`mb-1 ${goal === g.value ? 'text-accent-primary' : 'text-text-secondary'}`} />
               <span className="text-sm">{g.label}</span>
             </button>
           ))}
@@ -616,7 +616,7 @@ function CalculatorView({
 
       {/* Activity Level */}
       <Card>
-        <label className="text-sm font-semibold text-gray-400 block mb-3">
+        <label className="text-sm font-semibold text-text-secondary block mb-3">
           ACTIVITY LEVEL
         </label>
         <div className="space-y-2">
@@ -628,11 +628,11 @@ function CalculatorView({
                 w-full p-3 rounded-lg border-2 text-left transition-colors
                 ${activity === level.value
                   ? 'border-accent-primary bg-accent-primary/10'
-                  : 'border-gray-700 hover:border-gray-600'}
+                  : 'border-border hover:border-border'}
               `}
             >
               <p className="font-semibold">{level.label}</p>
-              <p className="text-xs text-gray-500">{level.description}</p>
+              <p className="text-xs text-text-secondary">{level.description}</p>
             </button>
           ))}
         </div>
@@ -645,26 +645,26 @@ function CalculatorView({
       {/* Current Targets Display */}
       {targets && (
         <Card className="bg-accent-primary/5 border-accent-primary/20">
-          <h3 className="text-sm font-semibold text-gray-400 mb-3">CURRENT TARGETS</h3>
+          <h3 className="text-sm font-semibold text-text-secondary mb-3">CURRENT TARGETS</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-gray-500">Calories</p>
+              <p className="text-xs text-text-secondary">Calories</p>
               <p className="text-2xl font-bold font-digital text-accent-primary">
                 {targets.calories}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Protein</p>
+              <p className="text-xs text-text-secondary">Protein</p>
               <p className="text-2xl font-bold font-digital text-accent-primary">
                 {targets.protein}g
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Carbs</p>
+              <p className="text-xs text-text-secondary">Carbs</p>
               <p className="text-lg font-digital">{targets.carbs}g</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Fats</p>
+              <p className="text-xs text-text-secondary">Fats</p>
               <p className="text-lg font-digital">{targets.fats}g</p>
             </div>
           </div>
@@ -730,7 +730,7 @@ function LogMealView({
       {/* Saved Meals */}
       {savedMeals.length > 0 ? (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-gray-400">SAVED MEALS ({savedMeals.length})</h3>
+          <h3 className="text-sm font-semibold text-text-secondary">SAVED MEALS ({savedMeals.length})</h3>
 
           {savedMeals.map((meal) => (
             <Card key={meal.id} padding="none" className="overflow-hidden">
@@ -742,11 +742,11 @@ function LogMealView({
                     className="flex-1 text-left"
                   >
                     <p className="font-semibold">{meal.name}</p>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-text-secondary mt-1">
                       P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
                     </p>
                     {meal.ingredients && meal.ingredients.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-text-secondary mt-1">
                         {meal.ingredients.length} ingredient{meal.ingredients.length !== 1 ? 's' : ''}
                         <span className="ml-2">{expandedMealId === meal.id ? '▲' : '▼'}</span>
                       </p>
@@ -764,16 +764,16 @@ function LogMealView({
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-800">
+                <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                   <button
                     onClick={() => handleEditMeal(meal)}
-                    className="flex-1 text-sm text-gray-400 hover:text-accent-primary py-1"
+                    className="flex-1 text-sm text-text-secondary hover:text-accent-primary py-1"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onDeleteSavedMeal(meal.id)}
-                    className="flex-1 text-sm text-gray-400 hover:text-accent-danger py-1"
+                    className="flex-1 text-sm text-text-secondary hover:text-accent-danger py-1"
                   >
                     Delete
                   </button>
@@ -789,18 +789,18 @@ function LogMealView({
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-bg-primary px-4 py-3 border-t border-gray-800">
-                      <p className="text-xs text-gray-500 mb-2">INGREDIENTS</p>
+                    <div className="bg-bg-primary px-4 py-3 border-t border-border">
+                      <p className="text-xs text-text-secondary mb-2">INGREDIENTS</p>
                       <div className="space-y-2">
                         {meal.ingredients.map((ing) => (
                           <div key={ing.id} className="text-sm">
-                            <p className="text-gray-300">
+                            <p className="text-text-primary">
                               {ing.name}
-                              <span className="text-gray-500 ml-2">
+                              <span className="text-text-secondary ml-2">
                                 ({ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit})
                               </span>
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-text-secondary">
                               P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
                             </p>
                           </div>
@@ -815,9 +815,9 @@ function LogMealView({
         </div>
       ) : (
         <Card className="text-center py-8">
-          <UtensilsCrossed size={40} className="mx-auto mb-3 text-gray-500" />
+          <UtensilsCrossed size={40} className="mx-auto mb-3 text-text-secondary" />
           <p className="text-lg font-semibold mb-1">No Saved Meals</p>
-          <p className="text-gray-400 text-sm">
+          <p className="text-text-secondary text-sm">
             Create a meal with multiple ingredients to quickly log it later
           </p>
         </Card>

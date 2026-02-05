@@ -19,7 +19,7 @@ export function WeightChart({
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-gray-500 text-sm glass rounded-xl"
+        className="flex items-center justify-center text-text-secondary text-sm glass rounded-xl"
         style={{ height }}
       >
         No weight data yet
@@ -72,7 +72,7 @@ export function WeightChart({
   return (
     <div className="relative" style={{ height }}>
       {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-xs text-gray-500 font-digital">
+      <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-xs text-text-secondary font-digital">
         <span>{Math.round(chartMax)}</span>
         <span>{Math.round((chartMax + chartMin) / 2)}</span>
         <span>{Math.round(chartMin)}</span>
@@ -86,9 +86,9 @@ export function WeightChart({
           className="w-full h-full"
         >
           {/* Grid lines */}
-          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
-          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
-          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-white/10" />
+          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
+          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
 
           {/* Goal line */}
           {showGoalLine && goalLineY !== null && goalLineY >= 0 && goalLineY <= 100 && (
@@ -98,7 +98,7 @@ export function WeightChart({
                 y1={goalLineY}
                 x2="100"
                 y2={goalLineY}
-                stroke="rgba(245, 158, 11, 0.6)"
+                stroke="var(--chart-goal-alpha)"
                 strokeWidth="1"
                 strokeDasharray="4 2"
                 initial={{ opacity: 0 }}
@@ -108,7 +108,7 @@ export function WeightChart({
               <motion.text
                 x="2"
                 y={goalLineY - 2}
-                fill="rgba(245, 158, 11, 0.8)"
+                fill="var(--chart-goal-text)"
                 fontSize="3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -167,7 +167,7 @@ export function WeightChart({
                 cy={y}
                 r="2.5"
                 fill="none"
-                stroke="rgba(92, 107, 74, 0.8)"
+                stroke="var(--chart-avg-stroke)"
                 strokeWidth="1"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -179,18 +179,18 @@ export function WeightChart({
           {/* Gradients - Updated for gold/green */}
           <defs>
             <linearGradient id="weightGradientNew" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgb(245, 158, 11)" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="rgb(245, 158, 11)" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--chart-line-start)" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="var(--chart-line-start)" stopOpacity="0" />
             </linearGradient>
             <linearGradient id="lineGradientNew" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="rgb(245, 158, 11)" />
-              <stop offset="100%" stopColor="rgb(92, 107, 74)" />
+              <stop offset="0%" stopColor="var(--chart-line-start)" />
+              <stop offset="100%" stopColor="var(--chart-line-end)" />
             </linearGradient>
           </defs>
         </svg>
 
         {/* X-axis labels */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-500 transform translate-y-5">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-text-secondary transform translate-y-5">
           {data.length > 0 && <span>{formatDate(data[0].date)}</span>}
           {data.length > 1 && <span>{formatDate(data[data.length - 1].date)}</span>}
         </div>
@@ -199,7 +199,7 @@ export function WeightChart({
       {/* Current value indicator */}
       {data.length > 0 && (
         <div className="absolute top-0 right-0 glass rounded-lg px-3 py-1.5">
-          <span className="text-xs text-gray-400">Latest: </span>
+          <span className="text-xs text-text-secondary">Latest: </span>
           <span className="font-digital font-bold text-accent-primary">
             {data[data.length - 1].weight} {unit}
           </span>

@@ -28,9 +28,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 // Character base icon representations
 const CHARACTER_BASES = {
-  dominant: { icon: Sword, color: 'text-red-400' },
-  switch: { icon: Wand2, color: 'text-purple-400' },
-  submissive: { icon: Moon, color: 'text-blue-400' }
+  dominant: { icon: Sword, color: 'text-error' },
+  switch: { icon: Wand2, color: 'text-primary' },
+  submissive: { icon: Moon, color: 'text-info' }
 }
 
 // Mood animations
@@ -116,7 +116,7 @@ export function Avatar({
       if (evolutionStage >= 6) return 'border-primary'
       return 'border-border'
     } else {
-      if (evolutionStage >= 9) return 'border-yellow-400'
+      if (evolutionStage >= 9) return 'border-warning'
       if (evolutionStage >= 6) return 'border-primary'
       return 'border-border'
     }

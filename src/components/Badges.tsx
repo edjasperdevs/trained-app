@@ -16,8 +16,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 const RARITY_BG: Record<BadgeRarity, string> = {
-  common: 'bg-gray-500/10',
-  rare: 'bg-blue-500/10',
+  common: 'bg-secondary/10',
+  rare: 'bg-info/10',
   epic: 'bg-secondary/10',
   legendary: 'bg-primary/10'
 }

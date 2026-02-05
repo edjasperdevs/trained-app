@@ -265,11 +265,11 @@ export function Settings() {
       <div className="px-4 py-6 space-y-6">
         {/* Profile Section */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">PROFILE</h3>
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">PROFILE</h3>
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-gray-500 block mb-1.5">Username</label>
+              <label className="text-xs text-text-secondary block mb-1.5">Username</label>
               <input
                 type="text"
                 value={profile?.username || ''}
@@ -279,7 +279,7 @@ export function Settings() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 block mb-1.5">Fitness Level</label>
+              <label className="text-xs text-text-secondary block mb-1.5">Fitness Level</label>
               <select
                 value={profile?.fitnessLevel || 'beginner'}
                 onChange={(e) => setProfile({ fitnessLevel: e.target.value as 'beginner' | 'intermediate' | 'advanced' })}
@@ -292,7 +292,7 @@ export function Settings() {
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 block mb-1.5">Training Days per Week</label>
+              <label className="text-xs text-text-secondary block mb-1.5">Training Days per Week</label>
               <select
                 value={profile?.trainingDaysPerWeek || 3}
                 onChange={(e) => {
@@ -310,7 +310,7 @@ export function Settings() {
 
             {/* Workout Days Selector */}
             <div>
-              <label className="text-xs text-gray-500 block mb-2">
+              <label className="text-xs text-text-secondary block mb-2">
                 Which days do you workout? (select {trainingDays})
               </label>
               <div className="flex gap-1">
@@ -328,8 +328,8 @@ export function Settings() {
                         ${isSelected
                           ? 'bg-accent-primary text-bg-primary hover:bg-accent-primary/80'
                           : canAdd
-                            ? 'bg-bg-secondary text-gray-400 hover:bg-gray-700'
-                            : 'bg-bg-secondary text-gray-600 cursor-not-allowed'}
+                            ? 'bg-bg-secondary text-text-secondary hover:bg-surface-elevated'
+                            : 'bg-bg-secondary text-text-secondary cursor-not-allowed'}
                       `}
                     >
                       {name}
@@ -337,7 +337,7 @@ export function Settings() {
                   )
                 })}
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-text-secondary mt-2">
                 {selectedDays.length} of {trainingDays} days selected
               </p>
             </div>
@@ -346,52 +346,52 @@ export function Settings() {
 
         {/* Units */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">UNITS</h3>
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">UNITS</h3>
           <div className="flex gap-3">
             <button
               onClick={() => setProfile({ units: 'imperial' })}
               className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
                 profile?.units === 'imperial'
                   ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
-                  : 'glass-subtle border-transparent hover:bg-white/10'
+                  : 'glass-subtle border-transparent hover:bg-glass-light'
               }`}
             >
               <p className="font-semibold">Imperial</p>
-              <p className="text-xs text-gray-500">lbs, ft/in</p>
+              <p className="text-xs text-text-secondary">lbs, ft/in</p>
             </button>
             <button
               onClick={() => setProfile({ units: 'metric' })}
               className={`flex-1 p-4 rounded-xl border transition-all duration-150 ${
                 profile?.units === 'metric'
                   ? 'border-accent-primary bg-accent-primary/10 shadow-lg shadow-accent-primary/10'
-                  : 'glass-subtle border-transparent hover:bg-white/10'
+                  : 'glass-subtle border-transparent hover:bg-glass-light'
               }`}
             >
               <p className="font-semibold">Metric</p>
-              <p className="text-xs text-gray-500">kg, cm</p>
+              <p className="text-xs text-text-secondary">kg, cm</p>
             </button>
           </div>
         </Card>
 
         {/* Stats */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">YOUR STATS</h3>
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">YOUR STATS</h3>
           <div className="grid grid-cols-2 gap-3">
             <div className="glass-subtle rounded-xl p-4 text-center">
               <p className="text-3xl font-bold font-digital text-accent-primary">
                 {profile?.currentStreak || 0}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Current Streak</p>
+              <p className="text-xs text-text-secondary mt-1">Current Streak</p>
             </div>
             <div className="glass-subtle rounded-xl p-4 text-center">
               <p className="text-3xl font-bold font-digital text-accent-secondary">
                 {profile?.longestStreak || 0}
               </p>
-              <p className="text-xs text-gray-500 mt-1">Longest Streak</p>
+              <p className="text-xs text-text-secondary mt-1">Longest Streak</p>
             </div>
           </div>
           {profile?.createdAt && (
-            <p className="text-xs text-gray-500 text-center mt-4">
+            <p className="text-xs text-text-secondary text-center mt-4">
               Member since {new Date(profile.createdAt).toLocaleDateString()}
             </p>
           )}
@@ -403,12 +403,12 @@ export function Settings() {
         {/* Weight Tracking */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-400">WEIGHT TRACKING</h3>
+            <h3 className="text-sm font-semibold text-text-secondary">WEIGHT TRACKING</h3>
             {rateOfChange && (
               <div className={`flex items-center gap-1.5 text-sm px-2 py-1 rounded-lg ${
                 rateOfChange.direction === 'losing' ? 'bg-accent-success/10 text-accent-success' :
                 rateOfChange.direction === 'gaining' ? 'bg-accent-primary/10 text-accent-primary' :
-                'bg-white/5 text-gray-400'
+                'bg-glass-light text-text-secondary'
               }`}>
                 {rateOfChange.direction === 'losing' ? (
                   <TrendingDown size={16} />
@@ -437,7 +437,7 @@ export function Settings() {
                 max={units === 'metric' ? 180 : 400}
                 step={0.1}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary text-sm">
                 {getWeightUnit(units)}
               </span>
             </div>
@@ -450,18 +450,18 @@ export function Settings() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             {/* Current Weight */}
             <div className="glass-subtle rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-1">Current</p>
-              <p className="font-digital font-bold text-xl text-white">
+              <p className="text-xs text-text-secondary mb-1">Current</p>
+              <p className="font-digital font-bold text-xl text-text-primary">
                 {formatWeight(profile?.weight || 0, units)}
               </p>
               {todayWeight && (
-                <p className="text-xs text-gray-500 mt-1">Updated today</p>
+                <p className="text-xs text-text-secondary mt-1">Updated today</p>
               )}
             </div>
 
             {/* Goal Weight */}
             <div className="glass-subtle rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-1">Goal</p>
+              <p className="text-xs text-text-secondary mb-1">Goal</p>
               {profile?.goalWeight ? (
                 <>
                   <p className="font-digital font-bold text-xl text-accent-primary">
@@ -469,7 +469,7 @@ export function Settings() {
                   </p>
                   <button
                     onClick={() => setGoalWeight(null)}
-                    className="text-xs text-gray-500 hover:text-accent-danger mt-1"
+                    className="text-xs text-text-secondary hover:text-accent-danger mt-1"
                   >
                     Clear goal
                   </button>
@@ -481,7 +481,7 @@ export function Settings() {
                     value={goalWeightInput}
                     onChange={(e) => setGoalWeightInput(e.target.value)}
                     placeholder="Set goal"
-                    className="w-full bg-transparent border-b border-gray-600 focus:border-accent-primary outline-none font-digital text-lg py-1"
+                    className="w-full bg-transparent border-b border-border focus:border-accent-primary outline-none font-digital text-lg py-1"
                   />
                   {goalWeightInput && (
                     <button
@@ -512,13 +512,13 @@ export function Settings() {
                   <PartyPopper size={24} className="text-accent-success" />
                   <div>
                     <p className="font-bold text-accent-success">Goal Achieved!</p>
-                    <p className="text-sm text-gray-400">You've reached your target weight</p>
+                    <p className="text-sm text-text-secondary">You've reached your target weight</p>
                   </div>
                 </div>
               ) : projectedGoal.projectedDate ? (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Projected Goal Date</p>
+                    <p className="text-xs text-text-secondary uppercase tracking-wider mb-1">Projected Goal Date</p>
                     <p className="font-bold text-lg">
                       {projectedGoal.projectedDate.toLocaleDateString('en-US', {
                         month: 'short',
@@ -528,7 +528,7 @@ export function Settings() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">~{projectedGoal.weeksRemaining} weeks</p>
+                    <p className="text-xs text-text-secondary">~{projectedGoal.weeksRemaining} weeks</p>
                     <p className="text-sm text-accent-primary font-digital">
                       {Math.abs(toDisplayWeight(projectedGoal.currentWeight - projectedGoal.targetWeight, units)).toFixed(1)} {getWeightUnit(units)} to go
                     </p>
@@ -536,9 +536,9 @@ export function Settings() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <BarChart3 size={20} className="text-gray-400" />
+                  <BarChart3 size={20} className="text-text-secondary" />
                   <div>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-text-secondary">
                       {weightTrend && weightTrend.daysTracked < 7
                         ? `Log ${7 - weightTrend.daysTracked} more days to see projected date`
                         : 'Keep tracking to see your projected goal date'}
@@ -582,7 +582,7 @@ export function Settings() {
           )}
 
           {weightHistory.length === 0 && (
-            <p className="text-xs text-gray-500 text-center py-2">
+            <p className="text-xs text-text-secondary text-center py-2">
               Log your weight daily to track your progress
             </p>
           )}
@@ -609,7 +609,7 @@ export function Settings() {
                 key={key}
                 onClick={() => setReminderPreference(key, !reminderPreferences[key])}
                 className={`w-full flex items-center justify-between p-3 transition-all duration-150 ${
-                  isTrained ? 'rounded bg-surface-elevated hover:bg-surface-elevated/80' : 'rounded-xl glass-subtle hover:bg-white/10'
+                  isTrained ? 'rounded bg-surface-elevated hover:bg-surface-elevated/80' : 'rounded-xl glass-subtle hover:bg-glass-light'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -715,7 +715,7 @@ export function Settings() {
               animate={{ height: 'auto', opacity: 1 }}
               className="mt-4 space-y-3"
             >
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-text-secondary">
                 This will permanently delete all your progress including XP, workout history, and avatar evolution.
               </p>
               <Button
@@ -751,14 +751,14 @@ export function Settings() {
 
         {/* Account */}
         <Card>
-          <h3 className="text-sm font-semibold text-gray-400 mb-4">ACCOUNT</h3>
+          <h3 className="text-sm font-semibold text-text-secondary mb-4">ACCOUNT</h3>
           {user ? (
             <div className="space-y-4">
               <div className="bg-bg-secondary rounded-lg p-3">
-                <p className="text-xs text-gray-500">Signed in as</p>
+                <p className="text-xs text-text-secondary">Signed in as</p>
                 <p className="font-medium truncate">{user.email}</p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">
                 Your data syncs automatically when connected to the internet.
               </p>
               <Button
@@ -774,7 +774,7 @@ export function Settings() {
             </div>
           ) : (
             <div className="space-y-4">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-text-secondary">
                 {isConfigured
                   ? 'Sign in to sync your data across devices and enable coach features.'
                   : 'Running in local-only mode. Your data is saved on this device.'}
@@ -814,7 +814,7 @@ export function Settings() {
           aria-label="Import progress"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowImportModal(false)}
         >
           <motion.div
@@ -832,7 +832,7 @@ export function Settings() {
               </div>
             ) : (
               <>
-                <p className="text-sm text-gray-400 mb-4">
+                <p className="text-sm text-text-secondary mb-4">
                   Upload a backup file or paste the JSON data below.
                 </p>
 
@@ -857,7 +857,7 @@ export function Settings() {
                   value={importData}
                   onChange={(e) => setImportData(e.target.value)}
                   placeholder="Or paste JSON data here..."
-                  className="w-full h-32 bg-bg-card border border-gray-700 rounded-lg p-3 text-sm font-mono resize-none mb-4"
+                  className="w-full h-32 bg-bg-card border border-border rounded-lg p-3 text-sm font-mono resize-none mb-4"
                 />
 
                 {importStatus === 'error' && (
@@ -906,10 +906,10 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
   const percentComplete = Math.round((earnedBadges.length / allBadges.length) * 100)
 
   const rarityBg: Record<string, string> = {
-    common: 'bg-gray-500/20',
-    rare: 'bg-blue-500/20',
-    epic: 'bg-purple-500/20',
-    legendary: 'bg-yellow-500/20'
+    common: 'bg-secondary/20',
+    rare: 'bg-info/20',
+    epic: 'bg-primary/20',
+    legendary: 'bg-warning/20'
   }
 
   return (

@@ -83,11 +83,11 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
-      className="bg-black/95 flex flex-col"
+      className="bg-background/95 flex flex-col"
     >
       {/* Header */}
-      <div className="bg-bg-secondary px-4 py-4 flex items-center justify-between border-b border-gray-800">
-        <button onClick={onClose} aria-label="Go back" className="text-gray-400 hover:text-white p-1">
+      <div className="bg-bg-secondary px-4 py-4 flex items-center justify-between border-b border-border">
+        <button onClick={onClose} aria-label="Go back" className="text-text-secondary hover:text-text-primary p-1">
           <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
@@ -100,33 +100,33 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Meal Name */}
         <div>
-          <label className="text-xs text-gray-400 block mb-2">MEAL NAME</label>
+          <label className="text-xs text-text-secondary block mb-2">MEAL NAME</label>
           <input
             type="text"
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
             placeholder="e.g., Post-Workout Shake"
-            className="w-full bg-bg-card border border-gray-700 rounded-lg px-4 py-3 text-lg"
+            className="w-full bg-bg-card border border-border rounded-lg px-4 py-3 text-lg"
             autoFocus
           />
         </div>
 
         {/* Food Search */}
         <div>
-          <label className="text-xs text-gray-400 block mb-2">ADD INGREDIENTS</label>
+          <label className="text-xs text-text-secondary block mb-2">ADD INGREDIENTS</label>
           <FoodSearch onSelect={handleAddIngredient} />
         </div>
 
         {/* Ingredients List */}
         <div>
-          <label className="text-xs text-gray-400 block mb-2">
+          <label className="text-xs text-text-secondary block mb-2">
             INGREDIENTS ({ingredients.length})
           </label>
 
           {ingredients.length === 0 ? (
             <div className="bg-bg-card rounded-lg p-6 text-center">
               <span className="text-3xl block mb-2">🥗</span>
-              <p className="text-gray-500 text-sm">
+              <p className="text-text-secondary text-sm">
                 Search and add ingredients above
               </p>
             </div>
@@ -143,17 +143,17 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{ing.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-text-secondary">
                         {ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit}
                         {ing.brand && ` · ${ing.brand}`}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-text-secondary mt-1">
                         P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
                       </p>
                     </div>
                     <button
                       onClick={() => handleRemoveIngredient(ing.id)}
-                      className="text-gray-500 hover:text-accent-danger p-2 ml-2"
+                      className="text-text-secondary hover:text-accent-danger p-2 ml-2"
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
@@ -168,27 +168,27 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
       </div>
 
       {/* Footer with Totals and Save */}
-      <div className="bg-bg-secondary border-t border-gray-800 p-4 space-y-4">
+      <div className="bg-bg-secondary border-t border-border p-4 space-y-4">
         {/* Macro Totals */}
         {ingredients.length > 0 && (
           <div className="bg-bg-card rounded-lg p-3">
-            <p className="text-xs text-gray-400 mb-2">MEAL TOTALS</p>
+            <p className="text-xs text-text-secondary mb-2">MEAL TOTALS</p>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
                 <p className="text-lg font-bold font-digital text-accent-primary">{totals.protein}</p>
-                <p className="text-xs text-gray-500">Protein</p>
+                <p className="text-xs text-text-secondary">Protein</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{totals.carbs}</p>
-                <p className="text-xs text-gray-500">Carbs</p>
+                <p className="text-xs text-text-secondary">Carbs</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{totals.fats}</p>
-                <p className="text-xs text-gray-500">Fats</p>
+                <p className="text-xs text-text-secondary">Fats</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital text-accent-secondary">{totals.calories}</p>
-                <p className="text-xs text-gray-500">Cals</p>
+                <p className="text-xs text-text-secondary">Cals</p>
               </div>
             </div>
           </div>

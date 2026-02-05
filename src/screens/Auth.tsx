@@ -101,7 +101,7 @@ export function Auth() {
         <Card className="w-full max-w-md text-center">
           <span className="text-4xl block mb-4">🔧</span>
           <h2 className="text-xl font-bold mb-2">Setup Required</h2>
-          <p className="text-gray-400">
+          <p className="text-text-secondary">
             Backend is not configured. Please contact your administrator or check the setup instructions.
           </p>
         </Card>
@@ -120,7 +120,7 @@ export function Auth() {
         <div className="text-center mb-8">
           <span className="text-6xl block mb-4">🎮</span>
           <h1 className="text-2xl font-bold">Gamify Your Gains</h1>
-          <p className="text-gray-400 mt-2">
+          <p className="text-text-secondary mt-2">
             {mode === 'login' && 'Welcome back!'}
             {mode === 'signup' && 'Level up your fitness journey'}
             {mode === 'forgot' && 'Reset your password'}
@@ -138,11 +138,11 @@ export function Auth() {
               <span className="text-2xl">📧</span>
               <div>
                 <p className="font-semibold text-accent-warning">Confirm Your Email</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  We sent a confirmation link to <span className="text-white">{email || 'your email'}</span>.
+                <p className="text-sm text-text-secondary mt-1">
+                  We sent a confirmation link to <span className="text-text-primary">{email || 'your email'}</span>.
                   Click the link to activate your account, then come back here to sign in.
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-text-secondary mt-2">
                   Don't see it? Check your spam folder.
                 </p>
               </div>
@@ -154,13 +154,13 @@ export function Auth() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="text-xs text-gray-500 block mb-1">Email</label>
+              <label className="text-xs text-text-secondary block mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
                 required
               />
             </div>
@@ -168,13 +168,13 @@ export function Auth() {
             {/* Password (not shown for forgot mode) */}
             {mode !== 'forgot' && (
               <div>
-                <label className="text-xs text-gray-500 block mb-1">Password</label>
+                <label className="text-xs text-text-secondary block mb-1">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                  className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
                   required
                 />
               </div>
@@ -183,13 +183,13 @@ export function Auth() {
             {/* Confirm Password (only for signup) */}
             {mode === 'signup' && (
               <div>
-                <label className="text-xs text-gray-500 block mb-1">Confirm Password</label>
+                <label className="text-xs text-text-secondary block mb-1">Confirm Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-bg-secondary border border-gray-700 rounded-lg px-3 py-2"
+                  className="w-full bg-bg-secondary border border-border rounded-lg px-3 py-2"
                   required
                 />
               </div>
@@ -216,18 +216,18 @@ export function Auth() {
           </form>
 
           {/* Mode Toggles */}
-          <div className="mt-6 pt-6 border-t border-gray-800 space-y-3">
+          <div className="mt-6 pt-6 border-t border-border space-y-3">
             {mode === 'login' && (
               <>
                 <button
                   onClick={() => { setMode('signup'); setError(''); setSuccess('') }}
-                  className="w-full text-sm text-gray-400 hover:text-white"
+                  className="w-full text-sm text-text-secondary hover:text-text-primary"
                 >
                   Don't have an account? <span className="text-accent-primary">Sign up</span>
                 </button>
                 <button
                   onClick={() => { setMode('forgot'); setError(''); setSuccess('') }}
-                  className="w-full text-sm text-gray-400 hover:text-white"
+                  className="w-full text-sm text-text-secondary hover:text-text-primary"
                 >
                   Forgot your password?
                 </button>
@@ -237,7 +237,7 @@ export function Auth() {
             {mode === 'signup' && (
               <button
                 onClick={() => { setMode('login'); setError(''); setSuccess('') }}
-                className="w-full text-sm text-gray-400 hover:text-white"
+                className="w-full text-sm text-text-secondary hover:text-text-primary"
               >
                 Already have an account? <span className="text-accent-primary">Sign in</span>
               </button>
@@ -246,7 +246,7 @@ export function Auth() {
             {mode === 'forgot' && (
               <button
                 onClick={() => { setMode('login'); setError(''); setSuccess('') }}
-                className="w-full text-sm text-gray-400 hover:text-white"
+                className="w-full text-sm text-text-secondary hover:text-text-primary"
               >
                 Back to <span className="text-accent-primary">Sign in</span>
               </button>

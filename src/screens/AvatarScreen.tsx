@@ -137,9 +137,9 @@ export function AvatarScreen() {
           </h3>
           <div className="flex items-center gap-4">
             <div className={`w-12 h-12 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-              {baseCharacter === 'dominant' && <Sword size={24} className="text-red-400" />}
-              {baseCharacter === 'switch' && <Sparkles size={24} className="text-purple-400" />}
-              {baseCharacter === 'submissive' && <Zap size={24} className="text-yellow-400" />}
+              {baseCharacter === 'dominant' && <Sword size={24} className="text-error" />}
+              {baseCharacter === 'switch' && <Sparkles size={24} className="text-primary" />}
+              {baseCharacter === 'submissive' && <Zap size={24} className="text-warning" />}
             </div>
             <div>
               <p className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : 'capitalize'}`}>
