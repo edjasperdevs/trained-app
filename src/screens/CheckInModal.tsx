@@ -157,6 +157,9 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   return (
     <AnimatePresence>
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Daily check-in"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -181,6 +184,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 </h2>
                 <button
                   onClick={() => onClose(false)}
+                  aria-label="Close check-in"
                   className="text-text-secondary hover:text-text-primary"
                 >
                   <X size={20} />
@@ -400,6 +404,10 @@ function QuestCheckbox({
     <Card
       onClick={disabled ? undefined : () => onChange(!checked)}
       hover={!disabled}
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={`${label}: ${xp} ${xpLabel}`}
+      aria-disabled={disabled}
       className={`${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${
         checked ? 'border-success/50' : ''
       }`}
@@ -407,6 +415,7 @@ function QuestCheckbox({
     >
       <div className="flex items-center gap-3">
         <div
+          aria-hidden="true"
           className={`w-6 h-6 border-2 flex items-center justify-center transition-colors ${
             isTrained ? 'rounded' : 'rounded'
           } ${

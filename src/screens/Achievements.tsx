@@ -228,6 +228,7 @@ export function Achievements() {
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
+            aria-label="Go back"
             className={`w-10 h-10 bg-surface-elevated flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors ${isTrained ? 'rounded' : 'rounded-full'}`}
           >
             <ChevronLeft size={20} />

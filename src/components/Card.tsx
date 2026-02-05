@@ -9,6 +9,10 @@ interface CardProps {
   hover?: boolean
   padding?: 'sm' | 'md' | 'lg' | 'none'
   variant?: 'default' | 'elevated' | 'subtle'
+  role?: string
+  'aria-checked'?: boolean
+  'aria-label'?: string
+  'aria-disabled'?: boolean
 }
 
 const paddingClasses = {
@@ -24,7 +28,11 @@ export function Card({
   onClick,
   hover = false,
   padding = 'md',
-  variant = 'default'
+  variant = 'default',
+  role,
+  'aria-checked': ariaChecked,
+  'aria-label': ariaLabel,
+  'aria-disabled': ariaDisabled,
 }: CardProps) {
   const { themeId } = useTheme()
   const isTrained = themeId === 'trained'
@@ -60,6 +68,10 @@ export function Card({
   return (
     <Component
       onClick={onClick}
+      role={role}
+      aria-checked={ariaChecked}
+      aria-label={ariaLabel}
+      aria-disabled={ariaDisabled}
       whileHover={hover ? { scale: 1.01, y: -2 } : undefined}
       whileTap={onClick ? { scale: 0.98 } : undefined}
       className={`

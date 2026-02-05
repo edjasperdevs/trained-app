@@ -149,6 +149,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
   return (
     <AnimatePresence>
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Claim weekly XP"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

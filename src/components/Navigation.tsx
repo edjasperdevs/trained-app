@@ -23,7 +23,7 @@ export function Navigation() {
   const isTrained = themeId === 'trained'
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
         {navItems.map(item => {
           const isActive = location.pathname === item.path
@@ -32,6 +32,8 @@ export function Navigation() {
             <NavLink
               key={item.path}
               to={item.path}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
               className="flex flex-col items-center justify-center w-16 h-full relative"
             >
               {isActive && (

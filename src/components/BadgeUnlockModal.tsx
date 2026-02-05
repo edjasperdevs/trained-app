@@ -256,6 +256,9 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
   return (
     <AnimatePresence>
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Badge unlocked"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}

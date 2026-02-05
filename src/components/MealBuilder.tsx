@@ -87,8 +87,8 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
     >
       {/* Header */}
       <div className="bg-bg-secondary px-4 py-4 flex items-center justify-between border-b border-gray-800">
-        <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <button onClick={onClose} aria-label="Go back" className="text-gray-400 hover:text-white p-1">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>

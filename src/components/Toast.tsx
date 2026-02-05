@@ -61,7 +61,7 @@ export function ToastContainer() {
   }
 
   return (
-    <div className={`fixed ${isTrained ? 'bottom-20' : 'top-4'} left-4 right-4 z-[100] pointer-events-none flex flex-col items-center gap-2`}>
+    <div role="status" aria-live="polite" className={`fixed ${isTrained ? 'bottom-20' : 'top-4'} left-4 right-4 z-[100] pointer-events-none flex flex-col items-center gap-2`}>
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => {
           const style = getToastStyles(toast.type)
@@ -85,6 +85,7 @@ export function ToastContainer() {
               <p className="flex-1 text-sm text-text-primary">{toast.message}</p>
               <button
                 onClick={() => removeToast(toast.id)}
+                aria-label="Dismiss notification"
                 className="text-text-secondary hover:text-text-primary transition-colors"
               >
                 <X size={16} />

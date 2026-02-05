@@ -114,6 +114,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 value={code}
                 onChange={(e) => handleCodeChange(e.target.value)}
                 placeholder="XXXX-XXXX-XXXX-XXXX"
+                aria-label="License key"
                 className={`w-full glass-input rounded-xl px-4 py-3 text-center text-lg font-mono tracking-wider uppercase ${
                   error ? 'border-accent-danger' : ''
                 }`}
@@ -158,6 +159,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
           <div className="mt-6 pt-6 border-t border-white/10">
             <button
               onClick={() => setShowHelp(!showHelp)}
+              aria-expanded={showHelp}
               className="w-full text-center text-sm text-gray-400 hover:text-white transition-colors"
             >
               {showHelp ? 'Hide help' : "Don't have a code?"}
@@ -232,6 +234,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
       {/* Success Modal */}
       {showSuccess && (
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Access granted"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"

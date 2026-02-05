@@ -552,6 +552,7 @@ export function Settings() {
           {weightHistory.length > 1 && (
             <button
               onClick={() => setShowWeightChart(!showWeightChart)}
+              aria-expanded={showWeightChart}
               className="w-full text-sm text-accent-primary flex items-center justify-center gap-2 py-2"
             >
               {showWeightChart ? 'Hide Chart' : 'Show Trend Chart'}
@@ -697,6 +698,7 @@ export function Settings() {
         <Card className="border-accent-danger/30">
           <button
             onClick={() => setShowDangerZone(!showDangerZone)}
+            aria-expanded={showDangerZone}
             className="w-full flex items-center justify-between"
           >
             <h3 className="text-sm font-semibold text-accent-danger">DANGER ZONE</h3>
@@ -806,6 +808,9 @@ export function Settings() {
       {/* Import Modal */}
       {showImportModal && (
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Import progress"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
