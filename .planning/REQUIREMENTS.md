@@ -13,12 +13,12 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 ### Foundation
 
-- [ ] **FOUND-01**: Migrate Tailwind CSS v3 to v4 with `@theme` directive replacing JS token system
-- [ ] **FOUND-02**: Define premium design tokens (surface hierarchy, border radius 12-16px, spacing scale, subtle borders)
-- [ ] **FOUND-03**: Audit and replace all hardcoded colors (67 identified) with token references
-- [ ] **FOUND-04**: Upgrade framer-motion to motion v12 (find-and-replace imports)
-- [ ] **FOUND-05**: Self-host fonts via Fontsource (replace Google Fonts CDN)
-- [ ] **FOUND-06**: Create `cn()` utility + install CVA, tailwind-merge, clsx
+- [x] **FOUND-01**: Migrate Tailwind CSS v3 to v4 with `@theme` directive replacing JS token system
+- [x] **FOUND-02**: Define premium design tokens (surface hierarchy, border radius 12-16px, spacing scale, subtle borders)
+- [x] **FOUND-03**: Audit and replace all hardcoded colors (67 identified) with token references
+- [x] **FOUND-04**: Upgrade framer-motion to motion v12 (find-and-replace imports)
+- [x] **FOUND-05**: Self-host fonts via Fontsource (replace Google Fonts CDN)
+- [x] **FOUND-06**: Create `cn()` utility + install CVA, tailwind-merge, clsx
 
 ### Theme Removal
 
@@ -85,12 +85,12 @@ Deferred to post-refresh.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1: Foundation | Pending |
-| FOUND-02 | Phase 1: Foundation | Pending |
-| FOUND-03 | Phase 1: Foundation | Pending |
-| FOUND-04 | Phase 1: Foundation | Pending |
-| FOUND-05 | Phase 1: Foundation | Pending |
-| FOUND-06 | Phase 1: Foundation | Pending |
+| FOUND-01 | Phase 1: Foundation | Complete |
+| FOUND-02 | Phase 1: Foundation | Complete |
+| FOUND-03 | Phase 1: Foundation | Complete |
+| FOUND-04 | Phase 1: Foundation | Complete |
+| FOUND-05 | Phase 1: Foundation | Complete |
+| FOUND-06 | Phase 1: Foundation | Complete |
 | THEME-01 | Phase 2: Theme Removal | Pending |
 | THEME-02 | Phase 2: Theme Removal | Pending |
 | THEME-03 | Phase 2: Theme Removal | Pending |
