@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** First impression must be flawless - no broken flows, confusing UX, or visual jank
-**Current focus:** Phase 4 - Resilience Hardening (in progress)
+**Current focus:** Phase 4 - Resilience Hardening (complete)
 
 ## Current Position
 
 Phase: 4 of 5 (Resilience Hardening)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-05 - Completed 04-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-05 - Completed 04-02-PLAN.md
 
-Progress: [===========         ] 57% (8/14 plans)
+Progress: [============        ] 64% (9/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: ~8 min
-- Total execution time: ~1.15 hours
+- Total execution time: ~1.18 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: [===========         ] 57% (8/14 plans)
 | 1 - Audit | 1 | 30 min | 30 min |
 | 2 - Performance | 2 | 14 min | 7 min |
 | 3 - UX Polish | 3 | 15 min | 5 min |
-| 4 - Resilience | 1 | 3 min | 3 min |
+| 4 - Resilience | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (skeletons), 03-02 (empty states + errors), 03-03 (haptics + onboarding), 04-01 (sync foundation)
+- Last 5 plans: 03-02 (empty states + errors), 03-03 (haptics + onboarding), 04-01 (sync foundation), 04-02 (API resilience + sync indicator)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -58,6 +58,9 @@ Recent decisions affecting current work:
 - [04-01]: syncStore is non-persisted (runtime state only, resets on reload)
 - [04-01]: Direct store imports in sync.ts (not barrel) to avoid circular deps
 - [04-01]: 2s debounce on scheduleSync to batch rapid-fire user actions
+- [04-02]: 5-minute USDA cooldown after 429 rate limit (skip USDA, go straight to Open Food Facts)
+- [04-02]: SyncStatusIndicator returns null when synced (zero visual noise in happy path)
+- [04-02]: Fixed bottom-[72px] z-40 positioning for sync indicator above nav bar
 
 ### Pending Todos
 
@@ -70,7 +73,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 04-01-PLAN.md
+Stopped at: Completed 04-02-PLAN.md (Phase 4 complete)
 Resume file: None
 
 ## Phase 1 Results
@@ -98,3 +101,4 @@ Resume file: None
 ## Phase 4 Results
 
 - **04-01 complete:** syncStore (non-persisted), scheduleSync (2s debounce), flushPendingSync, online/offline/visibilitychange listeners, sync triggers after workouts and meals, 429 rate limit handling
+- **04-02 complete:** USDA 429 rate limit cooldown (5-min bypass to Open Food Facts), SyncStatusIndicator component (synced/syncing/offline/error), mounted in authenticated app shell
