@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
-**Current focus:** Phase 2 - Theme Removal
+**Current focus:** Phase 3 - Component Primitives
 
 ## Current Position
 
-Phase: 2 of 7 (Theme Removal)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-05 -- Completed 02-02-PLAN.md (Screen de-branching + theme toggle removal)
+Phase: 2 of 7 (Theme Removal) -- COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-05 -- Completed 02-03-PLAN.md (Theme infrastructure deletion + localStorage migration)
 
-Progress: [████░░░░░░░░░░░░░░░░] 33% (4/12 plans)
+Progress: [██████░░░░░░░░░░░░░░] 42% (5/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 12min
-- Total execution time: 0.78 hours
+- Total plans completed: 5
+- Average duration: 11min
+- Total execution time: 0.85 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 32min | 16min |
-| 02-theme-removal | 2/3 | 15min | 7.5min |
+| 02-theme-removal | 3/3 | 19min | 6.3min |
 
 **Recent Trend:**
-- Last 5 plans: 8min, 7min, 25min, 7min
+- Last 5 plans: 8min, 7min, 25min, 7min, 4min
 - Trend: fast
 
 *Updated after each plan completion*
@@ -67,6 +67,8 @@ Recent decisions affecting current work:
 - [02-02]: GenderStep icons removed entirely (Trained plain text cards)
 - [02-02]: EvolutionStep sparkle effects removed (Trained restrained animations)
 - [02-02]: Submissive avatar icon is Zap (not Moon) throughout
+- [02-03]: .theme-trained CSS selectors converted to global (h1/h2/h3, .btn-primary)
+- [02-03]: src/themes/index.ts kept as tombstone comment (Phase 6 can delete directory)
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T19:08:01Z
-Stopped at: Completed 02-02-PLAN.md (Screen de-branching + theme toggle removal)
+Last session: 2026-02-05T19:14:13Z
+Stopped at: Completed 02-03-PLAN.md (Theme infrastructure deletion + localStorage migration). Phase 2 complete.
 Resume file: None

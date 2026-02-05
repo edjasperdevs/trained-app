@@ -16,7 +16,7 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
-- [ ] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
+- [x] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
 - [ ] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
 - [ ] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
 - [ ] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
@@ -55,9 +55,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: De-branch primitive and composite components (Button, Card, Navigation, Avatar, etc.)
-- [ ] 02-02: De-branch screens (Workouts, AccessGate, CheckIn, XPClaim, Settings, Avatar, Home, Onboarding)
-- [ ] 02-03: Delete GYG theme, ThemeProvider, useTheme hook; add localStorage migration
+- [x] 02-01: De-branch primitive and composite components (Button, Card, Navigation, Avatar, etc.)
+- [x] 02-02: De-branch screens (Workouts, AccessGate, CheckIn, XPClaim, Settings, Avatar, Home, Onboarding)
+- [x] 02-03: Delete GYG theme, ThemeProvider, useTheme hook; add localStorage migration
 
 ---
 
@@ -146,7 +146,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-05 |
-| 2. Theme Removal | 0/3 | Not started | - |
+| 2. Theme Removal | 3/3 | Complete | 2026-02-05 |
 | 3. Component Primitives | 0/2 | Not started | - |
 | 4. Screen Refresh | 0/2 | Not started | - |
 | 5. Animation Refinement | 0/1 | Not started | - |
