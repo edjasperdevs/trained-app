@@ -99,12 +99,11 @@ Plans:
 2. App Store-style marketing screenshots exist for key screens
 3. OG images configured for social media link previews
 4. Pre-launch checklist completed (all critical items pass)
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: Supabase monitoring and alerts
-- [ ] 05-02: Marketing screenshots
-- [ ] 05-03: OG images for social sharing
+- [ ] 05-01-PLAN.md -- Fix OG image (1200x630), wire Sentry into error paths, add robots.txt
+- [ ] 05-02-PLAN.md -- Pre-launch verification checklist, manual task documentation, human sign-off
 
 ---
 
@@ -116,7 +115,7 @@ Plans:
 | 2. Performance Foundation | 2/2 | Complete | 2026-02-05 |
 | 3. UX Polish | 3/3 | Complete | 2026-02-05 |
 | 4. Resilience Hardening | 2/2 | Complete | 2026-02-05 |
-| 5. Launch Preparation | 0/3 | Not started | - |
+| 5. Launch Preparation | 0/2 | Not started | - |
 
 ---
 
