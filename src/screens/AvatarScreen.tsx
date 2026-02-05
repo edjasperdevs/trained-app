@@ -43,7 +43,7 @@ export function AvatarScreen() {
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
       <div className="pt-8 pb-12 px-4 bg-surface">
-        <h1 className="text-2xl font-bold mb-6 text-center font-heading uppercase tracking-wide">
+        <h1 className="text-2xl font-bold mb-6 text-center">
           Your Status
         </h1>
 
@@ -65,13 +65,13 @@ export function AvatarScreen() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-3xl font-bold font-mono text-primary">{currentLevel}</p>
-              <p className="text-xs text-text-secondary uppercase tracking-wider">
+              <p className="text-xs text-text-secondary">
                 {LABELS.level}
               </p>
             </div>
             <div>
               <p className="text-3xl font-bold font-mono">{evolutionStage}</p>
-              <p className="text-xs text-text-secondary uppercase tracking-wider">
+              <p className="text-xs text-text-secondary">
                 Stage
               </p>
             </div>
@@ -79,7 +79,7 @@ export function AvatarScreen() {
               <p className="text-3xl font-bold font-mono text-secondary">
                 {totalXP.toLocaleString()}
               </p>
-              <p className="text-xs text-text-secondary uppercase tracking-wider">
+              <p className="text-xs text-text-secondary">
                 Total {LABELS.xp}
               </p>
             </div>
@@ -93,7 +93,7 @@ export function AvatarScreen() {
               <StageIcon iconName={currentEvolution.emoji} size={32} className="text-primary" />
             </div>
             <div>
-              <h3 className="text-xl font-bold font-heading uppercase tracking-wide">
+              <h3 className="text-xl font-bold">
                 {currentStageName}
               </h3>
               <p className="text-sm text-text-secondary">{currentEvolution.description}</p>
@@ -120,7 +120,7 @@ export function AvatarScreen() {
           {!nextEvolution && (
             <div className="text-center py-4 bg-warning/10 border border-warning/20 rounded">
               <Crown size={32} className="mx-auto text-warning" />
-              <p className="text-warning font-bold mt-2 font-heading uppercase tracking-wide">
+              <p className="text-warning font-bold mt-2">
                 Maximum Status Achieved.
               </p>
             </div>
@@ -129,7 +129,7 @@ export function AvatarScreen() {
 
         {/* Character Info */}
         <Card>
-          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
             ROLE
           </h3>
           <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ export function AvatarScreen() {
               {baseCharacter === 'submissive' && <Zap size={24} className="text-warning" />}
             </div>
             <div>
-              <p className="font-bold font-heading uppercase tracking-wide">
+              <p className="font-bold">
                 {LABELS.avatarClasses[baseCharacter]}
               </p>
               <p className="text-sm text-text-secondary">
@@ -153,7 +153,7 @@ export function AvatarScreen() {
 
         {/* Evolution Timeline */}
         <Card>
-          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
             PROGRESSION PATH
           </h3>
           <div className="space-y-3">
@@ -188,7 +188,7 @@ export function AvatarScreen() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className={`font-semibold ${isCurrent ? 'text-primary' : ''} font-heading uppercase tracking-wide text-sm`}>
+                      <p className={`font-semibold ${isCurrent ? 'text-primary' : ''} text-sm`}>
                         {stageName}
                       </p>
                       {isCurrent && (
@@ -219,7 +219,7 @@ export function AvatarScreen() {
         <Card padding="sm">
           <div className="flex items-center justify-between">
             <span className="text-text-secondary">Current State</span>
-            <span className="capitalize font-semibold font-heading uppercase tracking-wide text-sm">
+            <span className="capitalize font-semibold text-sm">
               {currentMood === 'happy' && 'Compliant'}
               {currentMood === 'neutral' && 'Steady'}
               {currentMood === 'sad' && 'Flagging'}

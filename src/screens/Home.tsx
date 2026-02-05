@@ -115,10 +115,10 @@ export function Home() {
       <div className="bg-surface pt-8 pb-6 px-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-text-secondary text-sm uppercase tracking-wider text-xs">
+            <p className="text-text-secondary text-sm text-xs">
               Welcome back,
             </p>
-            <h1 className="text-2xl font-bold font-heading uppercase tracking-wide">
+            <h1 className="text-2xl font-bold">
               {profile?.username || 'Trainee'}
             </h1>
           </div>
@@ -152,7 +152,7 @@ export function Home() {
                 <div className="flex items-center gap-4">
                   <Sparkles size={28} className="text-primary" />
                   <div className="flex-1">
-                    <p className="font-bold text-lg font-heading uppercase tracking-wide text-base">
+                    <p className="font-bold text-base">
                       Daily Report Pending
                     </p>
                     <p className="text-sm text-text-secondary">
@@ -189,7 +189,7 @@ export function Home() {
                     <Trophy size={28} className="text-success" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className="font-bold text-success font-heading uppercase tracking-wide">
+                    <p className="font-bold text-success">
                       Report Submitted.
                     </p>
                     <p className="text-sm text-text-secondary">
@@ -232,7 +232,7 @@ export function Home() {
                   <div className="flex items-center gap-3">
                     <Gift size={28} className="text-warning" />
                     <div>
-                      <p className="font-bold text-lg font-heading uppercase tracking-wide text-base">
+                      <p className="font-bold text-base">
                         Reward Ritual Ready
                       </p>
                       <p className="text-sm text-text-secondary">
@@ -258,7 +258,7 @@ export function Home() {
             <div className="flex items-center gap-3">
               <AlertTriangle size={24} className="text-warning" />
               <div>
-                <p className="text-warning font-semibold font-heading uppercase tracking-wide">
+                <p className="text-warning font-semibold">
                   Safe Word Activated
                 </p>
                 <p className="text-sm text-text-secondary">
@@ -272,7 +272,7 @@ export function Home() {
         {/* Today's Quests / Daily Assignments */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold font-heading uppercase tracking-wide text-base">
+            <h2 className="text-base font-bold uppercase tracking-wide">
               {LABELS.dailyQuests}
             </h2>
             <span className="text-sm text-text-secondary font-mono">
@@ -344,7 +344,7 @@ export function Home() {
 
         {/* Macro Progress / Protocol Compliance */}
         <div>
-          <h2 className="text-lg font-bold mb-3 font-heading uppercase tracking-wide text-base">
+          <h2 className="text-base font-bold mb-3 uppercase tracking-wide">
             Protocol Compliance
           </h2>
           {macroProgress ? (
@@ -388,7 +388,7 @@ export function Home() {
                   <Beef size={20} className="text-text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-sm font-heading uppercase tracking-wide">
+                  <p className="font-semibold text-sm">
                     No intake logged
                   </p>
                   <p className="text-xs text-text-secondary">
@@ -413,7 +413,7 @@ export function Home() {
             <div className="flex items-center justify-center gap-3 py-2">
               <CheckCircle2 size={24} className="text-success" />
               <div className="text-center">
-                <p className="font-bold text-success font-heading uppercase tracking-wide">
+                <p className="font-bold text-success">
                   Daily Report Complete
                 </p>
                 <p className="text-sm text-text-secondary">

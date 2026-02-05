@@ -174,7 +174,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
           {!submitted ? (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold font-heading uppercase tracking-wide">
+                <h2 className="text-xl font-bold">
                   {LABELS.checkIn}
                 </h2>
                 <button
@@ -250,7 +250,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Star size={20} className="text-success" />
-                          <span className="text-success font-semibold font-heading uppercase tracking-wide text-sm">
+                          <span className="text-success font-semibold text-sm">
                             Full Compliance Bonus!
                           </span>
                         </div>
@@ -308,7 +308,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide"
+                className="text-2xl font-bold mb-2"
               >
                 Report Accepted.
               </motion.h2>

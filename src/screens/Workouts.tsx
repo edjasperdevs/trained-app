@@ -222,7 +222,7 @@ export function Workouts() {
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
       <div className="pt-8 pb-6 px-4 bg-surface">
-        <h1 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        <h1 className="text-2xl font-bold mb-2">
           Training
         </h1>
         {currentPlan && (
@@ -301,7 +301,7 @@ export function Workouts() {
                 <Card>
                   <div className="text-center py-4">
                     <span className="text-4xl mb-3 block">😴</span>
-                    <p className="text-xl font-bold font-heading uppercase tracking-wide">
+                    <p className="text-xl font-bold">
                       Recovery Day
                     </p>
                     <p className="text-text-secondary">
@@ -398,7 +398,7 @@ export function Workouts() {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
                           <div>
-                            <p className="font-semibold capitalize font-heading uppercase tracking-wide text-sm">
+                            <p className="font-semibold capitalize text-sm">
                               {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
                             </p>
                             <p className="text-xs text-text-secondary">
@@ -456,7 +456,7 @@ export function Workouts() {
             className="bg-surface p-6 w-full max-w-md rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-2 font-heading uppercase tracking-wide">
+            <h2 className="text-xl font-bold mb-2">
               {LABELS.minimalWorkout}
             </h2>
             <p className="text-sm text-text-secondary mb-4">
@@ -851,7 +851,7 @@ function ActiveWorkoutView({
                               }}
                               className="text-left hover:opacity-80 transition-opacity"
                             >
-                              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                              <p className="text-xs text-gray-500 mb-1">
                                 Last Workout <span className="text-accent-primary">→ View History</span>
                               </p>
                               <p className="text-sm">
@@ -1192,7 +1192,7 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
         <div className="flex items-center gap-3">
           <span className="text-3xl">🏆</span>
           <div>
-            <p className="text-xs text-yellow-400 uppercase tracking-wider">Personal Record</p>
+            <p className="text-xs text-yellow-400 font-semibold">Personal Record</p>
             <p className="text-2xl font-bold font-digital">
               {prWeight} <span className="text-gray-400 text-sm">lbs</span> × {prReps} <span className="text-gray-400 text-sm">reps</span>
             </p>

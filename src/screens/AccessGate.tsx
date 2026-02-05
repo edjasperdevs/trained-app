@@ -66,7 +66,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         <div className="mb-4">
           <Shield size={72} className="mx-auto text-accent-primary" />
         </div>
-        <h1 className="text-3xl font-bold font-heading uppercase tracking-wider text-text-primary">
+        <h1 className="text-3xl font-bold text-text-primary">
           Trained
         </h1>
         <p className="text-gray-400 mt-2">
@@ -83,7 +83,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
       >
         <Card className="bg-bg-secondary">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold mb-2 font-heading uppercase tracking-wide">
+            <h2 className="text-xl font-bold mb-2">
               Enter Access Code
             </h2>
             <p className="text-gray-400 text-sm">
@@ -156,7 +156,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 className="mt-4 space-y-4"
               >
                 <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
                     <BookOpen size={18} className="text-accent-primary" /> Get the Ebook
                   </h3>
                   <p className="text-sm text-gray-400 mb-3">
@@ -173,7 +173,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 </div>
 
                 <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
                     <KeyRound size={18} className="text-accent-secondary" /> Already Purchased?
                   </h3>
                   <p className="text-sm text-gray-400">
@@ -182,7 +182,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 </div>
 
                 <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
                     <MessageCircle size={18} className="text-accent-warning" /> Need Help?
                   </h3>
                   <p className="text-sm text-gray-400">
@@ -242,7 +242,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide text-text-primary"
+                className="text-2xl font-bold mb-2 font-heading text-text-primary"
               >
                 Access Granted.
               </motion.h2>

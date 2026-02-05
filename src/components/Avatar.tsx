@@ -143,7 +143,7 @@ export function Avatar({
       {/* Stage name and level */}
       {showLevel && (
         <div className="mt-2 text-center">
-          <p className="text-sm text-primary font-semibold uppercase tracking-wider font-heading">
+          <p className="text-sm text-primary font-semibold">
             {stageName}
           </p>
           {level && (

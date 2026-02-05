@@ -350,7 +350,7 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.2 }}
         className="mb-8"
       >
-        <h1 className="text-4xl font-heading font-bold uppercase tracking-wider mb-4">
+        <h1 className="text-4xl font-bold mb-4">
           Trained
         </h1>
       </motion.div>
@@ -391,7 +391,7 @@ function NameStep({
 }) {
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         What should we call you?
       </h2>
       <p className="text-text-secondary mb-6">
@@ -438,7 +438,7 @@ function GenderStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Biological sex
       </h2>
       <p className="text-text-secondary mb-6">
@@ -454,7 +454,7 @@ function GenderStep({
             className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
           >
             <div className="flex items-center gap-4">
-              <p className="font-semibold text-lg font-heading uppercase tracking-wide">
+              <p className="font-semibold text-lg">
                 {opt.label}
               </p>
             </div>
@@ -493,7 +493,7 @@ function FitnessStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Training experience
       </h2>
       <p className="text-text-secondary mb-6">
@@ -509,7 +509,7 @@ function FitnessStep({
             className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
           >
             <div>
-              <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
+              <p className="font-semibold">{opt.label}</p>
               <p className="text-sm text-text-secondary">{opt.description}</p>
             </div>
           </Card>
@@ -547,7 +547,7 @@ function DaysStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Weekly commitment
       </h2>
       <p className="text-text-secondary mb-6">
@@ -564,7 +564,7 @@ function DaysStep({
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-semibold text-lg font-heading uppercase tracking-wide">
+                <p className="font-semibold text-lg">
                   {opt.label}
                 </p>
               </div>
@@ -629,7 +629,7 @@ function ScheduleStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Select your training days
       </h2>
       <p className="text-text-secondary mb-6">
@@ -772,7 +772,7 @@ function GoalStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Current stats
       </h2>
       <p className="text-text-secondary mb-6">
@@ -781,7 +781,7 @@ function GoalStep({
 
       {/* Height */}
       <div className="mb-4">
-        <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
+        <label className="block text-sm text-text-secondary mb-2 font-medium">
           Height
         </label>
         <div className="flex gap-3">
@@ -817,7 +817,7 @@ function GoalStep({
       {/* Weight and Age side by side */}
       <div className="flex gap-3 mb-4">
         <div className="flex-1">
-          <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
+          <label className="block text-sm text-text-secondary mb-2 font-medium">
             Weight (lbs)
           </label>
           <input
@@ -830,7 +830,7 @@ function GoalStep({
           />
         </div>
         <div className="flex-1">
-          <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
+          <label className="block text-sm text-text-secondary mb-2 font-medium">
             Age
           </label>
           <input
@@ -853,7 +853,7 @@ function GoalStep({
         </div>
       )}
 
-      <h3 className="text-lg font-bold mb-4 font-heading uppercase tracking-wide">
+      <h3 className="text-lg font-bold mb-4">
         Current objective
       </h3>
 
@@ -866,7 +866,7 @@ function GoalStep({
             className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
           >
             <div className="flex items-center justify-between">
-              <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
+              <p className="font-semibold">{opt.label}</p>
               <p className="text-sm text-text-secondary">{opt.description}</p>
             </div>
           </Card>
@@ -931,7 +931,7 @@ function AvatarStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Choose your persona
       </h2>
       <p className="text-text-secondary mb-6">
@@ -953,7 +953,7 @@ function AvatarStep({
                   <Icon size={24} className={opt.color} />
                 </div>
                 <div>
-                  <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
+                  <p className="font-semibold">{opt.label}</p>
                   <p className="text-sm text-text-secondary">{opt.description}</p>
                 </div>
               </div>
@@ -1006,7 +1006,7 @@ function FeaturesStep({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         How the protocol works
       </h2>
       <p className="text-text-secondary mb-6">
@@ -1029,7 +1029,7 @@ function FeaturesStep({
                     <Icon size={20} className="text-accent-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold mb-1 font-heading uppercase tracking-wide text-sm">
+                    <p className="font-semibold mb-1 text-sm">
                       {feature.title}
                     </p>
                     <p className="text-sm text-text-secondary">{feature.description}</p>
@@ -1074,7 +1074,7 @@ function TutorialStep({
       >
         <Shield size={48} className="mx-auto text-accent-primary" />
       </motion.div>
-      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-2">
         Protocol initialized, {username}.
       </h2>
       <p className="text-text-secondary mb-6">Earn {LABELS.xpFull} ({xpLabel}) through:</p>
@@ -1172,12 +1172,12 @@ function EvolutionStep({
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <span className="text-sm font-semibold text-accent-primary uppercase tracking-wider font-heading">
+        <span className="text-sm font-semibold text-accent-primary">
           First Advancement
         </span>
       </motion.div>
 
-      <h2 className="text-2xl font-bold mb-8 font-heading uppercase tracking-wide">
+      <h2 className="text-2xl font-bold mb-8">
         {`Welcome, ${username}.`}
       </h2>
 
@@ -1258,7 +1258,7 @@ function EvolutionStep({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-xl font-bold text-accent-primary font-heading uppercase tracking-wide"
+                className="text-xl font-bold text-accent-primary"
               >
                 {newStageName}
               </motion.p>
@@ -1277,7 +1277,7 @@ function EvolutionStep({
         <Card className="inline-block px-6">
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <p className="text-xs text-text-secondary uppercase tracking-wider">
+              <p className="text-xs text-text-secondary">
                 {LABELS.level}
               </p>
               <p className="text-2xl font-bold font-digital text-text-secondary">0</p>
@@ -1290,7 +1290,7 @@ function EvolutionStep({
               &rarr;
             </motion.div>
             <div className="text-center">
-              <p className="text-xs text-text-secondary uppercase tracking-wider">
+              <p className="text-xs text-text-secondary">
                 {LABELS.level}
               </p>
               <p className="text-2xl font-bold font-digital text-accent-primary">1</p>

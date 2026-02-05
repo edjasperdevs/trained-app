@@ -76,7 +76,7 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
     >
       {/* Rarity Label */}
       <div className="absolute top-2 right-2">
-        <span className={`text-[10px] font-semibold uppercase tracking-wider ${earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}`}>
+        <span className={`text-[10px] font-semibold ${earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}`}>
           {RARITY_LABELS[badge.rarity]}
         </span>
       </div>
@@ -230,7 +230,7 @@ export function Achievements() {
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-2xl font-bold font-heading uppercase tracking-wide">
+            <h1 className="text-2xl font-bold">
               {LABELS.achievements}
             </h1>
             <p className="text-text-secondary text-sm">
@@ -271,7 +271,7 @@ export function Achievements() {
                 earnedByRarity[rarity] > 0 ? RARITY_COLORS[rarity] : 'border-border/30'
               }`}
             >
-              <p className={`text-xs font-semibold uppercase ${RARITY_TEXT[rarity]}`}>
+              <p className={`text-xs font-semibold ${RARITY_TEXT[rarity]}`}>
                 {RARITY_LABELS[rarity]}
               </p>
               <p className="text-lg font-bold mt-1">

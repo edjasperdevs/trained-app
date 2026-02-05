@@ -48,7 +48,7 @@ export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
             {reminder.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm font-heading uppercase tracking-wide">
+            <p className="font-bold text-sm">
               {reminder.title}
             </p>
             <p className="text-xs text-text-secondary truncate">{reminder.description}</p>

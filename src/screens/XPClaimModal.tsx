@@ -180,7 +180,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <div className="mb-4">
                   <Gift size={56} className="mx-auto text-warning" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+                <h2 className="text-2xl font-bold mb-2">
                   Weekly Reward Ritual
                 </h2>
                 <p className="text-text-secondary">
@@ -280,7 +280,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide"
+                className="text-2xl font-bold mb-2"
               >
                 Reward Claimed
               </motion.h2>
@@ -307,7 +307,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               >
                 <div className="flex items-center justify-center gap-2">
                   <Star size={24} className="text-primary" />
-                  <span className="text-xl font-bold font-heading uppercase tracking-wide">
+                  <span className="text-xl font-bold">
                     {LABELS.level} {currentLevel}
                   </span>
                 </div>
@@ -352,9 +352,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-3xl font-bold mb-4 text-primary font-heading uppercase tracking-wide"
+                className="text-3xl font-bold mb-4 text-primary"
               >
-                RANK PROMOTED!
+                Rank Promoted!
               </motion.h2>
 
               <motion.div

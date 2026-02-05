@@ -49,7 +49,7 @@ export function Navigation() {
                   className={isActive ? 'text-primary' : 'text-text-secondary'}
                 />
               </motion.div>
-              <span className={`text-[10px] mt-0.5 transition-colors duration-150 tracking-wider uppercase font-medium ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
+              <span className={`text-[10px] mt-0.5 transition-colors duration-150 font-medium ${isActive ? 'text-primary' : 'text-text-secondary'}`}>
                 {item.label}
               </span>
             </NavLink>

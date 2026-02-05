@@ -59,7 +59,7 @@ function BadgeCard({ badge, earned, earnedAt, showProgress = false }: BadgeCardP
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`font-semibold text-sm ${!earned && 'text-text-secondary'} font-heading uppercase tracking-wide`}>
+          <p className={`font-semibold text-sm ${!earned && 'text-text-secondary'}`}>
             {badge.name}
           </p>
           <p className="text-xs text-text-secondary truncate">
@@ -128,7 +128,7 @@ export function BadgesSection() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider font-heading">
+        <h3 className="text-sm font-semibold text-text-secondary">
           {LABELS.achievements}
         </h3>
         <span className="text-xs text-text-secondary">
@@ -252,7 +252,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Trophy size={18} className="text-text-secondary" />
-          <span className="font-bold font-heading uppercase tracking-wide">
+          <span className="font-bold">
             {LABELS.achievements}
           </span>
         </div>
@@ -287,7 +287,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
       {/* Nearest badges */}
       {nearestBadges.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-xs text-text-secondary uppercase tracking-wider font-semibold font-heading">
+          <p className="text-xs text-text-secondary font-semibold">
             Almost Earned
           </p>
           {nearestBadges.map(({ badge, progress }) => (
@@ -302,7 +302,7 @@ export function NearestBadges({ limit = 3, onViewAll }: { limit?: number; onView
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium truncate font-heading uppercase tracking-wide text-xs">
+                  <p className="text-xs font-medium truncate">
                     {badge.name}
                   </p>
                   <span className="text-xs text-text-secondary ml-2 font-mono">

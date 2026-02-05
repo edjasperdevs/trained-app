@@ -301,13 +301,17 @@ textarea:focus-visible,
    GLOBAL HEADING & BUTTON STYLES
    ================================================================ */
 
-/* Heading styles (Oswald uppercase) */
-h1,
-h2,
-h3 {
+/* Heading styles (Oswald) - uppercase restricted to h1 only */
+h1 {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+h2,
+h3 {
+  font-family: var(--font-heading);
+  letter-spacing: 0.02em;
 }
 
 /* Primary button styles */

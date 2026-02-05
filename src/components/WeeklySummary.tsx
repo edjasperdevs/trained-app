@@ -103,8 +103,8 @@ export function WeeklySummary() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider font-heading">
-          WEEKLY SUMMARY
+        <h3 className="text-sm font-semibold text-text-secondary">
+          Weekly Summary
         </h3>
         <span className="text-xs text-text-secondary">
           Day {daysSoFar} of 7

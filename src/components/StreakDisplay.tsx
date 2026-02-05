@@ -48,7 +48,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Flame size={18} className="text-primary" />
-          <span className="font-bold font-heading uppercase tracking-wide">
+          <span className="font-bold">
             {profile?.currentStreak || 0} Day
           </span>
         </div>
@@ -70,7 +70,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
 
           return (
             <div key={day.date} className="flex flex-col items-center gap-1">
-              <span className="text-xs text-text-secondary uppercase">
+              <span className="text-xs text-text-secondary">
                 {day.dayLetter}
               </span>
               <motion.div

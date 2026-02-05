@@ -157,7 +157,7 @@ function BadgeDisplay({ badge, index }: { badge: Badge; index: number }) {
         transition={{ delay: 0.6 + index * 0.5 }}
         className="mt-4 text-center"
       >
-        <p className={`text-xs font-semibold uppercase tracking-wider ${RARITY_TEXT[badge.rarity]}`}>
+        <p className={`text-xs font-semibold ${RARITY_TEXT[badge.rarity]}`}>
           {RARITY_LABELS[badge.rarity]}
         </p>
         <h3 className="text-xl font-bold mt-1 font-heading">{badge.name}</h3>
@@ -231,7 +231,7 @@ export function BadgeUnlockModal({ badgeIds, onClose }: BadgeUnlockModalProps) {
             className="mb-8"
           >
             <motion.p
-              className="text-sm font-semibold text-primary uppercase tracking-widest font-heading"
+              className="text-sm font-semibold text-primary"
             >
               {LABELS.achievements.replace('s', '')} Unlocked
             </motion.p>

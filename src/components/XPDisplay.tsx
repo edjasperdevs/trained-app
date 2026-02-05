@@ -55,7 +55,7 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-primary font-bold font-mono uppercase tracking-wide">
+        <span className="text-primary font-bold font-mono">
           {LABELS.level} {currentLevel}
         </span>
         <div className="w-20">
@@ -85,7 +85,7 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
       <div className="text-center">
         {/* Level display */}
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-2xl font-bold text-primary font-mono uppercase tracking-wider">
+          <span className="text-2xl font-bold text-primary font-mono">
             {LABELS.level} {currentLevel}
           </span>
           {currentLevel >= MAX_LEVEL && (

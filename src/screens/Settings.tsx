@@ -255,7 +255,7 @@ export function Settings() {
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
       <div className="pt-8 pb-6 px-4 bg-surface">
-        <h1 className="text-2xl font-bold font-heading uppercase tracking-wide">
+        <h1 className="text-2xl font-bold">
           Settings
         </h1>
       </div>
@@ -588,8 +588,8 @@ export function Settings() {
 
         {/* Reminders */}
         <Card>
-          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
-            PROTOCOL REMINDERS
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+            Protocol Reminders
           </h3>
           <p className="text-xs text-text-secondary mb-4">
             Show protocol reminders on the home screen to help maintain discipline.
@@ -629,8 +629,8 @@ export function Settings() {
 
         {/* Data Management */}
         <Card>
-          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
-            DATA MANAGEMENT
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider">
+            Data Management
           </h3>
           <div className="space-y-3">
             <Button
@@ -687,8 +687,8 @@ export function Settings() {
         {/* Coach Dashboard */}
         {isCoach && (
           <Card className="border border-primary/30">
-            <h3 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider font-heading">
-              DOM/ME MODE
+            <h3 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider">
+              Dom/me Mode
             </h3>
             <p className="text-sm text-text-secondary mb-4">
               {`You have ${LABELS.coach.toLowerCase()} privileges. View and manage your ${LABELS.client.toLowerCase()}s from the dashboard.`}
@@ -748,7 +748,7 @@ export function Settings() {
         {/* About */}
         <Card padding="sm">
           <div className="text-center">
-            <p className="text-sm text-text-secondary font-heading uppercase tracking-wide">
+            <p className="text-sm text-text-secondary font-heading font-semibold">
               Trained
             </p>
             <p className="text-xs text-text-secondary">Version 1.0.0</p>
@@ -866,8 +866,8 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider font-heading">
-          {LABELS.achievements.toUpperCase()}
+        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">
+          {LABELS.achievements}
         </h3>
         <button
           onClick={onViewAll}
