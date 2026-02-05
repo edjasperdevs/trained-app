@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useXPStore } from './xpStore'
+import { getLocalDateString } from '../lib/dateUtils'
 
 describe('xpStore', () => {
   beforeEach(() => {
@@ -80,7 +81,7 @@ describe('xpStore', () => {
 
       // First log
       logDailyXP({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateString(),
         workout: true,
         protein: false,
         calories: false,
@@ -93,7 +94,7 @@ describe('xpStore', () => {
 
       // Update same day
       logDailyXP({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateString(),
         workout: true,
         protein: true,
         calories: false,
@@ -177,7 +178,7 @@ describe('xpStore', () => {
       claimWeeklyXP()
 
       expect(useXPStore.getState().lastClaimDate).toBe(
-        new Date().toISOString().split('T')[0]
+        getLocalDateString()
       )
     })
 
@@ -279,7 +280,7 @@ describe('xpStore', () => {
       const { logDailyXP, getTodayLog } = useXPStore.getState()
 
       logDailyXP({
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateString(),
         workout: true,
         protein: false,
         calories: false,

@@ -1,20 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
 import { Navigation, ToastContainer, ErrorBoundary } from '@/components'
 import { ThemeProvider } from '@/themes'
-import {
-  Onboarding,
-  Home,
-  Workouts,
-  Macros,
-  AvatarScreen,
-  Settings,
-  Auth,
-  Coach,
-  Achievements,
-  AccessGate
-} from '@/screens'
+import { AccessGate, Auth } from '@/screens'
+
+// Lazy-loaded route components
+const Onboarding = lazy(() => import('@/screens/Onboarding').then(m => ({ default: m.Onboarding })))
+const Home = lazy(() => import('@/screens/Home').then(m => ({ default: m.Home })))
+const Workouts = lazy(() => import('@/screens/Workouts').then(m => ({ default: m.Workouts })))
+const Macros = lazy(() => import('@/screens/Macros').then(m => ({ default: m.Macros })))
+const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ default: m.AvatarScreen })))
+const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
+const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
+const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
+
+function RouteLoader() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -97,9 +104,11 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <Routes>
-          <Route path="*" element={<Onboarding />} />
-        </Routes>
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
+            <Route path="*" element={<Onboarding />} />
+          </Routes>
+        </Suspense>
       </>
     )
   }
@@ -108,16 +117,18 @@ function AppContent() {
     <>
       <ToastContainer />
       <div className="relative">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/workouts" element={<Workouts />} />
-          <Route path="/macros" element={<Macros />} />
-          <Route path="/avatar" element={<AvatarScreen />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/coach" element={<Coach />} />
-          <Route path="/achievements" element={<Achievements />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/workouts" element={<Workouts />} />
+            <Route path="/macros" element={<Macros />} />
+            <Route path="/avatar" element={<AvatarScreen />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/coach" element={<Coach />} />
+            <Route path="/achievements" element={<Achievements />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
         <Navigation />
       </div>
     </>
