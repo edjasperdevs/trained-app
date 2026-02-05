@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 
 ## Current Position
 
-Phase: 2 of 7 (Theme Removal) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-05 -- Completed 02-03-PLAN.md (Theme infrastructure deletion + localStorage migration)
+Phase: 3 of 7 (Component Primitives)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-05 -- Completed 03-01-PLAN.md (CVA component primitives rewrite)
 
-Progress: [██████░░░░░░░░░░░░░░] 42% (5/12 plans)
+Progress: [████████░░░░░░░░░░░░] 50% (6/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 11min
-- Total execution time: 0.85 hours
+- Total plans completed: 6
+- Average duration: 10min
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░░░░░░░░░░░] 42% (5/
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 32min | 16min |
 | 02-theme-removal | 3/3 | 19min | 6.3min |
+| 03-component-primitives | 1/2 | 5min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 8min, 7min, 25min, 7min, 4min
+- Last 5 plans: 7min, 25min, 7min, 4min, 5min
 - Trend: fast
 
 *Updated after each plan completion*
@@ -69,6 +70,10 @@ Recent decisions affecting current work:
 - [02-02]: Submissive avatar icon is Zap (not Moon) throughout
 - [02-03]: .theme-trained CSS selectors converted to global (h1/h2/h3, .btn-primary)
 - [02-03]: src/themes/index.ts kept as tombstone comment (Phase 6 can delete directory)
+- [03-01]: Legacy ProgressBar colors (gold/cyan/green/purple) fully removed -- callers migrated to semantic names
+- [03-01]: Card elevated variant gets shadow-card for premium depth without glass
+- [03-01]: buttonVariants/cardVariants exported from barrel for link-as-button patterns
+- [03-01]: .glass and .glass-elevated CSS removed; .glass-subtle preserved for Settings cleanup later
 
 ### Pending Todos
 
@@ -80,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T19:14:13Z
-Stopped at: Completed 02-03-PLAN.md (Theme infrastructure deletion + localStorage migration). Phase 2 complete.
+Last session: 2026-02-05T20:08:32Z
+Stopped at: Completed 03-01-PLAN.md (CVA component primitives rewrite). Plan 03-02 next.
 Resume file: None
