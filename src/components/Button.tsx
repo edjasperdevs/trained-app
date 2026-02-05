@@ -1,5 +1,5 @@
 // TODO(phase-03): Refactor to use cn() + CVA variants
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ReactNode } from 'react'
 import { useTheme } from '@/themes'
 

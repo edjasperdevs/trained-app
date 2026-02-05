@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button, Card, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 import { useTheme } from '@/themes'

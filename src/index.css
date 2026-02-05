@@ -59,9 +59,9 @@
   --color-glass-border: #2A2A2A;
 
   /* ── Typography ─────────────────────────────────────────────── */
-  --font-heading: 'Oswald', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Oswald Variable', 'Oswald', sans-serif;
+  --font-body: 'Inter Variable', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 
   /* ── Border Radius (premium: 12-16px per FOUND-02) ─────────── */
   --radius: 4px;

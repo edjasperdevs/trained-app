@@ -13,12 +13,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@fontsource-variable/oswald": "^5.2.8",
     "@sentry/react": "^10.38.0",
     "@supabase/supabase-js": "^2.93.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^11.0.8",
     "lucide-react": "^0.563.0",
+    "motion": "^12.33.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.22.3",

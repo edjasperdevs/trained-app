@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import {
   Award, Trophy, ChevronDown, Flame, Dumbbell, Target, TrendingUp,
   Zap, Beef, Star, Sparkles, ArrowUp, Gem, Crown, Shield, Play, CheckCircle, LucideIcon

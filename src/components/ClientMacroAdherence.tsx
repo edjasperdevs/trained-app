@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { ProgressBar } from './ProgressBar'
 import type { MacroAdherence } from '@/hooks/useClientDetails'
 

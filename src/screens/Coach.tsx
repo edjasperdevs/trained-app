@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button, Card, WeightChart, ClientMacroAdherence, ClientActivityFeed } from '@/components'
 import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'

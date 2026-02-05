@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button } from './Button'
 import { FoodSearch } from './FoodSearch'
 import { MealIngredient } from '@/stores'

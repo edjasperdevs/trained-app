@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useToastStore, ToastType } from '@/stores/toastStore'
 import { useTheme } from '@/themes'
 import { Check, X, AlertTriangle, Info } from 'lucide-react'

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button } from './Button'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores/achievementsStore'
 import { useTheme } from '@/themes'

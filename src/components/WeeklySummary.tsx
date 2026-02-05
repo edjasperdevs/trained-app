@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Card } from './Card'
 import { useXPStore, useWorkoutStore, useMacroStore, useUserStore } from '@/stores'
 import { useTheme } from '@/themes'

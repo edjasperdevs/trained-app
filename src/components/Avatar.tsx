@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { useAvatarStore, EVOLUTION_STAGES } from '@/stores'
 import { useTheme } from '@/themes'
 import {

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import type { ActivityItem } from '@/hooks/useClientDetails'
 
 interface ClientActivityFeedProps {

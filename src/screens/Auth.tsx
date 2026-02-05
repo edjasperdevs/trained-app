@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Button, Card } from '@/components'
 import { useAuthStore, toast } from '@/stores'
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Button, Card, WeightChart, ProgressBar } from '@/components'
 import { Trophy, PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
 import {

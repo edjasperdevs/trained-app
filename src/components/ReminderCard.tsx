@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 import { Card, Button } from '@/components'

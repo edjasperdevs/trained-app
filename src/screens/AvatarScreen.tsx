@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { Avatar, Card, ProgressBar } from '@/components'
 import { useAvatarStore, useXPStore, EVOLUTION_STAGES } from '@/stores'
 import { useTheme } from '@/themes'

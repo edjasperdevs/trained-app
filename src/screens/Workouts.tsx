@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'motion/react'
 import { Button, Card, ProgressBar, EmptyState } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { useTheme } from '@/themes'
