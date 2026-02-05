@@ -20,7 +20,7 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 - [x] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
 - [x] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
 - [x] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
-- [ ] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
+- [x] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
 - [ ] **Phase 7: Deploy** - Service worker strategy, "What's New" interstitial
 
 ## Phase Details
@@ -121,7 +121,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 06-01: Delete theme infrastructure, remove legacy CSS rules, run tsc + test suite verification
+- [x] 06-01: Delete theme infrastructure, remove legacy CSS rules, run tsc + test suite verification
 
 ---
 
@@ -150,7 +150,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 3. Component Primitives | 2/2 | Complete | 2026-02-05 |
 | 4. Screen Refresh | 2/2 | Complete | 2026-02-05 |
 | 5. Animation Refinement | 1/1 | Complete | 2026-02-05 |
-| 6. Cleanup | 0/1 | Not started | - |
+| 6. Cleanup | 1/1 | Complete | 2026-02-05 |
 | 7. Deploy | 0/1 | Not started | - |
 
 ---
