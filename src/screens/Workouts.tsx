@@ -5,6 +5,7 @@ import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toas
 import { useTheme } from '@/themes'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
+import { scheduleSync } from '@/lib/sync'
 import { Clock, Dumbbell } from 'lucide-react'
 
 export function Workouts() {
@@ -122,6 +123,8 @@ export function Workouts() {
     analytics.workoutCompleted(activeWorkout.workoutType, duration)
 
     haptics.success()
+    // Trigger incremental sync
+    scheduleSync()
     setActiveWorkout(null)
   }
 
@@ -164,6 +167,8 @@ export function Workouts() {
       : 0
     analytics.workoutCompleted(activeWorkout.workoutType, duration)
 
+    // Trigger incremental sync
+    scheduleSync()
     setActiveWorkout(null)
   }
 

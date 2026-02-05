@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Card, ProgressBar, MealBuilder, EmptyState } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
+import { scheduleSync } from '@/lib/sync'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -76,7 +77,10 @@ export function Macros() {
             targets={targets}
             proteinHit={isProteinTargetHit()}
             caloriesHit={isCalorieTargetHit()}
-            onLogMacros={logQuickMacros}
+            onLogMacros={(macros) => {
+              logQuickMacros(macros)
+              scheduleSync()
+            }}
             todayMeals={todayMeals}
             onDeleteMeal={deleteLoggedMeal}
             onSetupTargets={() => setActiveTab('calculator')}
@@ -86,7 +90,10 @@ export function Macros() {
         {activeTab === 'log' && (
           <LogMealView
             savedMeals={savedMeals}
-            onLogMeal={logNamedMeal}
+            onLogMeal={(name, macros) => {
+              logNamedMeal(name, macros)
+              scheduleSync()
+            }}
             onSaveMeal={saveMeal}
             onDeleteSavedMeal={deleteSavedMeal}
           />

@@ -1,6 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
+import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
+import { flushPendingSync } from '@/lib/sync'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton } from '@/components'
 import { ThemeProvider } from '@/themes'
 import { AccessGate, Auth } from '@/screens'
@@ -46,6 +47,45 @@ function AppContent() {
   useEffect(() => {
     initializeAuth()
   }, [initializeAuth])
+
+  // Online/offline detection and background sync
+  useEffect(() => {
+    let lastHidden = 0
+
+    const handleOnline = () => {
+      useSyncStore.getState().setOnline(true)
+      useSyncStore.getState().setStatus('synced')
+      // Flush pending syncs on reconnection
+      flushPendingSync()
+    }
+
+    const handleOffline = () => {
+      useSyncStore.getState().setOnline(false)
+      useSyncStore.getState().setStatus('offline')
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        lastHidden = Date.now()
+      } else {
+        // If returning after 30+ seconds AND online, trigger sync
+        const elapsed = Date.now() - lastHidden
+        if (elapsed > 30_000 && navigator.onLine) {
+          flushPendingSync()
+        }
+      }
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
 
   // Check for neglected avatar on app load
   useEffect(() => {
