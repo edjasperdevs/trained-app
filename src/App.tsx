@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
-import { Navigation, ToastContainer, ErrorBoundary } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt } from '@/components'
 import { ThemeProvider } from '@/themes'
 import { AccessGate, Auth } from '@/screens'
 
@@ -140,6 +140,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <AppContent />
+        <UpdatePrompt />
       </ThemeProvider>
     </ErrorBoundary>
   )
