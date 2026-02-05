@@ -80,13 +80,13 @@
   --shadow-glow-intense: 0 0 30px rgba(213, 85, 80, 0.4);
 
   /* ── Animations ─────────────────────────────────────────────── */
-  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
 
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px var(--color-primary-muted); }
-    50% { box-shadow: 0 0 40px var(--color-primary); }
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
   }
 
   @keyframes shimmer {
@@ -100,31 +100,6 @@
   }
 }
 
-/* ================================================================
-   LEGACY KEYFRAMES - kept outside @theme for backward compat.
-   float and xp-pop are still referenced in components; will be
-   removed in Phase 5 (Animation Refinement).
-   ================================================================ */
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes xp-pop {
-  0% { transform: scale(0) translateY(0); opacity: 1; }
-  50% { transform: scale(1.2) translateY(-20px); opacity: 1; }
-  100% { transform: scale(1) translateY(-40px); opacity: 0; }
-}
-
-/* Legacy animation utilities that reference keyframes outside @theme */
-@utility animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@utility animate-xp-pop {
-  animation: xp-pop 0.5s ease-out forwards;
-}
 
 /* ================================================================
    CHART COLORS - CSS custom properties for chart libraries that
