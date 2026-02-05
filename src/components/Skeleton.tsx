@@ -20,7 +20,7 @@ export function SkeletonCard() {
 
 export function HomeSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-6 px-4">
         <div className="flex items-center justify-between mb-4">
@@ -70,7 +70,7 @@ export function HomeSkeleton() {
 
 export function WorkoutsSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-6 px-4">
         <Skeleton className="h-8 w-32 mb-2" />
@@ -96,7 +96,7 @@ export function WorkoutsSkeleton() {
 
 export function MacrosSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-4 px-4">
         <Skeleton className="h-8 w-28 mb-4" />
@@ -139,7 +139,7 @@ export function MacrosSkeleton() {
 
 export function AchievementsSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-6 px-4">
         <div className="flex items-center gap-4 mb-6">
@@ -193,7 +193,7 @@ export function AchievementsSkeleton() {
 
 export function AvatarSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-12 px-4">
         <Skeleton className="h-8 w-32 mx-auto mb-6" />
@@ -234,7 +234,7 @@ export function AvatarSkeleton() {
 
 export function SettingsSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-surface pt-8 pb-6 px-4">
         <Skeleton className="h-8 w-28" />
@@ -265,7 +265,7 @@ export function SettingsSkeleton() {
 
 export function OnboardingSkeleton() {
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col px-4 py-8">
       {/* Progress bar placeholder */}
       <div className="flex gap-1 mb-8 justify-center">
         <Skeleton className="h-1 w-8 rounded-full" />
