@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
-import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound } from '@/components'
 import { ThemeProvider } from '@/themes'
 import { AccessGate, Auth } from '@/screens'
 
@@ -12,7 +12,7 @@ const Workouts = lazy(() => import('@/screens/Workouts').then(m => ({ default: m
 const Macros = lazy(() => import('@/screens/Macros').then(m => ({ default: m.Macros })))
 const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ default: m.AvatarScreen })))
 const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
-const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
+// const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach }))) // Disabled for client-only launch
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
 
 function RouteLoader() {
@@ -124,9 +124,9 @@ function AppContent() {
             <Route path="/macros" element={<Macros />} />
             <Route path="/avatar" element={<AvatarScreen />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/coach" element={<Coach />} />
+            <Route path="/coach" element={<Navigate to="/" replace />} />
             <Route path="/achievements" element={<Achievements />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
         <Navigation />
