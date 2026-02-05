@@ -19,7 +19,7 @@ export function WeightChart({
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-text-secondary text-sm glass rounded-xl"
+        className="flex items-center justify-center text-text-secondary text-sm bg-surface border border-border rounded-xl"
         style={{ height }}
       >
         No weight data yet
@@ -198,7 +198,7 @@ export function WeightChart({
 
       {/* Current value indicator */}
       {data.length > 0 && (
-        <div className="absolute top-0 right-0 glass rounded-lg px-3 py-1.5">
+        <div className="absolute top-0 right-0 bg-surface border border-border rounded-lg px-3 py-1.5">
           <span className="text-xs text-text-secondary">Latest: </span>
           <span className="font-digital font-bold text-accent-primary">
             {data[data.length - 1].weight} {unit}

@@ -33,16 +33,8 @@ describe('ProgressBar', () => {
     expect(progressFill).toBeInTheDocument()
   })
 
-  it('should apply gold color', () => {
-    const { container } = render(<ProgressBar progress={50} color="gold" />)
-    // Gold maps to bg-xp-bar
-    const progressFill = container.querySelector('.bg-xp-bar')
-    expect(progressFill).toBeInTheDocument()
-  })
-
-  it('should apply green color', () => {
-    const { container } = render(<ProgressBar progress={50} color="green" />)
-    // Green maps to bg-secondary
+  it('should apply secondary color', () => {
+    const { container } = render(<ProgressBar progress={50} color="secondary" />)
     const progressFill = container.querySelector('.bg-secondary')
     expect(progressFill).toBeInTheDocument()
   })
@@ -51,6 +43,12 @@ describe('ProgressBar', () => {
     const { container } = render(<ProgressBar progress={50} color="success" />)
     // Success uses bg-success
     const progressFill = container.querySelector('.bg-success')
+    expect(progressFill).toBeInTheDocument()
+  })
+
+  it('should apply warning color', () => {
+    const { container } = render(<ProgressBar progress={50} color="warning" />)
+    const progressFill = container.querySelector('.bg-warning')
     expect(progressFill).toBeInTheDocument()
   })
 

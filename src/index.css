@@ -203,20 +203,7 @@ body {
 }
 
 /* Glassmorphism surfaces */
-.glass {
-  background: var(--color-surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border);
-}
-
-.glass-elevated {
-  background: var(--color-surface-elevated);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-}
+/* .glass and .glass-elevated removed (VIS-02: solid surfaces for standard components) */
 
 .glass-subtle {
   background: rgba(255, 255, 255, 0.03);

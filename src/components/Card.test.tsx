@@ -94,4 +94,14 @@ describe('Card', () => {
     expect(button.className).toContain('w-full')
     expect(button.className).toContain('text-left')
   })
+
+  it('should not use glass or backdrop-blur on any variant', () => {
+    const variants = ['default', 'elevated', 'subtle'] as const
+    variants.forEach((variant) => {
+      const { container } = render(<Card variant={variant}>No Glass</Card>)
+      const card = container.firstChild as HTMLElement
+      expect(card.className).not.toContain('backdrop-blur')
+      expect(card.className).not.toContain('glass')
+    })
+  })
 })
