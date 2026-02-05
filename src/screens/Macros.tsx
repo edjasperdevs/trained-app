@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card, ProgressBar, MealBuilder } from '@/components'
+import { Button, Card, ProgressBar, MealBuilder, EmptyState } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
 
@@ -79,6 +79,7 @@ export function Macros() {
             onLogMacros={logQuickMacros}
             todayMeals={todayMeals}
             onDeleteMeal={deleteLoggedMeal}
+            onSetupTargets={() => setActiveTab('calculator')}
           />
         )}
 
@@ -119,7 +120,8 @@ function DailyView({
   caloriesHit,
   onLogMacros,
   todayMeals,
-  onDeleteMeal
+  onDeleteMeal,
+  onSetupTargets
 }: {
   progress: MacroProgress
   targets: MacroTargets | null
@@ -128,17 +130,19 @@ function DailyView({
   onLogMacros: (macros: { protein?: number; calories?: number; carbs?: number; fats?: number }) => void
   todayMeals: LoggedMeal[]
   onDeleteMeal: (id: string) => void
+  onSetupTargets: () => void
 }) {
   const [quickLog, setQuickLog] = useState({ protein: '', calories: '' })
   const [showMeals, setShowMeals] = useState(false)
 
   if (!targets || !progress) {
     return (
-      <Card className="text-center py-8">
-        <span className="text-4xl mb-4 block">📊</span>
-        <p className="text-xl font-bold mb-2">No Macro Targets Set</p>
-        <p className="text-gray-400 mb-4">Go to Calculator tab to set your targets</p>
-      </Card>
+      <EmptyState
+        icon={UtensilsCrossed}
+        title="No macro targets set"
+        description="Set up your daily nutrition targets to start tracking calories and protein."
+        action={{ label: "Set Up Targets", onClick: onSetupTargets }}
+      />
     )
   }
 

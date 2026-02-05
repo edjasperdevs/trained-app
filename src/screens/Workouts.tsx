@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button, Card, ProgressBar } from '@/components'
+import { Button, Card, ProgressBar, EmptyState } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { useTheme } from '@/themes'
 import { analytics } from '@/lib/analytics'
-import { Clock } from 'lucide-react'
+import { Clock, Dumbbell } from 'lucide-react'
 
 export function Workouts() {
   const { theme, themeId } = useTheme()
@@ -430,10 +430,12 @@ export function Workouts() {
               </AnimatePresence>
 
               {workoutHistory.length === 0 && (
-                <Card className="text-center py-6">
-                  <p className="text-gray-400">No workouts logged yet</p>
-                  <p className="text-sm text-gray-500">Complete your first workout to see it here</p>
-                </Card>
+                <EmptyState
+                  icon={Dumbbell}
+                  title="No workouts yet"
+                  description="Start your first workout to begin tracking progress and earning XP."
+                  action={{ label: "Start Workout", onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                />
               )}
             </div>
           </>

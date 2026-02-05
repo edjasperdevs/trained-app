@@ -19,6 +19,7 @@ import {
 } from '@/stores'
 import { useTheme } from '@/themes'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
+import { friendlyError } from '@/lib/errors'
 import { isCoach as checkIsCoach } from '@/lib/supabase'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
@@ -179,8 +180,8 @@ export function Settings() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
       toast.success('Data exported')
-    } catch {
-      toast.error('Failed to export data')
+    } catch (error) {
+      toast.error(friendlyError('export your data', error))
     }
   }
 
@@ -190,7 +191,7 @@ export function Settings() {
 
       // Validate the import has expected structure
       if (!parsed.version && !parsed.user && !parsed.xp) {
-        toast.error('Invalid backup file format')
+        toast.error('This doesn\'t look like a Trained backup file. Make sure you\'re importing a file exported from Trained.')
         setImportStatus('error')
         return
       }
@@ -218,9 +219,9 @@ export function Settings() {
         setImportStatus('idle')
         setImportData('')
       }, 2000)
-    } catch {
+    } catch (error) {
       setImportStatus('error')
-      toast.error('Invalid JSON format')
+      toast.error('The file couldn\'t be read. Make sure it\'s a valid Trained backup file (.json).')
     }
   }
 
@@ -246,8 +247,8 @@ export function Settings() {
         useAvatarStore.getState().resetAvatar()
         toast.info('System reset. Reloading...')
         setTimeout(() => window.location.reload(), 1000)
-      } catch {
-        toast.error('Failed to reset progress')
+      } catch (error) {
+        toast.error(friendlyError('reset your progress', error))
       }
     }
   }

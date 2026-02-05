@@ -86,7 +86,7 @@ export function Auth() {
       // Check for network errors
       if (err instanceof Error && (err.message.includes('network') || err.message.includes('fetch'))) {
         setError('Network error - check your internet connection')
-        toast.error('No internet connection')
+        toast.error('No internet connection. Check your WiFi or cellular data and try again.')
       } else {
         setError('An unexpected error occurred')
       }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Card, ProgressBar } from '@/components'
+import { Card, ProgressBar, EmptyState } from '@/components'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores'
 import { useTheme } from '@/themes'
 import {
@@ -363,10 +363,11 @@ export function Achievements() {
 
         {/* Empty State */}
         {sortedBadges.length === 0 && (
-          <div className="text-center py-12">
-            <Trophy size={40} className="mx-auto mb-4 text-gray-500" />
-            <p className="text-gray-500">No badges in this category</p>
-          </div>
+          <EmptyState
+            icon={Trophy}
+            title="No badges here yet"
+            description="Keep training, checking in, and tracking nutrition to unlock badges in this category."
+          />
         )}
       </div>
     </div>
