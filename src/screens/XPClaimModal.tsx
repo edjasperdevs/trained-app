@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button, Card, BadgeUnlockModal } from '@/components'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
 import { Gift, Sparkles, Zap, Trophy, Star, ChevronRight, Gamepad2 } from 'lucide-react'
@@ -13,11 +13,10 @@ interface XPClaimModalProps {
 }
 
 // Confetti particle component - muted colors for Trained theme
-function Confetti({ delay, isTrained }: { delay: number; isTrained: boolean }) {
-  const gygColors = ['#00F5D4', '#7B61FF', '#FFD700', '#FF6B6B', '#4ECDC4']
-  const trainedColors = ['#8B1A1A', '#4A4A4A', '#2D5A27', '#8B6914', '#3A5A7A']
-  const colors = isTrained ? trainedColors : gygColors
-  const color = colors[Math.floor(Math.random() * colors.length)]
+const CONFETTI_COLORS = ['#8B1A1A', '#4A4A4A', '#2D5A27', '#8B6914', '#3A5A7A']
+
+function Confetti({ delay }: { delay: number }) {
+  const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]
   const startX = Math.random() * 100
   const endX = startX + (Math.random() - 0.5) * 50
   const rotation = Math.random() * 720 - 360
@@ -25,7 +24,7 @@ function Confetti({ delay, isTrained }: { delay: number; isTrained: boolean }) {
   return (
     <motion.div
       initial={{
-        opacity: isTrained ? 0.6 : 1,
+        opacity: 0.6,
         y: -20,
         x: `${startX}%`,
         rotate: 0,
@@ -50,9 +49,6 @@ function Confetti({ delay, isTrained }: { delay: number; isTrained: boolean }) {
 }
 
 export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const { claimWeeklyXP, getPendingXPBreakdown, pendingXP, currentLevel, totalXP, getCurrentLevelProgress, getXPForNextLevel } = useXPStore()
   const { triggerReaction, updateEvolutionStage } = useAvatarStore()
 
@@ -163,8 +159,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         {/* Confetti */}
         {showConfetti && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {Array.from({ length: isTrained ? 25 : 50 }).map((_, i) => (
-              <Confetti key={i} delay={i * 0.05} isTrained={isTrained} />
+            {Array.from({ length: 25 }).map((_, i) => (
+              <Confetti key={i} delay={i * 0.05} />
             ))}
           </div>
         )}
@@ -181,21 +177,14 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
           {phase === 'preview' && (
             <Card className="bg-surface">
               <div className="text-center mb-6">
-                <motion.div
-                  animate={isTrained ? undefined : {
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="mb-4"
-                >
-                  <Gift size={56} className={`mx-auto ${isTrained ? 'text-warning' : 'text-accent-secondary'}`} />
-                </motion.div>
-                <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                  {isTrained ? 'Weekly Reward Ritual' : 'Weekly Release Ready'}
+                <div className="mb-4">
+                  <Gift size={56} className="mx-auto text-warning" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+                  Weekly Reward Ritual
                 </h2>
                 <p className="text-text-secondary">
-                  {isTrained ? "You've earned this. Claim your reward." : 'Your sprint is complete. Time to ship.'}
+                  You've earned this. Claim your reward.
                 </p>
               </div>
 
@@ -207,26 +196,22 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex items-center justify-between bg-surface-elevated px-4 py-2 ${isTrained ? 'rounded' : 'rounded-lg'}`}
+                    className="flex items-center justify-between bg-surface-elevated px-4 py-2 rounded"
                   >
                     <span className="text-sm text-text-secondary">
                       {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </span>
-                    <span className="font-mono text-primary">+{day.total} {theme.labels.xp}</span>
+                    <span className="font-mono text-primary">+{day.total} {LABELS.xp}</span>
                   </motion.div>
                 ))}
               </div>
 
               {/* Total */}
-              <div className={`p-4 mb-6 ${
-                isTrained
-                  ? 'bg-primary-muted rounded border border-primary/30'
-                  : 'bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 rounded-xl'
-              }`}>
+              <div className="p-4 mb-6 bg-primary-muted rounded border border-primary/30">
                 <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">{isTrained ? 'Ready to Claim' : 'Ready to Deploy'}</span>
-                  <span className={`text-3xl font-bold font-mono ${isTrained ? 'text-primary' : 'text-glow-cyan'}`}>
-                    {pendingXP} {theme.labels.xp}
+                  <span className="text-text-secondary">Ready to Claim</span>
+                  <span className="text-3xl font-bold font-mono text-primary">
+                    {pendingXP} {LABELS.xp}
                   </span>
                 </div>
               </div>
@@ -237,13 +222,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 </Button>
                 <Button onClick={handleClaim} fullWidth size="lg">
                   <span className="flex items-center gap-2">
-                    <motion.span
-                      animate={isTrained ? undefined : { rotate: [0, 15, -15, 0] }}
-                      transition={{ repeat: Infinity, duration: 0.5 }}
-                    >
-                      <Sparkles size={18} />
-                    </motion.span>
-                    {isTrained ? 'CLAIM REWARD' : 'DEPLOY'}
+                    <Sparkles size={18} />
+                    CLAIM REWARD
                   </span>
                 </Button>
               </div>
@@ -273,12 +253,11 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 animate={{ opacity: 1 }}
                 className="text-text-secondary mb-4"
               >
-                {isTrained ? 'Processing reward...' : 'Deploying to production...'}
+                Processing reward...
               </motion.p>
 
               <motion.p
-                className={`text-6xl font-bold font-mono ${isTrained ? 'text-primary' : 'text-glow-cyan'}`}
-                style={isTrained ? undefined : { textShadow: '0 0 30px rgba(0, 245, 212, 0.5)' }}
+                className="text-6xl font-bold font-mono text-primary"
               >
                 +{xpCountUp}
               </motion.p>
@@ -294,16 +273,16 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ type: 'spring', delay: 0.2 }}
                 className="mb-6"
               >
-                <Trophy size={64} className={`mx-auto ${isTrained ? 'text-primary' : 'text-success'}`} />
+                <Trophy size={64} className="mx-auto text-primary" />
               </motion.div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}
+                className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide"
               >
-                {isTrained ? 'Reward Claimed' : 'Deployed to Production'}
+                Reward Claimed
               </motion.h2>
 
               <motion.div
@@ -312,11 +291,11 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ delay: 0.6, type: 'spring' }}
                 className="mb-6"
               >
-                <p className={`text-5xl font-bold font-mono mb-2 ${isTrained ? 'text-primary' : 'text-success'}`}>
-                  +{claimResult.xpClaimed} {theme.labels.xp}
+                <p className="text-5xl font-bold font-mono mb-2 text-primary">
+                  +{claimResult.xpClaimed} {LABELS.xp}
                 </p>
                 <p className="text-text-secondary">
-                  Total: {totalXP.toLocaleString()} {theme.labels.xp}
+                  Total: {totalXP.toLocaleString()} {LABELS.xp}
                 </p>
               </motion.div>
 
@@ -324,29 +303,29 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
-                className={`bg-surface-elevated p-4 mb-6 ${isTrained ? 'rounded' : 'rounded-lg'}`}
+                className="bg-surface-elevated p-4 mb-6 rounded"
               >
                 <div className="flex items-center justify-center gap-2">
                   <Star size={24} className="text-primary" />
-                  <span className={`text-xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                    {theme.labels.level} {currentLevel}
+                  <span className="text-xl font-bold font-heading uppercase tracking-wide">
+                    {LABELS.level} {currentLevel}
                   </span>
                 </div>
-                <div className={`mt-2 h-2 bg-surface overflow-hidden ${isTrained ? 'rounded-sm' : 'rounded-full'}`}>
+                <div className="mt-2 h-2 bg-surface overflow-hidden rounded-sm">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${getCurrentLevelProgress()}%` }}
                     transition={{ delay: 1, duration: 1 }}
-                    className={`h-full ${isTrained ? 'bg-primary' : 'bg-gradient-to-r from-accent-primary to-accent-secondary'}`}
+                    className="h-full bg-primary"
                   />
                 </div>
                 <p className="text-xs text-text-secondary mt-1">
-                  {getXPForNextLevel()} {theme.labels.xp} to next {theme.labels.level.toLowerCase()}
+                  {getXPForNextLevel()} {LABELS.xp} to next {LABELS.level.toLowerCase()}
                 </p>
               </motion.div>
 
               <Button onClick={handleClose} fullWidth>
-                {isTrained ? 'Continue' : 'Nice.'}
+                Continue
               </Button>
             </Card>
           )}
@@ -361,17 +340,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 className="mb-6"
               >
                 <motion.div
-                  animate={isTrained ? { scale: [1, 1.05, 1] } : {
-                    rotate: [0, 360],
-                    scale: [1, 1.1, 1]
-                  }}
-                  transition={isTrained
-                    ? { scale: { duration: 2, repeat: Infinity } }
-                    : {
-                      rotate: { duration: 2, repeat: Infinity, ease: 'linear' },
-                      scale: { duration: 1, repeat: Infinity }
-                    }
-                  }
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ scale: { duration: 2, repeat: Infinity } }}
                   className="inline-block"
                 >
                   <Star size={72} className="text-primary" fill="currentColor" />
@@ -382,13 +352,9 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className={`text-3xl font-bold mb-4 ${
-                  isTrained
-                    ? 'text-primary font-heading uppercase tracking-wide'
-                    : 'bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent'
-                }`}
+                className="text-3xl font-bold mb-4 text-primary font-heading uppercase tracking-wide"
               >
-                {isTrained ? 'RANK PROMOTED!' : 'VERSION BUMP!'}
+                RANK PROMOTED!
               </motion.h2>
 
               <motion.div
@@ -399,7 +365,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               >
                 <div className="flex items-center justify-center gap-4">
                   <span className="text-4xl text-text-secondary">
-                    {isTrained ? 'Rank' : 'Lvl'} {claimResult.newLevel - 1}
+                    Rank {claimResult.newLevel - 1}
                   </span>
                   <motion.div
                     animate={{ x: [0, 10, 0] }}
@@ -407,8 +373,8 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                   >
                     <ChevronRight size={24} className="text-primary" />
                   </motion.div>
-                  <span className={`text-5xl font-bold font-mono ${isTrained ? 'text-primary' : 'text-glow-purple'}`}>
-                    {isTrained ? 'Rank' : 'Lvl'} {claimResult.newLevel}
+                  <span className="text-5xl font-bold font-mono text-primary">
+                    Rank {claimResult.newLevel}
                   </span>
                 </div>
               </motion.div>
@@ -419,9 +385,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 transition={{ delay: 0.7 }}
                 className="text-text-secondary mb-6"
               >
-                {isTrained
-                  ? `You earned ${claimResult.xpClaimed} ${theme.labels.xp} this week.`
-                  : `You shipped ${claimResult.xpClaimed} ${theme.labels.xp} this sprint.`}
+                {`You earned ${claimResult.xpClaimed} ${LABELS.xp} this week.`}
               </motion.p>
 
               <motion.div
@@ -431,12 +395,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               >
                 <Button onClick={handleClose} fullWidth size="lg">
                   <span className="flex items-center gap-2">
-                    <motion.span
-                      animate={isTrained ? undefined : { scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Infinity, duration: 0.5 }}
-                    >
-                      <Gamepad2 size={18} />
-                    </motion.span>
+                    <Gamepad2 size={18} />
                     Continue
                   </span>
                 </Button>

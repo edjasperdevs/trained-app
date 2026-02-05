@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { Avatar, Card, ProgressBar } from '@/components'
 import { useAvatarStore, useXPStore, EVOLUTION_STAGES } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS, AVATAR_STAGES } from '@/design/constants'
 import {
   Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
   Trophy, Sparkles, Star, Crown, Lock, Check, LucideIcon
@@ -20,9 +20,6 @@ function StageIcon({ iconName, size = 24, className = '' }: { iconName: string; 
 }
 
 export function AvatarScreen() {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const {
     baseCharacter,
     evolutionStage,
@@ -38,16 +35,16 @@ export function AvatarScreen() {
   const nextEvolution = getNextEvolutionInfo()
   const evolutionProgress = getProgressToNextEvolution(currentLevel)
 
-  // Get the avatar stage name from theme
-  const currentStageName = theme.avatarStages[evolutionStage - 1] || currentEvolution.name
-  const nextStageName = nextEvolution ? (theme.avatarStages[nextEvolution.stage - 1] || nextEvolution.name) : null
+  // Get the avatar stage name from constants
+  const currentStageName = AVATAR_STAGES[evolutionStage - 1] || currentEvolution.name
+  const nextStageName = nextEvolution ? (AVATAR_STAGES[nextEvolution.stage - 1] || nextEvolution.name) : null
 
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className={`pt-8 pb-12 px-4 ${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-bg-secondary to-bg-primary'}`}>
-        <h1 className={`text-2xl font-bold mb-6 text-center ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-          {isTrained ? 'Your Status' : 'Your Avatar'}
+      <div className="pt-8 pb-12 px-4 bg-surface">
+        <h1 className="text-2xl font-bold mb-6 text-center font-heading uppercase tracking-wide">
+          Your Status
         </h1>
 
         {/* Main Avatar Display */}
@@ -68,22 +65,22 @@ export function AvatarScreen() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-3xl font-bold font-mono text-primary">{currentLevel}</p>
-              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
-                {theme.labels.level}
+              <p className="text-xs text-text-secondary uppercase tracking-wider">
+                {LABELS.level}
               </p>
             </div>
             <div>
               <p className="text-3xl font-bold font-mono">{evolutionStage}</p>
-              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
-                {isTrained ? 'Stage' : 'Evolution'}
+              <p className="text-xs text-text-secondary uppercase tracking-wider">
+                Stage
               </p>
             </div>
             <div>
               <p className="text-3xl font-bold font-mono text-secondary">
                 {totalXP.toLocaleString()}
               </p>
-              <p className={`text-xs text-text-secondary ${isTrained ? 'uppercase tracking-wider' : ''}`}>
-                Total {theme.labels.xp}
+              <p className="text-xs text-text-secondary uppercase tracking-wider">
+                Total {LABELS.xp}
               </p>
             </div>
           </div>
@@ -92,16 +89,16 @@ export function AvatarScreen() {
         {/* Current Evolution */}
         <Card>
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-16 h-16 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded-lg' : 'rounded-full'}`}>
+            <div className="w-16 h-16 bg-surface-elevated flex items-center justify-center rounded-lg">
               <StageIcon iconName={currentEvolution.emoji} size={32} className="text-primary" />
             </div>
             <div>
-              <h3 className={`text-xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+              <h3 className="text-xl font-bold font-heading uppercase tracking-wide">
                 {currentStageName}
               </h3>
               <p className="text-sm text-text-secondary">{currentEvolution.description}</p>
               <p className="text-xs text-text-secondary">
-                {theme.labels.level}s {currentEvolution.levelRange[0]} - {currentEvolution.levelRange[1]}
+                {LABELS.level}s {currentEvolution.levelRange[0]} - {currentEvolution.levelRange[1]}
               </p>
             </div>
           </div>
@@ -113,18 +110,18 @@ export function AvatarScreen() {
                 <span>Progress to {nextStageName}</span>
                 <span className="font-mono">{Math.round(evolutionProgress)}%</span>
               </div>
-              <ProgressBar progress={evolutionProgress} color={isTrained ? 'primary' : 'gradient'} size="md" />
+              <ProgressBar progress={evolutionProgress} color="primary" size="md" />
               <p className="text-xs text-text-secondary mt-2">
-                Reach {theme.labels.level} {nextEvolution.levelRange[0]} to {isTrained ? 'advance' : 'evolve'}
+                Reach {LABELS.level} {nextEvolution.levelRange[0]} to advance
               </p>
             </div>
           )}
 
           {!nextEvolution && (
-            <div className={`text-center py-4 bg-warning/10 border border-warning/20 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+            <div className="text-center py-4 bg-warning/10 border border-warning/20 rounded">
               <Crown size={32} className="mx-auto text-warning" />
-              <p className={`text-warning font-bold mt-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                {isTrained ? 'Maximum Status Achieved.' : 'Maximum Evolution Achieved!'}
+              <p className="text-warning font-bold mt-2 font-heading uppercase tracking-wide">
+                Maximum Status Achieved.
               </p>
             </div>
           )}
@@ -132,18 +129,18 @@ export function AvatarScreen() {
 
         {/* Character Info */}
         <Card>
-          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
-            {isTrained ? 'ROLE' : 'CHARACTER CLASS'}
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
+            ROLE
           </h3>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+            <div className="w-12 h-12 bg-surface-elevated flex items-center justify-center rounded">
               {baseCharacter === 'dominant' && <Sword size={24} className="text-error" />}
               {baseCharacter === 'switch' && <Sparkles size={24} className="text-primary" />}
               {baseCharacter === 'submissive' && <Zap size={24} className="text-warning" />}
             </div>
             <div>
-              <p className={`font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : 'capitalize'}`}>
-                {theme.labels.avatarClasses[baseCharacter]}
+              <p className="font-bold font-heading uppercase tracking-wide">
+                {LABELS.avatarClasses[baseCharacter]}
               </p>
               <p className="text-sm text-text-secondary">
                 {baseCharacter === 'dominant' && 'Strength and discipline'}
@@ -156,15 +153,15 @@ export function AvatarScreen() {
 
         {/* Evolution Timeline */}
         <Card>
-          <h3 className={`text-sm font-semibold text-text-secondary mb-4 ${isTrained ? 'uppercase tracking-wider font-heading' : ''}`}>
-            {isTrained ? 'PROGRESSION PATH' : 'EVOLUTION TIMELINE'}
+          <h3 className="text-sm font-semibold text-text-secondary mb-4 uppercase tracking-wider font-heading">
+            PROGRESSION PATH
           </h3>
           <div className="space-y-3">
             {EVOLUTION_STAGES.map((stage, index) => {
               const isUnlocked = currentLevel >= stage.levelRange[0]
               const isCurrent = stage.stage === evolutionStage
               const isNext = stage.stage === evolutionStage + 1
-              const stageName = theme.avatarStages[stage.stage - 1] || stage.name
+              const stageName = AVATAR_STAGES[stage.stage - 1] || stage.name
 
               return (
                 <motion.div
@@ -173,16 +170,14 @@ export function AvatarScreen() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={`
-                    flex items-center gap-3 p-2
-                    ${isTrained ? 'rounded' : 'rounded-lg'}
+                    flex items-center gap-3 p-2 rounded
                     ${isCurrent ? 'bg-primary/10 border border-primary/30' : ''}
                     ${isNext ? 'bg-secondary/10 border border-secondary/30' : ''}
                     ${!isUnlocked && !isNext ? 'opacity-40' : ''}
                   `}
                 >
                   <div className={`
-                    w-10 h-10 flex items-center justify-center
-                    ${isTrained ? 'rounded' : 'rounded-full'}
+                    w-10 h-10 flex items-center justify-center rounded
                     ${isUnlocked ? 'bg-surface-elevated' : 'bg-surface'}
                   `}>
                     {isUnlocked ? (
@@ -193,22 +188,22 @@ export function AvatarScreen() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <p className={`font-semibold ${isCurrent ? 'text-primary' : ''} ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                      <p className={`font-semibold ${isCurrent ? 'text-primary' : ''} font-heading uppercase tracking-wide text-sm`}>
                         {stageName}
                       </p>
                       {isCurrent && (
-                        <span className={`text-xs bg-primary/20 text-primary px-2 py-0.5 ${isTrained ? 'rounded' : 'rounded'}`}>
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded">
                           Current
                         </span>
                       )}
                       {isNext && (
-                        <span className={`text-xs bg-secondary/20 text-secondary px-2 py-0.5 ${isTrained ? 'rounded' : 'rounded'}`}>
+                        <span className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded">
                           Next
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-text-secondary">
-                      {theme.labels.level} {stage.levelRange[0]} - {stage.levelRange[1]}
+                      {LABELS.level} {stage.levelRange[0]} - {stage.levelRange[1]}
                     </p>
                   </div>
                   {isUnlocked && (
@@ -223,13 +218,13 @@ export function AvatarScreen() {
         {/* Mood */}
         <Card padding="sm">
           <div className="flex items-center justify-between">
-            <span className="text-text-secondary">{isTrained ? 'Current State' : 'Current Mood'}</span>
-            <span className={`capitalize font-semibold ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
-              {currentMood === 'happy' && (isTrained ? 'Compliant' : 'Happy')}
-              {currentMood === 'neutral' && (isTrained ? 'Steady' : 'Neutral')}
-              {currentMood === 'sad' && (isTrained ? 'Flagging' : 'Sad')}
-              {currentMood === 'hyped' && (isTrained ? 'Exemplary' : 'Hyped')}
-              {currentMood === 'neglected' && (isTrained ? 'Overdue' : 'Neglected')}
+            <span className="text-text-secondary">Current State</span>
+            <span className="capitalize font-semibold font-heading uppercase tracking-wide text-sm">
+              {currentMood === 'happy' && 'Compliant'}
+              {currentMood === 'neutral' && 'Steady'}
+              {currentMood === 'sad' && 'Flagging'}
+              {currentMood === 'hyped' && 'Exemplary'}
+              {currentMood === 'neglected' && 'Overdue'}
             </span>
           </div>
         </Card>

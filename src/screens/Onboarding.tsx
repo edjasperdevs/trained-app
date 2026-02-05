@@ -3,37 +3,27 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card } from '@/components'
 import {
-  Gamepad2,
-  Sparkles,
   Dumbbell,
-  Flame,
-  Sprout,
   Sword,
   Wand2,
-  Moon,
-  TrendingDown,
-  RefreshCw,
-  Scale,
-  TrendingUp,
   Beef,
   Zap,
-  CheckCircle2,
-  PartyPopper,
-  LucideIcon,
   Shield,
   Circle,
+  Sprout,
   Footprints,
   Trophy,
   Star,
   Crown,
   Home,
-  TrendingUp as ChartUp
+  TrendingUp as ChartUp,
+  LucideIcon
 } from 'lucide-react'
 
 // Map icon names to Lucide components for evolution stages
 const STAGE_ICON_MAP: Record<string, LucideIcon> = {
-  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
-  Trophy, Bolt: Zap, Sparkles, Star, Crown
+  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame: Zap,
+  Trophy, Bolt: Zap, Sparkles: Star, Star, Crown
 }
 import {
   useUserStore,
@@ -51,7 +41,7 @@ import {
 } from '@/stores'
 import { EVOLUTION_STAGES } from '@/stores/avatarStore'
 import { analytics } from '@/lib/analytics'
-import { useTheme } from '@/themes'
+import { LABELS, AVATAR_STAGES } from '@/design/constants'
 
 type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'avatar' | 'features' | 'tutorial' | 'evolution'
 
@@ -352,76 +342,37 @@ export function Onboarding() {
 // Step Components
 
 function WelcomeStep({ onNext }: { onNext: () => void }) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  if (isTrained) {
-    return (
-      <div className="text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl font-heading font-bold uppercase tracking-wider mb-4">
-            {theme.name}
-          </h1>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <p className="text-lg text-text-secondary mb-6">
-            The protocol for building discipline through fitness.
-          </p>
-          <p className="text-text-secondary mb-8 leading-relaxed">
-            This is not a game. This is a system.<br />
-            Track your workouts. Hit your macros.<br />
-            Report in daily. Earn your rank.
-          </p>
-          <p className="text-sm text-text-secondary mb-8 italic">
-            Structure creates freedom.
-          </p>
-        </motion.div>
-        <Button onClick={onNext} fullWidth size="lg">
-          Start
-        </Button>
-      </div>
-    )
-  }
-
   return (
     <div className="text-center">
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', delay: 0.2 }}
-        className="mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-8"
       >
-        <Gamepad2 size={80} className="mx-auto text-accent-primary" />
+        <h1 className="text-4xl font-heading font-bold uppercase tracking-wider mb-4">
+          Trained
+        </h1>
       </motion.div>
-      <h1 className="text-3xl font-bold mb-2">Your Fitness Operating System</h1>
-      <p className="text-text-secondary mb-8">
-        Built by an engineer. Powered by game mechanics. Designed for people who think in systems.
-      </p>
-      <div className="space-y-3 text-left mb-8">
-        <div className="flex items-center gap-3 text-sm">
-          <Sparkles size={24} className="text-accent-secondary flex-shrink-0" />
-          <span className="text-text-primary">Earn XP for workouts, hitting macros, and consistency</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm">
-          <Dumbbell size={24} className="text-accent-primary flex-shrink-0" />
-          <span className="text-text-primary">Watch your avatar evolve as you progress</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm">
-          <Flame size={24} className="text-accent-warning flex-shrink-0" />
-          <span className="text-text-primary">Build streaks and unlock achievements</span>
-        </div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <p className="text-lg text-text-secondary mb-6">
+          The protocol for building discipline through fitness.
+        </p>
+        <p className="text-text-secondary mb-8 leading-relaxed">
+          This is not a game. This is a system.<br />
+          Track your workouts. Hit your macros.<br />
+          Report in daily. Earn your rank.
+        </p>
+        <p className="text-sm text-text-secondary mb-8 italic">
+          Structure creates freedom.
+        </p>
+      </motion.div>
       <Button onClick={onNext} fullWidth size="lg">
-        Initialize
+        Start
       </Button>
     </div>
   )
@@ -438,16 +389,13 @@ function NameStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
         What should we call you?
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained ? 'This is how the protocol will address you.' : 'Your handle for the system.'}
+        This is how the protocol will address you.
       </p>
 
       <input
@@ -455,7 +403,7 @@ function NameStep({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter your name..."
-        className={`w-full bg-bg-secondary border border-border px-4 py-3 text-text-on-primary placeholder-gray-500 focus:outline-none focus:border-accent-primary mb-6 ${isTrained ? 'rounded' : 'rounded-lg'}`}
+        className="w-full bg-bg-secondary border border-border px-4 py-3 text-text-on-primary placeholder-gray-500 focus:outline-none focus:border-accent-primary mb-6 rounded"
         maxLength={20}
         autoFocus
       />
@@ -483,42 +431,35 @@ function GenderStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const options: { gender: Gender; label: string; icon: LucideIcon; color: string }[] = [
-    { gender: 'male', label: 'Male', icon: TrendingUp, color: 'text-info' },
-    { gender: 'female', label: 'Female', icon: Sparkles, color: 'text-primary' }
+  const options: { gender: Gender; label: string }[] = [
+    { gender: 'male', label: 'Male' },
+    { gender: 'female', label: 'Female' }
   ]
 
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? 'Biological sex' : 'Calibrating baseline metrics'}
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Biological sex
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained ? 'Used for accurate metabolic calculations only.' : 'Biological sex affects metabolism calculations.'}
+        Used for accurate metabolic calculations only.
       </p>
 
       <div className="space-y-3 mb-6">
-        {options.map((opt) => {
-          const Icon = opt.icon
-          return (
-            <Card
-              key={opt.gender}
-              onClick={() => onChange(opt.gender)}
-              hover
-              className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
-            >
-              <div className="flex items-center gap-4">
-                {!isTrained && <Icon size={28} className={opt.color} />}
-                <p className={`font-semibold text-lg ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                  {opt.label}
-                </p>
-              </div>
-            </Card>
-          )
-        })}
+        {options.map((opt) => (
+          <Card
+            key={opt.gender}
+            onClick={() => onChange(opt.gender)}
+            hover
+            className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
+          >
+            <div className="flex items-center gap-4">
+              <p className="font-semibold text-lg font-heading uppercase tracking-wide">
+                {opt.label}
+              </p>
+            </div>
+          </Card>
+        ))}
       </div>
 
       <div className="flex gap-3">
@@ -544,84 +485,35 @@ function FitnessStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const gygOptions: { level: FitnessLevel; label: string; description: string; icon: LucideIcon; color: string }[] = [
-    { level: 'beginner', label: 'Beginner', description: 'New to lifting or returning after a break', icon: Sprout, color: 'text-success' },
-    { level: 'intermediate', label: 'Intermediate', description: '1-3 years of consistent training', icon: Dumbbell, color: 'text-accent-primary' },
-    { level: 'advanced', label: 'Advanced', description: '3+ years, know your way around the gym', icon: Flame, color: 'text-accent-warning' }
-  ]
-
-  const trainedOptions: { level: FitnessLevel; label: string; description: string }[] = [
+  const options: { level: FitnessLevel; label: string; description: string }[] = [
     { level: 'beginner', label: 'Uninitiated', description: "Haven't started yet" },
     { level: 'intermediate', label: 'Trained', description: 'Consistent for 6+ months' },
     { level: 'advanced', label: 'Elite', description: '2+ years, advanced programming' }
   ]
 
-  if (isTrained) {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
-          Training experience
-        </h2>
-        <p className="text-text-secondary mb-6">
-          How would you describe your current relationship with the gym?
-        </p>
-
-        <div className="space-y-3 mb-6">
-          {trainedOptions.map((opt) => (
-            <Card
-              key={opt.level}
-              onClick={() => onChange(opt.level)}
-              hover
-              className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
-            >
-              <div>
-                <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                <p className="text-sm text-text-secondary">{opt.description}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        <div className="flex gap-3">
-          <Button variant="ghost" onClick={onBack}>
-            Back
-          </Button>
-          <Button onClick={onNext} fullWidth>
-            Continue
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Current system state</h2>
-      <p className="text-text-secondary mb-6">Where are you starting from?</p>
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Training experience
+      </h2>
+      <p className="text-text-secondary mb-6">
+        How would you describe your current relationship with the gym?
+      </p>
 
       <div className="space-y-3 mb-6">
-        {gygOptions.map((opt) => {
-          const Icon = opt.icon
-          return (
-            <Card
-              key={opt.level}
-              onClick={() => onChange(opt.level)}
-              hover
-              className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
-            >
-              <div className="flex items-center gap-4">
-                <Icon size={28} className={opt.color} />
-                <div>
-                  <p className="font-semibold">{opt.label}</p>
-                  <p className="text-sm text-text-secondary">{opt.description}</p>
-                </div>
-              </div>
-            </Card>
-          )
-        })}
+        {options.map((opt) => (
+          <Card
+            key={opt.level}
+            onClick={() => onChange(opt.level)}
+            hover
+            className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
+          >
+            <div>
+              <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
+              <p className="text-sm text-text-secondary">{opt.description}</p>
+            </div>
+          </Card>
+        ))}
       </div>
 
       <div className="flex gap-3">
@@ -647,24 +539,19 @@ function DaysStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const options: { days: TrainingDays; label: string; description: string }[] = [
-    { days: 3, label: '3 Days', description: 'Push/Pull/Legs - Great for beginners' },
-    { days: 4, label: '4 Days', description: 'Upper/Lower Split - Balanced approach' },
-    { days: 5, label: '5 Days', description: 'PPL + Upper/Lower - Maximum gains' }
+  const options: { days: TrainingDays; label: string }[] = [
+    { days: 3, label: '3 Days' },
+    { days: 4, label: '4 Days' },
+    { days: 5, label: '5 Days' }
   ]
 
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? 'Weekly commitment' : 'Configure your training schedule'}
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Weekly commitment
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained
-          ? 'A commitment is a commitment. Choose what you can sustain.'
-          : 'Be realistic. Consistency beats intensity.'}
+        A commitment is a commitment. Choose what you can sustain.
       </p>
 
       <div className="space-y-3 mb-6">
@@ -677,10 +564,9 @@ function DaysStep({
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className={`font-semibold text-lg ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
+                <p className="font-semibold text-lg font-heading uppercase tracking-wide">
                   {opt.label}
                 </p>
-                {!isTrained && <p className="text-sm text-text-secondary">{opt.description}</p>}
               </div>
               <div className="text-2xl font-bold text-accent-primary font-digital">
                 {opt.days}x
@@ -715,9 +601,6 @@ function ScheduleStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -746,13 +629,11 @@ function ScheduleStep({
 
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? 'Select your training days' : 'Pick your workout days'}
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Select your training days
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained
-          ? `Choose ${trainingDays} days. These can be changed later in settings.`
-          : `Select ${trainingDays} days that work best for your schedule.`}
+        {`Choose ${trainingDays} days. These can be changed later in settings.`}
       </p>
 
       <div className="grid grid-cols-7 gap-2 mb-4">
@@ -766,8 +647,7 @@ function ScheduleStep({
               onClick={() => toggleDay(index as DayOfWeek)}
               disabled={!isSelected && !canAdd}
               className={`
-                py-3 text-center text-sm font-medium transition-all
-                ${isTrained ? 'rounded' : 'rounded-lg'}
+                py-3 text-center text-sm font-medium transition-all rounded
                 ${isSelected
                   ? 'bg-accent-primary text-text-on-primary'
                   : canAdd
@@ -783,7 +663,7 @@ function ScheduleStep({
       </div>
 
       {/* Selected days summary */}
-      <div className={`p-3 mb-6 bg-bg-card border border-border/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+      <div className="p-3 mb-6 bg-bg-card border border-border/50 rounded">
         <p className="text-sm text-text-secondary mb-2">
           {selectedDays.length} of {trainingDays} days selected:
         </p>
@@ -827,17 +707,7 @@ function GoalStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const gygGoals: { value: Goal; label: string; description: string; icon: LucideIcon; color: string }[] = [
-    { value: 'cut', label: 'Cut', description: 'Lose fat, maintain muscle', icon: TrendingDown, color: 'text-error' },
-    { value: 'recomp', label: 'Recomp', description: 'Build muscle while losing fat', icon: RefreshCw, color: 'text-primary' },
-    { value: 'maintain', label: 'Maintain', description: 'Stay at current weight', icon: Scale, color: 'text-info' },
-    { value: 'bulk', label: 'Bulk', description: 'Build muscle, gain weight', icon: TrendingUp, color: 'text-success' }
-  ]
-
-  const trainedGoals: { value: Goal; label: string; description: string }[] = [
+  const goals: { value: Goal; label: string; description: string }[] = [
     { value: 'cut', label: 'Cut', description: '-500 cal deficit' },
     { value: 'recomp', label: 'Recomp', description: '-200 cal' },
     { value: 'maintain', label: 'Maintain', description: 'Hold current weight' },
@@ -897,26 +767,21 @@ function GoalStep({
   const feet = Math.floor(height / 12)
   const inches = height % 12
 
-  const inputClass = isTrained
-    ? 'w-full bg-bg-secondary border border-border rounded px-4 py-3 text-text-on-primary font-digital text-xl'
-    : 'w-full bg-bg-secondary border border-border rounded-lg px-4 py-3 text-text-on-primary font-digital text-xl'
-
+  const inputClass = 'w-full bg-bg-secondary border border-border rounded px-4 py-3 text-text-on-primary font-digital text-xl'
   const inputErrorClass = 'border-error'
 
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? 'Current stats' : 'Select your optimization target'}
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Current stats
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained
-          ? 'These numbers are where you start. Not where you stay.'
-          : "We'll calculate your macros based on these inputs."}
+        These numbers are where you start. Not where you stay.
       </p>
 
       {/* Height */}
       <div className="mb-4">
-        <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+        <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
           Height
         </label>
         <div className="flex gap-3">
@@ -952,7 +817,7 @@ function GoalStep({
       {/* Weight and Age side by side */}
       <div className="flex gap-3 mb-4">
         <div className="flex-1">
-          <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+          <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
             Weight (lbs)
           </label>
           <input
@@ -965,7 +830,7 @@ function GoalStep({
           />
         </div>
         <div className="flex-1">
-          <label className={`block text-sm text-text-secondary mb-2 ${isTrained ? 'uppercase tracking-wider' : ''}`}>
+          <label className="block text-sm text-text-secondary mb-2 uppercase tracking-wider">
             Age
           </label>
           <input
@@ -981,60 +846,36 @@ function GoalStep({
 
       {/* Validation errors */}
       {validationErrors.length > 0 && (
-        <div className={`p-3 mb-4 bg-error/10 border border-error/30 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+        <div className="p-3 mb-4 bg-error/10 border border-error/30 rounded">
           {validationErrors.map((error, index) => (
             <p key={index} className="text-sm text-error">{error}</p>
           ))}
         </div>
       )}
 
-      {isTrained && (
-        <h3 className="text-lg font-bold mb-4 font-heading uppercase tracking-wide">
-          Current objective
-        </h3>
-      )}
+      <h3 className="text-lg font-bold mb-4 font-heading uppercase tracking-wide">
+        Current objective
+      </h3>
 
       <div className="space-y-3 mb-4">
-        {isTrained ? (
-          trainedGoals.map((opt) => (
-            <Card
-              key={opt.value}
-              onClick={() => onGoalChange(opt.value)}
-              hover
-              className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
-            >
-              <div className="flex items-center justify-between">
-                <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                <p className="text-sm text-text-secondary">{opt.description}</p>
-              </div>
-            </Card>
-          ))
-        ) : (
-          gygGoals.map((opt) => {
-            const Icon = opt.icon
-            return (
-              <Card
-                key={opt.value}
-                onClick={() => onGoalChange(opt.value)}
-                hover
-                className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
-              >
-                <div className="flex items-center gap-4">
-                  <Icon size={28} className={opt.color} />
-                  <div>
-                    <p className="font-semibold">{opt.label}</p>
-                    <p className="text-sm text-text-secondary">{opt.description}</p>
-                  </div>
-                </div>
-              </Card>
-            )
-          })
-        )}
+        {goals.map((opt) => (
+          <Card
+            key={opt.value}
+            onClick={() => onGoalChange(opt.value)}
+            hover
+            className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
+          >
+            <div className="flex items-center justify-between">
+              <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
+              <p className="text-sm text-text-secondary">{opt.description}</p>
+            </div>
+          </Card>
+        ))}
       </div>
 
       {/* Helper text for selected objective */}
       {goal && (
-        <div className={`p-3 mb-6 bg-bg-card border border-border/50 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+        <div className="p-3 mb-6 bg-bg-card border border-border/50 rounded">
           <p className="text-sm text-text-secondary leading-relaxed">
             {goalHelperText[goal]}
           </p>
@@ -1064,92 +905,41 @@ function AvatarStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const gygOptions: { base: AvatarBase; label: string; icon: LucideIcon; color: string; description: string }[] = [
-    { base: 'dominant', label: 'Warrior', icon: Sword, color: 'text-error', description: 'Strength and discipline' },
-    { base: 'switch', label: 'Mage', icon: Wand2, color: 'text-primary', description: 'Knowledge and power' },
-    { base: 'submissive', label: 'Rogue', icon: Moon, color: 'text-info', description: 'Speed and agility' }
-  ]
-
-  const trainedOptions: { base: AvatarBase; label: string; description: string; icon: LucideIcon; color: string }[] = [
+  const options: { base: AvatarBase; label: string; description: string; icon: LucideIcon; color: string }[] = [
     {
       base: 'dominant',
-      label: theme.labels.avatarClasses.dominant,
+      label: LABELS.avatarClasses.dominant,
       description: 'Control. Authority. Leads from the front.',
       icon: Sword,
       color: 'text-error'
     },
     {
       base: 'switch',
-      label: theme.labels.avatarClasses.switch,
+      label: LABELS.avatarClasses.switch,
       description: 'Versatile. Adapts to any situation.',
       icon: Wand2,
       color: 'text-primary'
     },
     {
       base: 'submissive',
-      label: theme.labels.avatarClasses.submissive,
+      label: LABELS.avatarClasses.submissive,
       description: 'Obedient. Follows the protocol.',
       icon: Zap,
       color: 'text-warning'
     }
   ]
 
-  if (isTrained) {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
-          Choose your persona
-        </h2>
-        <p className="text-text-secondary mb-6">
-          This represents your avatar identity as you progress.
-        </p>
-
-        <div className="space-y-3 mb-6">
-          {trainedOptions.map((opt) => {
-            const Icon = opt.icon
-            return (
-              <Card
-                key={opt.base}
-                onClick={() => onChange(opt.base)}
-                hover
-                className={`border-2 ${value === opt.base ? 'border-accent-primary' : 'border-transparent'}`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-bg-secondary rounded flex items-center justify-center flex-shrink-0">
-                    <Icon size={24} className={opt.color} />
-                  </div>
-                  <div>
-                    <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
-                    <p className="text-sm text-text-secondary">{opt.description}</p>
-                  </div>
-                </div>
-              </Card>
-            )
-          })}
-        </div>
-
-        <div className="flex gap-3">
-          <Button variant="ghost" onClick={onBack}>
-            Back
-          </Button>
-          <Button onClick={onNext} fullWidth>
-            Continue
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Deploy your avatar</h2>
-      <p className="text-text-secondary mb-6">This character will evolve with your progress.</p>
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Choose your persona
+      </h2>
+      <p className="text-text-secondary mb-6">
+        This represents your avatar identity as you progress.
+      </p>
 
       <div className="space-y-3 mb-6">
-        {gygOptions.map((opt) => {
+        {options.map((opt) => {
           const Icon = opt.icon
           return (
             <Card
@@ -1159,11 +949,11 @@ function AvatarStep({
               className={`border-2 ${value === opt.base ? 'border-accent-primary' : 'border-transparent'}`}
             >
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center">
-                  <Icon size={32} className={opt.color} />
+                <div className="w-12 h-12 bg-bg-secondary rounded flex items-center justify-center flex-shrink-0">
+                  <Icon size={24} className={opt.color} />
                 </div>
                 <div>
-                  <p className="font-semibold text-lg">{opt.label}</p>
+                  <p className="font-semibold font-heading uppercase tracking-wide">{opt.label}</p>
                   <p className="text-sm text-text-secondary">{opt.description}</p>
                 </div>
               </div>
@@ -1191,10 +981,7 @@ function FeaturesStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const { themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
-  const trainedFeatures = [
+  const features = [
     {
       icon: Home,
       title: 'Daily Check-in',
@@ -1217,40 +1004,13 @@ function FeaturesStep({
     }
   ]
 
-  const gygFeatures = [
-    {
-      icon: Home,
-      title: 'Home',
-      description: 'Daily check-in to maintain streaks. Claim your weekly XP rewards on Sundays.'
-    },
-    {
-      icon: Dumbbell,
-      title: 'Workouts',
-      description: 'Your personalized program based on training days. Track sets, reps, and weights.'
-    },
-    {
-      icon: Beef,
-      title: 'Macros',
-      description: 'Log your daily nutrition. Hit protein and calorie targets to earn bonus XP.'
-    },
-    {
-      icon: ChartUp,
-      title: 'Progress',
-      description: 'Track weight, see trends, and watch your avatar evolve as you level up.'
-    }
-  ]
-
-  const features = isTrained ? trainedFeatures : gygFeatures
-
   return (
     <div>
-      <h2 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? 'How the protocol works' : 'How the app works'}
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        How the protocol works
       </h2>
       <p className="text-text-secondary mb-6">
-        {isTrained
-          ? 'Four areas of focus. Master them all.'
-          : 'Everything you need to level up your fitness.'}
+        Four areas of focus. Master them all.
       </p>
 
       <div className="space-y-3 mb-6">
@@ -1265,11 +1025,11 @@ function FeaturesStep({
             >
               <Card>
                 <div className="flex items-start gap-4">
-                  <div className={`w-10 h-10 bg-bg-secondary flex items-center justify-center flex-shrink-0 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+                  <div className="w-10 h-10 bg-bg-secondary flex items-center justify-center flex-shrink-0 rounded">
                     <Icon size={20} className="text-accent-primary" />
                   </div>
                   <div>
-                    <p className={`font-semibold mb-1 ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                    <p className="font-semibold mb-1 font-heading uppercase tracking-wide text-sm">
                       {feature.title}
                     </p>
                     <p className="text-sm text-text-secondary">{feature.description}</p>
@@ -1302,123 +1062,52 @@ function TutorialStep({
   onFinish: () => void
   onBack: () => void
 }) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-  const xpLabel = theme.labels.xp
-
-  if (isTrained) {
-    return (
-      <div className="text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mb-6"
-        >
-          <Shield size={48} className="mx-auto text-accent-primary" />
-        </motion.div>
-        <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
-          Protocol initialized, {username}.
-        </h2>
-        <p className="text-text-secondary mb-6">Earn {theme.labels.xpFull} ({xpLabel}) through:</p>
-
-        <div className="space-y-3 text-left mb-8">
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary">Workout completed</span>
-              <span className="text-accent-primary font-digital font-bold">+50 {xpLabel}</span>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary">Protein target hit</span>
-              <span className="text-accent-primary font-digital font-bold">+30 {xpLabel}</span>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary">Calorie target hit</span>
-              <span className="text-accent-primary font-digital font-bold">+20 {xpLabel}</span>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary">Daily report submitted</span>
-              <span className="text-accent-primary font-digital font-bold">+10 {xpLabel}</span>
-            </div>
-          </Card>
-        </div>
-
-        <p className="text-sm text-text-secondary mb-6">
-          {xpLabel} accumulates all week. Claim your reward every Sunday.
-        </p>
-
-        <div className="flex gap-3">
-          <Button variant="ghost" onClick={onBack}>
-            Back
-          </Button>
-          <Button onClick={onFinish} fullWidth size="lg">
-            Begin
-          </Button>
-        </div>
-      </div>
-    )
-  }
+  const xpLabel = LABELS.xp
 
   return (
     <div className="text-center">
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', delay: 0.2 }}
-        className="mb-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-6"
       >
-        <PartyPopper size={56} className="mx-auto text-accent-success" />
+        <Shield size={48} className="mx-auto text-accent-primary" />
       </motion.div>
-      <h2 className="text-2xl font-bold mb-2">You're all set, {username}!</h2>
-      <p className="text-text-secondary mb-6">Here's how to earn {xpLabel}:</p>
+      <h2 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+        Protocol initialized, {username}.
+      </h2>
+      <p className="text-text-secondary mb-6">Earn {LABELS.xpFull} ({xpLabel}) through:</p>
 
-      <div className="space-y-4 text-left mb-8">
+      <div className="space-y-3 text-left mb-8">
         <Card>
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Dumbbell size={20} className="text-accent-primary" />
-              <span>Complete a workout</span>
-            </div>
-            <span className="text-accent-primary font-digital font-bold">+100 {xpLabel}</span>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Beef size={20} className="text-accent-success" />
-              <span>Hit protein target</span>
-            </div>
+            <span className="text-text-secondary">Workout completed</span>
             <span className="text-accent-primary font-digital font-bold">+50 {xpLabel}</span>
           </div>
         </Card>
         <Card>
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Zap size={20} className="text-accent-warning" />
-              <span>Hit calorie target</span>
-            </div>
-            <span className="text-accent-primary font-digital font-bold">+50 {xpLabel}</span>
+            <span className="text-text-secondary">Protein target hit</span>
+            <span className="text-accent-primary font-digital font-bold">+30 {xpLabel}</span>
           </div>
         </Card>
         <Card>
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 size={20} className="text-accent-secondary" />
-              <span>Daily check-in</span>
-            </div>
-            <span className="text-accent-primary font-digital font-bold">+25 {xpLabel}</span>
+            <span className="text-text-secondary">Calorie target hit</span>
+            <span className="text-accent-primary font-digital font-bold">+20 {xpLabel}</span>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex justify-between items-center">
+            <span className="text-text-secondary">Daily report submitted</span>
+            <span className="text-accent-primary font-digital font-bold">+10 {xpLabel}</span>
           </div>
         </Card>
       </div>
 
       <p className="text-sm text-text-secondary mb-6">
-        {xpLabel} accumulates all week and can be claimed every Sunday!
+        {xpLabel} accumulates all week. Claim your reward every Sunday.
       </p>
 
       <div className="flex gap-3">
@@ -1426,7 +1115,7 @@ function TutorialStep({
           Back
         </Button>
         <Button onClick={onFinish} fullWidth size="lg">
-          Deploy
+          Begin
         </Button>
       </div>
     </div>
@@ -1442,21 +1131,19 @@ function EvolutionStep({
   avatarBase: AvatarBase
   onContinue: () => void
 }) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
   const [showNew, setShowNew] = useState(false)
 
   const oldStage = EVOLUTION_STAGES[0] // Egg
   const newStage = EVOLUTION_STAGES[1] // Hatchling
 
-  // Get theme-aware stage names
-  const oldStageName = theme.avatarStages[0] || oldStage.name
-  const newStageName = theme.avatarStages[1] || newStage.name
+  // Get stage names from constants
+  const oldStageName = AVATAR_STAGES[0] || oldStage.name
+  const newStageName = AVATAR_STAGES[1] || newStage.name
 
   const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
     dominant: { icon: Sword, color: 'text-error' },
     switch: { icon: Wand2, color: 'text-primary' },
-    submissive: { icon: isTrained ? Zap : Moon, color: isTrained ? 'text-warning' : 'text-info' }
+    submissive: { icon: Zap, color: 'text-warning' }
   }
 
   // Trigger the evolution animation after a delay
@@ -1476,9 +1163,7 @@ function EvolutionStep({
         animate={{ opacity: showNew ? 0.3 : 0 }}
         transition={{ duration: 0.5 }}
         style={{
-          background: isTrained
-            ? 'radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, transparent 70%)'
+          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, transparent 70%)'
         }}
       />
 
@@ -1487,13 +1172,13 @@ function EvolutionStep({
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <span className={`text-sm font-semibold text-accent-primary uppercase tracking-wider ${isTrained ? 'font-heading' : ''}`}>
-          {isTrained ? 'First Advancement' : 'First Evolution!'}
+        <span className="text-sm font-semibold text-accent-primary uppercase tracking-wider font-heading">
+          First Advancement
         </span>
       </motion.div>
 
-      <h2 className={`text-2xl font-bold mb-8 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-        {isTrained ? `Welcome, ${username}.` : `Congratulations, ${username}!`}
+      <h2 className="text-2xl font-bold mb-8 font-heading uppercase tracking-wide">
+        {`Welcome, ${username}.`}
       </h2>
 
       {/* Evolution animation */}
@@ -1535,7 +1220,7 @@ function EvolutionStep({
               key="new"
               initial={{
                 scale: 0,
-                rotate: isTrained ? 0 : -180,
+                rotate: 0,
                 opacity: 0
               }}
               animate={{
@@ -1573,44 +1258,13 @@ function EvolutionStep({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className={`text-xl font-bold text-accent-primary ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}
+                className="text-xl font-bold text-accent-primary font-heading uppercase tracking-wide"
               >
                 {newStageName}
               </motion.p>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Sparkle effects when evolved - muted for Trained theme */}
-        {showNew && !isTrained && (
-          <>
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute"
-                initial={{
-                  opacity: 0,
-                  scale: 0,
-                  x: 0,
-                  y: 0
-                }}
-                animate={{
-                  opacity: [0, 1, 0],
-                  scale: [0, 1, 0],
-                  x: Math.cos((i / 8) * Math.PI * 2) * 80,
-                  y: Math.sin((i / 8) * Math.PI * 2) * 80
-                }}
-                transition={{
-                  duration: 1,
-                  delay: 0.1 * i,
-                  ease: 'easeOut'
-                }}
-              >
-                <Sparkles size={20} className="text-accent-secondary" />
-              </motion.div>
-            ))}
-          </>
-        )}
       </div>
 
       {/* Level/Rank up indicator */}
@@ -1623,8 +1277,8 @@ function EvolutionStep({
         <Card className="inline-block px-6">
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <p className={`text-xs text-text-secondary uppercase ${isTrained ? 'tracking-wider' : ''}`}>
-                {theme.labels.level}
+              <p className="text-xs text-text-secondary uppercase tracking-wider">
+                {LABELS.level}
               </p>
               <p className="text-2xl font-bold font-digital text-text-secondary">0</p>
             </div>
@@ -1633,11 +1287,11 @@ function EvolutionStep({
               transition={{ duration: 0.5, repeat: Infinity }}
               className="text-accent-primary text-xl"
             >
-              →
+              &rarr;
             </motion.div>
             <div className="text-center">
-              <p className={`text-xs text-text-secondary uppercase ${isTrained ? 'tracking-wider' : ''}`}>
-                {theme.labels.level}
+              <p className="text-xs text-text-secondary uppercase tracking-wider">
+                {LABELS.level}
               </p>
               <p className="text-2xl font-bold font-digital text-accent-primary">1</p>
             </div>
@@ -1657,9 +1311,7 @@ function EvolutionStep({
         transition={{ delay: showNew ? 0.7 : 2.2 }}
         className="text-text-secondary mb-8"
       >
-        {isTrained
-          ? 'The protocol begins now.'
-          : `Your journey begins! Keep earning ${theme.labels.xp} to evolve further.`}
+        The protocol begins now.
       </motion.p>
 
       <motion.div
@@ -1668,7 +1320,7 @@ function EvolutionStep({
         transition={{ delay: showNew ? 1 : 2.5 }}
       >
         <Button onClick={onContinue} fullWidth size="lg">
-          {isTrained ? 'Begin' : "Let's Go!"}
+          Begin
         </Button>
       </motion.div>
     </div>

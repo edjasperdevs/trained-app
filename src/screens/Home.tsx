@@ -11,15 +11,13 @@ import {
   useAvatarStore,
   useRemindersStore
 } from '@/stores'
-import { useTheme, getStandingOrder } from '@/themes'
+import { getStandingOrder, LABELS } from '@/design/constants'
 import { haptics } from '@/lib/haptics'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 
 export function Home() {
   const navigate = useNavigate()
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
 
   const profile = useUserStore((state) => state.profile)
   const { currentLevel, pendingXP, XP_VALUES, getTodayLog } = useXPStore()
@@ -45,16 +43,16 @@ export function Home() {
   const message = useMemo(() => {
     // Determine context for message selection
     if (profile?.streakPaused) {
-      return getStandingOrder(theme, 'missed')
+      return getStandingOrder('missed')
     }
     if (!todayWorkout) {
-      return getStandingOrder(theme, 'rest')
+      return getStandingOrder('rest')
     }
     if (canClaimXP) {
-      return getStandingOrder(theme, 'claim')
+      return getStandingOrder('claim')
     }
-    return getStandingOrder(theme, 'training')
-  }, [theme, profile?.streakPaused, todayWorkout, canClaimXP])
+    return getStandingOrder('training')
+  }, [profile?.streakPaused, todayWorkout, canClaimXP])
 
   // Reset justCheckedIn after animation
   useEffect(() => {
@@ -82,7 +80,7 @@ export function Home() {
   const quests = [
     {
       id: 'workout',
-      label: todayWorkout ? `Complete ${todayWorkout.name}` : (isTrained ? 'Recovery Day' : 'Rest Day'),
+      label: todayWorkout ? `Complete ${todayWorkout.name}` : 'Recovery Day',
       xp: todayWorkout ? XP_VALUES.WORKOUT : 0,
       completed: workoutCompleted || !todayWorkout,
       icon: Dumbbell,
@@ -104,7 +102,7 @@ export function Home() {
     },
     {
       id: 'checkin',
-      label: theme.labels.checkIn,
+      label: LABELS.checkIn,
       xp: XP_VALUES.CHECK_IN,
       completed: false,
       icon: CheckCircle2
@@ -114,14 +112,14 @@ export function Home() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className={`${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-white/[0.02] to-transparent'} pt-8 pb-6 px-4`}>
+      <div className="bg-surface pt-8 pb-6 px-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className={`text-text-secondary text-sm ${isTrained ? 'uppercase tracking-wider text-xs' : ''}`}>
-              {isTrained ? 'Welcome back,' : 'Welcome back,'}
+            <p className="text-text-secondary text-sm uppercase tracking-wider text-xs">
+              Welcome back,
             </p>
-            <h1 className={`text-2xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-              {profile?.username || (isTrained ? 'Trainee' : 'Champion')}
+            <h1 className="text-2xl font-bold font-heading uppercase tracking-wide">
+              {profile?.username || 'Trainee'}
             </h1>
           </div>
           {profile?.currentStreak ? (
@@ -130,7 +128,7 @@ export function Home() {
         </div>
 
         {/* Standing Order / Motivational message */}
-        <p className={`text-text-secondary text-sm ${isTrained ? '' : 'italic'}`}>{message}</p>
+        <p className="text-text-secondary text-sm">{message}</p>
       </div>
 
       <div className="px-4 space-y-6">
@@ -148,28 +146,17 @@ export function Home() {
               exit={{ opacity: 0, y: -20 }}
             >
               <Card
-                className={`cursor-pointer ${
-                  isTrained
-                    ? 'border-l-[3px] border-l-primary'
-                    : 'bg-gradient-to-r from-accent-primary/20 to-accent-secondary/20 border-accent-primary'
-                }`}
+                className="cursor-pointer border-l-[3px] border-l-primary"
                 onClick={() => setShowCheckIn(true)}
               >
                 <div className="flex items-center gap-4">
-                  <motion.div
-                    animate={isTrained ? undefined : { scale: [1, 1.2, 1] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                  >
-                    <Sparkles size={28} className="text-primary" />
-                  </motion.div>
+                  <Sparkles size={28} className="text-primary" />
                   <div className="flex-1">
-                    <p className={`font-bold text-lg ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
-                      {isTrained ? 'Daily Report Pending' : 'Daily Check-in'}
+                    <p className="font-bold text-lg font-heading uppercase tracking-wide text-base">
+                      Daily Report Pending
                     </p>
                     <p className="text-sm text-text-secondary">
-                      {isTrained
-                        ? `Complete your ${theme.labels.checkIn.toLowerCase()} to earn ${theme.labels.xp}`
-                        : `Log today's progress and earn ${theme.labels.xp}`}
+                      {`Complete your ${LABELS.checkIn.toLowerCase()} to earn ${LABELS.xp}`}
                     </p>
                   </div>
                   <motion.div
@@ -202,11 +189,11 @@ export function Home() {
                     <Trophy size={28} className="text-success" />
                   </motion.div>
                   <div className="flex-1">
-                    <p className={`font-bold text-success ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                      {isTrained ? 'Report Submitted.' : 'Build deployed.'}
+                    <p className="font-bold text-success font-heading uppercase tracking-wide">
+                      Report Submitted.
                     </p>
                     <p className="text-sm text-text-secondary">
-                      +{todayLog?.total || 0} {theme.labels.xp} {isTrained ? 'earned' : 'committed'}
+                      +{todayLog?.total || 0} {LABELS.xp} earned
                     </p>
                   </div>
                 </div>
@@ -238,41 +225,24 @@ export function Home() {
               exit={{ opacity: 0, y: -20 }}
             >
               <Card
-                className={`cursor-pointer ${
-                  isTrained
-                    ? 'border-l-[3px] border-l-warning'
-                    : 'bg-gradient-to-r from-accent-secondary/20 to-accent-primary/20 border-accent-secondary'
-                }`}
+                className="cursor-pointer border-l-[3px] border-l-warning"
                 onClick={() => setShowClaimModal(true)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <motion.div
-                      animate={isTrained ? undefined : {
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                    >
-                      <Gift size={28} className={isTrained ? 'text-warning' : 'text-accent-secondary'} />
-                    </motion.div>
+                    <Gift size={28} className="text-warning" />
                     <div>
-                      <p className={`font-bold text-lg ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
-                        {isTrained ? 'Reward Ritual Ready' : 'Weekly Release Ready'}
+                      <p className="font-bold text-lg font-heading uppercase tracking-wide text-base">
+                        Reward Ritual Ready
                       </p>
                       <p className="text-sm text-text-secondary">
-                        {pendingXP} {theme.labels.xp} {isTrained ? 'awaiting claim' : 'ready to deploy'}
+                        {pendingXP} {LABELS.xp} awaiting claim
                       </p>
                     </div>
                   </div>
-                  <motion.div
-                    animate={isTrained ? undefined : { scale: [1, 1.1, 1] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  >
-                    <Button variant="secondary">
-                      {isTrained ? 'CLAIM' : 'DEPLOY'}
-                    </Button>
-                  </motion.div>
+                  <Button variant="secondary">
+                    CLAIM
+                  </Button>
                 </div>
               </Card>
             </motion.div>
@@ -288,13 +258,11 @@ export function Home() {
             <div className="flex items-center gap-3">
               <AlertTriangle size={24} className="text-warning" />
               <div>
-                <p className={`text-warning font-semibold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                  {isTrained ? 'Safe Word Activated' : 'System downtime detected'}
+                <p className="text-warning font-semibold font-heading uppercase tracking-wide">
+                  Safe Word Activated
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {isTrained
-                    ? 'You missed yesterday. Report in today to maintain your streak.'
-                    : 'You missed yesterday. Check in today to restore uptime.'}
+                  You missed yesterday. Report in today to maintain your streak.
                 </p>
               </div>
             </div>
@@ -304,11 +272,11 @@ export function Home() {
         {/* Today's Quests / Daily Assignments */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className={`text-lg font-bold ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
-              {theme.labels.dailyQuests}
+            <h2 className="text-lg font-bold font-heading uppercase tracking-wide text-base">
+              {LABELS.dailyQuests}
             </h2>
             <span className="text-sm text-text-secondary font-mono">
-              +{potentialXP} {theme.labels.xp} possible
+              +{potentialXP} {LABELS.xp} possible
             </span>
           </div>
 
@@ -326,9 +294,7 @@ export function Home() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-8 h-8 flex items-center justify-center ${
-                        isTrained ? 'rounded' : 'rounded-lg'
-                      } ${
+                      className={`w-8 h-8 flex items-center justify-center rounded ${
                         quest.completed
                           ? 'bg-success/20'
                           : 'bg-surface-elevated'
@@ -349,7 +315,7 @@ export function Home() {
                       <span className={`text-sm font-mono font-bold ${
                         quest.completed ? 'text-success' : 'text-primary'
                       }`}>
-                        +{quest.xp} {theme.labels.xp}
+                        +{quest.xp} {LABELS.xp}
                       </span>
                     )}
                   </div>
@@ -361,14 +327,14 @@ export function Home() {
             {profile?.currentStreak ? (
               <Card className="bg-warning/10 border-warning/20" padding="sm">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 flex items-center justify-center bg-warning/20 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+                  <div className="w-8 h-8 flex items-center justify-center bg-warning/20 rounded">
                     <Flame size={18} className="text-warning" />
                   </div>
                   <div className="flex-1">
-                    <p>{isTrained ? 'Obedience Bonus' : 'Streak Bonus'} ({profile.currentStreak} days)</p>
+                    <p>Obedience Bonus ({profile.currentStreak} days)</p>
                   </div>
                   <span className="text-sm font-mono font-bold text-warning">
-                    +{streakBonus} {theme.labels.xp}
+                    +{streakBonus} {LABELS.xp}
                   </span>
                 </div>
               </Card>
@@ -378,8 +344,8 @@ export function Home() {
 
         {/* Macro Progress / Protocol Compliance */}
         <div>
-          <h2 className={`text-lg font-bold mb-3 ${isTrained ? 'font-heading uppercase tracking-wide text-base' : ''}`}>
-            {isTrained ? 'Protocol Compliance' : 'Macro Progress'}
+          <h2 className="text-lg font-bold mb-3 font-heading uppercase tracking-wide text-base">
+            Protocol Compliance
           </h2>
           {macroProgress ? (
             <Card>
@@ -418,15 +384,15 @@ export function Home() {
                 onClick={() => navigate('/macros')}
                 className="w-full flex items-center gap-3 py-2 text-left"
               >
-                <div className={`w-10 h-10 bg-surface-elevated flex items-center justify-center ${isTrained ? 'rounded' : 'rounded-full'}`}>
+                <div className="w-10 h-10 bg-surface-elevated flex items-center justify-center rounded">
                   <Beef size={20} className="text-text-secondary" />
                 </div>
                 <div className="flex-1">
-                  <p className={`font-semibold text-sm ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                    {isTrained ? 'No intake logged' : 'No meals logged yet'}
+                  <p className="font-semibold text-sm font-heading uppercase tracking-wide">
+                    No intake logged
                   </p>
                   <p className="text-xs text-text-secondary">
-                    {isTrained ? 'Log your intake to track compliance.' : 'Tap to log your first meal.'}
+                    Log your intake to track compliance.
                   </p>
                 </div>
                 <ChevronRight size={16} className="text-text-secondary" />
@@ -447,44 +413,29 @@ export function Home() {
             <div className="flex items-center justify-center gap-3 py-2">
               <CheckCircle2 size={24} className="text-success" />
               <div className="text-center">
-                <p className={`font-bold text-success ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                  {isTrained ? 'Daily Report Complete' : "Today's Build Complete"}
+                <p className="font-bold text-success font-heading uppercase tracking-wide">
+                  Daily Report Complete
                 </p>
                 <p className="text-sm text-text-secondary">
-                  +{todayLog?.total || 0} {theme.labels.xp} {isTrained ? 'earned' : 'committed'}
-                  {pendingXP > 0 && ` • ${pendingXP} ${theme.labels.xp} ${isTrained ? 'pending claim' : 'pending release'}`}
+                  +{todayLog?.total || 0} {LABELS.xp} earned
+                  {pendingXP > 0 && ` • ${pendingXP} ${LABELS.xp} pending claim`}
                 </p>
               </div>
             </div>
           </Card>
         ) : (
-          <motion.div
-            animate={isTrained ? undefined : {
-              boxShadow: [
-                '0 0 0 0 rgba(245, 158, 11, 0)',
-                '0 0 0 8px rgba(245, 158, 11, 0.2)',
-                '0 0 0 0 rgba(245, 158, 11, 0)'
-              ]
-            }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className={`mt-6 ${isTrained ? '' : 'rounded-xl'}`}
-          >
+          <div className="mt-6">
             <Button
               onClick={() => setShowCheckIn(true)}
               fullWidth
               size="lg"
             >
               <span className="flex items-center justify-center gap-2">
-                <motion.span
-                  animate={isTrained ? undefined : { rotate: [0, 10, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.5 }}
-                >
-                  <Sparkles size={20} />
-                </motion.span>
-                {isTrained ? 'Submit Daily Report' : 'Daily Check-in'}
+                <Sparkles size={20} />
+                Submit Daily Report
               </span>
             </Button>
-          </motion.div>
+          </div>
         )}
       </div>
 
