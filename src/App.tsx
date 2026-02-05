@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore } from '@/stores'
-import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton } from '@/components'
 import { ThemeProvider } from '@/themes'
 import { AccessGate, Auth } from '@/screens'
 
@@ -14,14 +14,6 @@ const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ de
 const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
 // const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach }))) // Disabled for client-only launch
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
-
-function RouteLoader() {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
-}
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -104,7 +96,7 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <Suspense fallback={<RouteLoader />}>
+        <Suspense fallback={<OnboardingSkeleton />}>
           <Routes>
             <Route path="*" element={<Onboarding />} />
           </Routes>
@@ -117,18 +109,16 @@ function AppContent() {
     <>
       <ToastContainer />
       <div className="relative">
-        <Suspense fallback={<RouteLoader />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/workouts" element={<Workouts />} />
-            <Route path="/macros" element={<Macros />} />
-            <Route path="/avatar" element={<AvatarScreen />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/coach" element={<Navigate to="/" replace />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route path="/" element={<Suspense fallback={<HomeSkeleton />}><Home /></Suspense>} />
+          <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
+          <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
+          <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
+          <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
+          <Route path="/coach" element={<Navigate to="/" replace />} />
+          <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
         <Navigation />
       </div>
     </>
