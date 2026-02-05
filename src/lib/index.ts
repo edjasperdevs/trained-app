@@ -13,7 +13,9 @@ export {
   syncWorkoutLogToCloud,
   syncXPToCloud,
   syncAllToCloud,
-  loadAllFromCloud
+  loadAllFromCloud,
+  scheduleSync,
+  flushPendingSync
 } from './sync'
 export { friendlyError } from './errors'
 export { haptics } from './haptics'

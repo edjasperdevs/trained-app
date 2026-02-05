@@ -21,6 +21,11 @@ export function friendlyError(context: string, error?: unknown): string {
     return `Couldn't ${context}. You may not have permission for this action.`
   }
 
+  // Rate limit errors
+  if (message.includes('429') || message.includes('rate limit') || message.includes('Too Many Requests')) {
+    return `Too many requests while trying to ${context}. Please wait a moment and try again.`
+  }
+
   // Generic fallback
   return `Something went wrong while trying to ${context}. Please try again.`
 }

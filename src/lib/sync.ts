@@ -7,6 +7,8 @@
  */
 
 import { supabase, getSupabaseClient } from './supabase'
+import { useSyncStore } from '@/stores/syncStore'
+import { toast } from '@/stores/toastStore'
 
 // ==========================================
 // Retry Logic with Exponential Backoff
@@ -446,4 +448,65 @@ export async function loadAllFromCloud() {
 
   if (import.meta.env.DEV) console.log('Load results:', results)
   return results
+}
+
+// ==========================================
+// Incremental Sync Scheduling
+// ==========================================
+
+let syncTimer: ReturnType<typeof setTimeout> | null = null
+
+/**
+ * Schedule a debounced sync. Call after any user action that modifies data.
+ * If offline, marks pending changes and shows "saved locally" toast.
+ * If online, debounces 2 seconds then runs syncAllToCloud with retry.
+ */
+export function scheduleSync() {
+  if (!supabase) return
+
+  const { isOnline } = useSyncStore.getState()
+
+  if (!isOnline) {
+    useSyncStore.getState().setPendingChanges(true)
+    toast.info('Saved locally. Will sync when online.')
+    return
+  }
+
+  // Debounce: if user is rapid-firing actions, batch into one sync
+  if (syncTimer) clearTimeout(syncTimer)
+  syncTimer = setTimeout(async () => {
+    const store = useSyncStore.getState()
+    store.setStatus('syncing')
+    try {
+      await syncAllToCloud()
+      store.setStatus('synced')
+      store.setPendingChanges(false)
+      store.setLastSyncedAt(new Date().toISOString())
+    } catch {
+      store.setStatus('error')
+      store.setPendingChanges(true)
+    }
+  }, 2000)
+}
+
+/**
+ * Flush any pending syncs immediately (e.g., on reconnection).
+ * Skips debounce.
+ */
+export async function flushPendingSync() {
+  if (!supabase) return
+  if (syncTimer) { clearTimeout(syncTimer); syncTimer = null }
+
+  const store = useSyncStore.getState()
+  if (!store.pendingChanges) return
+
+  store.setStatus('syncing')
+  try {
+    await syncAllToCloud()
+    store.setStatus('synced')
+    store.setPendingChanges(false)
+    store.setLastSyncedAt(new Date().toISOString())
+  } catch {
+    store.setStatus('error')
+  }
 }
