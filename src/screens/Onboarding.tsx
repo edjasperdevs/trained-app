@@ -225,15 +225,20 @@ export function Onboarding() {
     <div className="min-h-screen bg-bg-primary flex flex-col px-4 py-8">
       {/* Progress indicator */}
       {step !== 'welcome' && (
-        <div className="flex gap-1 mb-8 justify-center">
-          {steps.slice(1).map((s, i) => (
-            <div
-              key={s}
-              className={`h-1 w-8 rounded-full transition-colors ${
-                i < currentIndex ? 'bg-accent-primary' : 'bg-gray-700'
-              }`}
-            />
-          ))}
+        <div className="mb-8">
+          <p className="text-center text-xs text-text-secondary mb-2">
+            Step {currentIndex} of {steps.length - 1}
+          </p>
+          <div className="flex gap-1 justify-center">
+            {steps.slice(1).map((s, i) => (
+              <div
+                key={s}
+                className={`h-1 w-8 rounded-full transition-colors ${
+                  i < currentIndex ? 'bg-accent-primary' : 'bg-gray-700'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
