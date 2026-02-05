@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
-**Current focus:** Phase 3 - Component Primitives
+**Current focus:** Phase 3 complete. Phase 4 - Screen Layouts next.
 
 ## Current Position
 
-Phase: 3 of 7 (Component Primitives)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-05 -- Completed 03-01-PLAN.md (CVA component primitives rewrite)
+Phase: 3 of 7 (Component Primitives) -- COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-05 -- Completed 03-02-PLAN.md (unified input styling and glow cleanup)
 
-Progress: [████████░░░░░░░░░░░░] 50% (6/12 plans)
+Progress: [██████████░░░░░░░░░░] 58% (7/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 10min
-- Total execution time: 0.93 hours
+- Total plans completed: 7
+- Average duration: 9min
+- Total execution time: 1.02 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████░░░░░░░░░░░░] 50% (6/
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 32min | 16min |
 | 02-theme-removal | 3/3 | 19min | 6.3min |
-| 03-component-primitives | 1/2 | 5min | 5min |
+| 03-component-primitives | 2/2 | 10min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 7min, 25min, 7min, 4min, 5min
+- Last 5 plans: 25min, 7min, 4min, 5min, 5min
 - Trend: fast
 
 *Updated after each plan completion*
@@ -74,6 +74,10 @@ Recent decisions affecting current work:
 - [03-01]: Card elevated variant gets shadow-card for premium depth without glass
 - [03-01]: buttonVariants/cardVariants exported from barrel for link-as-button patterns
 - [03-01]: .glass and .glass-elevated CSS removed; .glass-subtle preserved for Settings cleanup later
+- [03-02]: .input-base uses var(--color-surface) background for consistency with Card
+- [03-02]: Global focus-visible uses outline for non-inputs; input-base suppresses double focus indicator
+- [03-02]: .glass-subtle removed (all 6 Settings usages replaced with solid bg-surface)
+- [03-02]: All 10 glow utility classes removed (zero TSX references existed)
 
 ### Pending Todos
 
@@ -85,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T20:08:32Z
-Stopped at: Completed 03-01-PLAN.md (CVA component primitives rewrite). Plan 03-02 next.
+Last session: 2026-02-05T20:16:23Z
+Stopped at: Completed 03-02-PLAN.md (unified input styling and glow cleanup). Phase 3 complete. Phase 4 next.
 Resume file: None
