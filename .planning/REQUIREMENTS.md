@@ -22,9 +22,9 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 ### Theme Removal
 
-- [ ] **THEME-01**: Remove all `isTrained` branching (394 ternaries across 21 files) -- resolve to Trained values
-- [ ] **THEME-02**: Delete GYG theme, ThemeProvider, useTheme hook, theme toggle
-- [ ] **THEME-03**: Add localStorage migration for `app-theme` key on boot
+- [x] **THEME-01**: Remove all `isTrained` branching (394 ternaries across 21 files) -- resolve to Trained values
+- [x] **THEME-02**: Delete GYG theme, ThemeProvider, useTheme hook, theme toggle
+- [x] **THEME-03**: Add localStorage migration for `app-theme` key on boot
 
 ### Visual Refresh -- Components
 
@@ -91,9 +91,9 @@ Deferred to post-refresh.
 | FOUND-04 | Phase 1: Foundation | Complete |
 | FOUND-05 | Phase 1: Foundation | Complete |
 | FOUND-06 | Phase 1: Foundation | Complete |
-| THEME-01 | Phase 2: Theme Removal | Pending |
-| THEME-02 | Phase 2: Theme Removal | Pending |
-| THEME-03 | Phase 2: Theme Removal | Pending |
+| THEME-01 | Phase 2: Theme Removal | Complete |
+| THEME-02 | Phase 2: Theme Removal | Complete |
+| THEME-03 | Phase 2: Theme Removal | Complete |
 | VIS-01 | Phase 3: Component Primitives | Pending |
 | VIS-02 | Phase 3: Component Primitives | Pending |
 | VIS-03 | Phase 3: Component Primitives | Pending |
@@ -118,4 +118,4 @@ Deferred to post-refresh.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 -- Phase mappings added*
+*Last updated: 2026-02-05 -- Phase 2 requirements marked complete*
