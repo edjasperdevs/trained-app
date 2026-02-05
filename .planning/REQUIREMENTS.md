@@ -35,11 +35,11 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 ### Visual Refresh -- Screens
 
-- [ ] **SCREEN-01**: Apply premium typography scale across all screens (3-4 sizes, weight-driven hierarchy)
-- [ ] **SCREEN-02**: Fix uppercase overuse (restrict to section headers and primary CTAs only)
-- [ ] **SCREEN-03**: Apply generous spacing system (20-24px screen padding, 16-24px card padding)
-- [ ] **SCREEN-04**: Convert CheckInModal and XPClaimModal to bottom sheet pattern
-- [ ] **SCREEN-05**: Update skeleton loading and empty state colors to match new palette
+- [x] **SCREEN-01**: Apply premium typography scale across all screens (3-4 sizes, weight-driven hierarchy)
+- [x] **SCREEN-02**: Fix uppercase overuse (restrict to section headers and primary CTAs only)
+- [x] **SCREEN-03**: Apply generous spacing system (20-24px screen padding, 16-24px card padding)
+- [x] **SCREEN-04**: Convert CheckInModal and XPClaimModal to bottom sheet pattern
+- [x] **SCREEN-05**: Update skeleton loading and empty state colors to match new palette
 
 ### Animation
 
@@ -98,11 +98,11 @@ Deferred to post-refresh.
 | VIS-02 | Phase 3: Component Primitives | Complete |
 | VIS-03 | Phase 3: Component Primitives | Complete |
 | VIS-04 | Phase 3: Component Primitives | Complete |
-| SCREEN-01 | Phase 4: Screen Refresh | Pending |
-| SCREEN-02 | Phase 4: Screen Refresh | Pending |
-| SCREEN-03 | Phase 4: Screen Refresh | Pending |
-| SCREEN-04 | Phase 4: Screen Refresh | Pending |
-| SCREEN-05 | Phase 4: Screen Refresh | Pending |
+| SCREEN-01 | Phase 4: Screen Refresh | Complete |
+| SCREEN-02 | Phase 4: Screen Refresh | Complete |
+| SCREEN-03 | Phase 4: Screen Refresh | Complete |
+| SCREEN-04 | Phase 4: Screen Refresh | Complete |
+| SCREEN-05 | Phase 4: Screen Refresh | Complete |
 | ANIM-01 | Phase 5: Animation Refinement | Pending |
 | ANIM-02 | Phase 5: Animation Refinement | Pending |
 | ANIM-03 | Phase 5: Animation Refinement | Pending |
@@ -118,4 +118,4 @@ Deferred to post-refresh.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 -- Phase 3 requirements marked complete*
+*Last updated: 2026-02-05 -- Phase 4 requirements marked complete*
