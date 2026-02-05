@@ -82,12 +82,11 @@ Plans:
 2. Food search falls back to Open Food Facts when USDA rate limits
 3. Failed cloud syncs retry automatically with exponential backoff
 4. User sees clear sync status indicator (synced/syncing/offline)
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: Graceful network failure handling
-- [ ] 04-02: Food API fallback implementation
-- [ ] 04-03: Sync retry logic with status indicator
+- [ ] 04-01-PLAN.md -- syncStore, offline detection, incremental sync triggers, "saved locally" feedback
+- [ ] 04-02-PLAN.md -- Food API 429 cooldown, SyncStatusIndicator component
 
 ---
 
@@ -116,7 +115,7 @@ Plans:
 | 1. Audit & Discovery | 1/1 | Complete | 2026-02-04 |
 | 2. Performance Foundation | 2/2 | Complete | 2026-02-05 |
 | 3. UX Polish | 3/3 | Complete | 2026-02-05 |
-| 4. Resilience Hardening | 0/3 | Not started | - |
+| 4. Resilience Hardening | 0/2 | Not started | - |
 | 5. Launch Preparation | 0/3 | Not started | - |
 
 ---
