@@ -19,7 +19,7 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 - [x] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
 - [x] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
 - [x] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
-- [ ] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
+- [x] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
 - [ ] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
 - [ ] **Phase 7: Deploy** - Service worker strategy, "What's New" interstitial
 
@@ -106,7 +106,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: Replace bouncy springs with critically damped; remove playful keyframes; verify reduced-motion compliance
+- [x] 05-01: Replace bouncy springs with critically damped; remove playful keyframes; verify reduced-motion compliance
 
 ---
 
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 2. Theme Removal | 3/3 | Complete | 2026-02-05 |
 | 3. Component Primitives | 2/2 | Complete | 2026-02-05 |
 | 4. Screen Refresh | 2/2 | Complete | 2026-02-05 |
-| 5. Animation Refinement | 0/1 | Not started | - |
+| 5. Animation Refinement | 1/1 | Complete | 2026-02-05 |
 | 6. Cleanup | 0/1 | Not started | - |
 | 7. Deploy | 0/1 | Not started | - |
 

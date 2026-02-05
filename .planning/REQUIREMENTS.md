@@ -43,9 +43,9 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 ### Animation
 
-- [ ] **ANIM-01**: Replace bouncy animations with critically damped springs (damping 25-30, stiffness 300+)
-- [ ] **ANIM-02**: Remove playful keyframe animations (float, xp-pop); mute pulse-glow
-- [ ] **ANIM-03**: Ensure `prefers-reduced-motion` compliance via motion v12
+- [x] **ANIM-01**: Replace bouncy animations with critically damped springs (damping 25-30, stiffness 300+)
+- [x] **ANIM-02**: Remove playful keyframe animations (float, xp-pop); mute pulse-glow
+- [x] **ANIM-03**: Ensure `prefers-reduced-motion` compliance via motion v12
 
 ### Cleanup & Deploy
 
@@ -103,9 +103,9 @@ Deferred to post-refresh.
 | SCREEN-03 | Phase 4: Screen Refresh | Complete |
 | SCREEN-04 | Phase 4: Screen Refresh | Complete |
 | SCREEN-05 | Phase 4: Screen Refresh | Complete |
-| ANIM-01 | Phase 5: Animation Refinement | Pending |
-| ANIM-02 | Phase 5: Animation Refinement | Pending |
-| ANIM-03 | Phase 5: Animation Refinement | Pending |
+| ANIM-01 | Phase 5: Animation Refinement | Complete |
+| ANIM-02 | Phase 5: Animation Refinement | Complete |
+| ANIM-03 | Phase 5: Animation Refinement | Complete |
 | CLEAN-01 | Phase 6: Cleanup | Pending |
 | CLEAN-02 | Phase 6: Cleanup | Pending |
 | DEPLOY-01 | Phase 7: Deploy | Pending |
