@@ -1,257 +1,203 @@
 # Phase 3: UX Polish - Research
 
 **Researched:** 2026-02-05
-**Domain:** React UX patterns (skeleton loading, empty states, error messages, haptic feedback, onboarding progress)
-**Confidence:** HIGH (all patterns verified against existing codebase; no new dependencies needed)
+**Domain:** React PWA UX patterns (skeleton loading, empty states, error handling, haptic feedback, onboarding progress)
+**Confidence:** HIGH
 
 ## Summary
 
-Phase 3 is about improving perceived quality. The app already has all the infrastructure needed -- Tailwind CSS with `animate-pulse`, Framer Motion for transitions, a toast system for feedback, and a basic `Skeleton` component. The work is extending existing patterns, not building new systems.
+Phase 3 is a UX polish pass across five distinct areas: skeleton loading states, empty states, error messages, haptic feedback, and onboarding progress. The codebase already has foundational infrastructure for most of these -- a `Skeleton` component (unused), a toast system, an `ErrorBoundary`, and onboarding progress dots -- but they are either unused, incomplete, or not user-friendly enough.
 
-The codebase currently uses loading spinners (`RouteLoader` in App.tsx) for lazy-loaded routes and has no per-screen skeleton states. Empty states exist inconsistently -- the Macros DailyView has one, the Workouts history has one, but Achievements has a minimal one and the Home screen's macro section has a basic CTA. Error messages are functional but inconsistent -- some say "Failed to X" without recovery guidance while others are more helpful.
+The existing tech stack (Framer Motion ^11.0.8, Tailwind CSS ^3.4.3, Zustand ^4.5.2, Lucide React ^0.563.0) provides everything needed. **No new dependencies are required.** The critical finding from the codebase audit is that most screens (Home, Workouts, Macros, Achievements, Settings) read data synchronously from Zustand localStorage stores and render instantly. Only 3 actual async loading points exist: the `RouteLoader` Suspense fallback, the auth loading state, and the Coach screen's Supabase fetch. Skeletons should target only these real loading states, not create artificial loading where none exists.
 
-**Primary recommendation:** Build screen-specific skeleton components that mirror each screen's card layout, create a reusable `EmptyState` component with icon + message + CTA pattern, create an error message helper that generates user-friendly toast messages, add a `haptics.ts` utility with feature detection, and enhance the existing onboarding progress indicator with a text label.
+**Primary recommendation:** This is a code-touch-heavy but low-risk phase. Every plan involves editing existing files, not creating new infrastructure. Extend the existing `Skeleton.tsx`, create a small `haptics.ts` utility (~15 lines), improve error message strings in catch blocks, add actionable CTAs to empty states, and enhance the onboarding progress dots with "Step X of Y" text.
 
 ## Standard Stack
 
 ### Core (Already Installed -- No New Dependencies)
-
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
-| Tailwind CSS | ^3.4.3 | `animate-pulse` for skeleton shimmer | Already used for the Skeleton component |
-| Framer Motion | ^11.0.8 | AnimatePresence for skeleton-to-content transitions | Already used throughout the app |
-| Zustand | ^4.5.2 | Toast store for error feedback | Already the state management solution |
-| Lucide React | ^0.563.0 | Icons for empty states | Already used throughout |
+| Tailwind CSS | ^3.4.3 | `animate-pulse` for skeleton shimmer | Already used in `Skeleton.tsx`; `shimmer` keyframe also defined in `tailwind.config.js` |
+| Framer Motion | ^11.0.8 | AnimatePresence for skeleton-to-content transitions | Already used in every screen |
+| Zustand | ^4.5.2 | Toast store for error feedback | Existing `toastStore.ts` with `toast.error/success/warning/info` helpers |
+| Lucide React | ^0.563.0 | Icons for empty states | Already used throughout all screens |
 
 ### Supporting (Already Available)
-
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| Navigator.vibrate | Web API | Haptic feedback | On set completion, workout finish |
-| Tailwind keyframes | Built-in | `shimmer` animation already defined | For enhanced skeleton shimmer effect |
+| Navigator.vibrate | Web API | Haptic feedback on Android/Chrome | On set completion, workout finish, check-in, XP claim |
+| Tailwind `animate-pulse` | Built-in | Skeleton shimmer effect | Already used in `Skeleton.tsx` line 7 |
+| Tailwind `shimmer` keyframe | Custom in config | Enhanced shimmer animation | Defined in `tailwind.config.js` lines 76-96 |
 
 ### Alternatives Considered
-
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
-| Custom skeleton | react-loading-skeleton | Adds dependency; app's existing Skeleton.tsx + Tailwind `animate-pulse` is sufficient for the card-based layout |
-| navigator.vibrate | No alternative for web | Only API available; graceful fallback needed |
+| Custom Skeleton.tsx | react-loading-skeleton npm package | Adds dependency for ~20 lines of existing code that works fine |
+| navigator.vibrate() | ios-haptics library (Safari 17.4+ checkbox hack) | Adds iOS support but uses fragile browser hack; not worth the risk for non-critical feature |
+| Existing ErrorBoundary + toast | react-error-boundary | Adds dependency; existing class component + Zustand toast covers all cases |
 
-**Installation:** None required. All tools already in the project.
+**Installation:**
+```bash
+# No new packages needed. Everything is already installed.
+```
 
 ## Architecture Patterns
 
-### Recommended Project Structure
-
+### Recommended File Changes
 ```
 src/
-  components/
-    Skeleton.tsx          # EXTEND existing - add screen-specific skeletons
-    EmptyState.tsx        # NEW - reusable empty state component
-    ErrorBoundary.tsx     # EXISTS - already has fallback UI
-  lib/
-    haptics.ts            # NEW - haptic feedback utility
-    errors.ts             # NEW - user-friendly error message helpers
-  screens/
-    Home.tsx              # ADD skeleton + empty states
-    Workouts.tsx          # ADD skeleton + empty states
-    Macros.tsx            # ENHANCE existing empty state
-    Achievements.tsx      # ADD skeleton + enhance empty state
-    AvatarScreen.tsx      # ADD skeleton
-    Onboarding.tsx        # ENHANCE progress indicator
+├── components/
+│   └── Skeleton.tsx          # EXTEND: Add route-level skeleton variants (SkeletonPage, SkeletonCoach)
+├── lib/
+│   └── haptics.ts            # NEW: ~15-line utility for haptic feedback abstraction
+├── screens/
+│   ├── Workouts.tsx          # EDIT: Enhance empty state for workout history (add CTA)
+│   ├── Macros.tsx            # EDIT: Enhance DailyView empty state (add button), MealsView (add button)
+│   ├── Achievements.tsx      # EDIT: Empty filter state is fine as-is (no actionable change in filter context)
+│   ├── Coach.tsx             # EDIT: Replace spinner with skeleton, improve error messages
+│   ├── Onboarding.tsx        # EDIT: Add "Step X of Y" text to progress indicator
+│   ├── CheckInModal.tsx      # EDIT: Add haptic on submit
+│   └── Settings.tsx          # EDIT: Improve error message strings
+├── App.tsx                   # EDIT: Replace RouteLoader spinner with skeleton, replace auth spinner
+├── stores/
+│   └── authStore.ts          # EDIT: Improve sync error message strings
+└── screens/
+    └── Auth.tsx              # EDIT: Improve error message strings
 ```
 
-### Pattern 1: Screen-Specific Skeleton Components
+### Pattern 1: Skeleton Variants for Real Async Loading Points
+**What:** Create named skeleton variants that match the visual structure of content behind actual loading states.
+**When to use:** ONLY where there is a real async boundary -- Suspense fallback, auth loading, or API fetch.
+**Key insight from audit:** Most screens render synchronously from Zustand localStorage stores. Only 3 spots need skeletons:
 
-**What:** Each screen gets a skeleton that mirrors its actual layout with pulse-animated placeholder shapes.
-**When to use:** Any screen that loads data from Zustand stores.
-**Why:** The existing `RouteLoader` in App.tsx shows a generic spinner for lazy-loaded routes. Screen-specific skeletons maintain spatial layout and reduce perceived load time.
+| Loading Point | File | Line | Current UI | Skeleton Needed |
+|---------------|------|------|-----------|----------------|
+| Route lazy loading | `App.tsx` RouteLoader | 18-24 | CSS spinner `animate-spin` | Generic page skeleton |
+| Auth initialization | `App.tsx` authLoading | 66-78 | CSS spinner + "Loading..." | Centered skeleton |
+| Coach client list | `Coach.tsx` isLoading | 216-225 | Emoji + "Loading clients..." | Dashboard skeleton |
 
-**Current state (spinner in App.tsx, line 18-24):**
+**FoodSearch.tsx** (line 365-373) has a small inline spinner in the search input -- this is appropriate for inline search and should stay. Optionally add skeleton result rows.
+
+**Example:**
 ```typescript
-function RouteLoader() {
+// In Skeleton.tsx -- extend existing component
+export function SkeletonPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  )
-}
-```
-
-**Target pattern:**
-```typescript
-// src/components/Skeleton.tsx - extend existing file
-export function HomeSkeleton() {
-  return (
-    <div className="min-h-screen bg-bg-primary pb-20">
-      {/* Header skeleton */}
+    <div className="min-h-screen bg-background pb-20">
       <div className="pt-8 pb-6 px-4">
-        <Skeleton className="h-4 w-24 mb-2" />
-        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-8 w-1/3 mb-2" />
+        <Skeleton className="h-4 w-1/2" />
       </div>
-      <div className="px-4 space-y-6">
-        {/* Avatar + XP card skeleton */}
+      <div className="px-4 space-y-4">
         <SkeletonCard />
-        {/* Weekly summary skeleton */}
         <SkeletonCard />
-        {/* Quests skeleton */}
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map(i => (
-            <Skeleton key={i} className="h-14 w-full rounded-lg" />
-          ))}
-        </div>
+        <SkeletonCard />
       </div>
     </div>
   )
 }
 ```
 
-**Transition pattern (Framer Motion fade):**
+### Pattern 2: Empty State with Actionable Guidance
+**What:** Every data-dependent empty state shows icon + descriptive text + action button.
+**When to use:** When a list or data view has no items to display AND the user can take action to populate it.
+
+**Current audit of empty states:**
+| Location | File:Line | Has Icon | Has Text | Has Action CTA | Needs Work |
+|----------|-----------|----------|----------|----------------|------------|
+| Home no macros | `Home.tsx:414-434` | Yes (Beef) | Yes | Yes (navigate /macros) | Fine as-is |
+| Workouts no history | `Workouts.tsx:432-437` | No (text only) | Yes | **No** | **Add CTA** |
+| Workouts rest day | `Workouts.tsx:301-312` | Yes (emoji) | Yes | No (appropriate) | Fine as-is |
+| Macros DailyView no targets | `Macros.tsx:135-143` | Yes (emoji) | Yes | **No button** | **Add "Set Up Macros" button** |
+| Macros MealsView no plan | `Macros.tsx:381-389` | Yes (icon) | Yes | **No button** | **Add "Go to Calculator" button** |
+| Macros LogMealView no meals | `Macros.tsx:806-813` | Yes (icon) | Yes | No (Create button above) | Fine -- CTA already on page |
+| Achievements empty filter | `Achievements.tsx:365-370` | Yes (icon) | Minimal | No | Fine -- filter context |
+| Coach no clients | `Coach.tsx:293-299` | Yes (emoji) | Yes | Yes (Add Client) | Already good |
+| Settings no weight history | `Settings.tsx:583-586` | No | Minimal text | No | Minor -- add encouragement |
+
+**Consistent pattern:**
 ```typescript
-// When data is ready, cross-fade from skeleton to content
-<AnimatePresence mode="wait">
-  {isLoading ? (
-    <motion.div key="skeleton" exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-      <HomeSkeleton />
-    </motion.div>
-  ) : (
-    <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <HomeContent />
-    </motion.div>
-  )}
-</AnimatePresence>
-```
-
-**Important nuance for this app:** Since all data comes from Zustand with localStorage persistence, "loading" is almost instant on subsequent visits. The skeleton primarily helps with:
-1. The `Suspense` fallback when lazy-loaded routes first load (code splitting)
-2. First-visit experience before stores are hydrated
-3. Any future async data fetching (e.g., if coach features add API calls)
-
-The `RouteLoader` in `App.tsx` should be replaced with screen-specific skeleton fallbacks in the `Suspense` wrappers.
-
-### Pattern 2: Reusable EmptyState Component
-
-**What:** A consistent component for "no data yet" screens with icon, message, and CTA.
-**When to use:** Workouts history, Macros daily view, Achievements (filtered), any list that can be empty.
-
-**Pattern:**
-```typescript
-// src/components/EmptyState.tsx
-interface EmptyStateProps {
-  icon: LucideIcon
-  title: string
-  description: string
-  action?: {
-    label: string
-    onClick: () => void
-  }
-}
-
-export function EmptyState({ icon: Icon, title, description, action }: EmptyStateProps) {
-  return (
-    <div className="text-center py-12">
-      <div className="w-16 h-16 bg-surface-elevated rounded-full flex items-center justify-center mx-auto mb-4">
-        <Icon size={28} className="text-text-secondary" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-text-secondary text-sm mb-6 max-w-xs mx-auto">{description}</p>
-      {action && (
-        <Button onClick={action.onClick}>{action.label}</Button>
-      )}
-    </div>
-  )
-}
+<Card className="text-center py-8">
+  <Icon size={40} className="mx-auto mb-4 text-text-secondary" />
+  <p className="text-xl font-bold mb-2">{title}</p>
+  <p className="text-text-secondary mb-4">{description}</p>
+  {actionLabel && <Button onClick={onAction}>{actionLabel}</Button>}
+</Card>
 ```
 
 ### Pattern 3: Haptic Feedback Utility
+**What:** A thin wrapper around `navigator.vibrate()` that gracefully degrades on unsupported browsers.
+**When to use:** Key user actions identified in success criteria: set completion, workout finish.
+**Browser support:** 81% global (Chrome, Firefox, Edge on Android). No Safari/iOS support.
 
-**What:** A thin wrapper around `navigator.vibrate()` with feature detection and predefined patterns.
-**When to use:** Set completion, workout finish, XP claim, check-in completion.
-
-**Pattern:**
 ```typescript
 // src/lib/haptics.ts
-const canVibrate = typeof navigator !== 'undefined' && 'vibrate' in navigator
+function vibrate(pattern: number | number[]): void {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern)
+    } catch {
+      // Silently fail -- haptics are enhancement, not requirement
+    }
+  }
+}
 
 export const haptics = {
-  /** Light tap - set completion, toggle */
-  light: () => canVibrate && navigator.vibrate(10),
-
-  /** Medium tap - action confirmed */
-  medium: () => canVibrate && navigator.vibrate(25),
-
-  /** Success pattern - workout complete, achievement unlocked */
-  success: () => canVibrate && navigator.vibrate([15, 50, 30]),
-
-  /** Heavy - important milestone like XP claim */
-  heavy: () => canVibrate && navigator.vibrate(50),
-
-  /** Error buzz */
-  error: () => canVibrate && navigator.vibrate([50, 30, 50]),
+  /** Light tap -- set completion, toggle */
+  light: () => vibrate(10),
+  /** Medium tap -- button press confirmation */
+  medium: () => vibrate(25),
+  /** Heavy tap -- workout complete, XP claim */
+  heavy: () => vibrate(50),
+  /** Success pattern -- check-in submitted, badge earned */
+  success: () => vibrate([10, 50, 20]),
+  /** Error pattern -- validation error */
+  error: () => vibrate([50, 100, 50]),
+  /** Check if haptics are supported on this device */
+  isSupported: () => typeof navigator !== 'undefined' && 'vibrate' in navigator,
 }
 ```
 
-**Important notes on Navigator.vibrate():**
-- Only works on Android devices (Safari/iOS does not support it -- [MDN source](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate))
-- Requires "sticky user activation" (user must have interacted with the page)
-- Always call as a result of a user action (click handler), never on page load
-- Returns `boolean` -- `true` if successful, `false` if not
-- Graceful no-op on unsupported platforms (desktop, iOS) when using the feature detection wrapper above
+**Haptic trigger points (from code audit):**
+| Action | File | Function | Haptic Type | Rationale |
+|--------|------|----------|-------------|-----------|
+| Complete a set | `Workouts.tsx` | `handleCompleteSet` (line 187-191) | `haptics.light` | Frequent action, subtle feedback |
+| Finish workout | `Workouts.tsx` | `handleCompleteWorkout` (line 96-124) | `haptics.success` | Major milestone |
+| End workout early | `Workouts.tsx` | `handleEndWorkoutEarly` (line 126-166) | `haptics.medium` | Partial completion |
+| Submit check-in | `CheckInModal.tsx` | `handleSubmit` (line 89-153) | `haptics.success` | Daily milestone |
+| Claim weekly XP | `XPClaimModal.tsx` | claim action | `haptics.heavy` | Major reward moment |
+| Badge unlocked | `CheckInModal.tsx` / `Workouts.tsx` | badge toast | `haptics.success` | Achievement unlocked |
 
 ### Pattern 4: User-Friendly Error Messages
+**What:** Replace generic error messages with ones that explain what happened AND what to do next.
+**When to use:** All `toast.error()` calls and inline error states.
 
-**What:** Replace technical error messages with human-readable ones that explain what happened and what to do.
-**When to use:** All toast.error() calls, ErrorBoundary fallback, form validation.
+**Error message audit with improvements:**
+| File:Line | Current Message | Improved Message |
+|-----------|----------------|-----------------|
+| `Coach.tsx:79` | "Failed to load clients" | "Couldn't load your clients. Try pulling down to refresh." |
+| `Coach.tsx:187` | "Failed to remove client" | "Couldn't remove this client. Please try again." |
+| `Auth.tsx:89` | "No internet connection" | "No internet connection. Connect to the internet and try again." |
+| `Settings.tsx:183` | "Failed to export data" | "Couldn't export your data. Your progress is still safe -- try again." |
+| `Settings.tsx:223` | "Invalid JSON format" | "This file doesn't look right. Make sure it's a .json backup from this app." |
+| `Settings.tsx:193` | "Invalid backup file format" | "This doesn't look like a backup file. Export your data first to create one." |
+| `Settings.tsx:250` | "Failed to reset progress" | "Couldn't reset your data. Try reloading the page and trying again." |
+| `ErrorBoundary.tsx:55-56` | "Something went wrong" | Keep, but enhance the subtitle: "Don't worry -- your data is safe. Try the options below." |
 
-**Current error messages in the codebase (from grep):**
-- `"Failed to export data"` -- no guidance on what to do
-- `"Invalid backup file format"` -- no guidance on what format is expected
-- `"Invalid JSON format"` -- technical jargon
-- `"Failed to load clients"` -- no recovery action
-- `"Failed to sync data. Changes saved locally."` -- this one is actually good (explains impact)
-
-**Target pattern for error messages:**
-```typescript
-// src/lib/errors.ts
-export function friendlyError(context: string, error?: Error): string {
-  // Network errors
-  if (error?.message?.includes('fetch') || error?.message?.includes('network')) {
-    return `Couldn't ${context}. Check your internet connection and try again.`
-  }
-  // Storage errors
-  if (error?.message?.includes('storage') || error?.message?.includes('quota')) {
-    return `Couldn't ${context}. Your device storage may be full. Try clearing some browser data.`
-  }
-  // Generic
-  return `Something went wrong while trying to ${context}. Please try again.`
-}
-```
+**Messages that are already good (keep as-is):**
+- `Coach.tsx:76`: "Unable to load clients - check your internet" -- has action
+- `authStore.ts:173`: "Failed to sync data. Changes saved locally." -- has reassurance
+- `Auth.tsx:63`: Long email confirmation message -- clear and specific
 
 ### Pattern 5: Onboarding Progress Indicator Enhancement
+**What:** Add "Step X of Y" text alongside the existing dot indicators.
+**Current state:** Onboarding.tsx line 228-237 shows horizontal bar segments that fill as the user progresses. No text label. Steps array: `['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'avatar', 'features', 'tutorial']` (10 total, 9 shown in progress bar after welcome).
 
-**What:** Add a text label ("Step X of Y") alongside the existing dot indicators.
-**Current state:** The onboarding already has a progress bar with dot indicators (line 227-237 of Onboarding.tsx). It shows horizontal bars that fill as you progress. The current implementation does NOT show step numbers.
-
-**Enhancement needed:**
 ```typescript
-// Current (lines 227-237):
-{step !== 'welcome' && (
-  <div className="flex gap-1 mb-8 justify-center">
-    {steps.slice(1).map((s, i) => (
-      <div
-        key={s}
-        className={`h-1 w-8 rounded-full transition-colors ${
-          i < currentIndex ? 'bg-accent-primary' : 'bg-gray-700'
-        }`}
-      />
-    ))}
-  </div>
-)}
-
-// Enhanced:
+// Enhanced progress indicator
 {step !== 'welcome' && step !== 'evolution' && (
   <div className="mb-8">
-    <p className="text-center text-xs text-text-secondary mb-2">
+    <p className="text-center text-xs text-text-secondary mb-3">
       Step {currentIndex} of {steps.length - 1}
     </p>
     <div className="flex gap-1 justify-center">
@@ -269,169 +215,179 @@ export function friendlyError(context: string, error?: Error): string {
 ```
 
 ### Anti-Patterns to Avoid
-
-- **Full-screen skeleton for persistent data:** Since Zustand stores hydrate from localStorage, data is usually available immediately. Only show skeletons for the `Suspense` fallback (code splitting), not as an "initial data load" pattern.
-- **Overly long vibrations:** Keep haptic patterns under 100ms total. Users should feel a tap, not a massage.
-- **Generic empty states:** "No data" is not helpful. Always explain WHAT is empty, WHY it might be empty, and HOW to populate it.
-- **Multiple CTAs in empty states:** Focus on a single primary action. Don't overwhelm users in an empty state.
-- **Technical error messages:** Never expose raw error.message to users. Always translate through a friendly helper.
+- **Skeleton on synchronous data:** Home, Workouts, Macros, Achievements, Settings read from Zustand localStorage -- they render instantly. Adding skeletons would be theater, not UX improvement. Only add skeletons where there's a real async loading delay.
+- **Over-vibrating:** Don't add haptics to every button tap. Reserve for milestone moments per the success criteria: set completion, workout finish.
+- **Generic empty states:** "No data" with no action is useless. Always include a CTA button when the user can take action.
+- **Error messages without recovery:** "Something went wrong" tells the user nothing. Always include what to try next.
+- **Technical jargon in errors:** Replace "Invalid JSON format" with plain English that a non-developer understands.
 
 ## Don't Hand-Roll
 
 | Problem | Don't Build | Use Instead | Why |
 |---------|-------------|-------------|-----|
-| Skeleton animation | Custom CSS keyframe shimmer | Tailwind `animate-pulse` (already exists) | Already defined, consistent, zero-config |
-| Route-level loading | Custom loading state management | React `Suspense` + lazy() (already set up) | Already configured in App.tsx |
-| Toast notifications | Custom notification system | Existing `toast.error/success/etc` | Already built with Framer Motion animations |
-| Vibration patterns | Raw navigator.vibrate calls | Centralized `haptics.ts` utility | Feature detection + predefined patterns in one place |
-| Error boundaries | Custom try/catch wrappers | Existing `ErrorBoundary` component | Already handles retry + reload |
+| Skeleton animation | Custom CSS keyframes | Tailwind `animate-pulse` (already in Skeleton.tsx) | Built-in, consistent, zero maintenance |
+| Toast system | Custom notification system | Existing `toastStore.ts` + `Toast.tsx` | Already built with Framer Motion, themed for both themes |
+| Error boundary | Custom try/catch wrappers | Existing `ErrorBoundary.tsx` component | Already wraps entire app, has retry + reload |
+| Progress indicator | Custom step tracker | Enhance existing onboarding dots in `Onboarding.tsx` | Already works, just needs text label |
+| Haptic patterns | Complex vibration library | `navigator.vibrate()` with ~15-line wrapper | No dependency needed; covers all use cases |
+| Reusable EmptyState | Could create shared component | Inline pattern in each screen | Only 3-4 screens need changes; a shared component is over-engineering for this scope |
 
-**Key insight:** This phase adds zero new dependencies. Every UX improvement builds on existing infrastructure (Tailwind animations, Framer Motion, Zustand toast store, Suspense boundaries). The value is in consistent application of patterns, not new technology.
+**Key insight:** This phase adds zero new dependencies. Every UX improvement builds on existing infrastructure. The value is in consistent application of patterns, not new technology.
 
 ## Common Pitfalls
 
-### Pitfall 1: Skeleton Layout Mismatch
+### Pitfall 1: Adding Skeletons Where Data Is Synchronous
+**What goes wrong:** Developer adds skeleton to Workouts or Macros screen, but data loads from localStorage via Zustand instantly. Users see a flash of skeleton for 0ms, causing layout shift.
+**Why it happens:** Assumption that "all screens need skeletons." The requirement says "all data-loading screens," but most screens in this app have no loading state.
+**How to avoid:** From the audit, only 3 places have actual async loading (RouteLoader, auth, Coach). Only add skeletons there.
+**Warning signs:** If you can't find an `isLoading` state or `Suspense` boundary in a screen, it doesn't need a skeleton.
 
-**What goes wrong:** Skeleton doesn't match the actual content layout, causing a jarring "jump" when data loads.
-**Why it happens:** Skeleton shapes are designed independently of the actual component.
-**How to avoid:** Build skeleton components by referencing the exact Card/section structure of each screen. Match heights, widths, padding, and spacing exactly.
-**Warning signs:** Content shifts position when transitioning from skeleton to real content.
+### Pitfall 2: Haptics on iOS Safari
+**What goes wrong:** `navigator.vibrate()` silently fails on iOS Safari. Developer tests on Android, ships, half the users get no feedback.
+**Why it happens:** Safari has never supported the Vibration API. As of 2026, it still doesn't (confirmed via Can I Use -- 0% Safari support across all versions).
+**How to avoid:** Accept this gracefully. The utility wrapper silently falls back to no-op. Haptics are a progressive enhancement. The `haptics.isSupported()` check can optionally hide a "Haptic Feedback" toggle in Settings for unsupported devices.
+**Warning signs:** `'vibrate' in navigator` returns `false` on Safari.
 
-### Pitfall 2: Haptic Feedback on iOS
+### Pitfall 3: Empty State Flash on First Render
+**What goes wrong:** Component renders empty state briefly before Zustand rehydrates from localStorage.
+**Why it happens:** Zustand with async `persist` middleware rehydrates after first render.
+**How to avoid:** This app uses direct `JSON.parse(localStorage.getItem(...))` initialization in store creators (not async persist). Stores are populated on first render. This is NOT an issue for this codebase.
+**Warning signs:** If stores ever migrate to async persistence (IndexedDB), this becomes a concern.
 
-**What goes wrong:** Developer tests on desktop or Android, ships code that silently fails on iOS.
-**Why it happens:** `navigator.vibrate` is not supported on Safari/iOS. The function doesn't exist.
-**How to avoid:** The `canVibrate` check in the haptics utility handles this. Never call `navigator.vibrate` directly -- always use the utility. Also: never gate functionality on haptic support. Haptics are an enhancement, not a requirement.
-**Warning signs:** Error in console about `navigator.vibrate is not a function` on iOS.
+### Pitfall 4: Onboarding Progress Breaking Existing Animations
+**What goes wrong:** Adding "Step X of Y" text disrupts the existing `AnimatePresence` slide transitions or layout.
+**Why it happens:** The progress indicator is rendered conditionally with `step !== 'welcome'` and sits above the animated content area.
+**How to avoid:** Add the step text INSIDE the existing progress indicator `<div className="mb-8">` container (line 228). Don't create a new container element that could affect the flex layout.
+**Warning signs:** Progress indicator jumping or causing content to shift during step transitions.
 
-### Pitfall 3: Empty State Flash
-
-**What goes wrong:** Empty state briefly appears before data hydrates from localStorage, then content appears causing a flash.
-**Why it happens:** Zustand's localStorage persistence needs one tick to hydrate.
-**How to avoid:** Check if the store has been hydrated before showing empty states. In this app, since all stores use Zustand `persist` middleware, hydration is synchronous on the same tick for localStorage. But verify by checking: if `profile` exists (user has onboarded), the stores should have data.
-**Warning signs:** Empty state flashes for a frame when navigating to a screen.
-
-### Pitfall 4: Overusing Skeletons
-
-**What goes wrong:** Skeleton shows for 50ms then disappears, creating a flicker worse than no skeleton.
-**Why it happens:** Data loads instantly from localStorage but skeleton is shown anyway.
-**How to avoid:** Only use skeletons in `Suspense` fallbacks for lazy-loaded route components. Don't add loading states to synchronous store reads. The primary use case here is when JS chunks are loading for the first time.
-**Warning signs:** Skeleton appears and disappears too quickly to register visually.
-
-### Pitfall 5: Error Messages That Blame Users
-
-**What goes wrong:** Message says "You entered invalid data" or "Error: invalid input".
-**Why it happens:** Developer writes error messages from the system's perspective.
-**How to avoid:** Always describe what happened and what to do next. Never use the word "invalid". Frame messages as "couldn't do X" not "you did X wrong".
-**Warning signs:** Any error message containing "invalid", "error:", or "failed" without a follow-up action.
+### Pitfall 5: Inconsistent Error Message Tone
+**What goes wrong:** Some errors are warm and helpful, others are cold and technical. Users get mixed signals about the app's personality.
+**Why it happens:** Error messages were added ad-hoc in different files at different times.
+**How to avoid:** Follow a consistent pattern: "[What happened]. [What to do next]." Never use "invalid", "failed", or "error" without follow-up guidance. The app has two themes (Trained = stern/professional, GYG = friendly/casual), but error messages should be universally friendly regardless of theme.
 
 ## Code Examples
 
-### Skeleton Component Extension (Verified Pattern -- Tailwind + Existing Component)
-
+### Example 1: Replace RouteLoader in App.tsx
 ```typescript
-// Extend src/components/Skeleton.tsx
-// Source: Existing codebase pattern (Skeleton.tsx lines 1-19)
+// In App.tsx -- replace lines 18-24
+import { Skeleton, SkeletonCard } from '@/components'
 
-// Workout-specific skeleton
-export function WorkoutSkeleton() {
+function RouteLoader() {
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
-      <div className="pt-8 pb-6 px-4 bg-surface">
-        <Skeleton className="h-8 w-32 mb-2" />
-        <Skeleton className="h-4 w-24" />
+    <div className="min-h-screen bg-background pb-20">
+      <div className="pt-8 pb-6 px-4">
+        <Skeleton className="h-8 w-1/3 mb-2" />
+        <Skeleton className="h-4 w-1/2" />
       </div>
-      <div className="px-4 py-6 space-y-6">
+      <div className="px-4 space-y-4">
         <SkeletonCard />
-        <div>
-          <Skeleton className="h-5 w-28 mb-3" />
-          <div className="grid grid-cols-7 gap-2">
-            {[...Array(7)].map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-lg" />
-            ))}
-          </div>
-        </div>
-        <div>
-          <Skeleton className="h-5 w-36 mb-3" />
-          {[1, 2, 3].map(i => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
+        <SkeletonCard />
+        <SkeletonCard />
       </div>
     </div>
   )
 }
 ```
 
-### EmptyState Usage Examples
-
+### Example 2: Replace Auth Loading in App.tsx
 ```typescript
-// Workouts - no history
-<EmptyState
-  icon={Dumbbell}
-  title="No workouts yet"
-  description="Start your first workout to begin tracking your progress and earning XP."
-  action={{ label: "Start Workout", onClick: handleStartWorkout }}
-/>
-
-// Macros - no targets set
-<EmptyState
-  icon={Beef}
-  title="No macro targets set"
-  description="Set up your nutrition targets to start tracking protein and calories."
-  action={{ label: "Set Up Macros", onClick: () => setActiveTab('calculator') }}
-/>
-
-// Achievements - empty filter
-<EmptyState
-  icon={Trophy}
-  title="No badges in this category"
-  description="Keep training and checking in to unlock badges across all categories."
-/>
+// In App.tsx -- replace lines 66-78
+if (authLoading) {
+  return (
+    <>
+      <ToastContainer />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-12 w-12 rounded-full mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+        </div>
+      </div>
+    </>
+  )
+}
 ```
 
-### Haptic Integration Points
-
+### Example 3: Coach Screen Skeleton
 ```typescript
-// Workouts.tsx - set completion (handleCompleteSet)
-const handleCompleteSet = (exerciseId: string, setIndex: number) => {
-  if (!activeWorkout) return
-  logSet(activeWorkout.id, exerciseId, setIndex, { completed: true, skipped: false })
-  setActiveWorkout(getCurrentWorkout())
-  haptics.light()  // <-- add
+// In Coach.tsx -- replace lines 216-225
+if (isLoading) {
+  return (
+    <div className="min-h-screen bg-bg-primary pb-20">
+      <div className="bg-bg-secondary pt-8 pb-6 px-4">
+        <Skeleton className="h-8 w-1/2 mb-2" />
+        <Skeleton className="h-4 w-1/4" />
+      </div>
+      <div className="px-4 py-6 space-y-4">
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+        </div>
+        {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+      </div>
+    </div>
+  )
 }
-
-// Workouts.tsx - workout completion (handleCompleteWorkout)
-const handleCompleteWorkout = () => {
-  // ... existing logic ...
-  haptics.success()  // <-- add after toast/analytics
-}
-
-// Home.tsx - check-in completion (CheckInModal onClose)
-if (didCheckIn) {
-  setJustCheckedIn(true)
-  haptics.success()  // <-- add
-}
-
-// XPClaimModal - XP claim
-haptics.heavy()  // <-- add after claim action
 ```
 
-### Enhanced Onboarding Progress
-
+### Example 4: Haptics Utility (Complete File)
 ```typescript
-// Onboarding.tsx - replace progress indicator section
+// src/lib/haptics.ts
+function vibrate(pattern: number | number[]): void {
+  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    try {
+      navigator.vibrate(pattern)
+    } catch {
+      // Silently fail -- haptics are enhancement, not requirement
+    }
+  }
+}
+
+export const haptics = {
+  /** Light tap -- set completion, toggle */
+  light: () => vibrate(10),
+  /** Medium tap -- button press confirmation */
+  medium: () => vibrate(25),
+  /** Heavy tap -- workout complete, XP claim */
+  heavy: () => vibrate(50),
+  /** Success pattern -- check-in submitted, badge earned */
+  success: () => vibrate([10, 50, 20]),
+  /** Error pattern -- validation error */
+  error: () => vibrate([50, 100, 50]),
+  /** Check if haptics are supported on this device */
+  isSupported: () => typeof navigator !== 'undefined' && 'vibrate' in navigator,
+}
+```
+
+### Example 5: Enhanced Empty State for Workouts History
+```typescript
+// In Workouts.tsx -- replace lines 432-437
+{workoutHistory.length === 0 && (
+  <Card className="text-center py-8">
+    <Dumbbell size={40} className="mx-auto mb-4 text-text-secondary" />
+    <p className="text-lg font-bold mb-2">No workouts yet</p>
+    <p className="text-text-secondary text-sm mb-4">
+      Complete your first workout to start tracking progress
+    </p>
+    {todayWorkout && !isCompleted && (
+      <Button onClick={handleStartWorkout}>Start Today's Workout</Button>
+    )}
+  </Card>
+)}
+```
+
+### Example 6: Onboarding Progress Enhancement
+```typescript
+// In Onboarding.tsx -- replace lines 227-238
 {step !== 'welcome' && step !== 'evolution' && (
   <div className="mb-8">
-    <p className="text-center text-xs text-text-secondary mb-2">
+    <p className="text-center text-xs text-text-secondary mb-3">
       Step {currentIndex} of {steps.length - 1}
     </p>
     <div className="flex gap-1 justify-center">
       {steps.slice(1).map((s, i) => (
         <div
           key={s}
-          className={`h-1 w-8 rounded-full transition-colors duration-300 ${
-            i < currentIndex ? 'bg-accent-primary' : i === currentIndex - 1 ? 'bg-accent-primary/50' : 'bg-gray-700'
+          className={`h-1 w-8 rounded-full transition-colors ${
+            i < currentIndex ? 'bg-accent-primary' : 'bg-gray-700'
           }`}
         />
       ))}
@@ -440,60 +396,73 @@ haptics.heavy()  // <-- add after claim action
 )}
 ```
 
+### Example 7: Improved Error Messages
+```typescript
+// In Settings.tsx -- replace error toast calls
+// Line 183: toast.error("Failed to export data")
+toast.error("Couldn't export your data. Your progress is still safe -- try again.")
+
+// Line 223: toast.error("Invalid JSON format")
+toast.error("This file doesn't look right. Make sure it's a .json backup from this app.")
+
+// Line 193: toast.error("Invalid backup file format")
+toast.error("This doesn't look like a backup file. Export your data first to create one.")
+```
+
 ## State of the Art
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| Generic spinners | Content-shaped skeletons | Standard since ~2019 | 10-20% reduction in perceived load time |
-| "Error occurred" messages | Context-specific error + recovery CTA | UX standard since ~2020 | Reduces user abandonment on errors |
-| No haptic in web | navigator.vibrate() in PWAs | Available since Chrome 30+ | Premium feel on Android; no-op on iOS |
-| Numbered step indicators | Progress bar + "Step X of Y" text | Current best practice | Clearer sense of progress and completion |
+| Generic spinners | Content-shaped skeleton placeholders | Widely adopted ~2019 | Reduces perceived load time by 10-20% |
+| "No data" text | Actionable empty states with icon + CTA | Material Design guidance ~2019 | Increases feature discovery, reduces confusion |
+| "Error occurred" messages | Context-specific error + recovery action | UX best practice ~2020 | Reduces user abandonment on errors |
+| No haptic in web | navigator.vibrate() in PWAs | Available since Chrome 30 | Premium feel on Android (~80% mobile); no-op on iOS |
+| Numbered step indicators | Progress bar + "Step X of Y" text | Current standard | Clearer sense of progress and completion |
 
 **Deprecated/outdated:**
 - Loading spinners as primary loading indicator (replaced by skeletons)
-- `window.confirm()` for destructive actions (the codebase still uses this in Workouts.tsx line 136 and Settings.tsx -- should be replaced with custom modal, but that's beyond Phase 3 scope)
+- `window.confirm()` for destructive actions (codebase still uses this in `Workouts.tsx` line 136 and `Settings.tsx` line 240 -- beyond Phase 3 scope)
 
 ## Open Questions
 
-1. **Suspense vs. Manual Loading States**
-   - What we know: App uses React.lazy() + Suspense for code-split routes. All store data comes from localStorage (synchronous).
-   - What's unclear: Should we add loading states within screens for the case where localStorage takes time to parse large datasets?
-   - Recommendation: Only use skeletons as Suspense fallbacks. Don't add manual loading states to store reads since localStorage hydration is synchronous. If future API calls are added, reassess.
+1. **iOS Haptics: Worth the dependency?**
+   - What we know: `ios-haptics` library uses Safari 17.4+ checkbox `<input switch>` hack to trigger native haptics. Clever but fragile.
+   - What's unclear: Long-term stability. Apple could break this technique in future Safari updates.
+   - Recommendation: Use plain `navigator.vibrate()` for now. iOS users get silent degradation (no haptics). If iOS support becomes critical later, the utility wrapper makes adding ios-haptics a one-line change.
 
-2. **Haptic Feedback Granularity**
-   - What we know: Success criteria says "key actions (set completion, workout finish)". navigator.vibrate works on Android only.
-   - What's unclear: Should we also add haptics to check-in, XP claim, achievement unlock, and tab navigation?
-   - Recommendation: Add to set completion, workout finish, check-in, and XP claim as explicitly required. Achievement unlock is a good bonus. Skip tab navigation -- too frequent.
+2. **FoodSearch skeleton vs. inline spinner**
+   - What we know: FoodSearch shows a small CSS spinner inside the search input while fetching. This is a scoped, appropriate inline indicator.
+   - What's unclear: Whether adding skeleton result rows in the dropdown while loading would be better UX.
+   - Recommendation: Keep the inline spinner (it's appropriate). Optionally add 3 skeleton rows in the results dropdown. The success criteria says "data-loading screens" -- FoodSearch is a component within Macros, not a screen.
 
-3. **Theme-Aware Empty States**
-   - What we know: App has dual themes (Trained = minimal/dark, GYG = colorful/gamified). Each theme uses different language ("Protocol" vs "System", etc.).
-   - What's unclear: Should empty state messages differ per theme?
-   - Recommendation: Yes, use `useTheme()` to select appropriate copy. The EmptyState component should accept `title` and `description` as props, letting each screen pass theme-appropriate text.
+3. **Scope of "all data-loading screens"**
+   - What we know: Only 3 places have real async loading (RouteLoader, auth, Coach). Most screens are synchronous.
+   - What's unclear: Whether the success criteria expects skeletons on every screen or just where there's actual loading delay.
+   - Recommendation: Replace all visible spinners with skeletons. Don't add skeletons to screens that render instantly from store data. The success criteria says "show skeleton placeholders instead of spinners" -- focus on replacing the 3 existing spinners.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Existing codebase analysis -- `src/components/Skeleton.tsx`, `src/App.tsx`, all screen files, `src/stores/toastStore.ts`
-- [MDN Navigator.vibrate()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/vibrate) -- API specification, browser compatibility, security requirements
-- [MDN Vibration API](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API) -- Pattern format documentation
+- Codebase audit: All 12 screens, 22 components, 8 stores, App.tsx routing, tailwind.config.js
+- [MDN Vibration API](https://developer.mozilla.org/en-US/docs/Web/API/Vibration_API) -- API specification, browser compatibility
+- [Can I Use: navigator.vibrate](https://caniuse.com/mdn-api_navigator_vibrate) -- 81.13% global support, 0% Safari
 
 ### Secondary (MEDIUM confidence)
-- [LogRocket: Handling React Loading States](https://blog.logrocket.com/handling-react-loading-states-react-loading-skeleton/) -- Skeleton best practices
-- [Carbon Design System: Empty States](https://carbondesignsystem.com/patterns/empty-states-pattern/) -- Empty state taxonomy and patterns
-- [Sentry: Error Handling in React](https://blog.sentry.io/guide-to-error-and-exception-handling-in-react/) -- Error boundary and message patterns
-- [618media: Error Messages for Better UX](https://618media.com/en/blog/error-messages-for-better-user-experience/) -- Friendly error message writing guide
+- [Smashing Magazine: Implementing Skeleton Screens in React](https://www.smashingmagazine.com/2020/04/skeleton-screens-react/) -- Design patterns for skeleton loading
+- [LogRocket: Handling React Loading States](https://blog.logrocket.com/handling-react-loading-states-react-loading-skeleton/) -- Best practices
+- [ios-haptics GitHub](https://github.com/tijnjh/ios-haptics) -- Safari 17.4+ workaround (evaluated, not recommended for now)
 
 ### Tertiary (LOW confidence)
-- [Medium: Haptic Feedback in Web Design](https://medium.com/@officialsafamarva/haptic-feedback-in-web-design-ux-you-can-feel-10e1a5095cee) -- Future direction of haptics in web
-- [Ironeko: Skeleton Loading Do's and Don'ts](https://ironeko.com/posts/the-dos-and-donts-of-skeleton-loading-in-react) -- Practical skeleton patterns
+- [Medium: Haptic Feedback in Web Design](https://medium.com/@officialsafamarva/haptic-feedback-in-web-design-ux-you-can-feel-10e1a5095cee) -- General patterns
+- [Ironeko: Skeleton Loading Do's and Don'ts](https://ironeko.com/posts/the-dos-and-donts-of-skeleton-loading-in-react) -- Practical guidelines
 
 ## Metadata
 
 **Confidence breakdown:**
-- Standard stack: HIGH -- all tools are already installed and used in the codebase
-- Architecture: HIGH -- patterns are direct extensions of existing code (Skeleton.tsx, Toast.tsx, Onboarding.tsx)
-- Pitfalls: HIGH -- verified against actual codebase patterns and known API limitations
-- Haptic feedback: MEDIUM -- navigator.vibrate API well-documented but iOS limitation means degraded experience for a portion of users
+- Standard stack: HIGH -- No new dependencies. Everything already installed and used in codebase.
+- Architecture: HIGH -- Patterns derived from direct audit of all 12 screens, 22 components, every loading state, every empty state, every error message.
+- Pitfalls: HIGH -- Critical finding that most screens are synchronous (no loading state) prevents over-engineering. iOS haptic limitation documented with specific Can I Use data.
+- Haptic feedback: MEDIUM -- Vibration API well-documented but iOS unsupported. 81% global coverage is good for progressive enhancement.
 
 **Research date:** 2026-02-05
-**Valid until:** 2026-04-05 (stable domain, no fast-moving dependencies)
+**Valid until:** 2026-03-07 (stable domain, no fast-moving APIs)
