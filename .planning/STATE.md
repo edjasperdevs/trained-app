@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
-**Current focus:** Phase 3 complete. Phase 4 - Screen Layouts next.
+**Current focus:** Phase 4 - Screen Refresh in progress. Plan 04-02 complete, 04-01 pending.
 
 ## Current Position
 
-Phase: 3 of 7 (Component Primitives) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-05 -- Completed 03-02-PLAN.md (unified input styling and glow cleanup)
+Phase: 4 of 7 (Screen Refresh)
+Plan: 04-02 of 2 in current phase (04-01 still pending)
+Status: In progress
+Last activity: 2026-02-05 -- Completed 04-02-PLAN.md (bottom sheet modals and palette cleanup)
 
-Progress: [██████████░░░░░░░░░░] 58% (7/12 plans)
+Progress: [████████████░░░░░░░░] 67% (8/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 9min
-- Total execution time: 1.02 hours
+- Total plans completed: 8
+- Average duration: 8min
+- Total execution time: 1.07 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [██████████░░░░░░░░░░] 58% (7/
 | 01-foundation | 2/2 | 32min | 16min |
 | 02-theme-removal | 3/3 | 19min | 6.3min |
 | 03-component-primitives | 2/2 | 10min | 5min |
+| 04-screen-refresh | 1/2 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 25min, 7min, 4min, 5min, 5min
+- Last 5 plans: 7min, 4min, 5min, 5min, 3min
 - Trend: fast
 
 *Updated after each plan completion*
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [03-02]: Global focus-visible uses outline for non-inputs; input-base suppresses double focus indicator
 - [03-02]: .glass-subtle removed (all 6 Settings usages replaced with solid bg-surface)
 - [03-02]: All 10 glow utility classes removed (zero TSX references existed)
+- [04-02]: Card wrappers removed from XPClaimModal phases -- bottom sheet container provides bg-surface
+- [04-02]: Overlay opacity harmonized to bg-background/80 (matching CheckInModal)
+- [04-02]: EmptyState confirmed clean -- no changes needed (already on new palette)
 
 ### Pending Todos
 
@@ -89,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T20:16:23Z
-Stopped at: Completed 03-02-PLAN.md (unified input styling and glow cleanup). Phase 3 complete. Phase 4 next.
+Last session: 2026-02-05T21:10:20Z
+Stopped at: Completed 04-02-PLAN.md (bottom sheet modals and palette cleanup). Phase 4 in progress (04-01 still pending).
 Resume file: None
