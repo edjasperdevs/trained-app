@@ -1,4 +1,4 @@
--- Gamify Your Gains Database Schema
+-- Trained App Database Schema
 -- Run this in your Supabase SQL Editor to set up the database
 
 -- Enable UUID extension
