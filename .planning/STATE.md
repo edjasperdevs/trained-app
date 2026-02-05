@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** First impression must be flawless - no broken flows, confusing UX, or visual jank
-**Current focus:** Phase 4 - Resilience Hardening (complete)
+**Current focus:** Phase 5 - Launch Preparation (in progress)
 
 ## Current Position
 
-Phase: 4 of 5 (Resilience Hardening)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-05 - Completed 04-02-PLAN.md
+Phase: 5 of 5 (Launch Preparation)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-05 - Completed 05-01-PLAN.md
 
-Progress: [===============     ] 75% (9/12 plans)
+Progress: [==================  ] 90% (9/10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: ~8 min
-- Total execution time: ~1.18 hours
+- Total plans completed: 9 (of 10)
+- Average duration: ~7.5 min
+- Total execution time: ~1.23 hours
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [===============     ] 75% (9/12 plans)
 | 2 - Performance | 2 | 14 min | 7 min |
 | 3 - UX Polish | 3 | 15 min | 5 min |
 | 4 - Resilience | 2 | 5 min | 2.5 min |
+| 5 - Launch Prep | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (empty states + errors), 03-03 (haptics + onboarding), 04-01 (sync foundation), 04-02 (API resilience + sync indicator)
+- Last 5 plans: 03-03 (haptics + onboarding), 04-01 (sync foundation), 04-02 (API resilience + sync indicator), 05-01 (OG image + Sentry wiring + robots.txt)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - [04-02]: 5-minute USDA cooldown after 429 rate limit (skip USDA, go straight to Open Food Facts)
 - [04-02]: SyncStatusIndicator returns null when synced (zero visual noise in happy path)
 - [04-02]: Fixed bottom-[72px] z-40 positioning for sync indicator above nav bar
+- [05-01]: Aliased Sentry setUser/clearUser as sentrySetUser/sentryClearUser to avoid collision with authStore user state
+- [05-01]: captureError wraps instanceof Error check at call site for type safety
+- [05-01]: 429 rate limit errors NOT captured to Sentry (expected behavior, handled by cooldown)
 
 ### Pending Todos
 
@@ -73,7 +77,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 04-02-PLAN.md (Phase 4 complete)
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
 
 ## Phase 1 Results
@@ -102,3 +106,7 @@ Resume file: None
 
 - **04-01 complete:** syncStore (non-persisted), scheduleSync (2s debounce), flushPendingSync, online/offline/visibilitychange listeners, sync triggers after workouts and meals, 429 rate limit handling
 - **04-02 complete:** USDA 429 rate limit cooldown (5-min bypass to Open Food Facts), SyncStatusIndicator component (synced/syncing/offline/error), mounted in authenticated app shell
+
+## Phase 5 Results
+
+- **05-01 complete:** OG image fixed to 1200x630 (was 512x512) via sharp SVG-to-PNG script, Sentry captureError wired into 8 catch blocks (sync/auth/foodApi), sentrySetUser on signIn/signUp, sentryClearUser on signOut, robots.txt created
