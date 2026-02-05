@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
-**Current focus:** Phase 4 - Screen Refresh in progress. Plan 04-02 complete, 04-01 pending.
+**Current focus:** Phase 4 - Screen Refresh complete. Both plans (04-01, 04-02) executed.
 
 ## Current Position
 
 Phase: 4 of 7 (Screen Refresh)
-Plan: 04-02 of 2 in current phase (04-01 still pending)
-Status: In progress
-Last activity: 2026-02-05 -- Completed 04-02-PLAN.md (bottom sheet modals and palette cleanup)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-05 -- Completed 04-01-PLAN.md (typography and spacing refresh)
 
-Progress: [████████████░░░░░░░░] 67% (8/12 plans)
+Progress: [███████████████░░░░░] 75% (9/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 8min
-- Total execution time: 1.07 hours
+- Total execution time: 1.24 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████████████░░░░░░░░] 67% (8/
 | 01-foundation | 2/2 | 32min | 16min |
 | 02-theme-removal | 3/3 | 19min | 6.3min |
 | 03-component-primitives | 2/2 | 10min | 5min |
-| 04-screen-refresh | 1/2 | 3min | 3min |
+| 04-screen-refresh | 2/2 | 13min | 6.5min |
 
 **Recent Trend:**
-- Last 5 plans: 7min, 4min, 5min, 5min, 3min
-- Trend: fast
+- Last 5 plans: 4min, 5min, 5min, 3min, 10min
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -82,6 +82,10 @@ Recent decisions affecting current work:
 - [04-02]: Card wrappers removed from XPClaimModal phases -- bottom sheet container provides bg-surface
 - [04-02]: Overlay opacity harmonized to bg-background/80 (matching CheckInModal)
 - [04-02]: EmptyState confirmed clean -- no changes needed (already on new palette)
+- [04-01]: h1 keeps uppercase in CSS; h2/h3 get letter-spacing only (weight-driven hierarchy)
+- [04-01]: Settings section headers keep uppercase (5 instances) -- structural section dividers
+- [04-01]: Button.tsx primary CTA uppercase preserved per design system
+- [04-01]: Achievements scrollable filter uses -mx-5 px-5 for horizontal bleed
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T21:10:20Z
-Stopped at: Completed 04-02-PLAN.md (bottom sheet modals and palette cleanup). Phase 4 in progress (04-01 still pending).
+Last session: 2026-02-05T22:39:17Z
+Stopped at: Completed 04-01-PLAN.md (typography and spacing refresh). Phase 4 complete.
 Resume file: None
