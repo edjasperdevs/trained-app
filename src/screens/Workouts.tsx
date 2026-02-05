@@ -2,16 +2,13 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button, Card, ProgressBar, EmptyState } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
 import { scheduleSync } from '@/lib/sync'
 import { Clock, Dumbbell } from 'lucide-react'
 
 export function Workouts() {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const {
     currentPlan,
     getTodayWorkout,
@@ -224,9 +221,9 @@ export function Workouts() {
   return (
     <div className="min-h-screen bg-bg-primary pb-20">
       {/* Header */}
-      <div className={`pt-8 pb-6 px-4 ${isTrained ? 'bg-surface' : 'bg-bg-secondary'}`}>
-        <h1 className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-          {isTrained ? 'Training' : 'Workouts'}
+      <div className="pt-8 pb-6 px-4 bg-surface">
+        <h1 className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide">
+          Training
         </h1>
         {currentPlan && (
           <p className="text-text-secondary">
@@ -280,20 +277,15 @@ export function Workouts() {
                     <div className="mt-4 pt-4 border-t border-border">
                       <button
                         onClick={() => setShowMinimalModal(true)}
-                        className={`
+                        className="
                           w-full flex items-center justify-center gap-2 py-2.5 px-4
                           text-sm font-medium transition-all
-                          ${isTrained
-                            ? 'border border-border text-text-secondary hover:border-primary hover:text-primary'
-                            : 'bg-surface-elevated text-text-secondary hover:text-primary'
-                          }
+                          border border-border text-text-secondary hover:border-primary hover:text-primary
                           rounded-lg
-                        `}
+                        "
                       >
                         <Clock size={16} />
-                        {isTrained
-                          ? `Log ${theme.labels.minimalWorkout.toLowerCase()} instead`
-                          : 'Short on time? Log quick workout'}
+                        {`Log ${LABELS.minimalWorkout.toLowerCase()} instead`}
                       </button>
                     </div>
                   )}
@@ -309,11 +301,11 @@ export function Workouts() {
                 <Card>
                   <div className="text-center py-4">
                     <span className="text-4xl mb-3 block">😴</span>
-                    <p className={`text-xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-                      {isTrained ? 'Recovery Day' : 'Rest Day'}
+                    <p className="text-xl font-bold font-heading uppercase tracking-wide">
+                      Recovery Day
                     </p>
                     <p className="text-text-secondary">
-                      {isTrained ? 'Recovery is part of the protocol' : 'Recovery is part of the process'}
+                      Recovery is part of the protocol
                     </p>
                   </div>
                 </Card>
@@ -406,8 +398,8 @@ export function Workouts() {
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
                           <div>
-                            <p className={`font-semibold capitalize ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
-                              {log.isMinimal ? theme.labels.minimalWorkout : log.workoutType}
+                            <p className="font-semibold capitalize font-heading uppercase tracking-wide text-sm">
+                              {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
                             </p>
                             <p className="text-xs text-text-secondary">
                               {new Date(log.date).toLocaleDateString('en-US', {
@@ -461,23 +453,21 @@ export function Workouts() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`bg-surface p-6 w-full max-w-md ${isTrained ? 'rounded-lg' : 'rounded-xl'}`}
+            className="bg-surface p-6 w-full max-w-md rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className={`text-xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-              {theme.labels.minimalWorkout}
+            <h2 className="text-xl font-bold mb-2 font-heading uppercase tracking-wide">
+              {LABELS.minimalWorkout}
             </h2>
             <p className="text-sm text-text-secondary mb-4">
-              {isTrained
-                ? `Short on time? Log what you did instead. You'll still earn ${theme.labels.xp} for staying compliant!`
-                : `Short on time? Log what you did instead. You'll still earn ${theme.labels.xp} for staying active!`}
+              {`Short on time? Log what you did instead. You'll still earn ${LABELS.xp} for staying compliant!`}
             </p>
 
             <textarea
               value={minimalNotes}
               onChange={(e) => setMinimalNotes(e.target.value)}
               placeholder="What did you do? (e.g., 20 pushups, 5 min walk, stretching...)"
-              className={`w-full h-32 bg-surface-elevated border border-border p-3 text-sm resize-none mb-4 ${isTrained ? 'rounded' : 'rounded-lg'}`}
+              className="w-full h-32 bg-surface-elevated border border-border p-3 text-sm resize-none mb-4 rounded"
               autoFocus
             />
 
@@ -496,7 +486,7 @@ export function Workouts() {
                 onClick={handleMinimalWorkout}
                 disabled={!minimalNotes.trim()}
               >
-                Log {theme.labels.minimalWorkout} (+{XP_VALUES.WORKOUT} {theme.labels.xp})
+                Log {LABELS.minimalWorkout} (+{XP_VALUES.WORKOUT} {LABELS.xp})
               </Button>
             </div>
           </motion.div>

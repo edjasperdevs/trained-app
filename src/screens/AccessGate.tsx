@@ -9,17 +9,13 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Button, Card } from '@/components'
 import { useAccessStore } from '@/stores/accessStore'
-import { Dumbbell, Zap, BookOpen, KeyRound, MessageCircle, Check, Shield } from 'lucide-react'
-import { useTheme } from '@/themes'
+import { Zap, BookOpen, KeyRound, MessageCircle, Check, Shield } from 'lucide-react'
 
 interface AccessGateProps {
   onAccessGranted: () => void
 }
 
 export function AccessGate({ onAccessGranted }: AccessGateProps) {
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
-
   const validateCode = useAccessStore((state) => state.validateCode)
   const email = useAccessStore((state) => state.email)
 
@@ -67,24 +63,14 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <motion.div
-          animate={{
-            scale: isTrained ? 1 : [1, 1.05, 1],
-          }}
-          transition={{ repeat: isTrained ? 0 : Infinity, duration: 3 }}
-          className="mb-4"
-        >
-          {isTrained ? (
-            <Shield size={72} className="mx-auto text-accent-primary" />
-          ) : (
-            <Dumbbell size={72} className="mx-auto text-accent-primary" />
-          )}
-        </motion.div>
-        <h1 className={`text-3xl font-bold ${isTrained ? 'font-heading uppercase tracking-wider text-text-primary' : 'bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent'}`}>
-          {theme.name}
+        <div className="mb-4">
+          <Shield size={72} className="mx-auto text-accent-primary" />
+        </div>
+        <h1 className="text-3xl font-bold font-heading uppercase tracking-wider text-text-primary">
+          Trained
         </h1>
         <p className="text-gray-400 mt-2">
-          {isTrained ? 'The protocol for building discipline' : 'Turn fitness into a game'}
+          The protocol for building discipline
         </p>
       </motion.div>
 
@@ -97,13 +83,11 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
       >
         <Card className="bg-bg-secondary">
           <div className="text-center mb-6">
-            <h2 className={`text-xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-              {isTrained ? 'Enter Access Code' : 'Enter License Key'}
+            <h2 className="text-xl font-bold mb-2 font-heading uppercase tracking-wide">
+              Enter Access Code
             </h2>
             <p className="text-gray-400 text-sm">
-              {isTrained
-                ? 'This app is exclusive to Trained ebook owners.'
-                : 'This app is exclusive to Gamify Your Gains ebook owners.'}
+              This app is exclusive to Trained ebook owners.
             </p>
           </div>
 
@@ -171,17 +155,15 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="mt-4 space-y-4"
               >
-                <div className={`bg-bg-card p-4 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-                  <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                <div className="bg-bg-card p-4 rounded">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
                     <BookOpen size={18} className="text-accent-primary" /> Get the Ebook
                   </h3>
                   <p className="text-sm text-gray-400 mb-3">
-                    {isTrained
-                      ? 'Purchase the Trained ebook to receive your access code.'
-                      : 'Purchase the Gamify Your Gains ebook to receive your access code.'}
+                    Purchase the Trained ebook to receive your access code.
                   </p>
                   <a
-                    href={isTrained ? 'https://trained.fitness' : 'https://gamifyyourgains.com'}
+                    href="https://trained.fitness"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block text-accent-primary text-sm font-medium hover:underline"
@@ -190,29 +172,27 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   </a>
                 </div>
 
-                <div className={`bg-bg-card p-4 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-                  <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                <div className="bg-bg-card p-4 rounded">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
                     <KeyRound size={18} className="text-accent-secondary" /> Already Purchased?
                   </h3>
                   <p className="text-sm text-gray-400">
-                    {isTrained
-                      ? 'Your access code was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.'
-                      : 'Your license key was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.'}
+                    Your access code was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.
                   </p>
                 </div>
 
-                <div className={`bg-bg-card p-4 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-                  <h3 className={`font-semibold mb-2 flex items-center gap-2 ${isTrained ? 'font-heading uppercase tracking-wide text-sm' : ''}`}>
+                <div className="bg-bg-card p-4 rounded">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-heading uppercase tracking-wide text-sm">
                     <MessageCircle size={18} className="text-accent-warning" /> Need Help?
                   </h3>
                   <p className="text-sm text-gray-400">
                     Contact support if you can't find your code or are having issues.
                   </p>
                   <a
-                    href={isTrained ? 'mailto:support@trained.fitness' : 'mailto:support@gamifyyourgains.com'}
+                    href="mailto:support@trained.fitness"
                     className="inline-block text-accent-primary text-sm font-medium hover:underline mt-2"
                   >
-                    {isTrained ? 'support@trained.fitness' : 'support@gamifyyourgains.com'}
+                    support@trained.fitness
                   </a>
                 </div>
               </motion.div>
@@ -228,7 +208,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         transition={{ delay: 0.5 }}
         className="text-gray-600 text-xs mt-8 text-center"
       >
-        © {new Date().getFullYear()} {theme.name}. All rights reserved.
+        © {new Date().getFullYear()} Trained. All rights reserved.
       </motion.p>
 
       {/* Success Modal */}
@@ -251,24 +231,20 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
               {/* Celebration Animation */}
               <motion.div
                 initial={{ scale: 0 }}
-                animate={{ scale: isTrained ? 1 : [0, 1.2, 1] }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 0.5, times: [0, 0.6, 1] }}
                 className="mb-4"
               >
-                {isTrained ? (
-                  <Shield size={72} className="mx-auto text-accent-primary" />
-                ) : (
-                  <Check size={72} className="mx-auto text-accent-success" />
-                )}
+                <Shield size={72} className="mx-auto text-accent-primary" />
               </motion.div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className={`text-2xl font-bold mb-2 ${isTrained ? 'font-heading uppercase tracking-wide text-text-primary' : 'bg-gradient-to-r from-accent-primary to-accent-secondary bg-clip-text text-transparent'}`}
+                className="text-2xl font-bold mb-2 font-heading uppercase tracking-wide text-text-primary"
               >
-                {isTrained ? 'Access Granted.' : 'Access Granted!'}
+                Access Granted.
               </motion.h2>
 
               <motion.p
@@ -278,9 +254,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 className="text-gray-400 mb-6"
               >
                 {email ? (
-                  <>Welcome, <span className="text-white font-medium">{email}</span>{isTrained ? '.' : '!'}</>
+                  <>Welcome, <span className="text-white font-medium">{email}</span>.</>
                 ) : (
-                  <>{isTrained ? 'Your access code has been verified.' : 'Your license key has been verified.'}</>
+                  <>Your access code has been verified.</>
                 )}
               </motion.p>
 
@@ -290,14 +266,14 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 transition={{ delay: 0.4 }}
                 className="space-y-3"
               >
-                <div className={`bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-                  <Check size={16} className="text-accent-primary" /> {isTrained ? 'Full protocol access unlocked' : 'Full app access unlocked'}
+                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
+                  <Check size={16} className="text-accent-primary" /> Full protocol access unlocked
                 </div>
-                <div className={`bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
+                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
                   <Check size={16} className="text-accent-primary" /> Progress syncs to cloud
                 </div>
-                <div className={`bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 ${isTrained ? 'rounded' : 'rounded-lg'}`}>
-                  <Check size={16} className="text-accent-primary" /> {isTrained ? 'All protocol features enabled' : 'All gamification features enabled'}
+                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
+                  <Check size={16} className="text-accent-primary" /> All protocol features enabled
                 </div>
               </motion.div>
 
@@ -313,7 +289,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   size="lg"
                 >
                   <span className="flex items-center gap-2">
-                    {isTrained ? 'Begin' : "Let's Go!"} {isTrained ? <Shield size={18} /> : <Dumbbell size={18} />}
+                    Begin <Shield size={18} />
                   </span>
                 </Button>
               </motion.div>

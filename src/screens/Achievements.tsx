@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Card, ProgressBar, EmptyState } from '@/components'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores'
-import { useTheme } from '@/themes'
+import { LABELS } from '@/design/constants'
 import {
   Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check, Award,
   Zap, Star, Gem, Crown, Shield, Play, CheckCircle, LucideIcon
@@ -52,8 +52,6 @@ const RARITY_GLOW: Record<BadgeRarity, string> = {
 }
 
 type CategoryFilter = 'all' | 'streak' | 'workout' | 'nutrition' | 'level' | 'special'
-
-// Categories are now generated inside the component to access theme
 
 interface BadgeCardProps {
   badge: Badge
@@ -149,8 +147,6 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
 
 export function Achievements() {
   const navigate = useNavigate()
-  const { theme, themeId } = useTheme()
-  const isTrained = themeId === 'trained'
   const [filter, setFilter] = useState<CategoryFilter>('all')
 
   const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
@@ -158,13 +154,13 @@ export function Achievements() {
   const hasEarnedBadge = useAchievementsStore((state) => state.hasEarnedBadge)
   const getBadgeProgress = useAchievementsStore((state) => state.getBadgeProgress)
 
-  // Generate categories with theme-aware labels
+  // Generate categories with Trained labels
   const categories: { id: CategoryFilter; label: string; icon: typeof Trophy }[] = [
-    { id: 'all', label: 'All', icon: isTrained ? Award : Trophy },
-    { id: 'streak', label: isTrained ? 'Obedience' : 'Streak', icon: Flame },
-    { id: 'workout', label: isTrained ? 'Training' : 'Workout', icon: Dumbbell },
+    { id: 'all', label: 'All', icon: Award },
+    { id: 'streak', label: 'Obedience', icon: Flame },
+    { id: 'workout', label: 'Training', icon: Dumbbell },
     { id: 'nutrition', label: 'Nutrition', icon: Beef },
-    { id: 'level', label: theme.labels.level, icon: ArrowUp },
+    { id: 'level', label: LABELS.level, icon: ArrowUp },
     { id: 'special', label: 'Special', icon: Sparkles },
   ]
 
@@ -224,21 +220,21 @@ export function Achievements() {
   return (
     <div className="min-h-screen bg-bg-primary pb-24">
       {/* Header */}
-      <div className={`pt-8 pb-6 px-4 ${isTrained ? 'bg-surface' : 'bg-gradient-to-b from-bg-secondary to-bg-primary'}`}>
+      <div className="pt-8 pb-6 px-4 bg-surface">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            className={`w-10 h-10 bg-surface-elevated flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors ${isTrained ? 'rounded' : 'rounded-full'}`}
+            className="w-10 h-10 bg-surface-elevated flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors rounded"
           >
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className={`text-2xl font-bold ${isTrained ? 'font-heading uppercase tracking-wide' : ''}`}>
-              {theme.labels.achievements}
+            <h1 className="text-2xl font-bold font-heading uppercase tracking-wide">
+              {LABELS.achievements}
             </h1>
             <p className="text-text-secondary text-sm">
-              {isTrained ? 'Track your marks of devotion' : 'Track your progress'}
+              Track your marks of devotion
             </p>
           </div>
         </div>
