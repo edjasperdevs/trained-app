@@ -15,3 +15,4 @@ export {
   syncAllToCloud,
   loadAllFromCloud
 } from './sync'
+export { friendlyError } from './errors'
