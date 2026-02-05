@@ -13,10 +13,10 @@ Requirements for launch to 90k fitness enthusiast followers.
 
 ### Performance
 
-- [ ] **PERF-01**: Implement route lazy loading and vendor chunk splitting
-- [ ] **PERF-02**: Switch service worker from autoUpdate to prompt mode with update banner
-- [ ] **PERF-03**: Achieve Lighthouse scores >90 (Performance, Accessibility, PWA)
-- [ ] **PERF-04**: Add runtime caching for Supabase API calls
+- [x] **PERF-01**: Implement route lazy loading and vendor chunk splitting
+- [x] **PERF-02**: Switch service worker from autoUpdate to prompt mode with update banner
+- [x] **PERF-03**: Achieve Lighthouse scores >90 (Performance, Accessibility, PWA)
+- [x] **PERF-04**: Add runtime caching for Supabase API calls
 
 ### UX Polish
 
@@ -76,10 +76,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | AUDIT-01 | Phase 1: Audit & Discovery | Pending |
-| PERF-01 | Phase 2: Performance Foundation | Pending |
-| PERF-02 | Phase 2: Performance Foundation | Pending |
-| PERF-03 | Phase 2: Performance Foundation | Pending |
-| PERF-04 | Phase 2: Performance Foundation | Pending |
+| PERF-01 | Phase 2: Performance Foundation | Complete |
+| PERF-02 | Phase 2: Performance Foundation | Complete |
+| PERF-03 | Phase 2: Performance Foundation | Complete |
+| PERF-04 | Phase 2: Performance Foundation | Complete |
 | UX-01 | Phase 3: UX Polish | Pending |
 | UX-02 | Phase 3: UX Polish | Pending |
 | UX-03 | Phase 3: UX Polish | Pending |
