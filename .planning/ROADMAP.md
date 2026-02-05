@@ -90,8 +90,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Apply typography scale, fix uppercase overuse, apply spacing system across all screens
-- [ ] 04-02: Convert CheckInModal and XPClaimModal to bottom sheets; update skeleton and empty state colors
+- [ ] 04-01-PLAN.md -- Apply typography scale, fix uppercase overuse, enforce consistent spacing across all screens
+- [ ] 04-02-PLAN.md -- Convert modals to bottom sheets; update skeleton and empty state colors to new palette
 
 ---
 
