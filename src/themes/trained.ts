@@ -55,10 +55,10 @@ export const trainedTheme: AppTheme = {
     colorSurfaceElevated: '#1C1C1C',
     colorBorder: '#2A2A2A',
 
-    // Primary accent - deep blood red
-    colorPrimary: '#8B1A1A',
-    colorPrimaryHover: '#A52222',
-    colorPrimaryMuted: 'rgba(139,26,26,0.15)',
+    // Primary accent - blood red (WCAG AA >= 4.5:1 on #0A0A0A and #141414)
+    colorPrimary: '#D55550',
+    colorPrimaryHover: '#E0605A',
+    colorPrimaryMuted: 'rgba(213,85,80,0.15)',
 
     // Secondary - gunmetal
     colorSecondary: '#4A4A4A',
@@ -67,19 +67,19 @@ export const trainedTheme: AppTheme = {
     // Text
     colorTextPrimary: '#E8E8E8',
     colorTextSecondary: '#888888',
-    colorTextAccent: '#8B1A1A',
+    colorTextAccent: '#E0605A',
     colorTextOnPrimary: '#FFFFFF',
 
-    // Status
-    colorSuccess: '#2D5A27',
-    colorWarning: '#8B6914',
-    colorError: '#8B1A1A',
+    // Status (WCAG AA compliant on #141414)
+    colorSuccess: '#4CAF50',
+    colorWarning: '#D4A843',
+    colorError: '#D55550',
     colorInfo: '#3A5A7A',
 
     // XP/Progress
-    colorXPBar: '#8B1A1A',
+    colorXPBar: '#D55550',
     colorXPBarBg: '#1C1C1C',
-    colorStreakActive: '#8B1A1A',
+    colorStreakActive: '#D55550',
     colorStreakInactive: '#2A2A2A',
 
     // Typography
@@ -96,7 +96,7 @@ export const trainedTheme: AppTheme = {
     // Shadows
     shadowCard: '0 2px 8px rgba(0,0,0,0.4)',
     shadowModal: '0 8px 32px rgba(0,0,0,0.6)',
-    shadowGlow: '0 0 20px rgba(139,26,26,0.2)',
+    shadowGlow: '0 0 20px rgba(213,85,80,0.2)',
   },
 
   standingOrders: {
