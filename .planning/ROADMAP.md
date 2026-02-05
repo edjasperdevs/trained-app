@@ -64,14 +64,12 @@ Plans:
 3. Error messages explain what went wrong and how to fix it
 4. Key actions (set completion, workout finish) provide haptic feedback
 5. Onboarding shows clear progress indicator (step X of Y)
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 03-01: Skeleton loading states
-- [ ] 03-02: Empty states with actionable guidance
-- [ ] 03-03: User-friendly error messages
-- [ ] 03-04: Haptic feedback on key actions
-- [ ] 03-05: Onboarding progress indicator
+- [ ] 03-01-PLAN.md -- Screen-specific skeleton loading states replacing generic spinner
+- [ ] 03-02-PLAN.md -- Reusable EmptyState component, error message improvements
+- [ ] 03-03-PLAN.md -- Haptic feedback on key actions, onboarding progress indicator
 
 ---
 
@@ -117,7 +115,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Audit & Discovery | 1/1 | Complete | 2026-02-04 |
 | 2. Performance Foundation | 2/2 | Complete | 2026-02-05 |
-| 3. UX Polish | 0/5 | Not started | - |
+| 3. UX Polish | 0/3 | Not started | - |
 | 4. Resilience Hardening | 0/3 | Not started | - |
 | 5. Launch Preparation | 0/3 | Not started | - |
 
