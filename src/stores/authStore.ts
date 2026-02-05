@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { syncAllToCloud, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
+import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
 
 type AuthErrorCode = 'email_not_confirmed' | 'invalid_credentials' | 'not_configured' | 'unknown' | null
 
@@ -58,6 +59,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
     } catch (error) {
       console.error('Auth initialization error:', error)
+      if (error instanceof Error) {
+        captureError(error, { context: 'auth.initialize' })
+      }
       set({ isLoading: false })
     }
   },
@@ -79,12 +83,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       if (data.user) {
         set({ user: data.user, session: data.session })
+        sentrySetUser(data.user.id, data.user.email)
         // Sync local data to cloud after signup
         get().syncData()
       }
 
       return { error: null }
     } catch (error) {
+      if (error instanceof Error) {
+        captureError(error, { context: 'auth.signUp' })
+      }
       return { error: 'An unexpected error occurred' }
     }
   },
@@ -114,12 +122,16 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
 
       set({ user: data.user, session: data.session })
+      sentrySetUser(data.user.id, data.user.email)
 
       // Sync data after successful login
       get().syncData()
 
       return { error: null }
     } catch (error) {
+      if (error instanceof Error) {
+        captureError(error, { context: 'auth.signIn' })
+      }
       return { error: 'An unexpected error occurred', code: 'unknown' }
     }
   },
@@ -129,6 +141,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     await supabase.auth.signOut()
     set({ user: null, session: null })
+    sentryClearUser()
   },
 
   resetPassword: async (email: string) => {
@@ -147,6 +160,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       return { error: null }
     } catch (error) {
+      if (error instanceof Error) {
+        captureError(error, { context: 'auth.resetPassword' })
+      }
       return { error: 'An unexpected error occurred' }
     }
   },
@@ -167,6 +183,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       console.error('Sync error:', error)
       // Show user-friendly error message
       if (error instanceof Error) {
+        captureError(error, { context: 'auth.syncData' })
         if (error.message.includes('network') || error.message.includes('fetch')) {
           toast.warning('Unable to sync - check your internet connection')
         } else {

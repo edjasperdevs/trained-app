@@ -9,6 +9,7 @@
 import { supabase, getSupabaseClient } from './supabase'
 import { useSyncStore } from '@/stores/syncStore'
 import { toast } from '@/stores/toastStore'
+import { captureError } from './sentry'
 
 // ==========================================
 // Retry Logic with Exponential Backoff
@@ -482,9 +483,12 @@ export function scheduleSync() {
       store.setStatus('synced')
       store.setPendingChanges(false)
       store.setLastSyncedAt(new Date().toISOString())
-    } catch {
+    } catch (error) {
       store.setStatus('error')
       store.setPendingChanges(true)
+      if (error instanceof Error) {
+        captureError(error, { context: 'scheduleSync' })
+      }
     }
   }, 2000)
 }
@@ -506,7 +510,10 @@ export async function flushPendingSync() {
     store.setStatus('synced')
     store.setPendingChanges(false)
     store.setLastSyncedAt(new Date().toISOString())
-  } catch {
+  } catch (error) {
     store.setStatus('error')
+    if (error instanceof Error) {
+      captureError(error, { context: 'flushPendingSync' })
+    }
   }
 }

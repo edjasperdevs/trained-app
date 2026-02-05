@@ -1,3 +1,5 @@
+import { captureError } from './sentry'
+
 export interface FoodSearchResult {
   id: string
   name: string
@@ -68,6 +70,9 @@ export async function searchFoods(query: string): Promise<FoodSearchResult[]> {
     }
   } catch (error) {
     console.warn('USDA API failed, falling back to Open Food Facts:', error)
+    if (error instanceof Error) {
+      captureError(error, { context: 'searchFoods.USDA', query })
+    }
   }
 
   // Fallback to Open Food Facts
