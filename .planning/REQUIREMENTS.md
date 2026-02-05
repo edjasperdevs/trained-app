@@ -20,11 +20,11 @@ Requirements for launch to 90k fitness enthusiast followers.
 
 ### UX Polish
 
-- [ ] **UX-01**: Replace loading spinners with skeleton placeholders
-- [ ] **UX-02**: Add actionable empty states for all data-dependent screens
-- [ ] **UX-03**: Improve error messages to be user-friendly and explain fixes
-- [ ] **UX-04**: Add haptic feedback on key actions
-- [ ] **UX-05**: Add progress indicator to onboarding flow
+- [x] **UX-01**: Replace loading spinners with skeleton placeholders
+- [x] **UX-02**: Add actionable empty states for all data-dependent screens
+- [x] **UX-03**: Improve error messages to be user-friendly and explain fixes
+- [x] **UX-04**: Add haptic feedback on key actions
+- [x] **UX-05**: Add progress indicator to onboarding flow
 
 ### Resilience
 
@@ -80,11 +80,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-02 | Phase 2: Performance Foundation | Complete |
 | PERF-03 | Phase 2: Performance Foundation | Complete |
 | PERF-04 | Phase 2: Performance Foundation | Complete |
-| UX-01 | Phase 3: UX Polish | Pending |
-| UX-02 | Phase 3: UX Polish | Pending |
-| UX-03 | Phase 3: UX Polish | Pending |
-| UX-04 | Phase 3: UX Polish | Pending |
-| UX-05 | Phase 3: UX Polish | Pending |
+| UX-01 | Phase 3: UX Polish | Complete |
+| UX-02 | Phase 3: UX Polish | Complete |
+| UX-03 | Phase 3: UX Polish | Complete |
+| UX-04 | Phase 3: UX Polish | Complete |
+| UX-05 | Phase 3: UX Polish | Complete |
 | RES-01 | Phase 4: Resilience Hardening | Pending |
 | RES-02 | Phase 4: Resilience Hardening | Pending |
 | RES-03 | Phase 4: Resilience Hardening | Pending |
