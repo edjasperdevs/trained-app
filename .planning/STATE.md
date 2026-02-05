@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
-**Current focus:** Phase 5 - Animation Refinement started. Plan 05-01 complete.
+**Current focus:** Phase 6 - Cleanup started. Plan 06-01 complete.
 
 ## Current Position
 
-Phase: 5 of 7 (Animation Refinement)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-05 -- Completed 05-01-PLAN.md (critically damped springs, keyframe cleanup)
+Phase: 6 of 7 (Cleanup)
+Plan: 1 of 1 in current phase
+Status: Phase complete
+Last activity: 2026-02-05 -- Completed 06-01-PLAN.md (delete themes tombstone, verify clean)
 
-Progress: [████████████████░░░░] 83% (10/12 plans)
+Progress: [██████████████████░░] 92% (11/12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 7.8min
-- Total execution time: 1.31 hours
+- Total plans completed: 11
+- Average duration: 7.7min
+- Total execution time: 1.43 hours
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [████████████████░░░░] 83% (10
 | 03-component-primitives | 2/2 | 10min | 5min |
 | 04-screen-refresh | 2/2 | 13min | 6.5min |
 | 05-animation-refinement | 1/2 | 4min | 4min |
+| 06-cleanup | 1/1 | 7min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 5min, 3min, 10min, 4min
+- Last 5 plans: 5min, 3min, 10min, 4min, 7min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -91,6 +92,7 @@ Recent decisions affecting current work:
 - [05-01]: Settings.tsx toggle kept at stiffness 500 (already correct feel)
 - [05-01]: pulse-glow slowed from 2s to 3s for premium feel
 - [05-01]: float/xp-pop keyframes removed (were unused in TSX)
+- [06-01]: Legacy theme migration code in main.tsx preserved (actively cleans up old user localStorage)
 
 ### Pending Todos
 
@@ -102,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05T22:27:00Z
-Stopped at: Completed 05-01-PLAN.md (critically damped springs, keyframe cleanup)
+Last session: 2026-02-05T22:36:24Z
+Stopped at: Completed 06-01-PLAN.md (delete themes tombstone, verify clean)
 Resume file: None
