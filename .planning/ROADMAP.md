@@ -46,13 +46,11 @@ Plans:
 3. Lighthouse Performance score exceeds 90
 4. Lighthouse Accessibility score exceeds 90
 5. Supabase API calls cache with NetworkFirst strategy
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: Route lazy loading and bundle optimization
-- [ ] 02-02: Service worker prompt mode and update banner
-- [ ] 02-03: Lighthouse audit and optimization
-- [ ] 02-04: Runtime caching for Supabase API
+- [ ] 02-01-PLAN.md -- Supabase API caching, viewport fix, color contrast accessibility fixes
+- [ ] 02-02-PLAN.md -- Lighthouse verification and human sign-off
 
 ---
 
@@ -118,7 +116,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Audit & Discovery | 0/1 | Not started | - |
-| 2. Performance Foundation | 0/4 | Not started | - |
+| 2. Performance Foundation | 0/2 | Not started | - |
 | 3. UX Polish | 0/5 | Not started | - |
 | 4. Resilience Hardening | 0/3 | Not started | - |
 | 5. Launch Preparation | 0/3 | Not started | - |
