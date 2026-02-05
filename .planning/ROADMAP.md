@@ -15,7 +15,7 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
+- [x] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
 - [ ] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
 - [ ] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
 - [ ] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
@@ -38,8 +38,8 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Tailwind v4 migration, @theme token system, cn() utility, CVA + tailwind-merge install
-- [ ] 01-02: Hardcoded color audit + replacement, font self-hosting, motion v12 upgrade
+- [x] 01-01: Tailwind v4 migration, @theme token system, cn() utility, CVA + tailwind-merge install
+- [x] 01-02: Hardcoded color audit + replacement, font self-hosting, motion v12 upgrade
 
 ---
 
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 2/2 | Complete | 2026-02-05 |
 | 2. Theme Removal | 0/3 | Not started | - |
 | 3. Component Primitives | 0/2 | Not started | - |
 | 4. Screen Refresh | 0/2 | Not started | - |
