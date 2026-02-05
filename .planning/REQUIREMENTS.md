@@ -28,10 +28,10 @@ Requirements for design refresh -- full visual overhaul with theme system simpli
 
 ### Visual Refresh -- Components
 
-- [ ] **VIS-01**: Redesign primitive components with CVA variants (Button, Card, ProgressBar, Toast, inputs)
-- [ ] **VIS-02**: Replace glass effects on standard cards with solid surface colors (keep glass for overlays only)
-- [ ] **VIS-03**: Remove/mute glow effects -- keep ONE hero glow per screen maximum
-- [ ] **VIS-04**: Refine focus rings, input styling, and form design to premium standard
+- [x] **VIS-01**: Redesign primitive components with CVA variants (Button, Card, ProgressBar, Toast, inputs)
+- [x] **VIS-02**: Replace glass effects on standard cards with solid surface colors (keep glass for overlays only)
+- [x] **VIS-03**: Remove/mute glow effects -- keep ONE hero glow per screen maximum
+- [x] **VIS-04**: Refine focus rings, input styling, and form design to premium standard
 
 ### Visual Refresh -- Screens
 
@@ -94,10 +94,10 @@ Deferred to post-refresh.
 | THEME-01 | Phase 2: Theme Removal | Complete |
 | THEME-02 | Phase 2: Theme Removal | Complete |
 | THEME-03 | Phase 2: Theme Removal | Complete |
-| VIS-01 | Phase 3: Component Primitives | Pending |
-| VIS-02 | Phase 3: Component Primitives | Pending |
-| VIS-03 | Phase 3: Component Primitives | Pending |
-| VIS-04 | Phase 3: Component Primitives | Pending |
+| VIS-01 | Phase 3: Component Primitives | Complete |
+| VIS-02 | Phase 3: Component Primitives | Complete |
+| VIS-03 | Phase 3: Component Primitives | Complete |
+| VIS-04 | Phase 3: Component Primitives | Complete |
 | SCREEN-01 | Phase 4: Screen Refresh | Pending |
 | SCREEN-02 | Phase 4: Screen Refresh | Pending |
 | SCREEN-03 | Phase 4: Screen Refresh | Pending |
@@ -118,4 +118,4 @@ Deferred to post-refresh.
 
 ---
 *Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 -- Phase 2 requirements marked complete*
+*Last updated: 2026-02-05 -- Phase 3 requirements marked complete*

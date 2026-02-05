@@ -17,7 +17,7 @@ Full visual overhaul across 7 phases transforming Trained from playful gamified 
 
 - [x] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
 - [x] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
-- [ ] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
+- [x] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
 - [ ] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
 - [ ] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
 - [ ] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
@@ -73,8 +73,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Redesign Button, Card, ProgressBar, Toast with CVA variants; replace glass with solid surfaces
-- [ ] 03-02: Refine inputs, focus rings, form styling; strip/mute glow effects to one-per-screen max
+- [x] 03-01: Redesign Button, Card, ProgressBar, Toast with CVA variants; replace glass with solid surfaces
+- [x] 03-02: Refine inputs, focus rings, form styling; strip/mute glow effects to one-per-screen max
 
 ---
 
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 |-------|---------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-02-05 |
 | 2. Theme Removal | 3/3 | Complete | 2026-02-05 |
-| 3. Component Primitives | 0/2 | Not started | - |
+| 3. Component Primitives | 2/2 | Complete | 2026-02-05 |
 | 4. Screen Refresh | 0/2 | Not started | - |
 | 5. Animation Refinement | 0/1 | Not started | - |
 | 6. Cleanup | 0/1 | Not started | - |
