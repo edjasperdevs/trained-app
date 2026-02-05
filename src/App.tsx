@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync } from '@/lib/sync'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
-import { ThemeProvider } from '@/themes'
 import { AccessGate, Auth } from '@/screens'
 
 // Lazy-loaded route components
@@ -169,10 +168,8 @@ function AppContent() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <AppContent />
-        <UpdatePrompt />
-      </ThemeProvider>
+      <AppContent />
+      <UpdatePrompt />
     </ErrorBoundary>
   )
 }

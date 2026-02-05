@@ -11,6 +11,15 @@ import { initSentry, ErrorBoundary } from './lib/sentry'
 // Initialize error tracking
 initSentry()
 
+// Theme migration: Remove legacy theme selection
+// Users who had 'gyg' selected will now get Trained (the only theme)
+const legacyTheme = localStorage.getItem('app-theme')
+if (legacyTheme) {
+  localStorage.removeItem('app-theme')
+  // Also remove body class that ThemeProvider used to set
+  document.body.classList.remove('theme-trained', 'theme-gyg')
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary fallback={<ErrorFallback />}>
