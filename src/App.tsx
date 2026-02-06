@@ -93,8 +93,10 @@ function AppContent() {
     }
   }, [profile?.onboardingComplete, checkNeglected])
 
-  // Show loading while auth initializes
-  if (authLoading) {
+  const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
+
+  // Show loading while auth initializes (skip in dev bypass)
+  if (!devBypass && authLoading) {
     return (
       <>
         <ToastContainer />
@@ -109,7 +111,7 @@ function AppContent() {
   }
 
   // Check access code first (before auth)
-  if (!hasAccess && !accessGranted) {
+  if (!devBypass && !hasAccess && !accessGranted) {
     return (
       <>
         <ToastContainer />
@@ -119,7 +121,7 @@ function AppContent() {
   }
 
   // If not authenticated, show auth screen
-  if (!user) {
+  if (!devBypass && !user) {
     return (
       <>
         <ToastContainer />
@@ -131,7 +133,7 @@ function AppContent() {
   }
 
   // If authenticated but onboarding not complete, show onboarding
-  if (!profile || !profile.onboardingComplete) {
+  if (!devBypass && (!profile || !profile.onboardingComplete)) {
     return (
       <>
         <ToastContainer />
@@ -157,6 +159,8 @@ function AppContent() {
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
           <Route path="/coach" element={<Navigate to="/" replace />} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+          {devBypass && <Route path="/auth" element={<Auth />} />}
+          {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Navigation />

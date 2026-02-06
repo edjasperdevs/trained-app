@@ -1,53 +1,87 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* ================================================================
-   DESIGN TOKENS - Single Source of Truth
-   All tokens defined here generate both CSS variables and Tailwind
-   utility classes automatically (Tailwind v4 @theme directive).
+   SHADCN THEME - Brand colors mapped to shadcn's variable system.
+   This app is always dark, so `:root` gets dark values directly.
+   ================================================================ */
+
+:root {
+  --radius: 0.625rem;
+  --background: #0A0A0A;
+  --foreground: #E8E8E8;
+  --card: #141414;
+  --card-foreground: #E8E8E8;
+  --popover: #1C1C1C;
+  --popover-foreground: #E8E8E8;
+  --primary: #D55550;
+  --primary-foreground: #FFFFFF;
+  --secondary: #4A4A4A;
+  --secondary-foreground: #E8E8E8;
+  --muted: #1C1C1C;
+  --muted-foreground: #888888;
+  --accent: #1C1C1C;
+  --accent-foreground: #E8E8E8;
+  --destructive: #D55550;
+  --border: #2A2A2A;
+  --input: #2A2A2A;
+  --ring: #D55550;
+  --chart-1: #D55550;
+  --chart-2: #4CAF50;
+  --chart-3: #D4A843;
+  --chart-4: #3A5A7A;
+  --chart-5: #E0605A;
+  --sidebar: #141414;
+  --sidebar-foreground: #E8E8E8;
+  --sidebar-primary: #D55550;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1C1C1C;
+  --sidebar-accent-foreground: #E8E8E8;
+  --sidebar-border: #2A2A2A;
+  --sidebar-ring: #D55550;
+}
+
+/* ================================================================
+   DESIGN TOKENS - Custom tokens that extend beyond shadcn's system.
+   Tokens that collide with shadcn (background, primary, secondary,
+   border) are driven by the @theme inline block below.
    ================================================================ */
 
 @theme {
-  /* ── Colors ─────────────────────────────────────────────────── */
-
-  /* Core backgrounds */
-  --color-background: #0A0A0A;
+  /* ── Custom surface colors (not in shadcn) ──────────────────── */
   --color-surface: #141414;
   --color-surface-elevated: #1C1C1C;
-  --color-border: #2A2A2A;
-
-  /* Primary accent - blood red (WCAG AA >= 4.5:1 on #0A0A0A and #141414) */
-  --color-primary: #D55550;
   --color-primary-hover: #E0605A;
   --color-primary-muted: rgba(213, 85, 80, 0.15);
-
-  /* Secondary - gunmetal */
-  --color-secondary: #4A4A4A;
   --color-secondary-hover: #5C5C5C;
 
-  /* Text */
+  /* ── Text ────────────────────────────────────────────────────── */
   --color-text-primary: #E8E8E8;
   --color-text-secondary: #888888;
   --color-text-accent: #E0605A;
   --color-text-on-primary: #FFFFFF;
 
-  /* Status (WCAG AA compliant on #141414) */
+  /* ── Status (WCAG AA compliant on #141414) ───────────────────── */
   --color-success: #4CAF50;
   --color-warning: #D4A843;
   --color-error: #D55550;
   --color-info: #3A5A7A;
 
-  /* XP / Progress */
+  /* ── XP / Progress ───────────────────────────────────────────── */
   --color-xp-bar: #D55550;
   --color-xp-bar-bg: #1C1C1C;
   --color-streak-active: #D55550;
   --color-streak-inactive: #2A2A2A;
 
-  /* Glass surfaces */
+  /* ── Glass surfaces ──────────────────────────────────────────── */
   --color-glass-light: rgba(255, 255, 255, 0.05);
   --color-glass-medium: rgba(255, 255, 255, 0.08);
   --color-glass-heavy: rgba(255, 255, 255, 0.12);
 
-  /* Legacy color aliases (backward compatibility for existing components) */
+  /* ── Legacy color aliases ────────────────────────────────────── */
   --color-bg-primary: #0A0A0A;
   --color-bg-secondary: #141414;
   --color-bg-card: #141414;
@@ -58,28 +92,21 @@
   --color-accent-danger: #D55550;
   --color-glass-border: #2A2A2A;
 
-  /* ── Typography ─────────────────────────────────────────────── */
+  /* ── Typography ──────────────────────────────────────────────── */
   --font-heading: 'Oswald Variable', 'Oswald', sans-serif;
   --font-body: 'Inter Variable', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', monospace;
 
-  /* ── Border Radius (premium: 12-16px per FOUND-02) ─────────── */
-  --radius: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 20px;
-  --radius-3xl: 24px;
+  /* ── Custom radius (not driven by shadcn calc) ──────────────── */
   --radius-card: 12px;
 
-  /* ── Shadows ────────────────────────────────────────────────── */
+  /* ── Shadows ─────────────────────────────────────────────────── */
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
   --shadow-glow: 0 0 20px rgba(213, 85, 80, 0.2);
   --shadow-glow-intense: 0 0 30px rgba(213, 85, 80, 0.4);
 
-  /* ── Animations ─────────────────────────────────────────────── */
+  /* ── Animations ──────────────────────────────────────────────── */
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
@@ -99,7 +126,6 @@
     50% { opacity: 1; }
   }
 }
-
 
 /* ================================================================
    CHART COLORS - CSS custom properties for chart libraries that
@@ -176,12 +202,6 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-
-/* Glassmorphism surfaces */
-/* .glass and .glass-elevated removed (VIS-02: solid surfaces for standard components) */
-/* .glass-subtle removed (03-02: replaced with solid surface styling) */
-
-/* Glow utility classes removed (03-02: only shadow-glow/shadow-glow-intense tokens remain in @theme) */
 
 /* ================================================================
    LAYOUT UTILITIES
@@ -294,4 +314,59 @@ h3 {
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   SHADCN TAILWIND THEME MAPPING
+   Maps shadcn CSS variables to Tailwind utility classes.
+   ================================================================ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Button, Card } from '@/components'
+import { Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
@@ -97,20 +103,22 @@ export function Auth() {
 
   if (!isConfigured) {
     return (
-      <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-5">
+      <div className="min-h-screen flex flex-col items-center justify-center px-5">
         <Card className="w-full max-w-md text-center">
-          <span className="text-4xl block mb-4">🔧</span>
-          <h2 className="text-xl font-bold mb-2">Setup Required</h2>
-          <p className="text-text-secondary">
-            Backend is not configured. Please contact your administrator or check the setup instructions.
-          </p>
+          <CardContent>
+            <span className="text-4xl block mb-4">🔧</span>
+            <h2 className="text-xl font-bold mb-2">Setup Required</h2>
+            <p className="text-muted-foreground">
+              Backend is not configured. Please contact your administrator or check the setup instructions.
+            </p>
+          </CardContent>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center px-5">
+    <div className="min-h-screen flex flex-col items-center justify-center px-5">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -119,7 +127,7 @@ export function Auth() {
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-bold tracking-wide">TRAINED</h1>
-          <p className="text-text-secondary mt-2">
+          <p className="text-muted-foreground mt-2">
             {mode === 'login' && 'Welcome back'}
             {mode === 'signup' && 'Build discipline through fitness'}
             {mode === 'forgot' && 'Reset your password'}
@@ -131,126 +139,143 @@ export function Auth() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-4 bg-accent-warning/10 border border-accent-warning/30 rounded-xl"
+            className="mb-4"
           >
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">📧</span>
-              <div>
-                <p className="font-semibold text-accent-warning">Confirm Your Email</p>
-                <p className="text-sm text-text-secondary mt-1">
-                  We sent a confirmation link to <span className="text-text-primary">{email || 'your email'}</span>.
-                  Click the link to activate your account, then come back here to sign in.
-                </p>
-                <p className="text-xs text-text-secondary mt-2">
+            <Alert className="border-warning/30 bg-warning/10">
+              <Mail className="size-4 text-warning" />
+              <AlertTitle className="text-warning">Confirm Your Email</AlertTitle>
+              <AlertDescription>
+                We sent a confirmation link to <span className="text-foreground font-medium">{email || 'your email'}</span>.
+                Click the link to activate your account, then come back here to sign in.
+                <p className="text-xs mt-2 text-muted-foreground">
                   Don't see it? Check your spam folder.
                 </p>
-              </div>
-            </div>
+              </AlertDescription>
+            </Alert>
           </motion.div>
         )}
 
         <Card>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="text-xs text-text-secondary block mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="input-base"
-                required
-              />
-            </div>
-
-            {/* Password (not shown for forgot mode) */}
-            {mode !== 'forgot' && (
-              <div>
-                <label className="text-xs text-text-secondary block mb-1">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="input-base"
+          <CardHeader>
+            <CardTitle>
+              {mode === 'login' && 'Sign In'}
+              {mode === 'signup' && 'Create Account'}
+              {mode === 'forgot' && 'Reset Password'}
+            </CardTitle>
+            <CardDescription>
+              {mode === 'login' && 'Enter your credentials to continue'}
+              {mode === 'signup' && 'Enter your details to get started'}
+              {mode === 'forgot' && 'Enter your email to receive a reset link'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
                   required
                 />
               </div>
-            )}
 
-            {/* Confirm Password (only for signup) */}
-            {mode === 'signup' && (
-              <div>
-                <label className="text-xs text-text-secondary block mb-1">Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="input-base"
-                  required
-                />
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <p className="text-accent-danger text-sm text-center">{error}</p>
-            )}
-
-            {/* Success Message */}
-            {success && (
-              <p className="text-accent-success text-sm text-center">{success}</p>
-            )}
-
-            {/* Submit Button */}
-            <Button type="submit" fullWidth disabled={isLoading}>
-              {isLoading ? 'Loading...' : (
-                mode === 'login' ? 'Sign In' :
-                mode === 'signup' ? 'Create Account' :
-                'Send Reset Link'
+              {/* Password (not shown for forgot mode) */}
+              {mode !== 'forgot' && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
               )}
-            </Button>
-          </form>
 
-          {/* Mode Toggles */}
-          <div className="mt-6 pt-6 border-t border-border space-y-3">
-            {mode === 'login' && (
-              <>
+              {/* Confirm Password (only for signup) */}
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              )}
+
+              {/* Error Message */}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <Alert className="border-success/30 bg-success/10 text-success">
+                  <AlertDescription>{success}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Submit Button */}
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Loading...' : (
+                  mode === 'login' ? 'Sign In' :
+                  mode === 'signup' ? 'Create Account' :
+                  'Send Reset Link'
+                )}
+              </Button>
+            </form>
+
+            {/* Mode Toggles */}
+            <Separator className="my-6" />
+            <div className="space-y-3">
+              {mode === 'login' && (
+                <>
+                  <button
+                    onClick={() => { setMode('signup'); setError(''); setSuccess('') }}
+                    className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Don't have an account? <span className="text-primary">Sign up</span>
+                  </button>
+                  <button
+                    onClick={() => { setMode('forgot'); setError(''); setSuccess('') }}
+                    className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Forgot your password?
+                  </button>
+                </>
+              )}
+
+              {mode === 'signup' && (
                 <button
-                  onClick={() => { setMode('signup'); setError(''); setSuccess('') }}
-                  className="w-full text-sm text-text-secondary hover:text-text-primary"
+                  onClick={() => { setMode('login'); setError(''); setSuccess('') }}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Don't have an account? <span className="text-accent-primary">Sign up</span>
+                  Already have an account? <span className="text-primary">Sign in</span>
                 </button>
+              )}
+
+              {mode === 'forgot' && (
                 <button
-                  onClick={() => { setMode('forgot'); setError(''); setSuccess('') }}
-                  className="w-full text-sm text-text-secondary hover:text-text-primary"
+                  onClick={() => { setMode('login'); setError(''); setSuccess('') }}
+                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Forgot your password?
+                  Back to <span className="text-primary">Sign in</span>
                 </button>
-              </>
-            )}
-
-            {mode === 'signup' && (
-              <button
-                onClick={() => { setMode('login'); setError(''); setSuccess('') }}
-                className="w-full text-sm text-text-secondary hover:text-text-primary"
-              >
-                Already have an account? <span className="text-accent-primary">Sign in</span>
-              </button>
-            )}
-
-            {mode === 'forgot' && (
-              <button
-                onClick={() => { setMode('login'); setError(''); setSuccess('') }}
-                className="w-full text-sm text-text-secondary hover:text-text-primary"
-              >
-                Back to <span className="text-accent-primary">Sign in</span>
-              </button>
-            )}
-          </div>
+              )}
+            </div>
+          </CardContent>
         </Card>
       </motion.div>
     </div>

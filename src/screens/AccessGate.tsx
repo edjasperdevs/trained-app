@@ -7,8 +7,13 @@
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Button, Card } from '@/components'
 import { useAccessStore } from '@/stores/accessStore'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
 import { Zap, BookOpen, KeyRound, MessageCircle, Check, Shield } from 'lucide-react'
 
 interface AccessGateProps {
@@ -56,7 +61,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center p-5">
+    <div className="min-h-screen flex flex-col items-center justify-center p-5">
       {/* Logo/Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -64,12 +69,12 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         className="text-center mb-8"
       >
         <div className="mb-4">
-          <Shield size={72} className="mx-auto text-accent-primary" />
+          <Shield size={72} className="mx-auto text-primary" />
         </div>
-        <h1 className="text-3xl font-bold text-text-primary">
+        <h1 className="text-3xl font-bold">
           Trained
         </h1>
-        <p className="text-gray-400 mt-2">
+        <p className="text-muted-foreground mt-2">
           The protocol for building discipline
         </p>
       </motion.div>
@@ -81,123 +86,126 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         transition={{ delay: 0.2 }}
         className="w-full max-w-md"
       >
-        <Card className="bg-bg-secondary">
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-bold mb-2">
-              Enter Access Code
-            </h2>
-            <p className="text-gray-400 text-sm">
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle>Enter Access Code</CardTitle>
+            <CardDescription>
               This app is exclusive to Trained ebook owners.
-            </p>
-          </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Input
+                  type="text"
+                  value={code}
+                  onChange={(e) => handleCodeChange(e.target.value)}
+                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  aria-label="License key"
+                  className={cn(
+                    'text-center text-lg font-mono tracking-wider uppercase h-12',
+                    error && 'border-destructive'
+                  )}
+                  maxLength={50}
+                  autoComplete="off"
+                  autoFocus
+                />
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2"
+                  >
+                    <Alert variant="destructive">
+                      <AlertDescription className="text-center">{error}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                disabled={code.length < 6 || isValidating}
+              >
+                {isValidating ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <motion.span
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
+                      <Zap size={18} />
+                    </motion.span>
+                    Validating...
+                  </span>
+                ) : (
+                  'Unlock App'
+                )}
+              </Button>
+            </form>
+
+            {/* Help Section */}
+            <Separator className="my-6" />
             <div>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => handleCodeChange(e.target.value)}
-                placeholder="XXXX-XXXX-XXXX-XXXX"
-                aria-label="License key"
-                className={`input-base px-4 py-3 text-center text-lg font-mono tracking-wider uppercase ${
-                  error ? 'border-accent-danger' : ''
-                }`}
-                maxLength={50}
-                autoComplete="off"
-                autoFocus
-              />
-              {error && (
-                <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-accent-danger text-sm mt-2 text-center"
+              <button
+                onClick={() => setShowHelp(!showHelp)}
+                aria-expanded={showHelp}
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showHelp ? 'Hide help' : "Don't have a code?"}
+              </button>
+
+              {showHelp && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-4 space-y-3"
                 >
-                  {error}
-                </motion.p>
+                  <div className="bg-muted p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <BookOpen size={18} className="text-primary" /> Get the Ebook
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Purchase the Trained ebook to receive your access code.
+                    </p>
+                    <a
+                      href="https://trained.fitness"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-primary text-sm font-medium hover:underline"
+                    >
+                      Learn more →
+                    </a>
+                  </div>
+
+                  <div className="bg-muted p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <KeyRound size={18} className="text-muted-foreground" /> Already Purchased?
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your access code was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.
+                    </p>
+                  </div>
+
+                  <div className="bg-muted p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
+                      <MessageCircle size={18} className="text-warning" /> Need Help?
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Contact support if you can't find your code or are having issues.
+                    </p>
+                    <a
+                      href="mailto:support@trained.fitness"
+                      className="inline-block text-primary text-sm font-medium hover:underline mt-2"
+                    >
+                      support@trained.fitness
+                    </a>
+                  </div>
+                </motion.div>
               )}
             </div>
-
-            <Button
-              type="submit"
-              fullWidth
-              size="lg"
-              disabled={code.length < 6 || isValidating}
-            >
-              {isValidating ? (
-                <span className="flex items-center justify-center gap-2">
-                  <motion.span
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  >
-                    <Zap size={18} />
-                  </motion.span>
-                  Validating...
-                </span>
-              ) : (
-                'Unlock App'
-              )}
-            </Button>
-          </form>
-
-          {/* Help Section */}
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <button
-              onClick={() => setShowHelp(!showHelp)}
-              aria-expanded={showHelp}
-              className="w-full text-center text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              {showHelp ? 'Hide help' : "Don't have a code?"}
-            </button>
-
-            {showHelp && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 space-y-4"
-              >
-                <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
-                    <BookOpen size={18} className="text-accent-primary" /> Get the Ebook
-                  </h3>
-                  <p className="text-sm text-gray-400 mb-3">
-                    Purchase the Trained ebook to receive your access code.
-                  </p>
-                  <a
-                    href="https://trained.fitness"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block text-accent-primary text-sm font-medium hover:underline"
-                  >
-                    Learn more →
-                  </a>
-                </div>
-
-                <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
-                    <KeyRound size={18} className="text-accent-secondary" /> Already Purchased?
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Your access code was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.
-                  </p>
-                </div>
-
-                <div className="bg-bg-card p-4 rounded">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2 font-semibold text-sm">
-                    <MessageCircle size={18} className="text-accent-warning" /> Need Help?
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Contact support if you can't find your code or are having issues.
-                  </p>
-                  <a
-                    href="mailto:support@trained.fitness"
-                    className="inline-block text-accent-primary text-sm font-medium hover:underline mt-2"
-                  >
-                    support@trained.fitness
-                  </a>
-                </div>
-              </motion.div>
-            )}
-          </div>
+          </CardContent>
         </Card>
       </motion.div>
 
@@ -206,7 +214,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="text-gray-600 text-xs mt-8 text-center"
+        className="text-muted-foreground/50 text-xs mt-8 text-center"
       >
         © {new Date().getFullYear()} Trained. All rights reserved.
       </motion.p>
@@ -227,72 +235,74 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="w-full max-w-sm"
           >
-            <Card className="bg-bg-secondary text-center">
-              {/* Celebration Animation */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, times: [0, 0.6, 1] }}
-                className="mb-4"
-              >
-                <Shield size={72} className="mx-auto text-accent-primary" />
-              </motion.div>
-
-              <motion.h2
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-2xl font-bold mb-2 font-heading text-text-primary"
-              >
-                Access Granted.
-              </motion.h2>
-
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-gray-400 mb-6"
-              >
-                {email ? (
-                  <>Welcome, <span className="text-white font-medium">{email}</span>.</>
-                ) : (
-                  <>Your access code has been verified.</>
-                )}
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-3"
-              >
-                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
-                  <Check size={16} className="text-accent-primary" /> Full protocol access unlocked
-                </div>
-                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
-                  <Check size={16} className="text-accent-primary" /> Progress syncs to cloud
-                </div>
-                <div className="bg-bg-card p-3 text-sm text-gray-400 flex items-center gap-2 rounded">
-                  <Check size={16} className="text-accent-primary" /> All protocol features enabled
-                </div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-6"
-              >
-                <Button
-                  onClick={handleContinue}
-                  fullWidth
-                  size="lg"
+            <Card>
+              <CardContent className="text-center">
+                {/* Celebration Animation */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, times: [0, 0.6, 1] }}
+                  className="mb-4"
                 >
-                  <span className="flex items-center gap-2">
-                    Begin <Shield size={18} />
-                  </span>
-                </Button>
-              </motion.div>
+                  <Shield size={72} className="mx-auto text-primary" />
+                </motion.div>
+
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl font-bold mb-2 font-heading"
+                >
+                  Access Granted.
+                </motion.h2>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-muted-foreground mb-6"
+                >
+                  {email ? (
+                    <>Welcome, <span className="text-foreground font-medium">{email}</span>.</>
+                  ) : (
+                    <>Your access code has been verified.</>
+                  )}
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-3"
+                >
+                  <div className="bg-muted p-3 text-sm text-muted-foreground flex items-center gap-2 rounded-lg">
+                    <Check size={16} className="text-primary" /> Full protocol access unlocked
+                  </div>
+                  <div className="bg-muted p-3 text-sm text-muted-foreground flex items-center gap-2 rounded-lg">
+                    <Check size={16} className="text-primary" /> Progress syncs to cloud
+                  </div>
+                  <div className="bg-muted p-3 text-sm text-muted-foreground flex items-center gap-2 rounded-lg">
+                    <Check size={16} className="text-primary" /> All protocol features enabled
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-6"
+                >
+                  <Button
+                    onClick={handleContinue}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <span className="flex items-center gap-2">
+                      Begin <Shield size={18} />
+                    </span>
+                  </Button>
+                </motion.div>
+              </CardContent>
             </Card>
           </motion.div>
         </motion.div>
