@@ -1,468 +1,595 @@
-# Design System Refresh Pitfalls
+# E2E Testing & Analytics/Monitoring Pitfalls
 
-**Research Date:** 2026-02-05
-**Context:** Visual overhaul of Trained fitness PWA from "playful gamified" to "Equinox/luxury gym" aesthetic. Removing dual-theme system (trained/gyg), moving to single dark premium theme. Production app with active users.
+**Research Date:** 2026-02-06
+**Context:** Adding Playwright E2E tests, Plausible funnel analytics, and Sentry performance monitoring to existing Trained fitness PWA (React 18 + Vite + Zustand + Supabase) before launching to ~90k followers. No E2E tests exist yet. No `data-testid` attributes exist in the codebase. Sentry and Plausible already partially integrated.
 
 ---
 
 ## Table of Contents
 
-1. [The 298-Ternary Extraction Problem](#1-the-298-ternary-extraction-problem)
-2. [67 Hardcoded Color Values Bypassing the Token System](#2-67-hardcoded-color-values-bypassing-the-token-system)
-3. [Ghost Theme Code: Dead Branches After Removal](#3-ghost-theme-code-dead-branches-after-removal)
-4. [Typography Swap Layout Explosions](#4-typography-swap-layout-explosions)
-5. [Dark-Mode Contrast Traps: The Luxury Paradox](#5-dark-mode-contrast-traps-the-luxury-paradox)
-6. [Service Worker Caching the Old Design](#6-service-worker-caching-the-old-design)
-7. [Animation Budget Mismatch: Playful Residue in Premium Skin](#7-animation-budget-mismatch-playful-residue-in-premium-skin)
-8. [The "Is It Broken?" User Perception Problem](#8-the-is-it-broken-user-perception-problem)
-9. [Test Suite Coupling to Theme Branching](#9-test-suite-coupling-to-theme-branching)
-10. [CSS Variable Flash on Initial Load (FOUC)](#10-css-variable-flash-on-initial-load-fouc)
-11. [Border Radius Personality Disorder](#11-border-radius-personality-disorder)
-12. [Glassmorphism Removal Breaking Visual Hierarchy](#12-glassmorphism-removal-breaking-visual-hierarchy)
-13. [localStorage Theme Preference Collision](#13-localstorage-theme-preference-collision)
-14. [Tailwind Config Legacy Aliases Creating Confusion](#14-tailwind-config-legacy-aliases-creating-confusion)
+1. [Zero data-testid Attributes After Visual Overhaul](#1-zero-data-testid-attributes-after-visual-overhaul)
+2. [Supabase Auth Session Handling in Playwright](#2-supabase-auth-session-handling-in-playwright)
+3. [Service Worker Intercepting Playwright Network Mocking](#3-service-worker-intercepting-playwright-network-mocking)
+4. [Zustand localStorage Pollution Between Test Runs](#4-zustand-localstorage-pollution-between-test-runs)
+5. [Plausible Event Names Are Permanent History](#5-plausible-event-names-are-permanent-history)
+6. [Sentry Performance Monitoring Doubling Bundle Impact](#6-sentry-performance-monitoring-doubling-bundle-impact)
+7. [Animation-Induced Test Flakiness](#7-animation-induced-test-flakiness)
+8. [CI Environment Differences Breaking Playwright](#8-ci-environment-differences-breaking-playwright)
+9. [Test User Cleanup and Database State Leaking](#9-test-user-cleanup-and-database-state-leaking)
+10. [AccessGate and Auth Wall Blocking Every E2E Test](#10-accessgate-and-auth-wall-blocking-every-e2e-test)
+11. [Plausible Script Blocked in Test Environments](#11-plausible-script-blocked-in-test-environments)
+12. [Existing Unit Tests Broken After Design Refresh](#12-existing-unit-tests-broken-after-design-refresh)
+13. [Sentry Session Replay PII Leakage in Fitness Context](#13-sentry-session-replay-pii-leakage-in-fitness-context)
+14. [Sync Debounce Timer Causing Race Conditions in Tests](#14-sync-debounce-timer-causing-race-conditions-in-tests)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, visible breakage for users, or multi-day delays.
+Mistakes that cause test suites to be unreliable, analytics data to be permanently corrupted, or monitoring to miss real issues.
 
 ---
 
-### 1. The 298-Ternary Extraction Problem
+### 1. Zero data-testid Attributes After Visual Overhaul
 
-**What goes wrong:** The codebase has 298 instances of `isTrained ? ... : ...` across 21 files. Every component uses `const isTrained = themeId === 'trained'` to branch styling. Removing the theme system means touching every single one of these ternaries. If you do this as a bulk find-and-replace, you will pick the wrong branch in some cases, silently introducing broken styling that only appears on specific screens or states.
-
-**Specific code locations (highest density):**
-- `Onboarding.tsx`: 37 ternaries across 11 sub-components
-- `Home.tsx`: 40 ternaries
-- `XPClaimModal.tsx`: 31 ternaries
-- `AvatarScreen.tsx`: 32 ternaries
-- `Settings.tsx`: 29 ternaries across 2 components
-
-**Why it happens:** When you have a clear pattern (`isTrained ? A : B`), it feels safe to always pick branch A (since we are keeping "trained" and removing "gyg"). But some ternaries have the branches reversed, some have nested ternaries, and some branches reference GYG-only CSS classes that are actually the correct visual choice for the new premium look (like `rounded-2xl` from GYG vs `rounded-md` from trained).
-
-**Warning signs:**
-- You "finish" the migration but visual QA reveals wrong border radii, wrong font weights, or wrong hover states on 3-5 screens
-- Components render but look subtly off -- spacing, padding, or glow effects differ from the design
-- The Onboarding flow looks different from the rest of the app because it was migrated separately
-
-**Prevention:**
-1. Do NOT bulk-replace. Migrate component-by-component, visually verifying each one
-2. For each ternary, decide based on the NEW design intent, not just "pick the trained branch"
-3. Create a migration checklist tracking every file with `isTrained` count:
-   ```
-   [ ] Button.tsx (2 ternaries) - verified
-   [ ] Card.tsx (1 ternary) - verified
-   [ ] Navigation.tsx (2 ternaries) - verified
-   ...
-   ```
-4. Migrate shared components (Button, Card, ProgressBar, Toast) FIRST because every screen depends on them
-5. Take before/after screenshots of every screen as you migrate
-
-**Phase relevance:** This is the CORE work of the design refresh. Must be Phase 1 or the earliest visual migration phase. Get the shared components right first, then screens.
-
----
-
-### 2. 67 Hardcoded Color Values Bypassing the Token System
-
-**What goes wrong:** Despite having a CSS variable token system, the codebase contains 67 hardcoded color references (`text-white`, `bg-black`, `#hex`, `rgba()`) across 16 files (25 in components, 42 in screens). When you update the token system's color palette, these hardcoded values will not change, creating visual inconsistencies -- some elements use the new palette while others retain old colors.
-
-**Specific examples found in codebase:**
-- `text-white` used directly instead of `text-text-primary` or `text-text-on-primary`
-- Inline `rgba()` values in `WeightChart.tsx` (10 occurrences) for chart colors
-- Hardcoded hex values in `Onboarding.tsx` (7 occurrences) and `Auth.tsx` (5 occurrences)
-- `BadgeUnlockModal.tsx` has 9 hardcoded color values for particle/glow effects
-
-**Warning signs:**
-- After changing the token palette, certain text appears too bright or too dim compared to surrounding elements
-- Chart colors clash with the new palette
-- Modal overlays, particle effects, or glow effects still reference old accent colors
-- Status/feedback colors feel inconsistent with the premium aesthetic
-
-**Prevention:**
-1. Before changing any token values, audit and replace all hardcoded colors:
-   ```bash
-   # Find all hardcoded colors in components and screens
-   grep -rn "text-white\|bg-black\|bg-white\|#[0-9a-fA-F]\{3,8\}\|rgb(" src/components/ src/screens/
-   ```
-2. Replace each with the appropriate token reference: `text-white` -> `text-text-on-primary`, inline `rgba()` -> `var(--color-*)` with opacity
-3. For chart colors (WeightChart.tsx), create dedicated chart tokens in the design system
-4. Only THEN update the token values in the theme file
-
-**Phase relevance:** This audit MUST happen before the token palette is changed. Schedule it as the first step of the token migration phase. If done after, you will need to re-audit to find the mismatches.
-
----
-
-### 3. Ghost Theme Code: Dead Branches After Removal
-
-**What goes wrong:** After removing the GYG theme and all `isTrained` ternaries, orphaned code remains: the `gyg.ts` theme file, the `ThemeProvider` toggle logic, theme-related localStorage keys, the `toggleTheme` function, theme-specific CSS classes (`.theme-trained`, `.theme-gyg`), and the `getStandingOrder()` utility that switches on theme context. If you leave this dead code in, it confuses future developers, adds bundle size, and can cause runtime errors if any remaining code path tries to access removed theme properties.
-
-**Specific dead code locations after migration:**
-- `src/themes/gyg.ts` - entire file
-- `src/themes/index.ts` - `toggleTheme`, `themes` registry, `getDefaultTheme`, `THEME_STORAGE_KEY`, body class toggling
-- `src/themes/types.ts` - `ThemeId` type union, theme registry typing
-- `src/index.css` - `.theme-trained` and `.theme-gyg` scoped styles
-- `src/screens/Settings.tsx` - theme toggle UI (uses `toggleTheme`)
-- `tailwind.config.js` - legacy color aliases (`bg.primary`, `bg.secondary`, `accent.*`, `glass.*`)
-
-**Warning signs:**
-- TypeScript errors referencing `'gyg'` in union types after partial removal
-- Bundle analyzer shows `gyg.ts` still included
-- Settings screen has a broken or invisible theme toggle
-- `localStorage.getItem('app-theme')` returning `'gyg'` for users who previously had that theme selected
-
-**Prevention:**
-1. Create a removal checklist ordered by dependency:
-   - Remove Settings toggle UI first (it references `toggleTheme`)
-   - Remove `gyg.ts` and update `themes` registry
-   - Simplify `ThemeProvider` to just inject tokens (no switching logic)
-   - Remove `ThemeId` union type, replace with simple constant
-   - Clean CSS of `.theme-trained` / `.theme-gyg` scoped rules
-   - Remove legacy Tailwind aliases
-2. Run TypeScript compiler (`tsc --noEmit`) after each removal step to catch broken references
-3. Search for string literals `'gyg'` and `'trained'` to find all references
-4. Clean up localStorage: add migration code that removes the `app-theme` key on first load of new version
-
-**Phase relevance:** Theme system removal should be its own discrete step AFTER tokens are finalized but BEFORE component migration. Removing the infrastructure first means components can be migrated without the branching overhead.
-
----
-
-### 4. Typography Swap Layout Explosions
-
-**What goes wrong:** The current Trained theme uses Oswald (condensed, uppercase headings) + Inter (body). Changing to a new font pairing for the luxury aesthetic will alter the physical dimensions of every text element. Oswald is significantly narrower than most fonts at the same size. If you swap to a wider heading font, text that currently fits on one line will wrap. Buttons that fit their labels will overflow. Cards with tight padding will break their layouts.
+**What goes wrong:** The codebase has zero `data-testid` attributes anywhere in `src/`. The recent shadcn/ui migration replaced nearly every component's markup and class names. Without stable test selectors, Playwright tests must rely on text content, ARIA roles, or CSS class names -- all of which are fragile. Tests written against current CSS classes (`bg-primary`, `text-muted-foreground`) will break on any future Tailwind or shadcn update. Tests written against text content break when copy changes. This creates a test suite that provides false confidence: it passes today but breaks on innocent changes.
 
 **Specific risk areas in this codebase:**
-- Navigation labels (`text-[10px] uppercase tracking-wider`) -- already tight, any font change risks clipping
-- Button text with `tracking-widest uppercase` -- Oswald is condensed, replacement will be wider
-- `XPDisplay.tsx` with `font-mono tabular-nums` -- changing mono font affects number alignment
-- All headings use `font-heading` via CSS variables -- a single token change affects every heading app-wide
-- Onboarding screens have long motivational text that may reflow differently
+- Navigation uses icon-only buttons (no visible text to select by)
+- Multiple screens use identical shadcn Button/Card components with no distinguishing attributes
+- Onboarding is a 10-step wizard where each step uses the same component structure
+- Modals (CheckInModal, XPClaimModal) overlay the main content, making parent element selection ambiguous
+- The AccessGate screen has a single input + button -- easy to target, but similar structure to the Auth screen
 
 **Warning signs:**
-- Text wrapping where it didn't before, especially in buttons and navigation
-- Numbers in XP/streak displays misaligning after font change
-- Layout shifts visible on page load (CLS score degradation)
-- Mobile screens where content now extends below the fold unexpectedly
+- Tests use selectors like `page.locator('.bg-primary')` or `page.locator('button:nth-child(2)')`
+- Tests break when a developer changes a button label from "Log Workout" to "Log Session"
+- Flaky failures where the selector matches multiple elements on the page
 
 **Prevention:**
-1. Before changing fonts, document current text measurements for critical UI:
-   - Navigation label widths
-   - Button minimum widths
-   - Card title line counts
-   - XP/number display column widths
-2. Use `font-display: swap` in `@font-face` to prevent FOIT (Flash of Invisible Text)
-3. Configure fallback font metrics to match the new font as closely as possible using `size-adjust`, `ascent-override`, and `descent-override`
-4. Add `text-overflow: ellipsis` and `overflow: hidden` as safety nets on constrained text
-5. Test on mobile viewport widths (375px iPhone SE) where text overflow hits hardest
-6. Change fonts AFTER layout/spacing changes, not before -- this way layout can accommodate new metrics
+1. Add `data-testid` attributes to critical interactive elements BEFORE writing any Playwright tests. Target these areas first:
+   - Navigation links (home, workouts, macros, avatar, settings)
+   - Form inputs and submit buttons on Auth, AccessGate, and Onboarding
+   - Primary action buttons on each screen (log workout, log meal, check in, claim XP)
+   - Modal triggers and modal action buttons
+   - Key data displays (XP amount, streak count, level indicator)
+2. Follow a naming convention: `data-testid="screen-element"` (e.g., `data-testid="auth-email-input"`, `data-testid="home-checkin-button"`)
+3. Use Playwright's recommended locator priority: `getByRole` > `getByLabel` > `getByTestId` -- but for this app's icon-heavy navigation and modal-heavy flows, `getByTestId` will be the most reliable
+4. Do NOT use `getByText` for buttons whose labels might change during copy refinement
 
-**Phase relevance:** Typography changes must come AFTER the component architecture is simplified (ternaries removed) but should be validated early with a prototype. Do not change fonts and colors simultaneously -- the visual diff becomes impossible to QA when both change at once.
+**Detection:** Run `grep -r 'data-testid' src/` -- if it returns 0 results, this pitfall is active.
+
+**Phase relevance:** Adding `data-testid` attributes should be the FIRST step of the E2E testing phase, before any Playwright test is written. It requires touching component files but is a zero-behavior-change modification.
 
 ---
 
-### 5. Dark-Mode Contrast Traps: The Luxury Paradox
+### 2. Supabase Auth Session Handling in Playwright
 
-**What goes wrong:** Premium/luxury dark designs tend toward low contrast for aesthetic reasons -- muted colors, subtle borders, soft text. But WCAG AA requires 4.5:1 for normal text and 3:1 for large text. The existing Trained theme already pushes boundaries: `colorTextSecondary: '#888888'` on `colorBackground: '#0A0A0A'` yields approximately 6.8:1 (passing), but a luxury redesign that dims secondary text further (e.g., `#666666`) would drop to ~4.2:1 (barely passing) or fail. The trap: the design looks beautiful in Figma on a calibrated monitor but fails contrast checks and is illegible on low-brightness phone screens.
-
-**Specific contrast risk areas in this codebase:**
-- `colorTextSecondary` on `colorBackground` -- most commonly used for helper text, timestamps, labels
-- `colorBorder: '#2A2A2A'` on `colorBackground: '#0A0A0A'` -- only 1.5:1 contrast, fine for decorative borders but risky if borders convey meaning
-- `colorInfo: '#3A5A7A'` on dark backgrounds -- already low contrast (~3.5:1), will fail if made more muted
-- Status colors (success, warning, error) must remain distinguishable on the dark surface
-- `colorPrimaryMuted: 'rgba(213,85,80,0.15)'` -- semi-transparent tints may become invisible if background darkens
-
-**Dark-mode-specific traps:**
-1. **Pure black halation:** `#000000` backgrounds cause a halation effect for users with astigmatism (~33% of population) where light text appears to bleed/glow. The current `#0A0A0A` is close to pure black. Going darker is risky; `#121212` (Material Design recommendation) or the current value is safer
-2. **Saturated colors on dark backgrounds:** Highly saturated colors (like the current `#D55550` primary red) can cause visual vibration against near-black. The luxury aesthetic typically desaturates slightly -- but desaturated colors are harder to see on dark backgrounds
-3. **Disabled state invisibility:** Disabled elements (opacity-50) on dark backgrounds become nearly invisible. At 50% opacity, `#888888` text on `#0A0A0A` drops to about ~3.4:1
-4. **Elevation through brightness:** Dark mode establishes hierarchy through surface brightness, not shadows. If all surfaces (`background`, `surface`, `surfaceElevated`) are too close in value, cards blend into the background
-
-**Warning signs:**
-- Secondary text becomes hard to read on mobile at half brightness
-- Users report "can't see" certain UI elements
-- Automated accessibility audit flags fail on text contrast
-- Cards appear to "float" in Figma but look flat on actual devices
-- Disabled buttons are indistinguishable from the background
-
-**Prevention:**
-1. Check EVERY color pairing with a contrast checker BEFORE implementing:
-   - Text on background: 4.5:1 minimum
-   - Large text on background: 3:1 minimum
-   - Interactive element borders: 3:1 minimum
-   - Create a contrast matrix of all foreground/background combinations
-2. Use dark gray backgrounds, not pure black: `#0C0C0C` to `#141414` range
-3. Maintain minimum brightness steps between surface levels:
-   - background -> surface: at least 4-6 brightness points (e.g., `#0C0C0C` -> `#161616`)
-   - surface -> surfaceElevated: at least 4-6 brightness points
-4. Test on a physical phone at 30% brightness in a lit room -- this is where dark mode contrast failures become obvious
-5. Use desaturated, lighter versions of accent colors rather than dimming them
-6. Set disabled states to `opacity-40` minimum, never below, and add a visual indicator beyond just opacity (strikethrough, dashed border)
-
-**Phase relevance:** Color token definition should be the FIRST design decision, validated against WCAG before any component work begins. Build a contrast reference sheet that every subsequent phase uses as a source of truth.
-
----
-
-### 6. Service Worker Caching the Old Design
-
-**What goes wrong:** Users running the installed PWA will have the old CSS, JavaScript, and design tokens cached by the service worker. When you deploy the visual redesign, users will continue seeing the old "playful" design until the service worker updates. Worse: if HTML updates but cached CSS does not (or vice versa), users may see a hybrid state -- new layout with old colors, or old layout with new fonts.
+**What goes wrong:** Every test that exercises authenticated functionality needs a valid Supabase session. The naive approach -- typing email/password into the Auth screen for every test -- is slow (~3-5 seconds per login), flaky (network-dependent), and creates rate-limiting risk with Supabase auth endpoints. Worse, Supabase sessions are stored in localStorage by the `@supabase/supabase-js` client (key format: `sb-{project-ref}-auth-token`), and the session includes JWTs with expiration. If you save a `storageState` file with an expired JWT, all tests using that state will fail simultaneously with auth errors.
 
 **This app's specific risk:**
-- The app uses `registerType: 'prompt'` (good -- shows update UI) but the visual redesign is a dramatic change
-- CSS variables are injected at runtime by `ThemeProvider` (which reads from JS bundle), so CSS and JS must update atomically
-- Users with `localStorage.getItem('app-theme')` set to `'gyg'` will trigger a theme that no longer exists in the new code, potentially causing a crash or blank screen
+- The auth flow has THREE gates: AccessGate (access code) -> Auth (email/password) -> Onboarding (if new user). Tests must bypass or handle all three.
+- `authStore.initialize()` runs on every app load, calling `supabase.auth.getSession()` which validates the token
+- The `VITE_DEV_BYPASS` env var exists and skips all auth gates -- but using it in E2E tests means you never test auth flows
+- Supabase auth tokens expire after 1 hour by default; CI runs that take longer will see mid-run failures
 
 **Warning signs:**
-- Users report the app "looks weird" -- some elements updated, others did not
-- JavaScript errors in Sentry: `themes[themeId]` returning undefined (for users with `gyg` stored)
-- Screenshots from users showing a mix of old and new design
-- Support requests spike on deploy day with "app won't load" or "everything looks wrong"
+- Tests pass individually but fail when run as a suite (session expires during the run)
+- All tests fail simultaneously with "Invalid login credentials" or "JWT expired"
+- Test suite takes 5+ minutes because every test logs in through the UI
+- Rate limiting: Supabase returns 429 after too many auth requests in CI
 
 **Prevention:**
-1. Add localStorage migration as the FIRST thing the new app does on boot:
+1. Use Playwright's [project dependencies](https://playwright.dev/docs/auth) pattern: create a `setup` project that authenticates once via Supabase REST API (not through the UI), saves `storageState` to a JSON file, and all test projects depend on it
+2. Authenticate via the Supabase client library directly in `globalSetup`:
    ```typescript
-   // Run before ThemeProvider initialization
-   const stored = localStorage.getItem('app-theme')
-   if (stored === 'gyg') {
-     localStorage.removeItem('app-theme')
-     // or: localStorage.setItem('app-theme', 'trained')
+   // global-setup.ts (conceptual approach)
+   const { data } = await supabase.auth.signInWithPassword({
+     email: TEST_USER_EMAIL,
+     password: TEST_USER_PASSWORD
+   })
+   // Save session to storageState file for Playwright to inject
+   ```
+3. Create a dedicated test user in Supabase with a known password -- do NOT use production accounts
+4. Set Supabase JWT expiration to a longer duration for test environments, or refresh the token in `globalSetup`
+5. For the AccessGate: either set the access code in test env config, or use `VITE_DEV_BYPASS=true` ONLY for non-auth tests
+
+**Phase relevance:** Auth setup infrastructure must be built FIRST in the E2E phase. Every subsequent test depends on it. Get this wrong and the entire E2E suite is unreliable.
+
+---
+
+### 3. Service Worker Intercepting Playwright Network Mocking
+
+**What goes wrong:** The app uses `vite-plugin-pwa` with Workbox, and has runtime caching rules for USDA food API, Open Food Facts, and Supabase REST API. When Playwright tests run against the built app (production mode), the service worker activates and intercepts network requests. This means `page.route()` and `browserContext.route()` do NOT see requests handled by the service worker. If a test mocks the USDA API to return specific food data, the service worker may serve a cached response instead, and the mock never fires. The test passes or fails unpredictably depending on cache state.
+
+**This app's specific caching rules (from vite.config.ts):**
+- USDA food search: `CacheFirst` with 1-week TTL (100 entries)
+- Open Food Facts: `CacheFirst` with 1-week TTL (100 entries)
+- Supabase REST API: `NetworkFirst` with 24-hour TTL and 3-second timeout (50 entries)
+
+The `CacheFirst` strategy for food APIs is the most dangerous: once cached, tests will NEVER see fresh mock data.
+
+**Warning signs:**
+- Tests that mock API responses still get old data
+- Food search tests pass on first run but return stale results on subsequent runs
+- Tests pass locally (dev mode, no SW) but fail in CI (production build, SW active)
+- Intermittent failures where some workers get cached data and others don't
+
+**Prevention:**
+1. **Block the service worker in Playwright config** for all tests that don't specifically test SW behavior:
+   ```typescript
+   // playwright.config.ts
+   use: {
+     serviceWorkers: 'block'
    }
    ```
-2. Make the service worker update prompt more prominent for this release -- possibly force-update rather than prompt, given the scale of changes
-3. Deploy the visual redesign as a single atomic release, not incrementally -- a half-migrated design looks broken, not "in progress"
-4. Set a cache-busting version on all assets (Vite does this automatically with content hashes, but verify `sw.js` itself is not cached)
-5. Consider adding a "What's New" screen that fires once after the redesign deploys, explaining the visual changes
+2. Create a SEPARATE test project specifically for service worker testing (update prompts, offline behavior) where SW is allowed
+3. If running tests against `vite dev` server (not production build), the service worker won't be active -- this is simpler for most E2E tests
+4. For tests that DO need the SW, clear caches in `beforeEach`:
+   ```typescript
+   await page.evaluate(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))))
+   ```
+5. Document clearly which test suites require SW and which don't
 
-**Phase relevance:** Service worker strategy must be planned in the FIRST phase but executed in the FINAL phase (the deploy). The localStorage migration code must ship WITH the redesign, not before or after.
+**Detection:** If you see `page.route()` handlers that never fire, check the DevTools Application tab for active service workers.
+
+**Phase relevance:** This must be decided during Playwright config setup, BEFORE writing food search or Supabase data tests. A wrong default here creates hours of debugging later.
+
+---
+
+### 4. Zustand localStorage Pollution Between Test Runs
+
+**What goes wrong:** Playwright creates a fresh browser context per test by default, which includes clean localStorage. This SHOULD prevent Zustand state leaks. However, there are two traps specific to this codebase:
+
+**Trap 1: storageState reuse carries Zustand data.** When you save `storageState` for auth reuse (Pitfall #2), that file includes ALL localStorage -- including the 8 Zustand persist stores (`gamify-gains-user`, `gamify-gains-workouts`, `gamify-gains-macros`, `gamify-gains-xp`, `gamify-gains-avatar`, `gamify-gains-achievements`, `gamify-gains-reminders`, `gamify-gains-access`). If the auth setup test also triggers onboarding or logs data, that state leaks into every subsequent test via the storageState file.
+
+**Trap 2: Test actions trigger Supabase sync.** The `scheduleSync()` function fires after most user actions with a 2-second debounce. If a test creates data (logs a workout, logs a meal), `scheduleSync()` writes to the REAL Supabase database. The next test, even with clean localStorage, may load that data from the cloud via `loadAllFromCloud()` when it initializes auth.
+
+**Zustand persist keys in this codebase:**
+| Key | Store | Persists To |
+|-----|-------|-------------|
+| `gamify-gains-user` | userStore | localStorage |
+| `gamify-gains-workouts` | workoutStore | localStorage |
+| `gamify-gains-macros` | macroStore | localStorage |
+| `gamify-gains-xp` | xpStore | localStorage |
+| `gamify-gains-avatar` | avatarStore | localStorage |
+| `gamify-gains-achievements` | achievementsStore | localStorage |
+| `gamify-gains-reminders` | remindersStore | localStorage |
+| `gamify-gains-access` | accessStore | localStorage |
+
+**Warning signs:**
+- Tests pass in isolation but fail when run as a suite
+- A workout logged in Test A appears in Test B's workout history
+- User profile from auth setup appears in tests that should start with no profile
+- Tests that check "empty state" UI fail because they see data from previous tests
+
+**Prevention:**
+1. When saving `storageState` for auth, ONLY include cookies and the Supabase auth token localStorage key -- strip out the `gamify-gains-*` keys:
+   ```typescript
+   // After saving storageState, filter it
+   const state = JSON.parse(fs.readFileSync(authFile))
+   state.origins[0].localStorage = state.origins[0].localStorage.filter(
+     item => item.name.startsWith('sb-')
+   )
+   fs.writeFileSync(authFile, JSON.stringify(state))
+   ```
+2. Add a `beforeEach` helper that clears Zustand stores (but NOT the auth token) by evaluating in the page:
+   ```typescript
+   await page.evaluate(() => {
+     Object.keys(localStorage)
+       .filter(k => k.startsWith('gamify-gains-'))
+       .forEach(k => localStorage.removeItem(k))
+   })
+   ```
+3. Use a dedicated test Supabase project (or at minimum, dedicated test user) so sync data doesn't contaminate the production database
+4. For tests that need specific state (e.g., "completed onboarding" state), seed the localStorage directly rather than running through the full onboarding flow
+
+**Phase relevance:** This infrastructure must be built alongside the auth setup (Pitfall #2). Both are part of the same Playwright test infrastructure phase.
+
+---
+
+### 5. Plausible Event Names Are Permanent History
+
+**What goes wrong:** The app already has 22 custom events defined in `src/lib/analytics.ts`. Plausible tracks events by name. If you add new funnel/engagement events with names that are poorly chosen, inconsistent with existing names, or too generic, you are stuck with them. While Plausible allows editing the display name of a goal, the underlying event name in your codebase is what fires from the app. Historical data is tied to that event name. If you later realize "Workout Started" should have been "Workout Begun" (to match a naming convention), you have to keep firing both names during a transition period, or lose the ability to compare historical data across the rename.
+
+**Existing event names in this codebase (22 events):**
+```
+Onboarding Started, Onboarding Completed, Workout Started, Workout Completed,
+Quick Workout Logged, Meal Logged, Meal Saved, Protein Target Hit,
+Calorie Target Hit, Check-In Completed, XP Claimed, Level Up, Badge Earned,
+Avatar Evolved, App Opened, Settings Viewed, Achievements Viewed,
+Data Exported, Signup Completed, Login Completed, Coach Dashboard Viewed,
+Client Viewed
+```
+
+The naming convention is: `{Noun} {Past Tense Verb}` (e.g., "Workout Completed", "Badge Earned"). Some deviate: "Quick Workout Logged" (adjective+noun+verb), "App Opened" (noun+verb).
+
+**Warning signs:**
+- New events use a different convention: "user_signed_up" (snake_case) vs "Signup Completed" (Title Case)
+- Funnel events overlap with existing events ("Signup" vs "Signup Completed")
+- Events are too granular (tracking every button click) making the dashboard noisy
+- Events are too broad ("Page Viewed") providing no actionable insight
+- Property names are inconsistent: `workout_type` in one event, `type` in another
+
+**Prevention:**
+1. Document the naming convention BEFORE adding new events: `{Noun} {Past Tense Verb}` in Title Case with spaces (matching existing)
+2. Map the entire funnel as event names BEFORE implementing any:
+   ```
+   FUNNEL: App Opened -> Access Code Entered -> Signup Completed ->
+           Onboarding Completed -> First Workout Completed ->
+           First Meal Logged -> First Week Completed
+   ```
+3. Review new event names against ALL 22 existing names for consistency
+4. Use custom properties for variants rather than creating new event names:
+   - GOOD: `trackEvent('Workout Completed', { is_first: true })`
+   - BAD: `trackEvent('First Workout Completed')` (creates a new event when a property suffices)
+5. Keep event count manageable -- Plausible dashboards become unusable past ~40 custom events
+6. For funnel tracking, Plausible requires events to be set up as goals first -- plan the Plausible dashboard configuration alongside the code changes
+
+**Phase relevance:** Event naming and funnel design should be completed as a planning step BEFORE any code is written. This is a one-way door. Get it right on paper first.
+
+---
+
+### 6. Sentry Performance Monitoring Doubling Bundle Impact
+
+**What goes wrong:** The app already includes `@sentry/react` (currently used for error tracking and session replay). Adding performance monitoring (tracing) imports additional code. The current Sentry config sets `tracesSampleRate: 0.1` but does not import `BrowserTracing` explicitly -- it relies on whatever the default Sentry.init provides. Explicitly adding `browserTracingIntegration()` and `replayIntegration()` to get full performance monitoring can significantly increase the Sentry portion of the bundle.
+
+**Bundle impact breakdown (approximate, based on Sentry docs and community reports):**
+- `@sentry/react` core: ~30KB gzipped
+- `browserTracingIntegration()`: ~10-15KB gzipped additional
+- `replayIntegration()`: ~36KB gzipped (already included via `replaysOnErrorSampleRate: 1.0`)
+- Total potential: ~80KB+ gzipped for full Sentry
+
+The app already splits Sentry into its own chunk (`manualChunks: { 'vendor-sentry': ['@sentry/react'] }` in vite.config.ts), which is good -- Sentry won't block initial render. But on mobile networks targeting 90k users, every KB matters for the initial app shell.
+
+**Warning signs:**
+- `npm run build` output shows vendor-sentry chunk growing past 100KB
+- Lighthouse performance score drops after adding tracing
+- Time to Interactive increases on mobile 3G
+- Users on slow connections see a delay before the app becomes responsive
+
+**Prevention:**
+1. Audit what you actually need. For a PWA pre-launch, you likely need:
+   - Error tracking (already have)
+   - Session replay on errors (already have at `replaysOnErrorSampleRate: 1.0`)
+   - Web Vitals (can be done with Sentry's `browserTracingIntegration` OR lightweight alternatives)
+   - Page load timing (included in BrowserTracing)
+2. Use Sentry's tree-shaking flags in vite.config.ts to strip unused code:
+   ```typescript
+   define: {
+     __SENTRY_DEBUG__: false,
+     __SENTRY_TRACING__: true, // only if you actually use tracing
+   }
+   ```
+3. Consider whether `web-vitals` library (~1.5KB) is sufficient for Core Web Vitals instead of full Sentry tracing (~15KB)
+4. Keep `replaysSessionSampleRate: 0` (current setting) -- recording all sessions adds massive overhead
+5. After changes, verify bundle impact:
+   ```bash
+   npx vite build && ls -la dist/assets/vendor-sentry*.js
+   ```
+6. Set a bundle size budget: Sentry chunk should not exceed 50KB gzipped
+
+**Phase relevance:** Performance monitoring additions should happen AFTER E2E tests are working (so you can verify the monitoring does not break anything) and should include a bundle size check as an acceptance criterion.
+
+---
+
+### 7. Animation-Induced Test Flakiness
+
+**What goes wrong:** The app uses Framer Motion (spring animations with critically damped springs after the redesign) and CSS transitions throughout. Playwright's auto-waiting waits for elements to be visible and stable, but "stable" does not mean "animation complete." A button that is animating via `spring` might be clickable but at the wrong position. A toast notification that fades in might be visible but not yet readable for text assertions. Modals (CheckInModal, XPClaimModal) that animate in may have their content intercepted by the parent overlay during the transition.
+
+**This app's specific animation risk areas:**
+- `XPClaimModal`: Spring animation on mount -- if test clicks "Claim" too fast, the modal may not be fully rendered
+- `CheckInModal`: Overlay + content animation -- assertions on streak count may fire before the number animates to its final value
+- `Navigation`: `layoutId="nav-indicator"` creates a shared layout animation when switching tabs
+- Toast notifications (`sonner`): Appear with slide-in animation, disappear after timeout
+- Skeleton -> content transitions: Components use `Suspense` with skeleton fallbacks -- the transition from skeleton to content is a visual shift
+
+**Warning signs:**
+- Tests pass 90% of the time but fail randomly on modal assertions
+- `toBeVisible()` passes but `toHaveText('100 XP')` fails (content still animating)
+- Click actions fire but nothing happens (clicked during animation transition)
+- Tests pass locally (fast machine) but fail in CI (slower, headless)
+
+**Prevention:**
+1. **Disable animations in test mode.** Add a CSS override when running in Playwright:
+   ```typescript
+   // In Playwright test setup
+   await page.addStyleTag({
+     content: `*, *::before, *::after {
+       animation-duration: 0s !important;
+       transition-duration: 0s !important;
+     }`
+   })
+   ```
+   Or better: use a Framer Motion `ReducedMotion` provider in test mode
+2. **Use `page.waitForLoadState('networkidle')` before assertions** -- not just `domcontentloaded`
+3. **Wait for specific content** rather than element visibility:
+   ```typescript
+   // BAD: flaky if content is animating
+   await expect(page.locator('[data-testid="xp-display"]')).toBeVisible()
+   // GOOD: waits for specific text content
+   await expect(page.locator('[data-testid="xp-display"]')).toHaveText(/\d+ XP/)
+   ```
+4. **For toast assertions**, wait for the toast to appear AND stabilize:
+   ```typescript
+   await expect(page.locator('[data-sonner-toast]')).toBeVisible()
+   await expect(page.locator('[data-sonner-toast]')).toContainText('Workout logged')
+   ```
+5. Set Playwright timeout configs appropriately: `expect.timeout` of 5000ms (default) is fine, but `actionTimeout` should be 10000ms for animations to settle
+
+**Phase relevance:** Animation handling should be decided in the Playwright config phase, before individual test files are written. The CSS override approach is simplest and covers all cases.
 
 ---
 
 ## Moderate Pitfalls
 
-Mistakes that cause delays, rework, or technical debt.
+Mistakes that cause delays, debugging sessions, or compromised test/monitoring quality.
 
 ---
 
-### 7. Animation Budget Mismatch: Playful Residue in Premium Skin
+### 8. CI Environment Differences Breaking Playwright
 
-**What goes wrong:** The current app uses Framer Motion extensively (321 `motion` usages across 29 files) with playful animations: bounce effects (`whileTap: { scale: 0.97 }`), floating animations (`float 3s ease-in-out infinite`), XP pop effects (`xp-pop`), glow pulses (`pulse-glow`), and shimmer effects. A luxury aesthetic requires restrained, purposeful motion -- slow fades, subtle scale transitions, ease-out-cubic timing. If you change colors and typography but keep the old animation patterns, the result feels like a luxury skin on a children's toy.
-
-**Specific animation inventory:**
-- `Button.tsx`: `whileTap: { scale: 0.97 }`, `whileHover: { scale: 1.02 }` -- slightly too bouncy for premium
-- `Card.tsx`: `whileHover: { scale: 1.01, y: -2 }` -- card lift is fine for premium, but scale may be too much
-- `Navigation.tsx`: `layoutId="nav-indicator"` with `animate: { scale: 1.1 }` -- nav bounce feels gamified
-- `tailwind.config.js`: `pulse-glow`, `float`, `xp-pop`, `shimmer`, `pulse-slow` keyframes -- all coded for playful feel
-- `index.css`: `.glow-primary`, `.glow-gold`, `.glow-green`, `.glow-primary-intense`, `.text-glow-primary` -- neon glow effects
+**What goes wrong:** Playwright tests pass locally (macOS, headed browser, fast machine) but fail in GitHub Actions (Linux, headless, slower, containerized). Common causes specific to this PWA:
+- **Font rendering differences:** The app uses Inter, Oswald, and JetBrains Mono via `@fontsource`. In CI, these web fonts may not render identically, affecting any screenshot comparison tests.
+- **Viewport differences:** Mobile PWA tests assume specific viewport sizes. CI default viewport may differ from local.
+- **Network timing:** Supabase calls that complete in <100ms locally may take 500ms+ in CI, causing timeout-sensitive assertions to fail.
+- **`page.pause()` left in code:** If a developer leaves `page.pause()` in a test for debugging, it hangs indefinitely in headless CI with no visible error -- just a timeout after the full test timeout.
 
 **Warning signs:**
-- New premium colors feel "wrong" but you cannot pinpoint why -- it is likely the animation style conflicting with the visual style
-- Reviewers describe the app as "trying too hard" or "inconsistent personality"
-- Glow effects that looked exciting with gold/amber now look garish with muted luxury colors
-- XP pop animation feels juvenile when paired with sophisticated typography
+- Green locally, red in CI -- consistently
+- Tests pass on retry in CI (indicating timing, not logic issues)
+- Screenshot comparison tests always fail in CI
+- CI runs take 10x longer than local, or hang without output
 
 **Prevention:**
-1. Create an animation style guide for the new aesthetic BEFORE changing individual animations:
-   - Duration: 150-300ms for micro-interactions (current is fine), 400-600ms for transitions
-   - Easing: `ease-out` or `cubic-bezier(0.16, 1, 0.3, 1)` -- no bounce
-   - Scale range: 0.98-1.02 max (current 0.97 is fine, but 1.1 on nav is too much)
-   - Glow: remove or replace with subtle box-shadows using `rgba` with low alpha
-   - Shimmer: replace with subtle fade or remove entirely
-2. Audit all 5 Tailwind keyframe animations and decide keep/modify/remove for each
-3. Reduce motion values in Framer Motion components: `{ scale: 1.1 }` -> `{ scale: 1.03 }` on nav
-4. Replace `pulse-glow` with a gentler `fade-subtle` or remove
-5. Remove the `float` and `xp-pop` animations -- they do not belong in a luxury aesthetic
-
-**Phase relevance:** Animation changes should happen in a DEDICATED phase AFTER colors and typography are settled. Animations depend on the final color palette (glow colors, shadow colors) and font metrics (text animation sizing). Changing animations simultaneously with colors makes it impossible to evaluate either in isolation.
-
----
-
-### 8. The "Is It Broken?" User Perception Problem
-
-**What goes wrong:** Users who have the current version installed will update and see a dramatically different app. Without context, a visual overhaul can feel like something went wrong rather than an intentional improvement. Research from Nielsen Norman Group confirms that frequent redesigns erode trust, and users may report the new design as a "bug." This risk is amplified for a PWA where the update happens silently -- unlike an App Store update with release notes.
-
-**This app's specific risk:**
-- The audience (fitness users, 90k follower base) expects stability from a tool they use daily
-- The shift from "playful gamified" to "luxury premium" changes the emotional register dramatically
-- Labels may change (e.g., "Daily Quests" -> "Daily Assignments"), compounding the disorientation
-- Users on the GYG theme will experience an even more dramatic shift (gold/amber -> dark premium)
-
-**Warning signs:**
-- Spike in "is the app broken?" messages on social media within hours of deploy
-- App store reviews (if applicable) mentioning "what happened to my app"
-- Increased bounce rate / decreased session time in analytics
-- Support requests about missing features (that are there, but look different)
-
-**Prevention:**
-1. Ship a "What's New" interstitial that shows once on first load after redesign:
-   - Show side-by-side of old vs new (or key highlights)
-   - Frame as intentional upgrade: "We've elevated the experience"
-   - Allow dismissal but make it prominent
-2. Announce the redesign BEFORE deploying via social channels (the 90k follower base)
-3. Keep navigation structure and feature placement identical -- only change visual treatment
-4. Do NOT change functionality, labels, AND visuals simultaneously -- visual-only makes the change legible as intentional
-5. Consider a brief changelog/banner in the Settings screen documenting the update
-
-**Phase relevance:** User communication planning should happen in Phase 1 (planning) but execute in the FINAL phase (deploy). The "What's New" screen should be built as part of the last development phase.
-
----
-
-### 9. Test Suite Coupling to Theme Branching
-
-**What goes wrong:** The test utilities (`src/test/utils.tsx`) hard-code `defaultTheme="trained"` in the custom render wrapper. Existing component tests (Button, Card, ProgressBar) render with the trained theme. After removing the dual-theme system, these tests need updating -- but more critically, the tests are coupled to theme-specific class names and behaviors. If the Card test asserts `bg-surface border border-border` (trained branch) and you change Card to use different classes, tests break even though the component works correctly.
-
-**Specific test files affected:**
-- `src/components/Button.test.tsx`
-- `src/components/Card.test.tsx`
-- `src/components/ProgressBar.test.tsx`
-- `src/test/utils.tsx` (render wrapper)
-- `src/stores/workoutStore.test.ts` (may reference theme indirectly)
-- `src/stores/macroStore.test.ts`
-- `src/stores/xpStore.test.ts`
-
-**Warning signs:**
-- Tests pass before the redesign but fail after, even though the app works correctly visually
-- CI/CD pipeline blocks deploy because of test failures on CSS class assertions
-- Developers skip or delete tests to unblock the deploy, losing coverage
-
-**Prevention:**
-1. Update `src/test/utils.tsx` FIRST -- simplify the render wrapper to not use ThemeProvider at all (since there will be only one theme, tokens can be set directly)
-2. Audit test assertions: replace theme-specific class name checks with behavioral checks (does the button respond to click? is the card interactive?) rather than visual class checks
-3. If visual regression testing is desired, use screenshot comparison (Storybook + Chromatic or Percy) rather than asserting CSS classes
-4. Run the full test suite as part of each component migration, not just at the end
-
-**Phase relevance:** Test infrastructure updates should happen in the SAME phase as the theme system simplification, before component-level visual changes begin.
-
----
-
-### 10. CSS Variable Flash on Initial Load (FOUC)
-
-**What goes wrong:** The current architecture injects CSS variables via JavaScript (`injectCSSVariables()` in ThemeProvider's `useEffect`). This means there is a brief moment between HTML render and React hydration where the `:root` defaults from `index.css` are active. Currently this is fine because the defaults match the trained theme. But if you change the token values in the theme file without updating the `:root` defaults in `index.css`, users will see a flash of the old colors before the new ones are injected.
-
-**Technical detail:**
-```
-Timeline:
-1. Browser loads index.html
-2. index.css loads -> :root variables applied (OLD defaults if not updated)
-3. React bundle loads and executes
-4. ThemeProvider mounts
-5. useEffect fires -> injectCSSVariables() overwrites :root (NEW values)
-```
-Between steps 2 and 5, the old colors are visible. On fast connections this is <100ms. On slow connections or cold starts, this can be 500ms+ -- very visible as a color flash.
-
-**Warning signs:**
-- Brief flash of old accent colors on page load, especially noticeable on slower devices
-- Users report "the app flashes red then changes" (or whatever the old primary color was)
-- Core Web Vitals: increased CLS score from the color shift
-
-**Prevention:**
-1. ALWAYS update `index.css` `:root` defaults in sync with the theme file -- they must contain the new token values
-2. Consider moving away from JS-injected CSS variables entirely now that there is only one theme -- put all values directly in `index.css` `:root`
-3. If keeping JS injection (for potential future theming), set the `:root` defaults to match the only theme exactly
-4. Test on throttled connection (Chrome DevTools -> Network -> Slow 3G) to catch flash
-
-**Phase relevance:** This is a step in the token migration phase. When changing token values, update BOTH `src/themes/trained.ts` AND `src/index.css` `:root` block simultaneously.
-
----
-
-### 11. Border Radius Personality Disorder
-
-**What goes wrong:** The current system has two completely different border radius philosophies: Trained uses sharp/minimal (`4px`, `6px`, `6px`) while GYG uses rounded (`8px`, `12px`, `16px`). Components like Card and Button pick between these via `isTrained`. When migrating to the premium aesthetic, you must decide on a single radius system, but if different components are migrated at different times, some will have sharp corners while others have rounded corners, creating a visually incoherent state.
-
-**Additional complexity in this codebase:**
-- Tailwind config has `borderRadius.DEFAULT: 'var(--border-radius)'` plus hardcoded `'2xl': '16px'` and `'3xl': '24px'`
-- Some components use Tailwind radius classes (`rounded-md`, `rounded-2xl`), others use the CSS variable
-- The GYG theme's `16px` card radius and the hardcoded Tailwind `'2xl': '16px'` are the same value but from different sources
-
-**Warning signs:**
-- Cards with sharp corners next to buttons with rounded corners (or vice versa)
-- Navigation bar with one radius style while content area uses another
-- "It looks like two different apps" feedback during review
-
-**Prevention:**
-1. Decide the new border radius scale FIRST as a design decision:
-   - Luxury/premium typically uses moderate radii: `6px` (small), `10px` (medium), `14px` (cards/modals)
-   - NOT fully rounded (too playful) and NOT fully sharp (too brutalist)
-2. Update the CSS variable tokens AND the Tailwind config simultaneously
-3. Remove the hardcoded `'2xl'` and `'3xl'` Tailwind values -- everything should flow from tokens
-4. Migrate ALL components' border radius in a SINGLE pass, not incrementally
-
-**Phase relevance:** Border radius is part of the token definition phase. Decide the scale, update tokens, then enforce consistency in every component migration.
-
----
-
-### 12. Glassmorphism Removal Breaking Visual Hierarchy
-
-**What goes wrong:** The GYG theme uses glassmorphism (`.glass`, `.glass-elevated`, `.glass-subtle` classes) while Trained uses solid backgrounds. The `index.css` has 3 glass utility classes with `backdrop-filter: blur()`. If the new premium design does not use glassmorphism, removing it is straightforward. But if the premium design uses a DIFFERENT kind of glass (more subtle, less blurry), partial removal creates inconsistency. More critically, glassmorphism is how GYG establishes visual hierarchy (layers of translucency). Removing it without replacing the hierarchy mechanism makes everything look flat.
-
-**Impact on this codebase:**
-- `Card.tsx` uses `.glass`, `.glass-elevated`, `.glass-subtle` in the GYG branch
-- `Button.tsx` uses `.glass` in ghost variant for GYG
-- `index.css` has `.glass-input`, `.glass-overlay` classes used app-wide
-- `.glass-overlay` for modals is shared between themes -- removing it breaks modal dimming
-
-**Warning signs:**
-- Cards blend into background after removing glass effects
-- Modal overlays become either too opaque or too transparent
-- The app feels "flat" compared to the current design even with good colors
-- Input fields lose their visual boundary on dark backgrounds
-
-**Prevention:**
-1. Inventory every glass class usage and its PURPOSE (hierarchy, grouping, focus, overlay)
-2. For each purpose, define the premium replacement:
-   - Glass card -> solid surface with subtle border and shadow
-   - Glass input -> solid surface with border, focus glow
-   - Glass overlay -> keep (modal backdrop needs dimming regardless of theme)
-3. Do NOT remove `.glass-overlay` -- it serves a functional purpose beyond aesthetics
-4. Test every modal and overlay after changes
-
-**Phase relevance:** Glass/surface treatment changes happen during the component migration phase, AFTER tokens are set. Do not remove glass classes from `index.css` until all component references are updated.
-
----
-
-## Minor Pitfalls
-
-Mistakes that cause annoyance, cleanup work, or small visual bugs.
-
----
-
-### 13. localStorage Theme Preference Collision
-
-**What goes wrong:** The app stores theme preference in `localStorage` under key `app-theme`. Users who had selected the GYG theme have `'gyg'` stored. The new code will not have a `'gyg'` theme. The `getInitialTheme()` function falls back to default if the stored value is not in the `themes` registry -- this is safe. But the stale `'gyg'` value persists in localStorage, and if you later reintroduce any theming feature, it could resurface.
-
-**Warning signs:**
-- No immediate breakage (fallback logic works), but `localStorage` pollution
-- If future code reads `app-theme` without the fallback check, it gets an invalid value
-- DevTools inspection shows stale theme data confusing debugging
-
-**Prevention:**
-1. Add a one-time migration on app boot that removes the `app-theme` key
-2. Or: remove the `THEME_STORAGE_KEY` logic entirely since there will be only one theme
-3. Clean up in the same PR that removes the theme system
-
-**Phase relevance:** Part of the theme system removal phase. Minor but should not be forgotten.
-
----
-
-### 14. Tailwind Config Legacy Aliases Creating Confusion
-
-**What goes wrong:** The `tailwind.config.js` has "legacy color mappings for backward compatibility" including `bg.primary`, `bg.secondary`, `bg.card`, `accent.primary`, `accent.secondary`, `accent.success`, `accent.warning`, `accent.danger`, and `glass.*` colors. These aliases duplicate the primary token colors, creating two valid ways to reference the same color in Tailwind classes. During the redesign, developers may use the wrong alias, or the aliases may fall out of sync with the primary tokens.
-
-**Warning signs:**
-- `bg-bg-primary` and `bg-background` both work but might resolve differently if aliases are not updated
-- Code review confusion: "should I use `bg-accent-primary` or `bg-primary`?"
-- Aliases drift from actual token values if updated independently
-
-**Prevention:**
-1. Remove ALL legacy aliases in the same phase as the theme system removal
-2. Search codebase for usage of legacy aliases before removal:
-   ```bash
-   grep -rn "bg-bg-\|bg-accent-\|bg-glass-\|text-accent-" src/
+1. **Configure explicit viewport** in `playwright.config.ts` matching the target mobile experience:
+   ```typescript
+   use: {
+     viewport: { width: 375, height: 812 }, // iPhone X
+   }
    ```
-3. Replace any found usages with the canonical token class names
-4. Simplify `tailwind.config.js` to only have the primary token mappings
+2. **Install browser dependencies in CI** -- Playwright needs system libraries:
+   ```yaml
+   - name: Install Playwright Browsers
+     run: npx playwright install --with-deps chromium
+   ```
+   Install only the browsers you test (chromium is sufficient for most PWA testing)
+3. **Never use `page.pause()` in committed code** -- add a lint rule or pre-commit hook to catch it
+4. **Set generous timeouts for CI** but strict locally:
+   ```typescript
+   timeout: process.env.CI ? 60000 : 30000,
+   ```
+5. **Run the dev server in CI, not the production build** (unless testing SW behavior) -- it avoids the build step and SW issues
+6. **Avoid screenshot comparison tests entirely** for this milestone -- they add complexity without matching the goal of "does the user flow work?"
+7. **Use `retries: 2` in CI only** to handle genuine flakiness, but investigate any test that needs retries regularly
 
-**Phase relevance:** Part of the Tailwind config cleanup, which should happen during token migration phase.
+**Phase relevance:** CI integration should be the LAST step of the E2E phase, after all tests pass locally. Debugging CI failures without a working local suite is extremely painful.
+
+---
+
+### 9. Test User Cleanup and Database State Leaking
+
+**What goes wrong:** E2E tests that create Supabase data (user profiles, workout logs, meal logs, XP records) leave that data behind. If tests run against the production Supabase instance, test data appears in the real database. If tests run against a test Supabase instance, data accumulates across runs, causing tests that expect empty/specific states to fail.
+
+**This app's Supabase tables affected by E2E tests:**
+- `profiles` (user profile data)
+- `workout_logs` (workout history)
+- `daily_macro_logs` and `logged_meals` (nutrition data)
+- `macro_targets` (user macro settings)
+- `saved_meals` (user's saved meals)
+- `user_xp` (XP and level data)
+- `weight_logs` (weight tracking history)
+
+**Warning signs:**
+- Production dashboard shows test users in real data
+- Tests that check "no workouts yet" empty state see workouts from previous test runs
+- Database foreign key errors when cleanup deletes records in the wrong order
+- Supabase free tier row limits approached by test data accumulation
+
+**Prevention:**
+1. **NEVER run E2E tests against production Supabase.** Use one of:
+   - Supabase local development (via Docker: `supabase start`)
+   - A dedicated Supabase test project (free tier is fine for tests)
+2. **Create a test cleanup function** that runs in `globalTeardown`:
+   ```typescript
+   // Delete in correct order respecting foreign keys
+   await supabase.from('logged_meals').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('daily_macro_logs').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('saved_meals').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('workout_logs').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('user_xp').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('weight_logs').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('macro_targets').delete().eq('user_id', TEST_USER_ID)
+   await supabase.from('profiles').delete().eq('id', TEST_USER_ID)
+   ```
+3. Use the [supawright](https://github.com/isaacharrisholt/supawright) library which handles cleanup automatically, respecting foreign key constraints
+4. Prefix test user email with a recognizable pattern (e.g., `test+{timestamp}@trained.app`) so test data is identifiable
+5. If using Supabase local, add a `supabase db reset` step to CI before running tests
+
+**Phase relevance:** Database strategy must be decided during Playwright infrastructure setup. It determines the entire test environment configuration.
+
+---
+
+### 10. AccessGate and Auth Wall Blocking Every E2E Test
+
+**What goes wrong:** The app has a three-layer authentication wall: AccessGate (access code) -> Auth (email/password) -> Onboarding (if first time). The `App.tsx` renders these as conditional returns -- if `!hasAccess`, ONLY the AccessGate renders. If `!user`, ONLY the Auth screen renders. If `!profile.onboardingComplete`, ONLY Onboarding renders. This means a Playwright test that tries to navigate to `/workouts` will see the AccessGate instead, with no route change and no error.
+
+**The `VITE_DEV_BYPASS` escape hatch:**
+The app already has `const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'` which skips AccessGate, Auth, and Onboarding checks. BUT: if you use this for ALL tests, you never test the actual auth flow that 90k users will experience.
+
+**Warning signs:**
+- Every test fails because it sees the AccessGate instead of the expected screen
+- Tests navigate to `/workouts` but assertions about workout UI fail -- they are actually asserting against the AccessGate screen
+- Tests pass with `VITE_DEV_BYPASS=true` but the auth flow itself is untested
+- Switching between bypass and non-bypass modes requires rebuilding the app
+
+**Prevention:**
+1. Create TWO Playwright projects in the config:
+   - `auth-tests`: Tests AccessGate, Auth, and Onboarding flows. Uses NO bypass. Authenticates through the UI.
+   - `app-tests`: Tests all authenticated features. Uses `storageState` from auth setup (which includes the access token and auth session). Does NOT use `VITE_DEV_BYPASS`.
+2. The `storageState` from auth setup must include:
+   - `gamify-gains-access` localStorage key (so AccessGate is bypassed)
+   - `sb-{project-ref}-auth-token` localStorage key (so Auth is bypassed)
+   - Optionally: a seeded `gamify-gains-user` with `onboardingComplete: true` (so Onboarding is bypassed)
+3. Do NOT rely on `VITE_DEV_BYPASS` for E2E tests -- it skips real code paths
+4. For the auth setup project, authenticate through the AccessGate + Auth screens once, save the state, and all app tests reuse it
+
+**Phase relevance:** This is the foundation of the entire test architecture. Decide the project structure and auth strategy before writing any tests.
+
+---
+
+### 11. Plausible Script Blocked in Test Environments
+
+**What goes wrong:** The Plausible script is loaded from `https://plausible.io/js/script.js` via a `<script>` tag in `index.html`. In test environments (local dev, CI), this script may not load because: (a) the test server runs on `localhost` and the `data-domain` is `trained-app-eta.vercel.app`, so Plausible ignores events; (b) Playwright may block external scripts; or (c) ad blockers in the test browser block `plausible.io`. When `window.plausible` is undefined, all `trackEvent()` calls silently do nothing. This is fine for test execution, but it means you cannot verify that analytics events are actually firing correctly.
+
+**The existing guard in analytics.ts:**
+```typescript
+if (import.meta.env.DEV) {
+  console.log('[Analytics]', event, props)
+  return
+}
+```
+This means in dev mode, events are logged to console but NOT sent to Plausible. Tests running against the dev server will never exercise the real Plausible path.
+
+**Warning signs:**
+- Analytics events fire in dev console but not in production
+- Plausible dashboard shows zero events after deploying new tracking
+- Events fire in production but with wrong property names (never caught in tests)
+- Funnel analysis shows broken funnels because intermediate events were never fired
+
+**Prevention:**
+1. Create a test utility that intercepts `trackEvent` calls and records them:
+   ```typescript
+   // test-helpers/analytics.ts
+   export async function getTrackedEvents(page: Page): Promise<Array<{event: string, props?: object}>> {
+     return page.evaluate(() => (window as any).__TEST_ANALYTICS_EVENTS__ || [])
+   }
+   ```
+   And in analytics.ts, add a test hook:
+   ```typescript
+   if (import.meta.env.VITE_TEST_ANALYTICS === 'true') {
+     (window as any).__TEST_ANALYTICS_EVENTS__ = (window as any).__TEST_ANALYTICS_EVENTS__ || []
+     (window as any).__TEST_ANALYTICS_EVENTS__.push({ event, props })
+   }
+   ```
+2. Write explicit E2E tests that verify critical events fire during user flows:
+   - "When user completes onboarding, `Onboarding Completed` event fires with `training_days` prop"
+   - "When user logs a workout, `Workout Completed` event fires with `workout_type` and `duration_minutes`"
+3. Do NOT test analytics by checking the Plausible dashboard -- that has a delay and is not deterministic
+4. Verify event property names match the Plausible goal configuration before deploying
+
+**Phase relevance:** Analytics verification tests should be written AFTER the funnel event names are finalized (Pitfall #5) but as part of the E2E test suite.
+
+---
+
+### 12. Existing Unit Tests Broken After Design Refresh
+
+**What goes wrong:** The app has 6 existing test files (3 store tests, 3 component tests). The store tests (`workoutStore.test.ts`, `macroStore.test.ts`, `xpStore.test.ts`) are likely fine -- they test business logic, not UI. But the component tests (`Button.test.tsx`, `Card.test.tsx`, `ProgressBar.test.tsx`) were written before the shadcn/ui migration and almost certainly assert against old class names, old component APIs, or old rendering behavior. Running `vitest run` and seeing failures creates a demoralizing start to the testing milestone.
+
+**Specific risk areas:**
+- `Button.test.tsx`: The Button component was completely replaced by shadcn's Button with CVA variants. Old tests may assert against variant class names that no longer exist.
+- `Card.test.tsx`: Card structure changed in the shadcn migration. Tests may assert against old child component structure.
+- `ProgressBar.test.tsx`: May assert against old progress bar implementation.
+- `src/test/setup.ts`: Mocks localStorage, but may not mock the new shadcn dependencies or Radix UI primitives properly.
+
+**Warning signs:**
+- `npm run test:run` fails immediately with import errors or missing component exports
+- Tests compile but fail on class name assertions (`expected 'bg-surface' but received 'bg-card'`)
+- Tests assert against component props that no longer exist in the shadcn version
+
+**Prevention:**
+1. Run the existing test suite FIRST, before writing any new code. Document what passes and what fails:
+   ```bash
+   npm run test:run 2>&1 | tee test-audit-results.txt
+   ```
+2. Fix or delete broken tests based on a simple rule: if the test asserts business logic (store behavior), fix it. If it asserts visual output (CSS classes, DOM structure), delete it and replace with E2E tests that verify the actual user experience.
+3. Do NOT spend days fixing component snapshot tests -- E2E tests provide better coverage for visual behavior
+4. Update `src/test/setup.ts` if needed for new dependencies (Radix UI portals, etc.)
+5. Consider adding `vitest run` to CI as a gate AFTER fixing the tests, so regressions are caught going forward
+
+**Phase relevance:** Existing test repair should happen BEFORE new E2E tests are written. It provides a baseline and catches any business logic regressions introduced during the design refresh.
+
+---
+
+### 13. Sentry Session Replay PII Leakage in Fitness Context
+
+**What goes wrong:** The app has `replaysOnErrorSampleRate: 1.0` -- every session with an error gets a replay recorded. Sentry session replay captures DOM snapshots, which include text content. In a fitness app, this means replays may capture: body weight, age, calorie intake, macro targets, meal names, workout exercises and weights lifted, streak data, and potentially email addresses from the auth screen. The existing `beforeSend` filter redacts email patterns from error messages, but session replay captures the DOM directly -- the `beforeSend` hook does not apply to replay data.
+
+**Specific PII risk areas in this app:**
+- Settings screen: displays email, weight, height, age, gender
+- Macros screen: food search queries, logged meals (dietary data is health PII in many jurisdictions)
+- Workouts screen: exercises, weights, reps (fitness data)
+- Profile/onboarding: username, body metrics
+
+**Warning signs:**
+- Sentry replay dashboard shows user body weights, meal details, and email addresses
+- GDPR/CCPA compliance review flags session replay as a PII vector
+- Users discover their fitness data is being recorded and lose trust
+
+**Prevention:**
+1. Configure Sentry replay masking for sensitive DOM elements:
+   ```typescript
+   replayIntegration({
+     maskAllText: false, // Don't mask everything -- too aggressive
+     maskAllInputs: true, // Mask all form inputs
+     blockAllMedia: false,
+     // Mask specific sensitive selectors
+     mask: [
+       '[data-sentry-mask]', // Opt-in masking
+       'input[type="email"]',
+       'input[type="password"]',
+     ],
+   })
+   ```
+2. Add `data-sentry-mask` to components displaying: weight, meals, body metrics, email
+3. Alternatively, add `data-sentry-block` to entire screens (Settings, Macros) to exclude them from replay entirely
+4. Review the current Sentry replay configuration and test it: trigger an error, then check the replay in Sentry dashboard to see what's captured
+5. Document what IS and IS NOT captured in a privacy log
+
+**Phase relevance:** This should be reviewed during the Sentry performance monitoring phase, BEFORE the launch to 90k users. Post-launch discovery of PII leakage is a trust-destroying event.
+
+---
+
+### 14. Sync Debounce Timer Causing Race Conditions in Tests
+
+**What goes wrong:** The `scheduleSync()` function in `src/lib/sync.ts` uses a 2-second debounce timer. When a Playwright test performs an action (e.g., logs a workout), the sync fires 2 seconds later. If the test makes an assertion immediately after the action, it may pass -- but 2 seconds later, `syncAllToCloud()` fires and modifies Supabase state. The NEXT test, which depends on a clean database, sees unexpected data. Alternatively, if a test checks that data was synced, it needs to wait at least 2 seconds + network time, introducing artificial delays.
+
+**Code path:**
+```
+User action -> scheduleSync() -> 2s debounce -> syncAllToCloud() -> Supabase writes
+```
+
+**Warning signs:**
+- Tests that check Supabase state fail intermittently (sync hasn't fired yet)
+- Tests that should have clean state see data from previous tests (sync fired AFTER cleanup)
+- Adding `await page.waitForTimeout(3000)` makes tests pass (bad sign -- timing dependency)
+- Test suite takes 2x longer than expected due to sync wait times
+
+**Prevention:**
+1. **For most E2E tests, block Supabase network requests** so sync never completes:
+   ```typescript
+   await page.route('**/rest/v1/**', route => route.abort())
+   ```
+   This tests the offline-first behavior (Zustand stores work without Supabase) which is the primary UX path anyway.
+2. **For tests that explicitly test sync behavior**, wait for the sync indicator:
+   ```typescript
+   // Trigger action
+   await page.click('[data-testid="log-workout-button"]')
+   // Wait for sync to complete (SyncStatusIndicator shows then hides)
+   await expect(page.locator('[data-testid="sync-indicator"]')).toBeVisible()
+   await expect(page.locator('[data-testid="sync-indicator"]')).toBeHidden({ timeout: 10000 })
+   ```
+3. **In test teardown**, flush pending syncs before cleanup:
+   ```typescript
+   await page.evaluate(() => {
+     // Clear any pending sync timers
+     const syncTimerId = (window as any).__syncTimer
+     if (syncTimerId) clearTimeout(syncTimerId)
+   })
+   ```
+4. Consider exposing `flushPendingSync()` to the test environment for deterministic sync testing
+
+**Phase relevance:** Sync handling strategy should be decided during Playwright infrastructure setup, alongside the database strategy (Pitfall #9) and localStorage strategy (Pitfall #4). These three are interconnected.
 
 ---
 
@@ -470,74 +597,71 @@ Mistakes that cause annoyance, cleanup work, or small visual bugs.
 
 | Phase Topic | Likely Pitfall | Mitigation | Severity |
 |---|---|---|---|
-| Token/palette definition | Contrast failures in dark mode (#5) | Build contrast matrix before coding | Critical |
-| Theme system removal | 298 ternaries need individual decisions (#1) | Component-by-component migration checklist | Critical |
-| Theme system removal | Ghost code and dead branches (#3) | TypeScript compiler as verification tool | Moderate |
-| Theme system removal | localStorage collision (#13) | Add migration code on boot | Minor |
-| Token migration | CSS variable FOUC (#10) | Update index.css :root in sync with theme | Moderate |
-| Token migration | Hardcoded colors bypassing tokens (#2) | Audit BEFORE changing token values | Critical |
-| Token migration | Legacy Tailwind aliases (#14) | Remove aliases, search for usage | Minor |
-| Typography changes | Layout explosions from font swap (#4) | Measure critical UI before/after, test mobile | Critical |
-| Component visual migration | Border radius inconsistency (#11) | Migrate all radii in single pass | Moderate |
-| Component visual migration | Glassmorphism removal (#12) | Inventory purpose of each glass class | Moderate |
-| Animation overhaul | Playful residue in premium skin (#7) | Create animation style guide first | Moderate |
-| Testing | Test suite coupling (#9) | Update test infra before component changes | Moderate |
-| Deploy | Service worker caching old design (#6) | Atomic deploy + localStorage migration | Critical |
-| Deploy | User perception of broken app (#8) | "What's New" interstitial + social announcement | Moderate |
+| Playwright infrastructure setup | Auth wall blocks all tests (#10) | Two-project config with storageState | Critical |
+| Playwright infrastructure setup | Service worker intercepts mocks (#3) | `serviceWorkers: 'block'` default | Critical |
+| Playwright infrastructure setup | No test selectors exist (#1) | Add data-testid before writing tests | Critical |
+| Playwright infrastructure setup | Zustand state leaks via storageState (#4) | Filter storageState, clean in beforeEach | Critical |
+| Playwright infrastructure setup | Sync debounce causes races (#14) | Block Supabase routes or wait for indicator | Moderate |
+| Test database strategy | Test data pollutes production (#9) | Use local/test Supabase instance | Critical |
+| Existing test repair | Old tests broken by design refresh (#12) | Audit first, fix logic tests, delete visual tests | Moderate |
+| Writing E2E tests | Animation causes flaky assertions (#7) | CSS override to disable animations | Moderate |
+| CI integration | Environment differences (#8) | Explicit viewport, deps, generous timeouts | Moderate |
+| Analytics planning | Event names are permanent (#5) | Document naming convention, plan funnel on paper | Critical |
+| Analytics verification | Can't test Plausible in dev mode (#11) | Test hook to intercept trackEvent calls | Moderate |
+| Sentry performance | Bundle size doubles (#6) | Audit integrations, tree-shake, set size budget | Moderate |
+| Sentry configuration | Session replay captures PII (#13) | Mask sensitive elements, review before launch | Moderate |
 
 ---
 
 ## Recommended Phase Order Based on Pitfalls
 
-The pitfall analysis suggests this phase ordering to minimize compounding risk:
+The pitfall analysis suggests this ordering to prevent compounding failures:
 
-1. **Token & Contrast Definition** -- Define the new color palette, typography, border radius, and spacing tokens. Validate all against WCAG contrast. Do NOT touch any components yet.
-2. **Hardcoded Color Audit** -- Replace all 67 hardcoded color values with token references. This must happen before tokens change values.
-3. **Theme System Simplification** -- Remove dual-theme infrastructure, `isTrained` ternaries, GYG theme file, localStorage cleanup. Update test utilities.
-4. **Component Visual Migration** -- Apply new tokens to all components, screen by screen. Take before/after screenshots.
-5. **Typography & Spacing** -- Change font pairing, test layout impact, fix overflow issues.
-6. **Animation Refinement** -- Adjust motion values, remove playful effects, add premium micro-interactions.
-7. **Deploy Preparation** -- Service worker strategy, "What's New" screen, user communication, atomic release.
+1. **Existing Test Audit & Repair** -- Fix or remove broken unit tests first. This gives a baseline and catches design refresh regressions. Quick win for confidence.
 
-The critical insight: **Steps 1-2 must happen before Step 3**, and **Step 3 must happen before Step 4**. Violating this order causes the pitfalls to compound.
+2. **Test Selectors & Infrastructure** -- Add `data-testid` attributes to the codebase. Configure Playwright with two projects (auth-tests, app-tests), storageState, service worker blocking, and animation disabling. Decide database strategy. This is pure infrastructure -- no actual test assertions yet.
+
+3. **E2E Test Suite** -- Write tests for critical user journeys: auth flow, onboarding, workout logging, meal logging, check-in, XP claim. Use the infrastructure from step 2.
+
+4. **Analytics Event Planning** -- Design funnel event names on paper. Review against existing 22 events. Get naming right before coding.
+
+5. **Analytics Implementation & Verification** -- Add new Plausible events. Write E2E tests that verify events fire. Configure Plausible dashboard goals and funnels.
+
+6. **Sentry Performance Monitoring** -- Add tracing integration. Configure replay masking. Verify bundle size stays within budget. Set up operational alerts.
+
+7. **CI Integration** -- Wire Playwright into GitHub Actions. Configure for headless Chromium. Add test reports. Gate deploys on test pass.
+
+The critical insight: **Steps 1-2 must happen before Step 3**, and **Step 4 must happen before Step 5**. The infrastructure and planning phases prevent the most expensive mistakes.
 
 ---
 
 ## Sources
 
-### Dark Mode & Accessibility
-- [Inclusive Dark Mode: Designing Accessible Dark Themes - Smashing Magazine](https://www.smashingmagazine.com/2025/04/inclusive-dark-mode-designing-accessible-dark-themes/)
-- [Dark Mode: Best Practices for Accessibility - DubBot](https://dubbot.com/dubblog/2023/dark-mode-a11y.html)
-- [Dark Mode: How Users Think About It and Issues to Avoid - NN/G](https://www.nngroup.com/articles/dark-mode-users-issues/)
-- [Offering a Dark Mode Doesn't Satisfy WCAG Color Contrast Requirements - BOIA](https://www.boia.org/blog/offering-a-dark-mode-doesnt-satisfy-wcag-color-contrast-requirements)
-- [12 Principles of Dark Mode Design - Uxcel](https://uxcel.com/blog/12-principles-of-dark-mode-design-627)
-- [Dark Mode in App Design: Principles & Tips - Ramotion](https://www.ramotion.com/blog/dark-mode-in-app-design/)
-- [The Principles of Dark UI Design - Toptal](https://www.toptal.com/designers/ui/dark-ui-design)
+### Playwright & E2E Testing
+- [Playwright Authentication Docs](https://playwright.dev/docs/auth) -- storageState pattern, project dependencies, global setup
+- [Playwright Best Practices](https://playwright.dev/docs/best-practices) -- locator priority, test isolation
+- [Playwright Browser Context Isolation](https://playwright.dev/docs/browser-contexts) -- fresh localStorage per test
+- [Supawright: Playwright Test Harness for Supabase](https://github.com/isaacharrisholt/supawright) -- automatic cleanup with FK-aware deletion
+- [Mokkapps: Login at Supabase via REST API in Playwright](https://mokkapps.de/blog/login-at-supabase-via-rest-api-in-playwright-e2e-test) -- REST API auth for speed
+- [Semaphore: Flaky Tests in Rendering and Animation Workflows](https://semaphore.io/blog/flaky-tests-ui) -- animation timing solutions
+- [BetterStack: Avoiding Flaky Tests in Playwright](https://betterstack.com/community/guides/testing/avoid-flaky-playwright-tests/) -- timeout and retry patterns
+- [BrowserStack: Playwright Selectors Best Practices 2026](https://www.browserstack.com/guide/playwright-selectors-best-practices) -- data-testid usage
+- [Vite PWA: Testing Service Worker](https://vite-pwa-org.netlify.app/guide/testing-service-worker) -- SW testing strategies
 
-### Typography & Layout Shift
-- [Fixing Layout Shifts Caused by Web Fonts - DebugBear](https://www.debugbear.com/blog/web-font-layout-shift)
-- [Web Fonts and the Dreaded Cumulative Layout Shift - Sentry Blog](https://blog.sentry.io/web-fonts-and-the-dreaded-cumulative-layout-shift/)
-- [Optimizing Web Fonts: FOIT vs FOUT vs Font Display Strategies](https://talent500.com/blog/optimizing-fonts-foit-fout-font-display-strategies/)
+### Plausible Analytics
+- [Plausible Custom Event Goals](https://plausible.io/docs/custom-event-goals) -- goal setup, naming requirements
+- [Plausible Custom Properties](https://plausible.io/docs/custom-props/for-custom-events) -- attaching properties to events
 
-### Design System Migration
-- [Building a Unified Design System with React, Tailwind CSS, and Figma](https://medium.com/@roman_fedyskyi/building-a-unified-design-system-with-react-tailwind-css-and-figma-part-1-2e6dcf2a22b4)
-- [How to Build a Design Token System for Tailwind That Scales Forever](https://hexshift.medium.com/how-to-build-a-design-token-system-for-tailwind-that-scales-forever-84c4c0873e6d)
-- [Good Refactoring vs Bad Refactoring - Builder.io](https://www.builder.io/blog/good-vs-bad-refactoring)
-
-### PWA Update & User Perception
-- [Service Worker Updates - web.dev](https://web.dev/learn/pwa/update)
-- [Taming PWA Cache Behavior - Infinity Interactive](https://iinteractive.com/resources/blog/taming-pwa-cache-behavior)
-- [Redesign or Regress? How UX Changes Can Break Trust - CMSWire](https://www.cmswire.com/customer-experience/when-ux-design-undermines-customer-experience/)
-- [Common Mistakes to Avoid in PWA UX Design - MoldStud](https://moldstud.com/articles/p-common-mistakes-to-avoid-in-pwa-user-experience-design-enhance-your-progressive-web-app)
-
-### Animation
-- [Reduce Bundle Size of Framer Motion - Motion.dev](https://motion.dev/docs/react-reduce-bundle-size)
-- [Framer Motion Tips for Performance in React - TillItsDone](https://tillitsdone.com/blogs/framer-motion-performance-tips/)
+### Sentry Monitoring
+- [Sentry: How to Reduce Bundle Size of JS SDKs](https://sentry.zendesk.com/hc/en-us/articles/32588203861403-How-can-I-reduce-the-bundle-size-of-JS-SDKs) -- tree-shaking, integration removal
+- [Sentry: Tree Shaking for React](https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/) -- build flags, dead code elimination
+- [Sentry: Session Replay Performance Overhead](https://docs.sentry.io/product/explore/session-replay/web/performance-overhead/) -- bundle size breakdown, DOM complexity impact
+- [Sentry Blog: Reduced Replay SDK by 35%](https://blog.sentry.io/sentry-bundle-size-how-we-reduced-replay-sdk-by-35/) -- bundle optimization techniques
 
 ### Codebase Analysis
-- Direct analysis of `src/themes/`, `src/components/`, `src/screens/`, `tailwind.config.js`, `src/index.css`
-- grep analysis: 298 `isTrained ?` ternaries across 21 files, 67 hardcoded color values across 16 files, 321 framer-motion usages across 29 files
+- Direct analysis of: `src/lib/analytics.ts` (22 existing events), `src/lib/sentry.ts` (current config), `src/lib/sync.ts` (2s debounce, retry logic), `src/lib/supabase.ts` (client config), `src/stores/authStore.ts` (3-layer auth), `src/stores/syncStore.ts` (non-persisted), `vite.config.ts` (SW caching rules, manual chunks), `src/App.tsx` (AccessGate/Auth/Onboarding gates), `src/test/setup.ts` (existing test infrastructure), `package.json` (dependency versions)
+- `grep` analysis: 0 `data-testid` attributes, 8 Zustand persist stores with `gamify-gains-*` keys, 6 existing test files
 
 ---
 
-*Research compiled: 2026-02-05*
+*Research compiled: 2026-02-06*

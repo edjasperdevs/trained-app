@@ -1,260 +1,257 @@
 # Project Research Summary
 
-**Project:** Trained -- Luxury Fitness PWA Design Refresh
-**Domain:** Design system overhaul (dual-theme removal + premium visual upgrade)
-**Researched:** 2026-02-05
+**Project:** Trained -- Pre-Launch Confidence (E2E Testing + Analytics/Monitoring)
+**Domain:** PWA quality assurance and observability enhancement
+**Researched:** 2026-02-06
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Trained is a production fitness PWA with ~90k followers that needs to evolve from a "playful gamified" aesthetic to an "Equinox/luxury gym" experience. The codebase carries a dual-theme system (Trained vs GYG) implemented through 394 `isTrained` ternary branches across 21 files, a ThemeProvider that injects CSS variables at runtime, and a four-layer token indirection chain (TypeScript object -> React context -> DOM API -> CSS variables -> Tailwind). The research is unambiguous: the highest-leverage move is collapsing this entire system into Tailwind v4's `@theme` directive, which replaces all four layers with a single CSS file that generates tokens at build time with zero runtime cost.
+This milestone adds pre-launch safety nets to the existing Trained fitness PWA before deploying to ~90k Instagram followers with no beta testing phase. The research reveals a remarkably straightforward implementation: **no new vendors or major architectural changes are needed**. The app already has Sentry for error monitoring, Plausible for analytics, and Vitest for unit testing. What's missing is: (1) Playwright for E2E testing of critical user journeys, (2) activation of Sentry's existing performance monitoring capabilities, and (3) Plausible funnel configuration to track conversion paths.
 
-The existing stack (React 18, TypeScript, Vite, Tailwind, Framer Motion) is fundamentally sound -- no framework changes are needed. The refresh is a tooling modernization (Tailwind v3 to v4, framer-motion to motion) combined with a design-token simplification and a visual refinement pass. The core palette (`#0A0A0A` background, `#D55550` accent) is already within the premium range used by Whoop and Peloton. The problem is not the colors themselves but their application: too many glows, too-small border radii (4-6px vs the 12-16px premium standard), over-application of glass effects, bouncy animations, and excessive use of uppercase text. The visual refresh is about restraint -- reducing intensity across every dimension by 50-70%.
+The recommended approach is infrastructure-first: add test selectors (`data-testid` attributes) before writing any Playwright tests, configure two-project test architecture (auth tests vs. app tests) to handle the app's three-layer auth wall (AccessGate > Auth > Onboarding), and leverage the existing offline-first architecture by seeding Zustand localStorage rather than mocking Supabase. This avoids the complexity of database test fixtures while testing the actual user experience. For analytics, finalize funnel event naming before coding (names are permanent in Plausible's history), and wire the 14 existing-but-unused events already defined in `analytics.ts`. For Sentry, simply add `browserTracingIntegration()` to the existing init—it's already bundled, just not activated.
 
-The primary risk is the 394-ternary extraction. Each branch must be resolved individually (not bulk-replaced), because some GYG branches actually contain the correct premium values (e.g., `rounded-2xl` from GYG vs `rounded-md` from Trained). Additionally, 67 hardcoded color values bypass the token system entirely and must be audited before any palette changes. The migration must be incremental and bottom-up: tokens first, then primitives, then composites, then screens, with theme infrastructure removed last. Deploying atomically is critical because the service worker will cache old assets, and users with `gyg` stored in localStorage will hit a nonexistent theme.
+The critical risk is test selector fragility: the codebase has zero `data-testid` attributes after the recent shadcn/ui migration, and the app is icon-heavy with identical component structures across screens. Without stable selectors, tests become brittle and fail on innocent changes. The second risk is Supabase auth session handling in Playwright—naive per-test login is slow and creates rate-limiting exposure, but the app's `VITE_DEV_BYPASS` flag combined with `storageState` provides a clean solution. Service worker interference with network mocking and Zustand localStorage pollution between test runs are both critical but solvable with proper Playwright configuration (`serviceWorkers: 'block'` by default, careful `storageState` filtering).
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack stays. The refresh adds tooling for design system composition and modernizes two dependencies. See [STACK.md](./STACK.md) for full details.
+The existing stack already provides everything needed—this milestone is about **deepening integrations** rather than adding vendors. Playwright is the sole new dev dependency, with zero production bundle impact. Sentry's `browserTracingIntegration` is already bundled in the installed `@sentry/react` package and just needs activation. Plausible funnel configuration is dashboard-only (no code changes to the script tag). The app's offline-first architecture (Zustand + localStorage as source of truth) is ideal for E2E testing because it eliminates the need for complex Supabase mocking in most tests.
 
-**Upgrades:**
-- **Tailwind CSS v3.4 -> v4.1**: CSS-first `@theme` directive replaces the entire JS token system (`tailwind.config.js`, `ThemeProvider.injectCSSVariables()`, `trained.ts` tokens). 5-10x faster builds. Zero runtime cost. Automated migration tool available.
-- **framer-motion v11 -> motion v12**: Package rebrand. Same API, smaller bundle, better tree-shaking. Find-and-replace migration (`framer-motion` -> `motion/react`).
-- **Self-hosted variable fonts via Fontsource**: Replace Google Fonts CDN links with `@fontsource-variable/inter`, `@fontsource-variable/oswald`, `@fontsource-variable/jetbrains-mono`. Eliminates render-blocking cross-origin requests, enables offline use (PWA requirement), version-locks fonts.
+**Core additions:**
+- **@playwright/test ^1.58**: E2E testing framework — browser-based tests for critical user flows (auth, onboarding, workout logging, macro tracking, offline sync). Dev dependency only. Provides real browser testing (not jsdom), built-in auth session reuse via `storageState`, network interception, mobile viewport emulation, and offline simulation.
+- **Sentry browserTracingIntegration**: Activate existing capability — enables automatic Web Vitals capture (LCP, CLS, INP), page load/navigation tracing, and XHR/fetch spans. Already included in `@sentry/react` bundle, near-zero bundle impact to enable.
+- **Plausible funnel configuration**: Dashboard setup — define 3-4 conversion funnels (signup-to-first-workout, daily engagement, meal tracking adoption) from existing and new custom events. No script changes needed; base `script.js` supports `window.plausible()` with custom props.
 
-**New additions:**
-- **tailwind-merge + clsx -> `cn()` utility**: Industry-standard pattern for composable Tailwind components. Prevents class conflicts when components accept `className` props.
-- **class-variance-authority (CVA)**: Type-safe component variant definitions. Pairs with `cn()` to replace raw Tailwind template literals with structured variant APIs.
-
-**Deletions:**
-- `tailwind.config.js`, `postcss.config.js` (replaced by `@tailwindcss/vite` + `@theme`)
-- `src/themes/gyg.ts` (GYG theme removed)
-- Runtime CSS variable injection code
+**What NOT to add:**
+- No MSW for E2E (Playwright's `page.route()` is simpler)
+- No supawright (overkill for offline-first app; localStorage seeding is sufficient)
+- No second analytics vendor (Plausible funnels + properties cover launch needs)
+- No Lighthouse CI yet (add post-launch after design stability)
+- No visual regression testing yet (design still settling after shadcn migration)
 
 ### Expected Features
 
-The visual refresh targets a specific aesthetic: dark, restrained, Equinox-tier. See [FEATURES.md](./FEATURES.md) for the full feature landscape with brand reference colors.
+Research reveals a clear MVP scope prioritized by launch safety: analytics gaps close immediately (low-risk, high-value event wiring), E2E tests provide the safety net for critical flows, and monitoring hardening ensures operational visibility at scale.
 
 **Must have (table stakes):**
-- Layered dark surface hierarchy (3+ elevation levels, not flat black)
-- Restrained accent color usage (max 5-10% of screen, one hue)
-- Commanding typography with clear hierarchy (3-4 sizes max, weight-driven contrast)
-- Generous spacing system (20-24px screen padding, 16-24px card padding)
-- Subtle borders (rgba white at 6-10%, never visually prominent)
-- Elevation through surface color, not heavy shadows
-- Consistent icon treatment (Lucide at fixed sizes per context)
+- **E2E tests for 7 critical user journeys** — Access gate > auth > onboarding, workout logging, meal tracking, daily check-in, XP claim, offline/sync. Manual testing cannot cover permutations at 90k-user launch scale.
+- **Plausible funnel definitions** — Dashboard-configured funnels for signup-to-first-workout (3 steps), daily engagement (4 steps), meal logging adoption (2 steps). Answers "where do people drop off?"
+- **Missing analytics events** — 8 gaps identified: onboarding step tracking (find drop-off points), abandonment events (workout, onboarding), food search success tracking, streak loss detection, PWA install tracking, error-to-event correlation.
+- **Sentry performance monitoring + alerting** — Activate `browserTracingIntegration` for Web Vitals (LCP, CLS, INP), configure error spike alerts (>10 errors/5min), new issue alerts, release tracking, source maps upload.
+- **Core Web Vitals baseline** — Pre-launch measurement to compare against. LCP <2.5s, INP <200ms, CLS <0.1.
 
 **Should have (differentiators):**
-- Purposeful motion design (critically damped springs, 150-300ms, no bounce)
-- Data-dense but uncluttered layouts (large number + small label pattern)
-- Premium micro-interactions (felt, not seen -- brief scale pulses, smooth counters)
-- Refined input/form design (subtle focus rings, generous touch targets)
-- Bottom sheet pattern replacing center modals
-- Skeleton loading aligned to new palette
+- **Session replay on errors (already configured)** — Verify `replaysOnErrorSampleRate: 1.0` works in production. Add custom breadcrumbs at key state transitions (onboarding complete, workout start/end, check-in, sync events).
+- **Cohort analysis via properties** — Add properties to events: `fitness_level`, `goal`, `days_since_signup` to understand which user segments retain better.
+- **Analytics verification in E2E** — Test hook to verify critical events fire during user flows (onboarding completion, workout logging).
 
-**Defer to post-refresh:**
-- OKLCH color space conversion (no user-visible benefit for existing palette)
-- Circular progress gauges like Whoop (significant effort)
-- Icon library swap to Phosphor (Lucide is fine)
-- Storybook (premature for current team/component count)
-
-**Anti-features to actively remove:**
-- Neon/saturated glow effects on cards and buttons (keep for ONE hero element max)
-- Glass effects on standard cards (solid surfaces only; keep glass for overlays)
-- Excessive color variety (max 2 chromatic colors per screen)
-- Bouncy/playful animations (replace with critically damped springs)
-- Blanket uppercase on all headings (restrict to section headers and primary CTAs)
-- Small border radii (4-6px -> 12-16px for cards)
+**Defer (post-launch):**
+- Uptime monitoring (nice to have, not blocking)
+- Lighthouse CI gate (requires CI pipeline work)
+- Visual regression testing (wait for design stability)
+- Additional E2E tests beyond critical 7-10 (add as bugs appear)
 
 ### Architecture Approach
 
-The migration is incremental and bottom-up, not big-bang. The dual-theme system has three consumption patterns (CSS variables, theme object properties, `isTrained` conditional branching) each requiring a different migration strategy. The ThemeProvider stays as a compatibility layer until the very end, then gets deleted in a clean sweep. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full file-by-file impact assessment.
+The architecture centers on three independent but complementary systems: (1) Playwright E2E infrastructure using localStorage seeding to bypass complex Supabase test fixtures, (2) Plausible analytics enhancement via event wiring and SPA pageview tracking, and (3) Sentry performance monitoring via integration activation and custom spans. The key insight is that the app's offline-first design (Zustand localStorage as source of truth) makes it **ideal for E2E testing**—tests can seed state directly without database dependencies.
 
-**Major architectural layers (target state):**
-1. **Design Tokens (CSS)** -- Single source of truth in `src/index.css` via Tailwind v4 `@theme`. No runtime injection. Pure CSS variables generated at build time.
-2. **Design Constants (TypeScript)** -- Plain TS exports for Trained-specific labels, avatar stages, standing orders. No React context needed. `export const LABELS = { xp: 'DP', ... }`.
-3. **Primitive Components** -- Button, Card, ProgressBar, Toast with no theme branching. Single styling path using CVA + `cn()`.
-4. **Composite Components** -- Avatar, Navigation, XPDisplay, etc. Import constants directly.
-5. **Screens** -- Use primitives + composites. No conditional branching.
+**Major components:**
+1. **Playwright test infrastructure** — Two-project architecture: `auth-tests` (exercises AccessGate/Auth/Onboarding flows without bypass) and `app-tests` (uses `storageState` with seeded Zustand stores, bypassing auth). Fixtures for localStorage seeding adapted from existing `devSeed.ts`. Page object model for each screen (home, onboarding, workouts, macros). Service worker blocked by default to prevent cache interference. Animation disabled via CSS override to prevent flaky assertions.
+2. **Plausible analytics wiring** — SPA pageview tracking via `useLocation` hook in App.tsx (no dependency on `plausible-tracker` npm package). Wire 14 existing-but-unused events to their trigger points (Macros screen, Settings screen, Achievements screen, authStore actions). Dashboard funnel configuration maps event sequences (3-4 funnels from 2-8 steps each).
+3. **Sentry performance monitoring** — Add `browserTracingIntegration()` to existing `Sentry.init()` in main.tsx. Wrap sync operations (`syncAllToCloud`, `loadAllFromCloud`) in performance spans. Wrap food API calls in spans. Add breadcrumbs to key user actions (navigation, workout start/complete, meal logging, check-in, sync events). Configure PII masking for session replay (`maskAllInputs: true`, mask weight/meal data).
 
-**Key architectural decisions:**
-- No new abstraction layer (no `DesignSystemProvider`, no `useDesignSystem()` hook)
-- No "old design / new design" feature flag (recreates the dual-theme problem)
-- De-branching and visual refresh are separate concerns, separate commits
-- Theme files deleted last, not first
+**Integration points:**
+- `e2e/fixtures/seed.fixture.ts` adapts `src/lib/devSeed.ts` format for Playwright's `page.addInitScript()`
+- `playwright.config.ts` `webServer` auto-starts Vite dev server with `VITE_DEV_BYPASS=true`
+- `src/lib/analytics.ts` adds `usePageviewTracking()` hook exported for App.tsx
+- `src/lib/sentry.ts` exports `startSpan()` helper for consistent API in app code
+- CI workflow installs Playwright browsers, runs `npm run build`, then `playwright test` with production bundle
+
+**Anti-patterns to avoid:**
+- Testing against real Supabase in CI (use localStorage seeding + bypass instead)
+- Adding `data-testid` after tests are written (selectors break immediately)
+- Putting Sentry React Router integration before understanding routing (standard `browserTracingIntegration` is sufficient)
+- Event naming inconsistency (existing 22 events use `{Noun} {Past Tense Verb}` Title Case pattern)
 
 ### Critical Pitfalls
 
-See [PITFALLS.md](./PITFALLS.md) for the complete 14-pitfall analysis with code-level details.
+Research identified 14 pitfalls; the top 5 are architectural blockers that must be addressed before code is written:
 
-1. **394-ternary extraction** -- Cannot bulk-replace. Some GYG branches contain the correct premium values. Must resolve component-by-component with visual verification. **Prevent by:** migration checklist per file, before/after screenshots, shared components first.
-2. **67 hardcoded colors bypassing tokens** -- `text-white`, inline `rgba()`, hex values in 16 files. These will not update when the palette changes. **Prevent by:** audit and replace ALL hardcoded colors BEFORE changing any token values.
-3. **Dark-mode contrast traps** -- Luxury aesthetics push toward low contrast. `#888888` secondary text on `#0A0A0A` is 6.8:1 (passing), but further dimming fails WCAG. **Prevent by:** build a contrast matrix for all foreground/background pairs before any implementation.
-4. **Service worker caching old design** -- PWA users will see old CSS until SW updates. Users with `gyg` in localStorage will hit a nonexistent theme. **Prevent by:** atomic deploy, localStorage migration on boot, prominent update prompt.
-5. **Typography swap layout explosions** -- Oswald is condensed. Any font change alters every text element's physical dimensions. Navigation labels and buttons are already tight. **Prevent by:** change fonts AFTER layout/spacing changes, test on 375px viewport, add text-overflow safety nets.
+1. **Zero data-testid attributes after visual overhaul** — The shadcn/ui migration replaced all component markup. No stable test selectors exist. Tests relying on CSS classes or text content will break on innocent changes. **Prevention:** Add `data-testid` to critical interactive elements (navigation, form inputs, action buttons, modals) BEFORE writing any Playwright tests. Use naming convention `screen-element` (e.g., `auth-email-input`, `home-checkin-button`).
+
+2. **Supabase auth session handling in Playwright** — Naive per-test login is slow (3-5s), flaky, and creates rate-limiting risk. Saved `storageState` with expired JWT causes all tests to fail simultaneously. The app has three auth gates (AccessGate > Auth > Onboarding). **Prevention:** Use Playwright project dependencies pattern: `setup` project authenticates once via Supabase REST API, saves `storageState`, all test projects load it. Create dedicated test user. Filter `storageState` to exclude Zustand stores, keeping only auth token.
+
+3. **Service worker intercepting Playwright network mocking** — The app uses `vite-plugin-pwa` with `CacheFirst` for food APIs and `NetworkFirst` for Supabase. Service worker intercepts requests before `page.route()` sees them. Mocks never fire; tests get stale cached data. **Prevention:** Set `serviceWorkers: 'block'` in playwright.config.ts by default. Create separate test project for offline/SW behavior testing.
+
+4. **Zustand localStorage pollution between test runs** — Saved `storageState` includes all 8 Zustand persist stores (`gamify-gains-*` keys). Test actions trigger `scheduleSync()` which writes to Supabase; next test may load that data. **Prevention:** Filter `storageState` to only include auth token, strip Zustand keys. Add `beforeEach` helper to clear `gamify-gains-*` localStorage keys. Use dedicated test Supabase instance.
+
+5. **Plausible event names are permanent history** — 22 existing events use inconsistent naming (mostly `{Noun} {Past Tense Verb}` Title Case, some deviations). Once deployed, event names cannot be changed without losing historical data. **Prevention:** Document naming convention BEFORE adding new events. Map entire funnel as event names on paper first. Review new names against all 22 existing for consistency. Use custom properties for variants, not new event names.
 
 ## Implications for Roadmap
 
-Based on combined research, the refresh should be structured in 7 phases. The ordering is driven by dependency chains identified across all four research files. Violating the order causes pitfalls to compound.
+Based on research, suggested phase structure follows a strict dependency order: infrastructure and planning phases must precede implementation to avoid compounding failures.
 
-### Phase 1: Foundation -- Token System + Tailwind v4 Migration
-**Rationale:** Everything downstream depends on the token values and the build tooling. Tailwind v4 migration is the enabler for the entire `@theme` token architecture. This must come first.
-**Delivers:** New CSS-first token system, Tailwind v4 + Vite plugin, `cn()` utility, CVA installed, self-hosted fonts, `motion` package upgrade.
-**Addresses:** Surface hierarchy (FEATURES table stakes #1), border radius scale (FEATURES table stakes #5, anti-feature #8), spacing system (FEATURES table stakes #4), shadow definitions (FEATURES table stakes #6).
-**Avoids:** FOUC from mismatched token sources (PITFALLS #10), hardcoded color drift (PITFALLS #2), legacy alias confusion (PITFALLS #14).
-**Key tasks:**
-- Run `npx @tailwindcss/upgrade` automated migration
-- Define complete `@theme` block in `index.css` with new premium tokens
-- Audit and replace 67 hardcoded color values with token references
-- Build WCAG contrast matrix for all color pairings
-- Create `src/lib/cn.ts` utility
-- Install CVA, tailwind-merge, clsx, fontsource packages
-- Upgrade framer-motion to motion (find-and-replace imports)
+### Phase 1: Test Infrastructure & Existing Test Repair
+**Rationale:** Playwright infrastructure is a prerequisite for all E2E tests. Adding `data-testid` attributes is zero-behavior-change but required for reliable selectors. Existing unit tests (likely broken after shadcn migration) provide a baseline for regression detection.
 
-### Phase 2: Theme System Removal -- De-branch + Simplify
-**Rationale:** The 394 `isTrained` ternaries are the core migration work. They block all visual refresh work because every component has two code paths. This must be completed before any visual design changes to keep concerns separated.
-**Delivers:** Single-path codebase with no theme branching, GYG theme deleted, ThemeProvider stripped to compatibility shim, test utilities updated.
-**Addresses:** Architecture target state (all 5 layers from ARCHITECTURE.md).
-**Avoids:** 394-ternary extraction errors (PITFALLS #1), ghost theme code (PITFALLS #3), test suite coupling (PITFALLS #9), localStorage collision (PITFALLS #13).
-**Key tasks:**
-- Lock theme to "trained" (remove toggle from Settings)
-- De-branch primitives: Button (4), Card (3), ProgressBar (3), Toast (6)
-- De-branch composites: Navigation (3), Avatar (8), StreakDisplay (13), XPDisplay (6), Badges (21), BadgeUnlockModal (18)
-- De-branch screens in complexity order: Workouts (14) -> AccessGate (32) -> CheckInModal (23) -> XPClaimModal (38) -> Settings (38) -> AvatarScreen (33) -> Home (45) -> Onboarding (63)
-- Replace `useTheme()` with direct constant imports
-- Remove ThemeProvider from App.tsx
-- Delete `src/themes/gyg.ts`, simplify types
-- Add localStorage migration for `app-theme` key
-- Update `src/test/utils.tsx`
+**Delivers:**
+- Audit of existing 6 test files (fix logic tests, delete broken visual tests)
+- `data-testid` attributes on critical UI elements (navigation, forms, actions, modals)
+- Playwright config with two projects (auth-tests, app-tests)
+- Fixtures for localStorage seeding (adapted from `devSeed.ts`)
+- `storageState` setup for auth reuse
+- Service worker blocking configuration
+- Animation disabling via CSS override
+- CI workflow skeleton (without test execution yet)
 
-### Phase 3: Visual Refresh -- Component Primitives
-**Rationale:** With tokens set and branching removed, primitives can be redesigned with CVA variants. These are the building blocks every screen depends on.
-**Delivers:** Premium-styled Button, Card, ProgressBar, Toast, input components with CVA variant APIs.
-**Addresses:** Restrained accent usage (FEATURES table stakes #2), subtle borders (FEATURES table stakes #5), elevation through surface color (FEATURES table stakes #6), refined inputs (FEATURES differentiator #4).
-**Avoids:** Border radius inconsistency (PITFALLS #11), glassmorphism removal breaking hierarchy (PITFALLS #12).
-**Key tasks:**
-- Implement CVA variants for each primitive
-- Increase border radii to premium scale (12-16px cards, 8-12px buttons, pill progress bars)
-- Replace glass effects on cards with solid surfaces + subtle borders
-- Refine focus rings and input styling
-- Strip/mute glow classes (keep ONE hero glow utility)
+**Addresses:**
+- Pitfall #1 (zero data-testid)
+- Pitfall #2 (auth session handling)
+- Pitfall #3 (service worker interference)
+- Pitfall #4 (localStorage pollution)
+- Pitfall #12 (broken existing tests)
 
-### Phase 4: Visual Refresh -- Screens
-**Rationale:** With clean primitives, screens can be refreshed to apply the premium aesthetic. Order by complexity, low to high.
-**Delivers:** All screens updated with premium typography, spacing, layout, and data density patterns.
-**Addresses:** Typography hierarchy (FEATURES table stakes #3), generous spacing (FEATURES table stakes #4), data-dense layouts (FEATURES differentiator #2), bottom sheet pattern (FEATURES differentiator #5).
-**Avoids:** Typography layout explosions (PITFALLS #4) by testing on constrained viewports as each screen is updated.
-**Key tasks:**
-- Establish type scale and apply across all screens
-- Fix uppercase overuse (restrict to section headers and primary CTAs)
-- Convert CheckInModal and XPClaimModal to bottom sheets
-- Apply large-number + small-label pattern for metric displays
-- Ensure 20-24px screen padding, generous card padding
-- Verify skeleton loading colors match new palette
+**Avoids:**
+- Writing tests before selectors exist
+- Debugging CI failures without local baseline
 
-### Phase 5: Animation Refinement
-**Rationale:** Animations depend on the final color palette (glow colors, shadow colors) and font metrics. They must come after visual changes are settled.
-**Delivers:** Premium motion system -- critically damped springs, restrained micro-interactions, no playful residue.
-**Addresses:** Purposeful motion design (FEATURES differentiator #1), micro-interaction quality (FEATURES differentiator #3).
-**Avoids:** Animation budget mismatch (PITFALLS #7) by having an animation style guide before touching individual components.
-**Key tasks:**
-- Create animation style guide (duration: 150-300ms, easing: ease-out/tight spring, scale: 0.97-1.02)
-- Audit all 5 Tailwind keyframe animations (pulse-glow, float, xp-pop, shimmer, pulse-slow)
-- Remove float and xp-pop animations
-- Replace pulse-glow with subtle fade
-- Reduce nav indicator scale from 1.1 to 1.03
-- Ensure `prefers-reduced-motion` compliance via motion v12
+### Phase 2: Core E2E Test Suite
+**Rationale:** With infrastructure in place, write tests for critical user journeys. These provide the safety net for all future changes. Focus on 7-10 tests covering launch-blocking flows.
 
-### Phase 6: Infrastructure Cleanup
-**Rationale:** Final sweep to remove all dead code, legacy files, and compatibility shims. Doing this as a discrete phase prevents premature deletion that causes cascading import errors.
-**Delivers:** Clean codebase with no theme remnants, minimal config surface area.
-**Key tasks:**
-- Delete `src/themes/` directory entirely (move retained constants to `src/design/constants.ts`)
-- Delete `tailwind.config.js` (if not already removed by v4 migration)
-- Remove legacy Tailwind color aliases
-- Remove `.theme-trained` / `.theme-gyg` CSS scoped rules
-- Remove `injectCSSVariables()` and all runtime token injection
-- Final `tsc --noEmit` verification
-- Run full test suite
+**Delivers:**
+- E2E tests for: auth flow, onboarding (10 steps), workout logging, meal logging, check-in, XP claim, offline/sync
+- Page object models for each screen
+- Verification that tests pass locally (dev server)
+- Verification that tests pass in CI (production build)
 
-### Phase 7: Deploy Preparation
-**Rationale:** The redesign is dramatic enough to require user communication and PWA-specific deployment strategy.
-**Delivers:** Atomic release with service worker strategy, user communication, and rollback plan.
-**Addresses:** User perception concerns (PITFALLS #8).
-**Avoids:** Service worker caching old design (PITFALLS #6).
-**Key tasks:**
-- Build "What's New" interstitial screen
-- Verify service worker update flow (consider force-update for this release)
-- Verify Vite content hashes on all assets
-- Announce redesign via social channels before deploy
-- Deploy as single atomic release
-- Monitor Sentry for theme-related errors post-deploy
+**Addresses:**
+- Feature requirement: E2E tests for critical journeys
+- Pitfall #7 (animation flakiness)
+- Pitfall #8 (CI environment differences)
+- Pitfall #10 (AccessGate blocking tests)
+- Pitfall #14 (sync debounce races)
+
+**Avoids:**
+- Testing implementation details (focus on user-visible behavior)
+- Testing every screen and edge case (diminishing returns)
+
+### Phase 3: Analytics Planning & Implementation
+**Rationale:** Event naming is a one-way door. Plan on paper before coding. Wiring existing events is low-risk, high-value work that can happen independently of E2E tests.
+
+**Delivers:**
+- Documented event naming convention (Title Case `{Noun} {Past Tense Verb}`)
+- Funnel design document (signup-to-first-workout, daily engagement, meal logging adoption, gamification loop)
+- Wiring of 14 existing-but-unused events to their trigger points
+- SPA pageview tracking via `useLocation` hook
+- New events: onboarding step tracking, abandonment, food search, streak loss, PWA install, error correlation
+- Dashboard configuration guide for Plausible goals and funnels
+- E2E test verification that critical events fire
+
+**Addresses:**
+- Feature requirement: Plausible funnel definitions
+- Feature requirement: Missing analytics events
+- Pitfall #5 (event names permanent)
+- Pitfall #11 (Plausible blocked in tests)
+
+**Avoids:**
+- Over-instrumenting (keep event count <40 for dashboard usability)
+- Adding second analytics vendor
+
+### Phase 4: Sentry Performance & Monitoring Hardening
+**Rationale:** Performance monitoring adds bundle size. Do it after E2E tests exist to verify no breakage. Session replay PII masking is critical before launch.
+
+**Delivers:**
+- `browserTracingIntegration()` added to Sentry init
+- Custom spans on sync operations and food API calls
+- Breadcrumbs at key user actions
+- Session replay PII masking for weight, meals, email
+- Sentry alert configuration (error spike, new issue)
+- Source maps upload
+- Release tracking in build
+- Bundle size verification (<50KB gzipped for vendor-sentry)
+
+**Addresses:**
+- Feature requirement: Sentry performance monitoring + alerting
+- Feature requirement: Core Web Vitals baseline
+- Pitfall #6 (bundle size doubling)
+- Pitfall #13 (session replay PII leakage)
+
+**Avoids:**
+- Over-instrumenting with custom spans everywhere
+- Missing PII masking before launch
 
 ### Phase Ordering Rationale
 
-- **Tokens before de-branching**: Token audit catches hardcoded colors that would silently drift. The `@theme` migration establishes the single source of truth that all subsequent work builds on.
-- **De-branching before visual refresh**: Separating "remove old code paths" from "apply new design" makes regressions attributable. If something looks wrong after de-branching, it is a bug. If something looks wrong after visual refresh, it is a design decision to evaluate.
-- **Primitives before screens**: Bottom-up ensures that when you refresh a screen, every component it uses is already clean and styled correctly.
-- **Animation last (before deploy)**: Animations depend on final colors, typography metrics, and component structure. Changing them alongside other dimensions makes evaluation impossible.
-- **Infrastructure cleanup as its own phase**: Avoids the temptation to delete files prematurely, which causes cascading import errors.
+- **Phase 1 before Phase 2:** Infrastructure (selectors, fixtures, config) must exist before tests are written. Adding `data-testid` after tests exist causes immediate breakage.
+- **Phase 3 independent of Phases 1-2:** Analytics event naming and wiring can happen in parallel with E2E test infrastructure, but analytics verification tests depend on Phase 2 completing.
+- **Phase 4 last:** Performance monitoring touches critical init paths (`sentry.ts`, `sync.ts`). Having E2E tests first provides confidence that monitoring doesn't break functionality. PII masking review requires manual Sentry dashboard testing, best done after other phases stabilize.
+- **CI integration spans phases:** CI workflow skeleton created in Phase 1, executed with tests in Phase 2, includes analytics/Sentry verification in Phases 3-4.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 1 (Tailwind v4 migration):** The automated migration tool handles most renames, but shadow/radius/blur utility changes in v4 need manual review. Tailwind v4's `@theme` `@keyframes` nesting behavior should be verified.
-- **Phase 4 (Screen refresh):** Bottom sheet implementation pattern needs research -- whether to use a library (e.g., vaul) or build with motion. Data-dense layout patterns need screen-specific design decisions.
-- **Phase 5 (Animation refinement):** Spring physics tuning values (stiffness, damping) need per-component experimentation. No research can prescribe exact values.
+**Phases likely needing deeper research during planning:**
+- **Phase 2 (E2E tests):** Supabase auth flow testing if `storageState` approach proves insufficient. May need API research for Supabase REST endpoints.
+- **Phase 3 (Analytics):** Food search event tracking depends on USDA/Open Food Facts API behavior; may need API research if 429 detection and fallback logic needs event correlation.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 2 (Theme removal):** Purely mechanical -- resolve ternaries, delete dead code. No external patterns needed.
-- **Phase 3 (Primitive visual refresh):** CVA + cn() pattern is well-documented (shadcn/ui reference).
-- **Phase 6 (Cleanup):** Straightforward file deletion and import cleanup.
-- **Phase 7 (Deploy):** Standard PWA deployment with service worker considerations already documented in PITFALLS.md.
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1:** Playwright setup is well-documented. `data-testid` addition is mechanical. Test repair is codebase-specific, no external research needed.
+- **Phase 4:** Sentry `browserTracingIntegration` is a single import with official docs. Breadcrumb placement is pattern-matching. PII masking is configuration-only.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations verified against official docs (Tailwind v4, Motion, Fontsource, CVA). Automated migration tools exist. |
-| Features | MEDIUM-HIGH | Cross-referenced against Whoop, Peloton, Equinox brand palettes and Material Design dark theme docs. Feature priorities are well-grounded but specific token values (radius, spacing) need per-component tuning. |
-| Architecture | HIGH | Based on direct codebase analysis -- file-by-file `isTrained` counts, consumption pattern inventory, dependency ordering. No external assumptions. |
-| Pitfalls | HIGH | 14 pitfalls identified from codebase analysis + dark mode accessibility research + PWA deployment patterns. Phase-specific warnings are actionable. |
+| Stack | HIGH | Playwright version verified via npm (v1.58.1, published 2026-02-01), Sentry browserTracingIntegration confirmed in official docs as bundled with @sentry/react 10.x, Plausible funnel config verified in official docs |
+| Features | HIGH | Critical journeys derived from codebase analysis (App.tsx routing, store interactions). Missing events identified by comparing existing analytics.ts against actual usage. Funnel definitions match Plausible capability (2-8 steps) |
+| Architecture | HIGH | Two-project Playwright config is official pattern. localStorage seeding verified against existing devSeed.ts format. SPA pageview tracking via useLocation is standard React pattern. Sentry integration points confirmed in docs |
+| Pitfalls | MEDIUM-HIGH | Critical pitfalls (1-5) verified via codebase analysis (`grep data-testid` = 0 results, vite.config.ts shows CacheFirst SW rules, Zustand persist keys documented). Animation pitfall based on community sources. CI differences based on standard Playwright pain points |
 
 **Overall confidence:** HIGH
 
+Research is comprehensive with official sources for all stack recommendations. Feature scope validated against codebase structure. Pitfall analysis grounded in actual codebase state (zero test selectors, existing auth flow, SW configuration). Medium confidence areas are standard Playwright pain points rather than domain-specific unknowns.
+
 ### Gaps to Address
 
-- **Exact Fontsource variable font registered names**: Fontsource packages register with a "Variable" suffix (e.g., `'Inter Variable'`). Verify exact names after `npm install` before updating `@theme` font references.
-- **Typography scale validation**: The recommended type scale (36-48px display, 24-28px H1, etc.) is based on design conventions, not project-specific testing. Needs validation on actual screens, especially on 375px mobile viewport.
-- **Animation spring values**: Stiffness/damping recommendations (300/30) are starting points. Per-component tuning required during Phase 5.
-- **Bottom sheet implementation**: Whether to use a library like vaul or build custom with motion needs a decision during Phase 4 planning.
-- **Copy review**: Many `isTrained` branches contain Trained-specific copy that references the discipline/BDSM metaphor. A copy review pass should happen during Phase 2 to flag language that may not fit the new premium positioning.
-- **WCAG contrast matrix**: Must be built as the first task of Phase 1 before any token values are committed. Not yet created.
+Minor gaps that need validation during implementation:
+
+- **Sentry `reactRouterV6BrowserTracingIntegration` exact API:** Research recommends skipping this in favor of standard `browserTracingIntegration()` because the app has no parameterized routes and uses `<BrowserRouter>` pattern. Validate during Phase 4 that route-change transactions are captured correctly without the React Router-specific integration.
+- **Playwright `context.setOffline()` with vite-plugin-pwa:** Documented feature but not extensively tested with Workbox specifically. Validate during Phase 2's offline/sync test that offline simulation works as expected.
+- **Plausible custom properties aggregation limitations:** Plausible is privacy-first and doesn't track individual users. Properties are aggregate-only. Validate during Phase 3 that property-based segmentation (e.g., training_days, fitness_level) provides sufficient insight, or flag need for deeper product analytics tool post-launch.
+- **Zustand localStorage format stability:** The seed fixtures assume `{ state: {...}, version: N }` envelope format from current Zustand persist implementation. If Zustand version changes, seeding may break. Document format dependency and pin Zustand version.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Tailwind CSS v4 Official Docs](https://tailwindcss.com/docs) -- `@theme`, upgrade guide, Vite plugin
-- [Motion (formerly Framer Motion)](https://motion.dev/) -- upgrade guide, React API, reduced motion
-- [Fontsource](https://fontsource.org/) -- Inter, Oswald, JetBrains Mono variable font packages
-- [CVA Documentation](https://cva.style/docs) -- variant API, Tailwind integration
-- [WHOOP Developer Design Guidelines](https://developer.whoop.com/docs/developing/design-guidelines/) -- premium fitness design reference
-- [Material Design Dark Theme](https://m2.material.io/design/color/dark-theme.html) -- surface elevation system
-- Direct codebase analysis -- 394 `isTrained` ternaries, 67 hardcoded colors, 321 motion usages
+- [Playwright npm - v1.58.1](https://www.npmjs.com/package/@playwright/test)
+- [Playwright installation](https://playwright.dev/docs/intro)
+- [Playwright webServer](https://playwright.dev/docs/test-webserver)
+- [Playwright authentication](https://playwright.dev/docs/auth)
+- [Playwright release notes](https://playwright.dev/docs/release-notes)
+- [Playwright best practices](https://playwright.dev/docs/best-practices)
+- [Sentry React tracing](https://docs.sentry.io/platforms/javascript/guides/react/tracing/)
+- [Sentry browserTracingIntegration](https://docs.sentry.io/platforms/javascript/guides/react/configuration/integrations/browsertracing/)
+- [Sentry Web Vitals](https://docs.sentry.io/product/insights/frontend/web-vitals/)
+- [Sentry automatic instrumentation](https://docs.sentry.io/platforms/javascript/guides/react/tracing/instrumentation/automatic-instrumentation/)
+- [Plausible custom events](https://plausible.io/docs/custom-event-goals)
+- [Plausible funnel analysis](https://plausible.io/docs/funnel-analysis)
+- [Plausible custom properties](https://plausible.io/docs/custom-props/for-custom-events)
+- [Plausible script extensions](https://plausible.io/docs/script-extensions)
+- Direct codebase analysis: `src/lib/analytics.ts`, `src/lib/sentry.ts`, `src/lib/sync.ts`, `src/lib/devSeed.ts`, `src/stores/*.ts`, `src/App.tsx`, `vite.config.ts`, `package.json`
 
 ### Secondary (MEDIUM confidence)
-- [Peloton Brand Colors (Mobbin)](https://mobbin.com/colors/brand/peloton) -- premium fitness color reference
-- [Smashing Magazine - Inclusive Dark Mode](https://www.smashingmagazine.com/2025/04/inclusive-dark-mode-designing-accessible-dark-themes/) -- contrast and accessibility
-- [NN/G - Dark Mode Users and Issues](https://www.nngroup.com/articles/dark-mode-users-issues/) -- user perception of redesigns
-- [DebugBear - Web Font Layout Shift](https://www.debugbear.com/blog/web-font-layout-shift/) -- typography swap risks
+- [Supabase auth in Playwright E2E (Mokkapps)](https://mokkapps.de/blog/login-at-supabase-via-rest-api-in-playwright-e2e-test)
+- [Playwright + Vite + React setup (DEV Community)](https://dev.to/juan_deto/configure-vitest-msw-and-playwright-in-a-react-project-with-vite-and-ts-part-3-32pe)
+- [Supawright test harness](https://github.com/isaacharrisholt/supawright)
+- [@plausible-analytics/tracker npm](https://www.npmjs.com/package/@plausible-analytics/tracker)
+- [Vite PWA testing docs](https://vite-pwa-org.netlify.app/guide/testing-service-worker)
+- [BrowserStack: Playwright Selectors Best Practices](https://www.browserstack.com/guide/playwright-selectors-best-practices)
 
 ### Tertiary (LOW confidence -- verify before acting)
-- [Tailwind v4 Real-World Migration Steps (dev.to)](https://dev.to/mridudixit15/real-world-migration-steps-from-tailwind-css-v3-to-v4-1nn3) -- single community source
-- Fontsource variable font naming conventions -- verify exact registered names after install
-- Animation spring tuning values -- starting points only, need per-component validation
+- Sentry `reactRouterV6BrowserTracingIntegration` exact import path and API -- verify against current SDK version during implementation
+- Playwright `context.setOffline()` for PWA offline testing -- documented but not extensively tested with vite-plugin-pwa specifically
 
 ---
-*Research completed: 2026-02-05*
+*Research completed: 2026-02-06*
 *Ready for roadmap: yes*
