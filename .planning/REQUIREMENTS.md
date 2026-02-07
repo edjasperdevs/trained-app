@@ -86,33 +86,33 @@ Deferred to post-launch.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| E2E-01 | TBD | Pending |
-| E2E-02 | TBD | Pending |
-| E2E-03 | TBD | Pending |
-| E2E-04 | TBD | Pending |
-| E2E-05 | TBD | Pending |
-| E2E-06 | TBD | Pending |
-| E2E-07 | TBD | Pending |
-| E2E-08 | TBD | Pending |
-| E2E-09 | TBD | Pending |
-| E2E-10 | TBD | Pending |
-| E2E-11 | TBD | Pending |
-| ANLYT-01 | TBD | Pending |
-| ANLYT-02 | TBD | Pending |
-| ANLYT-03 | TBD | Pending |
-| ANLYT-04 | TBD | Pending |
-| MON-01 | TBD | Pending |
-| MON-02 | TBD | Pending |
-| MON-03 | TBD | Pending |
-| MON-04 | TBD | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 1 | Pending |
+| E2E-01 | Phase 1 | Pending |
+| E2E-02 | Phase 1 | Pending |
+| E2E-03 | Phase 1 | Pending |
+| E2E-04 | Phase 1 | Pending |
+| E2E-05 | Phase 2 | Pending |
+| E2E-06 | Phase 2 | Pending |
+| E2E-07 | Phase 2 | Pending |
+| E2E-08 | Phase 2 | Pending |
+| E2E-09 | Phase 2 | Pending |
+| E2E-10 | Phase 2 | Pending |
+| E2E-11 | Phase 2 | Pending |
+| ANLYT-01 | Phase 3 | Pending |
+| ANLYT-02 | Phase 3 | Pending |
+| ANLYT-03 | Phase 3 | Pending |
+| ANLYT-04 | Phase 3 | Pending |
+| MON-01 | Phase 4 | Pending |
+| MON-02 | Phase 4 | Pending |
+| MON-03 | Phase 4 | Pending |
+| MON-04 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after initial definition*
+*Last updated: 2026-02-06 after roadmap creation*

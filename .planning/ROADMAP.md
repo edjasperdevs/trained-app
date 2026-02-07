@@ -1,158 +1,122 @@
-# Roadmap: Trained Design Refresh
+# Roadmap: Trained Pre-Launch Confidence
+
+## Milestones
+
+- **v1.0 Launch Polish** - 5 phases, 16 requirements (shipped)
+- **v1.1 Design Refresh** - 7 phases, 25 requirements (shipped)
+- **v1.2 Pre-Launch Confidence** - 4 phases, 21 requirements (in progress)
 
 ## Overview
 
-Full visual overhaul across 7 phases transforming Trained from playful gamified to premium Equinox-tier. The phases follow a strict dependency chain: foundation tokens enable theme removal, which enables visual refresh of components, then screens, then animation tuning, with cleanup and deploy as the final sweep. 25 requirements, standard depth, targeting completion this week.
+Pre-launch safety nets before deploying to ~90k Instagram followers with no beta phase. Four phases follow a strict dependency chain: repair existing tests and build Playwright infrastructure (selectors, fixtures, config), then write E2E tests for 7 critical user journeys, then enhance Plausible analytics with funnel tracking and missing events, and finally harden Sentry monitoring with performance tracing, source maps, and PII-safe session replay. Zero behavior changes -- testing and observability only.
 
-**Phases:** 7
-**Requirements:** 25 mapped
+**Phases:** 4
+**Requirements:** 21 mapped
 **Depth:** Standard
-**Timeline:** This week
+**Execution:** Sequential
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+<details>
+<summary>v1.0 Launch Polish (shipped) -- see archived milestone</summary>
+5 phases, 10 plans, 16 requirements -- all complete.
+</details>
 
-- [x] **Phase 1: Foundation** - Token system, Tailwind v4, tooling upgrades
-- [x] **Phase 2: Theme Removal** - De-branch 394 ternaries, delete GYG, simplify codebase
-- [x] **Phase 3: Component Primitives** - Redesign Button, Card, ProgressBar, Toast, inputs with CVA
-- [x] **Phase 4: Screen Refresh** - Typography, spacing, bottom sheets, skeleton colors
-- [x] **Phase 5: Animation Refinement** - Critically damped springs, remove playful motion
-- [x] **Phase 6: Cleanup** - Delete dead code, legacy files, final verification
-- [x] **Phase 7: Deploy** - Service worker strategy, "What's New" interstitial
+<details>
+<summary>v1.1 Design Refresh (shipped 2026-02-05) -- see archived milestone</summary>
+7 phases, 12 plans, 25 requirements -- all complete.
+</details>
+
+### v1.2 Pre-Launch Confidence
+
+**Milestone Goal:** Nothing is broken and you can see exactly how users interact from day one
+
+- [ ] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
+- [ ] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
+- [ ] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
+- [ ] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
 
 ## Phase Details
 
-### Phase 1: Foundation
-**Goal**: Every color, font, spacing, and radius token flows from a single CSS source of truth with zero runtime cost
-**Depends on**: Nothing (first phase)
-**Requirements**: FOUND-01, FOUND-02, FOUND-03, FOUND-04, FOUND-05, FOUND-06
+### Phase 1: Test Foundation
+**Goal**: The existing test suite passes, Playwright is ready to author tests against, and every critical interactive element has a stable test selector
+**Depends on**: Nothing (first phase of milestone)
+**Requirements**: TEST-01, TEST-02, E2E-01, E2E-02, E2E-03, E2E-04
 **Success Criteria** (what must be TRUE):
-  1. App builds and runs on Tailwind v4 with `@theme` directive -- no `tailwind.config.js` token definitions remain active
-  2. All 67 previously-hardcoded color values reference design tokens (no raw hex/rgba in component files)
-  3. `cn()` utility and CVA are importable and used in at least one component as proof of concept
-  4. Fonts load from local bundles (no Google Fonts CDN requests visible in Network tab)
-  5. All `framer-motion` imports replaced with `motion/react` -- app animations still function
-**Plans**: 2 plans
+  1. `vitest run` passes with zero failures (existing tests repaired or intentionally removed after design refresh)
+  2. `tsc --noEmit` passes with zero type errors
+  3. `npx playwright test --list` shows the test runner configured with Vite dev server integration and at least one placeholder test discoverable
+  4. All navigation elements, form inputs, action buttons, and modals across screens have `data-testid` attributes following a consistent `screen-element` naming convention
+  5. A Playwright test can start with a pre-authenticated state (localStorage seeded with valid Zustand stores, bypassing the AccessGate/Auth/Onboarding wall) and tests run in isolation with no state leakage between them
+**Plans**: TBD
 
 Plans:
-- [x] 01-01: Tailwind v4 migration, @theme token system, cn() utility, CVA + tailwind-merge install
-- [x] 01-02: Hardcoded color audit + replacement, font self-hosting, motion v12 upgrade
+- [ ] 01-01: Repair existing unit/component tests and fix type errors
+- [ ] 01-02: Install Playwright, configure projects, build auth/seed fixtures, add data-testid attributes
 
 ---
 
-### Phase 2: Theme Removal
-**Goal**: The codebase has exactly one styling path -- no conditional branching, no theme selection, no GYG remnants
+### Phase 2: E2E Critical Journeys
+**Goal**: Seven Playwright tests cover every launch-critical user flow -- if any of these break, you know before users do
 **Depends on**: Phase 1
-**Requirements**: THEME-01, THEME-02, THEME-03
+**Requirements**: E2E-05, E2E-06, E2E-07, E2E-08, E2E-09, E2E-10, E2E-11
 **Success Criteria** (what must be TRUE):
-  1. Zero `isTrained` ternaries remain in the codebase (was 394 across 21 files)
-  2. No `useTheme()` hook calls exist -- components import constants directly
-  3. Settings screen has no theme toggle -- the option is gone
-  4. A user with `gyg` stored in localStorage sees the Trained theme on next visit (migration works)
-**Plans**: 3 plans
+  1. A new user can navigate access gate, sign up, complete onboarding, and land on the home screen (E2E verified)
+  2. An existing user can sign in and see their data on the home screen (E2E verified)
+  3. A user can add an exercise, log sets with reps/weight, and save a completed workout (E2E verified)
+  4. A user can search for food, add a meal entry, and see updated macro totals (E2E verified)
+  5. A user can complete daily check-in (streak maintained), claim weekly XP, and survive an offline-to-online sync cycle (E2E verified)
+**Plans**: TBD
 
 Plans:
-- [x] 02-01: De-branch primitive and composite components (Button, Card, Navigation, Avatar, etc.)
-- [x] 02-02: De-branch screens (Workouts, AccessGate, CheckIn, XPClaim, Settings, Avatar, Home, Onboarding)
-- [x] 02-03: Delete GYG theme, ThemeProvider, useTheme hook; add localStorage migration
+- [ ] 02-01: Auth and onboarding journey tests (E2E-05, E2E-06)
+- [ ] 02-02: Core feature journey tests -- workout, meals, check-in, XP claim, offline sync (E2E-07 through E2E-11)
 
 ---
 
-### Phase 3: Component Primitives
-**Goal**: Core UI components look premium -- solid surfaces, restrained accents, refined inputs -- and expose typed variant APIs
-**Depends on**: Phase 2
-**Requirements**: VIS-01, VIS-02, VIS-03, VIS-04
+### Phase 3: Analytics Enhancement
+**Goal**: Every step of the user funnel is tracked -- you can see exactly where people drop off from sign-up through habit formation
+**Depends on**: Phase 1 (test foundation must exist to verify events fire)
+**Requirements**: ANLYT-01, ANLYT-02, ANLYT-03, ANLYT-04
 **Success Criteria** (what must be TRUE):
-  1. Button, Card, ProgressBar, Toast, and input components use CVA variant definitions (not raw conditional classes)
-  2. Standard cards use solid surface colors with subtle borders -- glass effects only appear on overlays/modals
-  3. No screen has more than one glow effect (hero glow maximum)
-  4. Focus rings and input fields have consistent, refined styling that meets WCAG AA focus indicator requirements
-**Plans**: 2 plans
+  1. A documented event naming convention exists and all existing + new events follow it consistently
+  2. All 14 previously-unwired Plausible events fire when their corresponding user actions occur
+  3. Navigating between screens fires SPA pageview events (not just the initial page load)
+  4. Funnel definitions are documented covering sign up through first workout through 7-day retention, with each step mapping to a trackable Plausible event
+**Plans**: TBD
 
 Plans:
-- [x] 03-01: Redesign Button, Card, ProgressBar, Toast with CVA variants; replace glass with solid surfaces
-- [x] 03-02: Refine inputs, focus rings, form styling; strip/mute glow effects to one-per-screen max
+- [ ] 03-01: Design event naming convention and funnel definitions (planning before code)
+- [ ] 03-02: Wire missing events, add SPA pageview tracking, verify event firing
 
 ---
 
-### Phase 4: Screen Refresh
-**Goal**: Every screen communicates premium discipline through typography hierarchy, generous spacing, and purposeful layout
-**Depends on**: Phase 3
-**Requirements**: SCREEN-01, SCREEN-02, SCREEN-03, SCREEN-04, SCREEN-05
+### Phase 4: Monitoring Hardening
+**Goal**: Sentry captures performance data, readable stack traces, and PII-safe session replays -- with alerts that fire before users complain
+**Depends on**: Phase 2 (E2E tests provide confidence that monitoring changes don't break functionality)
+**Requirements**: MON-01, MON-02, MON-03, MON-04
 **Success Criteria** (what must be TRUE):
-  1. Typography uses 3-4 size stops with weight-driven hierarchy -- no more than 2 uppercase elements per screen (section headers and primary CTAs only)
-  2. Screen padding is 20-24px and card padding is 16-24px consistently across all screens
-  3. CheckInModal and XPClaimModal render as bottom sheets (slide up from bottom, not centered modals)
-  4. Skeleton loaders and empty states use colors from the new palette (no old theme colors visible during loading)
-**Plans**: 2 plans
+  1. Sentry dashboard shows Core Web Vitals (LCP, CLS, INP) and page load performance data from the running app
+  2. Error stack traces in Sentry display readable source-mapped code (not minified bundles)
+  3. Alert rules are configured to notify on error rate spikes (catches launch-day regressions)
+  4. Session replay recordings mask all health/fitness PII -- body weight, meal data, and body metrics are not visible in replays
+**Plans**: TBD
 
 Plans:
-- [x] 04-01-PLAN.md -- Apply typography scale, fix uppercase overuse, enforce consistent spacing across all screens
-- [x] 04-02-PLAN.md -- Convert modals to bottom sheets; update skeleton and empty state colors to new palette
-
----
-
-### Phase 5: Animation Refinement
-**Goal**: All motion feels purposeful and premium -- fast, critically damped, never bouncy or playful
-**Depends on**: Phase 4
-**Requirements**: ANIM-01, ANIM-02, ANIM-03
-**Success Criteria** (what must be TRUE):
-  1. All spring animations use critically damped parameters (damping 25-30, stiffness 300+) -- no overshoot/bounce visible
-  2. `float` and `xp-pop` keyframe animations are removed; `pulse-glow` is muted to a subtle fade
-  3. With `prefers-reduced-motion: reduce` enabled in OS settings, no animations play (motion v12 compliance)
-**Plans**: 1 plan
-
-Plans:
-- [x] 05-01: Replace bouncy springs with critically damped; remove playful keyframes; verify reduced-motion compliance
-
----
-
-### Phase 6: Cleanup
-**Goal**: Zero dead code from the old theme system remains -- the codebase is clean and the build is verified
-**Depends on**: Phase 5
-**Requirements**: CLEAN-01, CLEAN-02
-**Success Criteria** (what must be TRUE):
-  1. `src/themes/` directory does not exist (retained constants moved to `src/design/constants.ts` or equivalent)
-  2. No legacy CSS rules (`.theme-trained`, `.theme-gyg`, `injectCSSVariables`) exist in any file
-  3. `tsc --noEmit` passes with zero errors and the full test suite passes
-**Plans**: 1 plan
-
-Plans:
-- [x] 06-01: Delete theme infrastructure, remove legacy CSS rules, run tsc + test suite verification
-
----
-
-### Phase 7: Deploy
-**Goal**: Returning users get the new design atomically with clear communication about what changed
-**Depends on**: Phase 6
-**Requirements**: DEPLOY-01, DEPLOY-02
-**Success Criteria** (what must be TRUE):
-  1. Service worker serves new assets atomically -- no partial old/new design mashup possible
-  2. A returning user sees a "What's New" interstitial or update prompt on first visit after deploy
-  3. All Vite-generated assets have content hashes (cache-busting confirmed)
-**Plans**: 1 plan
-
-Plans:
-- [x] 07-01: Service worker atomic deploy strategy, "What's New" interstitial, asset hash verification
+- [ ] 04-01: Activate browserTracingIntegration, upload source maps, configure alerts and PII masking
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 2/2 | Complete | 2026-02-05 |
-| 2. Theme Removal | 3/3 | Complete | 2026-02-05 |
-| 3. Component Primitives | 2/2 | Complete | 2026-02-05 |
-| 4. Screen Refresh | 2/2 | Complete | 2026-02-05 |
-| 5. Animation Refinement | 1/1 | Complete | 2026-02-05 |
-| 6. Cleanup | 1/1 | Complete | 2026-02-05 |
-| 7. Deploy | 1/1 | Complete | 2026-02-05 |
+| 1. Test Foundation | 0/2 | Not started | - |
+| 2. E2E Critical Journeys | 0/2 | Not started | - |
+| 3. Analytics Enhancement | 0/2 | Not started | - |
+| 4. Monitoring Hardening | 0/1 | Not started | - |
 
 ---
-*Roadmap created: 2026-02-05*
-*Total: 7 phases, 12 plans, 25 requirements*
+*Roadmap created: 2026-02-06*
+*Total: 4 phases, 7 plans, 21 requirements*
