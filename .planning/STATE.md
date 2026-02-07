@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 1 of 6 (Foundation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-07 -- Roadmap created for v1.3 Coach Dashboard
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 01-01-PLAN.md (coach foundation schema)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33% (Phase 1)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [░░░░░░░░░░] 0%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 0
-- Average duration: --
-- Total execution time: --
+- Total plans completed: 1
+- Average duration: 2min
+- Total execution time: 2min
 
 ## Accumulated Context
 
@@ -37,6 +37,8 @@ All prior decisions logged in PROJECT.md Key Decisions table and milestone archi
 Recent decisions affecting current work:
 - v1.3: Coach dashboard at /coach, single coach, Supabase-only backend, existing design system
 - v1.3: Data ownership split -- client-owned (offline-first, push) vs coach-owned (server-authoritative, pull)
+- 01-01: set_by uses TEXT with CHECK constraint (not enum) for simplicity
+- 01-01: Role protection trigger checks JWT claims for service_role
 
 ### Pending Todos
 
@@ -51,5 +53,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Roadmap created for v1.3 -- ready to plan Phase 1
+Stopped at: Completed 01-01-PLAN.md (coach foundation schema)
 Resume file: None

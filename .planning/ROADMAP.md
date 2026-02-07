@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Coach dashboard code is not included in the client app's JavaScript bundle
 **Plans**: 3 plans
 Plans:
-- [ ] 01-01-PLAN.md -- Schema migration (set_by column, RLS fix, role protection trigger)
+- [x] 01-01-PLAN.md -- Schema migration (set_by column, RLS fix, role protection trigger)
 - [ ] 01-02-PLAN.md -- CoachGuard route protection component + App.tsx wiring
 - [ ] 01-03-PLAN.md -- Directional sync refactor (pushClientData, pullCoachData)
 
@@ -100,7 +100,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 1/3 | In progress | - |
 | 2. Invitations | 0/TBD | Not started | - |
 | 3. Client Roster | 0/TBD | Not started | - |
 | 4. Macro Management | 0/TBD | Not started | - |
