@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic inspired by Equinox and Whoop. The app just completed a full visual overhaul (shadcn/ui migration, Tailwind v4, theme system removal) and needs pre-launch confidence before going live to everyone at once.
+Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic. The app has completed three milestones (launch polish, design refresh, pre-launch confidence) and is ready for production deployment.
 
 ## Core Value
 
@@ -24,32 +24,30 @@ Previous milestones delivered:
 - ✓ Achievement badges (20+ badges, unlock animations) — existing
 - ✓ Offline-first with cloud sync (Zustand + Supabase) — existing
 - ✓ PWA support (prompt-based updates, runtime caching) — existing
-- ✓ Skeleton loading states, empty states, haptic feedback — launch polish
-- ✓ Sync status indicator, online/offline detection — launch polish
-- ✓ Sentry error monitoring wired into all error paths — launch polish
-- ✓ Plausible analytics (22 custom events) — existing
-- ✓ WCAG AA color contrast compliance — launch polish
-- ✓ Premium dark aesthetic (Tailwind v4, shadcn/ui, CVA variants) — design refresh
-- ✓ Single-theme codebase (GYG removed, 394 ternaries resolved) — design refresh
-- ✓ Animation refinement (critically damped springs, no playful motion) — design refresh
-- ✓ "What's New" update prompt for returning users — design refresh
+- ✓ Skeleton loading states, empty states, haptic feedback — v1.0
+- ✓ Sync status indicator, online/offline detection — v1.0
+- ✓ Sentry error monitoring wired into all error paths — v1.0
+- ✓ Plausible analytics (22 custom events) — v1.0
+- ✓ WCAG AA color contrast compliance — v1.0
+- ✓ Premium dark aesthetic (Tailwind v4, shadcn/ui, CVA variants) — v1.1
+- ✓ Single-theme codebase (GYG removed, 394 ternaries resolved) — v1.1
+- ✓ Animation refinement (critically damped springs, no playful motion) — v1.1
+- ✓ "What's New" update prompt for returning users — v1.1
+- ✓ E2E test suite with Playwright (7 critical user journeys, 10 tests) — v1.2
+- ✓ Existing test suite repaired and passing (139 tests) — v1.2
+- ✓ Funnel analytics (3 funnels: activation, habit formation, daily engagement) — v1.2
+- ✓ Engagement tracking (22 Plausible events across all screens) — v1.2
+- ✓ Performance monitoring (Sentry Core Web Vitals, page load tracing) — v1.2
+- ✓ Session replay with PII masking (health/fitness data protected) — v1.2
+- ✓ Source map upload for readable production stack traces — v1.2
 
 ### Active
 
-Pre-launch confidence work:
-
-- [ ] E2E test suite with Playwright covering critical user journeys
-- [ ] Existing test suite updated and passing after design refresh
-- [ ] Cross-browser verification (iOS Safari, Android Chrome, desktop)
-- [ ] Funnel analytics (sign up → onboarding → first workout → habit)
-- [ ] Engagement tracking (workout completion, meal logging, streak maintenance)
-- [ ] Performance monitoring (Core Web Vitals, API latency, page load times)
-- [ ] Operational dashboard (error rates, failed API calls, slow pages)
+None — ready for deployment. Next milestone TBD after launch feedback.
 
 ### Out of Scope
 
 - Coach dashboard — still client-only
-- New features or functionality changes — testing and observability only
 - Native mobile app — still PWA
 - Light mode — dark-only
 - Marketing site — app only
@@ -59,29 +57,27 @@ Pre-launch confidence work:
 ## Context
 
 **Current State:**
-- Design refresh milestone complete (7 phases, 25 requirements, all shipped)
-- shadcn/ui migration merged to master
-- Sentry already wired into 8 catch blocks + auth
-- Plausible already tracking 22 custom events
-- Some existing tests but likely need updating after the massive visual overhaul
-- No E2E tests exist yet
-- Launching to ~90k followers — no beta group, everyone at once
+- Three milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence)
+- 139 unit tests + 10 E2E tests passing
+- 22 Plausible analytics events wired with 3 funnel definitions
+- Sentry: performance tracing, source maps, session replay with PII masking, ErrorBoundary capture
+- Ready for production deployment to ~90k followers
 
-**What Exists (to build on):**
-- Sentry for error monitoring — needs performance monitoring added
-- Plausible for event tracking — needs funnel/engagement events added
-- Existing unit/component tests — need audit and repair
+**Tech Stack:**
+- React 18 + TypeScript + Vite + Tailwind v4 + shadcn/ui + CVA
+- Zustand (localStorage persistence) + Supabase (cloud sync)
+- Playwright (E2E) + Vitest (unit/component)
+- Plausible (analytics) + Sentry (monitoring)
 
-**Gap Analysis:**
-- No E2E tests → can't verify critical paths don't regress
-- No funnel tracking → can't see where users drop off
-- No performance monitoring → can't detect slow experiences
-- Existing tests may be broken → false confidence
+**Post-Deploy Manual Tasks:**
+- Configure Sentry alert rules in dashboard (MON-03)
+- Set SENTRY_AUTH_TOKEN/ORG/PROJECT in deploy environment
+- Verify source maps, PII masking, session replay after first deploy
 
 ## Constraints
 
-- **Timeline**: Before launch — move fast
-- **Functionality**: Zero behavior changes — testing and observability only
+- **Timeline**: Ready to ship — launch when confident
+- **Functionality**: Zero behavior changes in v1.2 — testing and observability only
 - **Privacy**: Plausible is privacy-first (no cookies) — keep it that way
 - **Bundle size**: Monitoring additions must not bloat the client
 - **Existing tools**: Build on Sentry + Plausible — don't add new vendors
@@ -90,10 +86,13 @@ Pre-launch confidence work:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Playwright for E2E | Fast, reliable, multi-browser support, Microsoft-backed | — Pending |
-| Build on Sentry + Plausible | Already integrated, avoid vendor sprawl | — Pending |
-| E2E over unit tests | User journey coverage more valuable pre-launch than isolated unit coverage | — Pending |
-| No beta group | Launching to everyone at once — tests must provide the confidence | — Pending |
+| Playwright for E2E | Fast, reliable, multi-browser support, Microsoft-backed | ✓ Good — 10 tests covering 7 critical flows |
+| Build on Sentry + Plausible | Already integrated, avoid vendor sprawl | ✓ Good — zero new vendors added |
+| E2E over unit tests | User journey coverage more valuable pre-launch | ✓ Good — caught real integration issues |
+| No beta group | Launching to everyone at once — tests must provide confidence | — Pending (launch hasn't happened) |
+| Static seed data in E2E | Deterministic over dynamic devSeed.ts | ✓ Good — stable, reproducible tests |
+| Dual Playwright projects | Separate auth tests from bypassed tests | ✓ Good — clean isolation |
+| maskAllText: false + [data-sentry-mask] | Readable replays + PII protection | ✓ Good — minimal masking, maximum insight |
 
 ---
-*Last updated: 2026-02-06 after pre-launch confidence milestone initialization*
+*Last updated: 2026-02-07 after v1.2 milestone*
