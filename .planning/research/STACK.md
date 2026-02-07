@@ -1,7 +1,7 @@
-# Technology Stack: E2E Testing & Analytics Enhancement
+# Technology Stack: Coach Dashboard Features
 
-**Project:** Trained -- Pre-Launch Confidence (E2E Testing + Analytics/Monitoring)
-**Researched:** 2026-02-06
+**Project:** Trained -- Coach Dashboard Milestone
+**Researched:** 2026-02-07
 **Mode:** Ecosystem (Stack dimension)
 **Overall confidence:** HIGH
 
@@ -9,180 +9,396 @@
 
 ## Executive Summary
 
-The existing Trained stack already has the foundation pieces in place: Sentry (`@sentry/react` ^10.38.0) for error monitoring and Plausible (script tag in `index.html`) for privacy-first analytics with 22 custom events. The Vitest + Testing Library unit test setup is also established.
+The existing Trained stack is well-positioned for coach dashboard features. The Supabase schema already includes `user_role` enum (`client`/`coach`/`admin`), a `coach_clients` junction table with status tracking, comprehensive RLS policies granting coaches read access to client data, and a `coach_client_summary` materialized view. A Coach screen (`/coach`) with client roster, detail views, weight charts, macro adherence, and activity feed already exists. The `useClientDetails` hook with 5-minute caching is already built.
 
-What is missing is: (1) Playwright for E2E testing against real browser behavior, (2) Sentry's `browserTracingIntegration` for Web Vitals and performance monitoring (the `tracesSampleRate: 0.1` config exists but the integration is not wired up), and (3) Plausible funnel configuration in the dashboard to track conversion paths.
+What is MISSING and needs to be added:
 
-The good news: **no new vendors are needed.** This milestone is about deepening existing integrations and adding Playwright as the sole new dev dependency. Bundle size impact on production is near-zero -- Playwright is dev-only, Sentry's browserTracingIntegration is already bundled with `@sentry/react`, and Plausible funnels are dashboard-only configuration.
+1. **Supabase Edge Functions** -- For sending invite emails (requires server-side execution with `service_role` key). No Edge Functions directory or configuration exists in the project yet.
+2. **Resend** -- Email delivery service, called from Edge Functions. Free tier: 3,000 emails/month (sufficient for a single coach inviting clients).
+3. **New database tables** -- `check_ins`, `workout_programs`, and `invites` tables with corresponding RLS policies.
+4. **Supabase Realtime** -- For live-updating the coach dashboard when clients submit check-ins. Already bundled in `@supabase/supabase-js` v2.93.3 (installed). Zero new client-side dependencies.
+5. **shadcn/ui Calendar component** -- For the workout programming date picker. Already compatible with the existing shadcn setup. Uses `react-day-picker` v9.x.
+
+The critical finding: **only ONE new npm dependency is needed** (`resend` in the Edge Functions runtime, which is Deno-based and separate from the client bundle). Zero new client-side production dependencies. Everything else uses existing packages or Supabase built-in features.
+
+---
+
+## Existing Infrastructure (Already Built)
+
+Before listing additions, here is what already exists and should NOT be rebuilt:
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| `user_role` enum (client/coach/admin) | `supabase/schema.sql` | Deployed |
+| `coach_clients` table with status | `supabase/schema.sql` | Deployed |
+| `coach_client_status` enum (pending/active/inactive) | `supabase/schema.sql` | Deployed |
+| RLS: Coach reads client profiles, weights, macros, workouts, XP | `supabase/schema.sql` | Deployed |
+| `coach_client_summary` view | `supabase/schema.sql` | Deployed |
+| `isCoach()` helper | `src/lib/supabase.ts` | Implemented |
+| Coach screen with client roster | `src/screens/Coach.tsx` | Implemented |
+| `useClientDetails` hook (weight, macros, activity) | `src/hooks/useClientDetails.ts` | Implemented |
+| WeightChart, ClientMacroAdherence, ClientActivityFeed | `src/components/` | Implemented |
+| Mock coach data for dev bypass | `src/lib/devSeed.ts` | Implemented |
+| `/coach` route (lazy loaded) | `src/App.tsx` | Implemented |
+| shadcn/ui components: Button, Card, Input, Label, Textarea, Select, Tabs, Dialog, Sheet, Switch, Badge, Alert | `src/components/ui/` | Installed |
 
 ---
 
 ## New Stack Additions
 
-### Add: @playwright/test (E2E Testing)
+### 1. Supabase Edge Functions (Email Sending + Invite Flow)
 
 | Detail | Value |
 |--------|-------|
-| **Package** | `@playwright/test` ^1.58 |
-| **Type** | Dev dependency only (zero production bundle impact) |
-| **Why** | Browser-based E2E tests for critical user flows before 90k-follower launch. Catches integration bugs that Vitest + jsdom cannot (routing, localStorage persistence, Supabase auth flows, service worker behavior). |
-| **Confidence** | HIGH -- verified via npm (v1.58.1 published 2026-02-01), Playwright release notes |
+| **Technology** | Supabase Edge Functions (Deno runtime) |
+| **Type** | Server-side only (runs on Supabase infrastructure) |
+| **Why** | Sending invite emails requires the `service_role` key which must NEVER be exposed client-side. Edge Functions run server-side with access to secrets. Also needed for `auth.admin.inviteUserByEmail()`. |
+| **Cost** | Free tier: 500,000 invocations/month. Overage: $2/million. |
+| **Confidence** | HIGH -- official Supabase documentation, official Resend integration example |
 
-**What it provides:**
-- Real Chromium/WebKit/Firefox testing (not jsdom simulation)
-- Built-in `webServer` config to auto-start Vite dev server
-- `storageState` for auth session reuse across tests (critical for Supabase)
-- Network interception via `page.route()` for mocking Supabase/API responses
-- Mobile viewport emulation (essential for a mobile-first PWA)
-- Offline simulation via `context.setOffline(true)` for service worker testing
-- Auto-wait for elements (no manual `waitFor` chains)
-- Trace viewer and screenshot-on-failure for debugging
+**What Edge Functions provide for this milestone:**
 
-**Integration with existing stack:**
-- Vite dev server: Playwright's `webServer` config starts `npm run dev` and waits for the port
-- Vitest coexistence: Playwright uses its own test runner (`npx playwright test`), completely separate from Vitest. No conflicts.
-- TypeScript: First-class TS support, shares the project's `tsconfig.json`
-- CI: Playwright provides official GitHub Actions setup with browser caching
+- **`send-invite` function**: Accepts coach_id + email, creates an invite record, sends email via Resend, optionally calls `supabase.auth.admin.inviteUserByEmail()` for new users
+- **`process-invite` function** (optional): Webhook/callback when invited user signs up, auto-creates coach_client relationship
+- Server-side secret management (RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY)
+- CORS handling for browser invocation via `@supabase/supabase-js` client
 
-**Key configuration decisions:**
-- Test against Chromium only in dev (speed), all 3 browsers in CI (coverage)
-- Use `storageState` pattern for authenticated tests -- authenticate once via Supabase REST API in setup, reuse session across all tests
-- Keep E2E tests in `/e2e/` directory (separate from unit tests in `/src/`)
-- Use `baseURL` config pointing to Vite dev server (default `http://localhost:5173`)
+**Invocation from client:**
 
-**Sources:**
-- [Playwright installation docs](https://playwright.dev/docs/intro)
-- [Playwright npm - v1.58.1](https://www.npmjs.com/package/@playwright/test)
-- [Playwright release notes](https://playwright.dev/docs/release-notes)
-- [Playwright webServer config](https://playwright.dev/docs/test-webserver)
-- [Playwright authentication](https://playwright.dev/docs/auth)
+The existing `@supabase/supabase-js` v2.93.3 already supports `supabase.functions.invoke()`:
 
----
-
-## Existing Stack -- Enhancements (No New Packages)
-
-### Enhance: @sentry/react -- Add browserTracingIntegration
-
-| Detail | Value |
-|--------|-------|
-| **Package** | `@sentry/react` ^10.38.0 (ALREADY INSTALLED) |
-| **Change** | Add `Sentry.browserTracingIntegration()` to the existing `Sentry.init()` call |
-| **Why** | Enables automatic Web Vitals capture (LCP, CLS, INP), page load/navigation transaction tracing, and XHR/fetch span creation. Currently `tracesSampleRate: 0.1` is set but does nothing without the integration. |
-| **Bundle impact** | Near-zero -- `browserTracingIntegration` is already included in the `@sentry/react` bundle; it just needs to be activated. |
-| **Confidence** | HIGH -- verified via Sentry docs; the integration is a core feature of the SDK |
-
-**What it automatically captures (zero additional code):**
-- **LCP** (Largest Contentful Paint) -- how fast the main content loads
-- **CLS** (Cumulative Layout Shift) -- visual stability
-- **INP** (Interaction to Next Paint) -- responsiveness (replaced FID in SDK 10.x)
-- **TTFB** (Time to First Byte) -- server response time
-- **Page load transactions** -- full waterfall of the initial page load
-- **Navigation transactions** -- SPA route changes via React Router
-- **Fetch/XHR spans** -- Supabase API call performance
-
-**What needs to change in `src/lib/sentry.ts`:**
-
-The current `Sentry.init()` call needs one addition:
 ```typescript
-Sentry.init({
-  dsn: SENTRY_DSN,
-  environment: import.meta.env.MODE,
-  integrations: [
-    Sentry.browserTracingIntegration(),
-  ],
-  tracesSampleRate: 0.1, // already configured
-  // ... rest of existing config
+const { data, error } = await supabase.functions.invoke('send-invite', {
+  body: { email: 'client@example.com' }
 })
 ```
 
-**Configuration decisions:**
-- Keep `tracesSampleRate: 0.1` (10%) -- sufficient for a launch audience of ~90k, avoids quota issues on free/growth Sentry plans
-- Set `tracePropagationTargets` to only the Supabase API domain (prevents CORS issues with third-party APIs like USDA/Open Food Facts)
-- INP is enabled by default in SDK 10.x -- no opt-in needed
-- LCP and CLS send as standalone spans by default in 10.x
+**CORS handling:**
+
+Starting with `@supabase/supabase-js` v2.95.0+, CORS headers can be imported from `@supabase/supabase-js/cors`. The project is on v2.93.3 which requires manual CORS headers in the Edge Function. Consider bumping to v2.95+ during implementation.
+
+**Project structure for Edge Functions:**
+
+```
+supabase/
+  functions/
+    send-invite/
+      index.ts        # Edge Function handler
+    _shared/
+      cors.ts         # Shared CORS headers
+      supabase.ts     # Admin client factory
+```
+
+**Setup requirements:**
+
+1. Install Supabase CLI: `npm install -D supabase` (or use `npx supabase`)
+2. Initialize: `npx supabase init` (creates `supabase/config.toml`)
+3. Create function: `npx supabase functions new send-invite`
+4. Set secrets: `npx supabase secrets set RESEND_API_KEY=re_xxxxx`
+5. Deploy: `npx supabase functions deploy send-invite`
 
 **Sources:**
-- [Sentry React tracing setup](https://docs.sentry.io/platforms/javascript/guides/react/tracing/)
-- [Sentry browserTracingIntegration](https://docs.sentry.io/platforms/javascript/guides/react/configuration/integrations/browsertracing/)
-- [Sentry Web Vitals](https://docs.sentry.io/product/insights/frontend/web-vitals/)
-- [Sentry automatic instrumentation](https://docs.sentry.io/platforms/javascript/guides/react/tracing/instrumentation/automatic-instrumentation/)
+- [Supabase Edge Functions getting started](https://supabase.com/docs/guides/functions/quickstart)
+- [Supabase send emails example](https://supabase.com/docs/guides/functions/examples/send-emails)
+- [Supabase CORS for Edge Functions](https://supabase.com/docs/guides/functions/cors)
+- [Supabase auth.admin.inviteUserByEmail](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail)
+- [Supabase Edge Functions pricing](https://supabase.com/docs/guides/functions/pricing)
 
-### Enhance: Plausible Analytics -- Funnel Configuration + New Events
+---
+
+### 2. Resend (Email Delivery)
 
 | Detail | Value |
 |--------|-------|
-| **Script** | `https://plausible.io/js/script.js` (ALREADY IN index.html) |
-| **Change** | Dashboard-side funnel configuration + new custom events in `src/lib/analytics.ts` |
-| **Why** | Track conversion funnels (signup-to-first-workout, onboarding completion) and engagement patterns to understand user behavior at launch scale. |
-| **Bundle impact** | Zero -- Plausible script is external, funnels are dashboard config, new events just add function calls to existing `analytics.ts` |
-| **Confidence** | HIGH -- Plausible funnel docs are straightforward; the JS API (`window.plausible()`) with custom props already works with the base `script.js` |
+| **Package** | `resend` (npm, used in Deno Edge Functions via `npm:resend`) |
+| **Type** | Server-side only (called from Edge Functions, NOT from client) |
+| **Why** | Supabase recommends Resend for transactional email. Official integration exists. Simple API, generous free tier, no complex SMTP config. |
+| **Cost** | Free tier: 3,000 emails/month. Pro: $20/month for 50,000 emails. |
+| **Bundle impact** | ZERO client-side impact. Resend runs only in Deno Edge Functions. |
+| **Confidence** | HIGH -- official Supabase + Resend integration documentation |
 
-**Important finding:** The base `script.js` already supports `window.plausible(event, { props })` via the JavaScript API. The `tagged-events`, `pageview-props`, and other script extensions are only needed for HTML-attribute-based automatic tracking, which this project does not use. No script change needed.
+**Why Resend over alternatives:**
 
-**Funnel setup is dashboard-only:**
-1. Go to Plausible site settings > Goals -- register each event name as a goal
-2. Go to Plausible site settings > Funnels -- create funnels from those goals
-3. Minimum 2 steps, maximum 8 steps per funnel
+| Provider | Why Not |
+|----------|---------|
+| **Resend** | RECOMMENDED. Official Supabase integration, simple API, free tier covers invite volume |
+| SendGrid | More complex setup, requires SMTP or separate SDK, overkill for transactional-only |
+| Mailgun | Similar complexity to SendGrid, no official Supabase integration |
+| AWS SES | Requires AWS account, complex IAM setup, overkill |
+| Supabase built-in auth emails | Only handles auth events (signup confirm, password reset), not custom invite emails with branded templates |
+| Nodemailer/SMTP | Supabase Edge Functions are Deno-based, Nodemailer is Node.js. Incompatible. |
 
-**Recommended funnels (built from existing + new events):**
+**Usage in Edge Function (Deno):**
 
-| Funnel | Steps |
-|--------|-------|
-| Signup to First Workout | Signup Completed > Onboarding Completed > Workout Completed |
-| Daily Engagement | App Opened > Check-In Completed > Workout Started |
-| Meal Tracking Adoption | App Opened > Meal Logged > Protein Target Hit |
-| Gamification Loop | Workout Completed > XP Claimed > Level Up |
+```typescript
+import { Resend } from "npm:resend"
 
-**New events to add to `analytics.ts`:**
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"))
 
-| Event | Purpose | Props |
-|-------|---------|-------|
-| `Page View` | Track SPA navigation (Plausible auto-tracks, but explicit for funnels) | `path` |
-| `Feature Discovery` | Track when users find key features | `feature` |
-| `Retention Signal` | Track return visits (daily active) | `days_since_signup` |
-| `Error Encountered` | Track user-facing errors for correlation | `error_type`, `screen` |
+await resend.emails.send({
+  from: "Trained <coach@yourdomain.com>",
+  to: email,
+  subject: "You've been invited to Trained",
+  html: `<p>Your coach has invited you...</p>`
+})
+```
+
+**Requirements:**
+- Verified sending domain in Resend dashboard (DNS records)
+- API key stored as Supabase Edge Function secret
+- Custom HTML email template (simple, no React Email needed for MVP)
 
 **Sources:**
-- [Plausible custom events](https://plausible.io/docs/custom-event-goals)
-- [Plausible funnel analysis](https://plausible.io/docs/funnel-analysis)
-- [Plausible custom properties](https://plausible.io/docs/custom-props/for-custom-events)
-- [Plausible script extensions](https://plausible.io/docs/script-extensions)
+- [Resend + Supabase Edge Functions](https://resend.com/docs/send-with-supabase-edge-functions)
+- [Resend pricing](https://resend.com/pricing)
+- [Resend Supabase integration page](https://resend.com/supabase)
+
+---
+
+### 3. Database Schema Additions (New Tables + RLS)
+
+| Detail | Value |
+|--------|-------|
+| **Technology** | PostgreSQL via Supabase |
+| **Type** | Database migration (SQL) |
+| **Why** | Three new tables needed for invite tracking, check-in forms, and workout programming |
+| **Confidence** | HIGH -- follows established schema patterns from existing tables |
+
+**New tables needed:**
+
+#### `invites` table
+
+Tracks email invitations sent by the coach, with status for deduplication and audit trail.
+
+```sql
+CREATE TYPE invite_status AS ENUM ('pending', 'accepted', 'expired');
+
+CREATE TABLE invites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  status invite_status DEFAULT 'pending' NOT NULL,
+  accepted_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days') NOT NULL,
+  UNIQUE(coach_id, email)
+);
+```
+
+#### `check_ins` table
+
+Weekly structured check-in forms submitted by clients, reviewed by coach.
+
+```sql
+CREATE TABLE check_ins (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  week_of DATE NOT NULL,  -- Monday of the check-in week
+
+  -- Structured fields
+  weight DECIMAL(5,1),
+  energy_level INTEGER CHECK (energy_level BETWEEN 1 AND 5),
+  adherence_rating INTEGER CHECK (adherence_rating BETWEEN 1 AND 5),
+  sleep_quality INTEGER CHECK (sleep_quality BETWEEN 1 AND 5),
+  stress_level INTEGER CHECK (stress_level BETWEEN 1 AND 5),
+  notes TEXT,
+  wins TEXT,        -- What went well
+  struggles TEXT,   -- What was hard
+
+  -- Coach review
+  coach_notes TEXT,
+  reviewed_at TIMESTAMPTZ,
+  reviewed_by UUID REFERENCES profiles(id),
+
+  UNIQUE(client_id, week_of)
+);
+```
+
+#### `workout_programs` table
+
+Coach-assigned workouts for specific dates on client calendars.
+
+```sql
+CREATE TABLE workout_programs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  workout_type workout_type NOT NULL,  -- Reuse existing enum
+  exercises JSONB DEFAULT '[]'::jsonb NOT NULL,  -- Same structure as workout_logs.exercises
+  notes TEXT,
+  UNIQUE(client_id, date)  -- One programmed workout per day
+);
+```
+
+**RLS policies follow the existing pattern:** clients own their data, coaches access their clients' data via `coach_clients` junction check.
+
+**Sources:**
+- Pattern derived from existing `supabase/schema.sql` in the codebase
+
+---
+
+### 4. shadcn/ui Calendar Component (Date Selection for Programming)
+
+| Detail | Value |
+|--------|-------|
+| **Package** | `react-day-picker` v9.x (installed automatically with shadcn calendar) |
+| **Install** | `npx shadcn@latest add calendar` |
+| **Type** | Client-side UI component |
+| **Why** | Coach needs to select dates when assigning workouts to client calendars. shadcn Calendar integrates seamlessly with existing Tailwind v4 + shadcn component system. |
+| **Bundle impact** | Minimal -- react-day-picker is ~12KB gzipped |
+| **Confidence** | HIGH -- shadcn/ui official component, updated June 2025 to react-day-picker v9 |
+
+**Why shadcn Calendar, not alternatives:**
+
+| Option | Why Not |
+|--------|---------|
+| **shadcn Calendar** | RECOMMENDED. Already compatible with existing shadcn setup, Tailwind v4, radix-ui. Zero config. |
+| react-big-calendar | Full-featured Google Calendar clone. Massive overkill for selecting workout dates. Has its own styling system that conflicts with Tailwind. |
+| DayPilot | Commercial license for production. Overkill. |
+| Syncfusion Scheduler | Commercial license. Enterprise-grade, not needed. |
+| FullCalendar | Heavy (200KB+), brings its own CSS, complex API. Overkill for date selection. |
+| Custom date grid | Unnecessary when shadcn Calendar exists and matches the design system. |
+
+**Usage pattern for workout programming:**
+
+The coach selects a date on the Calendar component, then assigns a workout type and exercises for that date. This is a date picker pattern, not a full calendar/scheduler pattern. The shadcn Calendar component (which wraps react-day-picker) is the right abstraction level.
+
+For displaying a week-at-a-glance view of programmed workouts, build a simple custom 7-column grid using existing Tailwind utilities. A full calendar library is NOT needed for this.
+
+**Sources:**
+- [shadcn/ui Calendar](https://ui.shadcn.com/docs/components/radix/calendar)
+- [shadcn Calendar June 2025 upgrade](https://ui.shadcn.com/docs/changelog/2025-06-calendar)
+- [react-day-picker v9.13.1](https://www.npmjs.com/package/react-day-picker)
+
+---
+
+### 5. Supabase Realtime (Check-in Notifications)
+
+| Detail | Value |
+|--------|-------|
+| **Package** | `@supabase/supabase-js` v2.93.3 (ALREADY INSTALLED) |
+| **Type** | Uses existing client library, zero new dependencies |
+| **Why** | When a client submits a check-in, the coach dashboard should update without manual refresh. Supabase Realtime's `postgres_changes` subscription is the simplest way. |
+| **Cost** | Free tier: 200 concurrent connections, messages included. More than sufficient for single-coach use. |
+| **Confidence** | HIGH -- built into installed supabase-js, official documentation |
+
+**Decision: Realtime vs Polling**
+
+For this project, the RIGHT answer is a **hybrid approach**:
+
+| Scenario | Approach | Rationale |
+|----------|----------|-----------|
+| Coach viewing dashboard | **Polling on page load** | Coach loads /coach, fetches fresh client list. Simple, reliable. Already implemented. |
+| Coach dashboard open, client submits check-in | **Supabase Realtime** | Subscribe to `check_ins` table INSERTs where `client_id` is in coach's client list. Avoids polling overhead, gives instant feedback. |
+| Coach not on dashboard | **Nothing** | No wasted connections or polling. |
+
+**Why not polling-only?** The coach may have the dashboard open while reviewing clients. A client submitting a check-in should surface immediately (badge count update, toast notification). Polling every 30 seconds would work but feels sluggish and wastes API calls.
+
+**Why not Realtime-only?** Initial data load still needs a standard query. Realtime only notifies of changes -- it does not provide initial state.
+
+**Implementation pattern:**
+
+```typescript
+// Subscribe when coach dashboard mounts
+useEffect(() => {
+  const channel = supabase
+    .channel('coach-checkins')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'check_ins'
+      },
+      (payload) => {
+        // Check if this client belongs to the coach
+        // Update local state / show notification
+      }
+    )
+    .subscribe()
+
+  return () => { supabase.removeChannel(channel) }
+}, [])
+```
+
+**Prerequisite:** Enable Realtime replication for the `check_ins` table in the Supabase dashboard (Database > Replication > toggle on `check_ins`).
+
+**Sources:**
+- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
+- [Supabase subscribe to channel](https://supabase.com/docs/reference/javascript/subscribe)
+- [Supabase Realtime pricing](https://supabase.com/docs/guides/realtime/pricing)
+- [Supabase Realtime limits](https://supabase.com/docs/guides/realtime/limits)
+
+---
+
+## Coach Authorization Strategy
+
+**Decision: Profile role check, NOT custom claims**
+
+| Approach | Verdict |
+|----------|---------|
+| **Profile `role` column check** | RECOMMENDED. Already implemented via `isCoach()` in `src/lib/supabase.ts`. Query `profiles.role = 'coach'` for auth guard. |
+| Supabase custom claims (JWT) | Overkill for single-coach. Requires custom JWT hook, adds complexity. Would be right for multi-tenant SaaS. |
+| Separate auth provider | Unnecessary. Supabase auth already handles this. |
+| Hardcoded coach user ID | Fragile, not portable, bad practice. |
+
+**How it works today:**
+
+1. Coach logs in with same email/password auth as any user
+2. `profiles.role` is set to `'coach'` in the database (manually or via admin)
+3. `isCoach()` queries the profile to check role
+4. `/coach` route renders Coach screen
+5. RLS policies on all tables use `coach_clients` junction to gate data access
+
+**What needs to change:**
+
+- Add a client-side route guard that redirects non-coach users away from `/coach/*` routes
+- Currently the `/coach` route renders for ALL authenticated users (no role check in `App.tsx`)
+- Add `useCoachGuard()` hook that checks role and redirects if not coach
+- Cache the role check in a Zustand store to avoid repeated profile queries
+
+**RLS is the real security layer.** Even if a non-coach user navigates to `/coach`, the RLS policies will return empty data for all coach queries. The client-side guard is UX, not security.
 
 ---
 
 ## What NOT to Add (and Why)
 
-### Do NOT add @playwright/experimental-ct-react (Component Testing)
+### Do NOT add React Email for invite templates
 
-Playwright offers experimental component testing for React. Do NOT use it. The project already has Vitest + Testing Library for component-level tests. Playwright should only be used for full E2E flows (multi-page, with real routing, auth, and network). Component testing with Playwright adds complexity for zero benefit over the existing Vitest setup.
+React Email is a React-based email templating system. It is excellent for complex email templates with components but is overkill for a single invite email. Use a plain HTML string in the Edge Function. Add React Email later if email complexity grows.
 
-### Do NOT add MSW (Mock Service Worker) for E2E tests
+### Do NOT add a form library (React Hook Form, Formik, etc.)
 
-MSW is excellent for unit tests but adds unnecessary complexity to E2E tests. Playwright has built-in `page.route()` for network interception that is simpler and more reliable in the E2E context. Use `page.route()` to mock Supabase responses when needed. If tests can run against a real (local or staging) Supabase instance, prefer that over mocking entirely.
+The check-in form has ~7 fields (weight, 4 rating sliders, 2 text areas). The existing shadcn components (Input, Textarea, Select, Label) with basic React state management handle this trivially. A form library adds dependency weight for zero benefit at this scale. Zustand state works fine for form management.
 
-### Do NOT add supawright
+### Do NOT add TanStack Query (React Query)
 
-Supawright is a Playwright + Supabase test harness that auto-creates/cleans database records. It is useful for complex multi-tenant apps but overkill here. The app stores most data in Zustand/localStorage. For the few Supabase-dependent flows (auth, sync), direct API calls in test setup are simpler and more transparent.
+The project uses direct Supabase client calls with custom hooks (`useClientDetails`). TanStack Query would provide caching, refetching, and optimistic updates -- but the existing 5-minute cache in `useClientDetails` already handles caching, and the data access patterns are simple enough that adding TanStack Query's complexity is not justified. If data fetching patterns grow more complex post-MVP, reconsider.
 
-### Do NOT switch from Plausible script tag to plausible-tracker npm package
+### Do NOT add Socket.IO or Pusher
 
-The `plausible-tracker` npm package (v0.3.9, unmaintained) and its successor `@plausible-analytics/tracker` (v0.4.4) add the Plausible tracking script as a JS module instead of a script tag. This adds to the production bundle and removes the CDN caching benefit. The current script tag approach is correct for a PWA -- it loads async, is cached by the browser independently of the app bundle, and the `window.plausible()` API already provides everything needed.
+Supabase Realtime provides WebSocket-based real-time subscriptions natively. Adding a separate real-time library duplicates functionality that is already bundled in the installed `@supabase/supabase-js`.
 
-### Do NOT add Google Analytics, Mixpanel, PostHog, or Amplitude
+### Do NOT add a drag-and-drop library for workout programming
 
-The project is privacy-first (no cookies). Plausible provides funnel analysis, custom events, and custom properties -- everything needed for launch analytics. Adding a second analytics vendor contradicts the privacy stance, increases bundle size, and fragments data across dashboards.
+Workout programming is "pick a date, pick a workout type, assign exercises." This is a form, not a drag-and-drop interface. If drag-and-drop reordering of exercises within a workout is needed later, add `@dnd-kit` then -- but do not preemptively install it.
 
-### Do NOT add web-vitals npm package separately
+### Do NOT add Zustand persist for coach data
 
-The `web-vitals` npm package provides standalone Web Vitals measurement. This is unnecessary because Sentry's `browserTracingIntegration` already uses `web-vitals` internally and reports the same metrics (LCP, CLS, INP) to Sentry's dashboard. Adding it separately would duplicate measurements.
+Coach data (client list, check-ins, programmed workouts) should NOT be cached in localStorage. It is multi-user data that can change at any time from either side (coach or client). Always fetch fresh from Supabase. The existing `useClientDetails` in-memory cache with 5-minute TTL is the right pattern.
 
-### Do NOT add Lighthouse CI or SpeedCurve
+### Do NOT add a notification service (OneSignal, Firebase Cloud Messaging)
 
-Synthetic performance monitoring (Lighthouse CI, SpeedCurve) runs lab tests in controlled environments. Sentry's Web Vitals capture Real User Monitoring (RUM) data from actual users, which is more valuable for a mobile-first PWA where device diversity matters. Add Lighthouse CI only if you need a CI gate for performance regression, which is a separate concern from this milestone.
+Push notifications for "client submitted check-in" would be nice but are NOT in scope for this milestone. The Supabase Realtime subscription provides in-app notifications when the coach has the dashboard open. Push notifications are a separate feature with significant complexity (service worker registration, permission prompts, device token management).
 
-### Do NOT add Datadog, New Relic, or other APM tools
+### Do NOT add multi-tenant infrastructure
 
-Sentry already covers error tracking, performance monitoring, and Web Vitals. Adding a full APM tool duplicates Sentry's capabilities at significant cost and complexity. The app has no backend server to monitor (Supabase is the backend).
+This is a single-coach app. Do NOT add organization tables, team management, role hierarchies, or tenant isolation patterns. The single `user_role` column + `coach_clients` junction table is the right abstraction for one coach managing clients.
 
 ---
 
@@ -190,148 +406,113 @@ Sentry already covers error tracking, performance monitoring, and Web Vitals. Ad
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| E2E framework | Playwright | Cypress | Playwright is faster (parallel by default), supports all browsers, better mobile emulation, better PWA/service worker support. Cypress is older and has architectural limitations (single-tab, no multi-domain). |
-| E2E framework | Playwright | Selenium/WebDriverIO | Heavyweight, slower, worse DX. Playwright is the modern standard. |
-| Performance monitoring | Sentry browserTracingIntegration | web-vitals + custom dashboard | Sentry already integrates web-vitals. Building a custom dashboard is wasted effort. |
-| Performance monitoring | Sentry browserTracingIntegration | Vercel Speed Insights | Vendor lock-in to Vercel. Sentry works on any host. App already uses Sentry. |
-| Analytics funnels | Plausible funnels | PostHog funnels | PostHog is more powerful but requires cookies, self-hosting, or paid cloud. Contradicts privacy-first. |
-| Analytics funnels | Plausible funnels | Custom-built funnel tracking | Plausible already supports 2-8 step funnels from custom events. No need to build this. |
-| API mocking in E2E | Playwright page.route() | MSW | MSW adds a dependency and service worker registration complexity. Playwright's built-in mocking is simpler for E2E. |
-| Auth in E2E | storageState (Playwright built-in) | supawright | supawright is for database seeding; storageState handles auth session reuse directly. |
+| Email sending | Resend via Edge Function | Supabase built-in auth emails | Built-in only handles auth events, not custom invite emails |
+| Email sending | Resend via Edge Function | Direct SMTP from client | Exposes credentials, not possible from browser |
+| Email delivery | Resend | SendGrid | More complex, no official Supabase integration, overkill |
+| Server-side logic | Supabase Edge Functions | External API (Vercel, Cloudflare Workers) | Extra infrastructure. Edge Functions run on Supabase, co-located with DB. |
+| Real-time updates | Supabase Realtime | Polling every 30s | Wasteful for long-lived dashboard sessions, sluggish UX |
+| Real-time updates | Supabase Realtime | Server-Sent Events | Would require custom server, defeats Supabase-native architecture |
+| Calendar UI | shadcn Calendar | react-big-calendar | Overkill, brings own styling, conflicts with Tailwind |
+| Calendar UI | shadcn Calendar | FullCalendar | 200KB+, commercial for premium features, overkill |
+| Date handling | Native Date API | date-fns / dayjs / luxon | Only need basic date formatting/comparison. Already using toISOString().split('T')[0] pattern throughout codebase. react-day-picker brings date-fns as peer dep if needed. |
+| Form management | React useState + shadcn | React Hook Form | 7 fields. Form library overhead not justified. |
+| Coach auth | Profile role column | Custom JWT claims | Single coach, not multi-tenant. Profile check is simpler. |
+| Data fetching | Custom hooks + Supabase client | TanStack Query | Existing patterns work. Refactor later if needed. |
+| Invite tracking | Database `invites` table | Stateless (just send email) | Need dedup, status tracking, expiry. Table is essential. |
 
 ---
 
-## Installation
+## Installation Summary
 
-### New dev dependencies (one command)
+### Client-side (zero new production dependencies)
+
 ```bash
-npm install -D @playwright/test
+# Add shadcn Calendar component (installs react-day-picker as dependency)
+npx shadcn@latest add calendar
+
+# Optional: bump supabase-js for CORS helper import
+npm install @supabase/supabase-js@latest
 ```
 
-### Install Playwright browsers
+### Server-side (Edge Functions setup)
+
 ```bash
-npx playwright install --with-deps chromium webkit
+# Install Supabase CLI as dev dependency
+npm install -D supabase
+
+# Initialize Supabase project (if config.toml doesn't exist)
+npx supabase init
+
+# Create the invite Edge Function
+npx supabase functions new send-invite
+
+# Set secrets (run once per environment)
+npx supabase secrets set RESEND_API_KEY=re_xxxxx
+
+# Deploy
+npx supabase functions deploy send-invite
 ```
 
-Note: Install only Chromium and WebKit. Firefox is optional and can be added later. WebKit covers Safari (important for iOS PWA users). The `--with-deps` flag installs system dependencies needed for headless browsers.
+### Database migrations (run in Supabase SQL Editor)
 
-### No production dependency changes
+- Add `invites` table + RLS
+- Add `check_ins` table + RLS
+- Add `workout_programs` table + RLS
+- Enable Realtime replication for `check_ins` table
 
-The only production-side change is modifying `src/lib/sentry.ts` to add `browserTracingIntegration()` -- using the already-installed `@sentry/react` package. No new production packages.
+### No changes to existing production dependencies
+
+All existing packages (`react`, `react-router-dom`, `zustand`, `@supabase/supabase-js`, `sonner`, `lucide-react`, `radix-ui`, `class-variance-authority`, `tailwind-merge`, `clsx`) remain unchanged.
 
 ---
 
-## File Structure for New Capabilities
+## Integration Points with Existing Code
 
-### Playwright E2E tests
+### 1. Coach Screen Expansion
+
+The existing `src/screens/Coach.tsx` (708 lines) is a single file handling the entire coach dashboard. For the new features, it should be split into:
+
 ```
-/e2e/                          # E2E test directory (separate from src/)
-  playwright.config.ts          # Playwright configuration
-  auth.setup.ts                # Authentication setup (runs once, saves storageState)
-  fixtures/                    # Test fixtures and helpers
-    auth.ts                    # Custom fixture with authenticated page
-  tests/
-    auth.spec.ts               # Login/signup/logout flows
-    onboarding.spec.ts         # Onboarding flow
-    workout.spec.ts            # Workout logging flow
-    macros.spec.ts             # Meal/macro tracking flow
-    gamification.spec.ts       # XP, leveling, streaks, achievements
-    offline.spec.ts            # Offline/service worker behavior
-    navigation.spec.ts         # Tab bar, routing, deep links
-  .auth/                       # Stored auth state (gitignored)
-    user.json
+src/screens/coach/
+  CoachDashboard.tsx       # Client roster (existing, extracted)
+  ClientDetail.tsx          # Client detail modal (existing, extracted)
+  InviteClient.tsx          # Email invite flow (NEW)
+  CheckInReview.tsx         # Check-in review view (NEW)
+  WorkoutProgramming.tsx    # Assign workouts to dates (NEW)
+  MacroManagement.tsx       # Set client macro targets (NEW)
 ```
 
-### Sentry enhancement
-```
-src/lib/sentry.ts              # Existing file -- add browserTracingIntegration
-```
+### 2. Client-Side Check-In Form
 
-### Plausible enhancement
-```
-src/lib/analytics.ts           # Existing file -- add new event definitions
-```
+A new screen/component for the CLIENT side (not coach):
 
-### Package scripts to add
-```json
-{
-  "scripts": {
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:debug": "playwright test --debug"
-  }
-}
+```
+src/screens/CheckIn.tsx     # Weekly check-in form
+src/stores/checkInStore.ts  # Local state for in-progress check-ins (NOT persisted)
 ```
 
----
+### 3. New Supabase Types
 
-## Key Integration Points
+Add to `src/lib/database.types.ts`:
+- `invites` table types (Row, Insert, Update)
+- `check_ins` table types
+- `workout_programs` table types
+- `invite_status` enum type
 
-### Playwright + Vite Dev Server
+### 4. Sync Integration
 
-```typescript
-// e2e/playwright.config.ts
-import { defineConfig, devices } from '@playwright/test'
+Check-in submissions from clients should call `scheduleSync()` after submission (same pattern as workout/macro syncing). Coach-side data should NOT use `scheduleSync()` -- it reads from Supabase directly.
 
-export default defineConfig({
-  testDir: './tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
-  use: {
-    baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
-  projects: [
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 7'] },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'mobile-safari',
-      use: { ...devices['iPhone 14'] },
-      dependencies: ['setup'],
-    },
-  ],
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
-})
+### 5. Route Changes
+
+Add nested coach routes in `App.tsx`:
+
 ```
-
-### Playwright + Supabase Auth
-
-The recommended pattern for authenticating in E2E tests with Supabase:
-
-1. **Setup project** authenticates via Supabase REST API (not UI clicks)
-2. **Saves session** to `storageState` file (localStorage + cookies)
-3. **Test projects** load `storageState` -- tests start authenticated
-4. Use a dedicated test user in Supabase (not a real user)
-
-This avoids slow UI-based login in every test and handles Supabase's token-based auth cleanly.
-
-### Sentry browserTracingIntegration + React Router
-
-The `browserTracingIntegration()` automatically detects React Router v6 navigation events and creates transactions for each route change. No additional configuration needed beyond adding the integration -- it hooks into the History API automatically.
-
-For React Router v6 specifically, Sentry recommends using `Sentry.reactRouterV6BrowserTracingIntegration` for route-aware transaction names. This uses `useEffect`, `useLocation`, `useNavigationType`, `createRoutesFromChildren`, and `matchRoutes` from `react-router-dom`.
-
-### Plausible + Existing Analytics Module
-
-The `src/lib/analytics.ts` module already wraps `window.plausible()` correctly. New events simply add more methods to the `analytics` object. No architectural changes needed.
+/coach                  # Dashboard (existing)
+/coach/client/:id       # Client detail page
+/coach/invite           # Invite flow
+/checkin                # Client-side check-in form (new route for clients)
+```
 
 ---
 
@@ -339,43 +520,49 @@ The `src/lib/analytics.ts` module already wraps `window.plausible()` correctly. 
 
 | Area | Level | Reason |
 |------|-------|--------|
-| Playwright version/setup | HIGH | Verified via npm (v1.58.1, published 2026-02-01) and official docs |
-| Playwright + Vite integration | HIGH | `webServer` config is well-documented, widely used pattern |
-| Playwright + Supabase auth | MEDIUM | Pattern documented in community sources (Mokkapps blog, Fireship); not in official Playwright docs. Works but needs per-project tuning. |
-| Sentry browserTracingIntegration | HIGH | Official Sentry docs confirm it is already bundled in @sentry/react 10.x |
-| Sentry Web Vitals (LCP/CLS/INP) | HIGH | Official docs confirm automatic capture with browserTracingIntegration in SDK 10.x |
-| Sentry + React Router v6 | MEDIUM | Documented but requires specific wiring with `reactRouterV6BrowserTracingIntegration` |
-| Plausible funnels | HIGH | Official Plausible docs confirm dashboard-only setup with custom events |
-| Plausible base script.js + JS API | HIGH | Official docs confirm window.plausible() works with base script without extensions |
-| No-new-vendors strategy | HIGH | All capabilities achievable with existing Sentry + Plausible + new Playwright |
+| Supabase Edge Functions setup | HIGH | Official docs, well-documented, official Resend example |
+| Resend integration | HIGH | Official Supabase partnership, verified pricing |
+| Resend free tier limits | HIGH | Verified: 3,000/month, sufficient for single coach |
+| Edge Function CORS | MEDIUM | Known pain point per community discussions. `supabase-js` v2.93.3 may need manual CORS. Bump to v2.95+ recommended. |
+| Supabase Realtime for check-ins | HIGH | Built into installed SDK, official documentation |
+| Realtime free tier limits | MEDIUM | 200 concurrent connections verified. Message limits less clear but sufficient for single-coach with <100 active clients. |
+| shadcn Calendar + react-day-picker | HIGH | Official shadcn component, upgraded June 2025, v9.13.1 current |
+| Database schema additions | HIGH | Follow exact patterns from existing schema |
+| Coach role auth (profile column) | HIGH | Already implemented in codebase (`isCoach()`) |
+| No-new-client-dependencies strategy | HIGH | All capabilities achievable with existing + shadcn Calendar |
 
 ---
 
 ## Sources
 
 ### Verified (HIGH confidence)
-- [Playwright npm - v1.58.1](https://www.npmjs.com/package/@playwright/test)
-- [Playwright installation](https://playwright.dev/docs/intro)
-- [Playwright webServer](https://playwright.dev/docs/test-webserver)
-- [Playwright authentication](https://playwright.dev/docs/auth)
-- [Playwright release notes](https://playwright.dev/docs/release-notes)
-- [Playwright best practices](https://playwright.dev/docs/best-practices)
-- [Sentry React tracing](https://docs.sentry.io/platforms/javascript/guides/react/tracing/)
-- [Sentry browserTracingIntegration](https://docs.sentry.io/platforms/javascript/guides/react/configuration/integrations/browsertracing/)
-- [Sentry Web Vitals](https://docs.sentry.io/product/insights/frontend/web-vitals/)
-- [Sentry automatic instrumentation](https://docs.sentry.io/platforms/javascript/guides/react/tracing/instrumentation/automatic-instrumentation/)
-- [Plausible custom events](https://plausible.io/docs/custom-event-goals)
-- [Plausible funnel analysis](https://plausible.io/docs/funnel-analysis)
-- [Plausible custom properties](https://plausible.io/docs/custom-props/for-custom-events)
-- [Plausible script extensions](https://plausible.io/docs/script-extensions)
+- [Supabase Edge Functions docs](https://supabase.com/docs/guides/functions)
+- [Supabase Edge Functions quickstart](https://supabase.com/docs/guides/functions/quickstart)
+- [Supabase send emails example](https://supabase.com/docs/guides/functions/examples/send-emails)
+- [Supabase Edge Functions CORS](https://supabase.com/docs/guides/functions/cors)
+- [Supabase Edge Functions pricing](https://supabase.com/docs/guides/functions/pricing) -- 500K free invocations/month
+- [Supabase auth.admin.inviteUserByEmail](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail)
+- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
+- [Supabase Realtime pricing](https://supabase.com/docs/guides/realtime/pricing)
+- [Supabase Realtime limits](https://supabase.com/docs/guides/realtime/limits) -- 200 concurrent connections free
+- [Supabase RLS docs](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Resend + Supabase integration](https://resend.com/docs/send-with-supabase-edge-functions)
+- [Resend pricing](https://resend.com/pricing) -- 3,000 emails/month free
+- [Resend Supabase page](https://resend.com/supabase)
+- [shadcn/ui Calendar component](https://ui.shadcn.com/docs/components/radix/calendar)
+- [shadcn Calendar June 2025 update](https://ui.shadcn.com/docs/changelog/2025-06-calendar)
+- [react-day-picker npm v9.13.1](https://www.npmjs.com/package/react-day-picker)
 
 ### Cross-referenced (MEDIUM confidence)
-- [Supabase auth in Playwright E2E (Mokkapps)](https://mokkapps.de/blog/login-at-supabase-via-rest-api-in-playwright-e2e-test)
-- [Playwright + Vite + React setup (DEV Community)](https://dev.to/juan_deto/configure-vitest-msw-and-playwright-in-a-react-project-with-vite-and-ts-part-3-32pe)
-- [Supawright test harness](https://github.com/isaacharrisholt/supawright)
-- [@plausible-analytics/tracker npm](https://www.npmjs.com/package/@plausible-analytics/tracker)
-- [Vite PWA testing docs](https://vite-pwa-org.netlify.app/guide/testing-service-worker)
+- [Supabase user invitations via Edge Functions (blog.mansueli.com)](https://blog.mansueli.com/allowing-users-to-invite-others-with-supabase-edge-functions)
+- [RBAC Admin User Invitations (blog.hijabicoder.dev)](https://blog.hijabicoder.dev/create-and-invite-users-to-your-admin-app-using-supabase-edge-functions)
+- [Supabase Realtime in React (codu.co)](https://www.codu.co/niall/real-time-table-changes-in-supabase-with-react-js-next-js-swmgqmq9)
+- [Supabase custom claims RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac)
 
-### Single-source (LOW confidence -- verify before acting)
-- Sentry `reactRouterV6BrowserTracingIntegration` exact import path and API -- verify against current SDK version during implementation
-- Playwright `context.setOffline()` for PWA offline testing -- documented but not extensively tested with vite-plugin-pwa specifically
+### Project-specific verification (HIGH confidence)
+- `@supabase/supabase-js` v2.93.3 confirmed installed (node_modules check)
+- `user_role` enum, `coach_clients` table, RLS policies confirmed in `supabase/schema.sql`
+- `isCoach()`, `useClientDetails`, Coach screen confirmed in source code
+- shadcn/ui setup confirmed (19 components in `src/components/ui/`)
+- No existing Edge Functions directory (greenfield)
+- No existing email infrastructure (greenfield)

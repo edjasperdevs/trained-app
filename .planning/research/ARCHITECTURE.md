@@ -1,812 +1,917 @@
-# Architecture: E2E Testing + Analytics/Monitoring Integration
+# Architecture Patterns: Coach Dashboard Integration
 
-**Domain:** Playwright E2E tests, Plausible funnel events, and Sentry performance monitoring for a React + Vite + Zustand + Supabase offline-first PWA
-**Researched:** 2026-02-06
-**Confidence:** HIGH (codebase analysis + official docs cross-referenced)
+**Domain:** Coach dashboard for existing fitness gamification PWA
+**Researched:** 2026-02-07
+**Confidence:** HIGH (based on direct codebase analysis + verified Supabase patterns)
+
+## Current Architecture Snapshot
+
+Before designing the integration, here is what already exists:
+
+### Existing Coach Infrastructure (Already Built)
+
+The codebase already has significant coach infrastructure in place:
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| `coach_clients` table | `supabase/schema.sql` | Deployed, with indexes |
+| `coach_client_summary` view | `supabase/schema.sql` | Deployed, joins profiles + XP + weight + workouts |
+| `profiles.role` column | `supabase/schema.sql` | Deployed, enum `user_role = 'client' \| 'coach' \| 'admin'` |
+| RLS policies (read) | `supabase/schema.sql` | Deployed for all data tables |
+| `Coach.tsx` screen | `src/screens/Coach.tsx` | Functional client list + detail modal with tabs |
+| `useClientDetails` hook | `src/hooks/useClientDetails.ts` | Functional with 5-min cache, fetches weight/macros/activity |
+| `ClientActivityFeed` | `src/components/ClientActivityFeed.tsx` | Functional, grouped by date |
+| `ClientMacroAdherence` | `src/components/ClientMacroAdherence.tsx` | Functional, adherence bars |
+| `WeightChart` (reused) | `src/components/WeightChart.tsx` | Accepts generic `WeightEntry[]`, works for coach view |
+| `isCoach()` helper | `src/lib/supabase.ts` | Queries `profiles.role === 'coach'` |
+| Coach link in Settings | `src/screens/Settings.tsx` | Conditionally shows "Open Dom/me Dashboard" |
+| `/coach` route | `src/App.tsx` | Lazy-loaded, inside authenticated routes |
+| Mock data (dev bypass) | `src/lib/devSeed.ts` | 4 mock clients with weight/macro/activity data |
+| Analytics events | `src/lib/analytics.ts` | `coachDashboardViewed`, `clientViewed` |
+| Theme labels | `src/design/constants.ts` | `coach: 'Dom/me'`, `client: 'Sub'`, etc. |
+
+### What is NOT Built Yet
+
+The milestone asks about features that go BEYOND read-only client monitoring:
+
+| Feature | Status | What's Needed |
+|---------|--------|---------------|
+| Coach assigns workout templates | NOT BUILT | New table, new RLS, new UI, client pull mechanism |
+| Coach sets macro targets | PARTIALLY BUILT | RLS policy for coach UPDATE on `macro_targets` exists, but no UI |
+| Coach-client check-ins/messaging | NOT BUILT | New table, new RLS, new UI |
+| Client sees coach assignments | NOT BUILT | Client-side polling/subscription, store integration |
+| Coach role assignment | MANUAL ONLY | Must be set via Supabase dashboard SQL |
+
+### Existing Data Flow
+
+```
+CLIENT CREATES DATA:
+  User action
+    -> Zustand store (localStorage, source of truth)
+      -> scheduleSync() (2s debounce)
+        -> syncAllToCloud() (Supabase)
+
+COACH READS DATA:
+  Coach opens dashboard
+    -> Direct Supabase queries (NOT Zustand)
+      -> coach_client_summary view (client list)
+      -> useClientDetails hook (weight, macros, activity)
+```
+
+### Existing Auth Flow
+
+```
+AccessGate (access code)
+  -> Auth (email/password via Supabase)
+    -> Onboarding (profile setup)
+      -> Main App (routes)
+
+Coach detection:
+  Settings.tsx calls isCoach() -> queries profiles.role
+  If coach, shows link to /coach route
+  /coach route is inside main authenticated routes (no separate auth)
+```
 
 ---
 
-## Current Architecture (What Exists)
+## Recommended Architecture for Coach Dashboard Expansion
 
-### System Overview
+### Design Principle: Two Data Authorities
+
+The fundamental challenge is that Trained is offline-first (Zustand localStorage is truth), but coach data is server-authoritative (Supabase is truth). These two models must coexist.
+
+**Rule:** Coach-originated data flows FROM Supabase TO client. Client-originated data flows FROM Zustand TO Supabase. They never conflict because they are different data domains.
 
 ```
-Browser
-+--------------------------------------------------------------------+
-|  index.html                                                         |
-|  +-- Plausible script tag (defer, data-domain)                     |
-|  +-- <div id="root">                                                |
-|      |                                                              |
-|      main.tsx                                                       |
-|      +-- initSentry()           <-- Sentry SDK init (prod only)    |
-|      +-- <ErrorBoundary>        <-- Sentry.ErrorBoundary            |
-|      +-- <BrowserRouter>                                            |
-|          +-- <App>                                                  |
-|              +-- AppContent()                                       |
-|                  +-- AccessGate | Auth | Onboarding | Main Routes  |
-|                  +-- <SyncStatusIndicator>                          |
-|                  +-- <Navigation>                                   |
-|                                                                     |
-|  Zustand Stores (8 stores, localStorage persistence)               |
-|  +-- gamify-gains-user, -workouts, -macros, -xp, -avatar,         |
-|  |   -achievements, -access, -reminders                            |
-|  +-- syncStore (non-persisted, runtime only)                       |
-|                                                                     |
-|  Service Worker (vite-plugin-pwa / Workbox)                        |
-|  +-- Precache: *.{js,css,html,ico,png,svg,woff2}                  |
-|  +-- Runtime: USDA (CacheFirst), OpenFoodFacts (CacheFirst),       |
-|  |           Supabase REST (NetworkFirst, 3s timeout)              |
-+--------------------------------------------------------------------+
-        |
-        v
-+------------------+    +------------------+    +------------------+
-|  Supabase        |    |  Sentry          |    |  Plausible       |
-|  (Auth + DB)     |    |  (Errors +       |    |  (Privacy-first  |
-|  - profiles      |    |   Performance)   |    |   analytics)     |
-|  - workout_logs  |    |  10% traces      |    |  Script tag      |
-|  - macro_targets |    |  100% error      |    |  window.plausible|
-|  - daily_macro_  |    |   replays        |    |  Custom events   |
-|    logs          |    |                  |    |                  |
-|  - weight_logs   |    |                  |    |                  |
-|  - user_xp       |    |                  |    |                  |
-+------------------+    +------------------+    +------------------+
+COACH-ORIGINATED DATA (server-authoritative):
+  Coach writes in dashboard
+    -> Supabase directly
+      -> Client polls on app open / visibility change
+        -> Merged into Zustand stores
+
+CLIENT-ORIGINATED DATA (offline-first, unchanged):
+  User action
+    -> Zustand store (localStorage)
+      -> scheduleSync() -> Supabase
 ```
-
-### Current Analytics State
-
-**Plausible (`src/lib/analytics.ts`):**
-- `window.plausible` global from script tag in `index.html`
-- `trackEvent()` wrapper that no-ops in dev mode
-- `analytics` object with 20+ pre-defined event functions
-- Events currently wired in: Onboarding (1 call), Workouts (4 calls), CheckIn (1 call), XPClaim (2 calls)
-- Events defined but NOT wired: mealLogged, mealSaved, proteinTargetHit, calorieTargetHit, badgeEarned, avatarEvolved, appOpened, settingsViewed, achievementsViewed, dataExported, signupCompleted, loginCompleted, coachDashboardViewed, clientViewed
-- No funnel goals configured in Plausible dashboard
-- No SPA pageview tracking (relies on default script.js which only tracks initial load)
-
-**Sentry (`src/lib/sentry.ts`):**
-- `@sentry/react` v10.38+ initialized in `main.tsx`
-- `tracesSampleRate: 0.1` (10% of transactions)
-- `replaysOnErrorSampleRate: 1.0` (100% on error)
-- `ErrorBoundary` wrapping root and AppContent
-- `captureError()` in 8 catch blocks (auth x4, sync x2, foodApi x1)
-- `setUser()`/`clearUser()` on login/logout
-- `addBreadcrumb()` exported but NEVER called in app code
-- NO `browserTracingIntegration` configured (only `tracesSampleRate`)
-- NO React Router integration (route changes not tracked)
-- NO custom spans for API calls or user interactions
-
-**Test Infrastructure (`src/test/`):**
-- Vitest (unit tests) with jsdom environment
-- `setup.ts`: localStorage mock, matchMedia mock, ResizeObserver mock
-- `utils.tsx`: custom render with BrowserRouter, mockDate helper, resetStore helper
-- 3 existing unit test files: `macroStore.test.ts`, `workoutStore.test.ts`, `xpStore.test.ts`
-- NO E2E tests
-- NO Playwright configuration
-- NO CI/CD pipeline
-
-**Dev Utilities:**
-- `devSeed.ts`: Comprehensive seed data for all 8 stores via localStorage
-- `VITE_DEV_BYPASS=true` env var skips auth + access gate
-- `?reset=true` URL param clears all data
-- `window.seedTestData()` / `window.clearTestData()` in dev mode
 
 ---
 
-## Recommended Architecture (What to Build)
+## 1. Supabase Schema Design
 
-### Three Integration Areas
+### New Tables Needed
 
-This milestone adds three independent but complementary systems:
+#### `coach_workout_templates`
 
+Coach-created workout templates that can be assigned to clients.
+
+```sql
+CREATE TABLE coach_workout_templates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  workout_type workout_type NOT NULL,
+  exercises JSONB DEFAULT '[]'::jsonb NOT NULL,
+  -- exercises format matches existing Exercise[] shape:
+  -- [{ name, targetSets, targetReps, notes }]
+  is_active BOOLEAN DEFAULT TRUE NOT NULL
+);
+
+CREATE INDEX idx_coach_templates_coach ON coach_workout_templates(coach_id);
+
+CREATE TRIGGER coach_workout_templates_updated_at
+  BEFORE UPDATE ON coach_workout_templates
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 ```
-1. PLAYWRIGHT E2E TESTS          2. PLAUSIBLE FUNNELS         3. SENTRY PERFORMANCE
-(test infrastructure)             (analytics enhancement)       (monitoring enhancement)
 
-e2e/                              src/lib/analytics.ts          src/lib/sentry.ts
-+-- fixtures/                     +-- Enhanced trackEvent()     +-- browserTracingIntegration
-|   +-- auth.ts                   +-- Funnel-aware events       +-- reactRouterV6 integration
-|   +-- seed.ts                   +-- SPA pageview tracking     +-- Custom spans for sync
-|   +-- base.ts                                                 +-- Web Vitals
-+-- pages/                        Plausible Dashboard
-|   +-- home.page.ts              +-- Goal definitions          Sentry Dashboard
-|   +-- workouts.page.ts          +-- Funnel: Onboarding        +-- Transaction traces
-|   +-- macros.page.ts            +-- Funnel: First Workout     +-- Performance metrics
-|   +-- onboarding.page.ts        +-- Funnel: Daily Engagement  +-- Web Vitals
-+-- tests/
-|   +-- smoke.spec.ts
-|   +-- onboarding.spec.ts
-|   +-- workout.spec.ts
-|   +-- macros.spec.ts
-|   +-- offline.spec.ts
-+-- playwright.config.ts
-.github/workflows/e2e.yml
+#### `client_assignments`
+
+Links a coach template to a specific client with scheduling info.
+
+```sql
+CREATE TABLE client_assignments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  template_id UUID REFERENCES coach_workout_templates(id) ON DELETE SET NULL,
+  -- Assignment can be a workout template OR macro targets
+  assignment_type TEXT NOT NULL CHECK (assignment_type IN ('workout', 'macros')),
+  -- For macro assignments, store targets directly
+  macro_targets JSONB, -- { protein, calories, carbs, fats, activity_level }
+  -- Scheduling
+  effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  expires_date DATE, -- NULL = indefinite
+  notes TEXT,
+  -- Client acknowledgment
+  seen_at TIMESTAMPTZ,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'completed', 'expired', 'cancelled'))
+);
+
+CREATE INDEX idx_assignments_client ON client_assignments(client_id, status);
+CREATE INDEX idx_assignments_coach ON client_assignments(coach_id);
+CREATE INDEX idx_assignments_effective ON client_assignments(client_id, effective_date DESC);
+
+CREATE TRIGGER client_assignments_updated_at
+  BEFORE UPDATE ON client_assignments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 ```
 
-### Integration Point Map
+#### `coach_notes`
 
-| Existing Module | Playwright Touches | Plausible Touches | Sentry Touches |
-|---|---|---|---|
-| `main.tsx` | -- | -- | Add `browserTracingIntegration`, router instrumentation |
-| `App.tsx` | Test target (all routes) | -- | Wrap `Routes` with Sentry HOC |
-| `src/lib/analytics.ts` | Mock in tests | Add SPA pageview, wire unwired events | -- |
-| `src/lib/sentry.ts` | Disable in tests | -- | Add integrations, custom spans |
-| `src/lib/sync.ts` | Seed data bypasses sync | -- | Add performance spans |
-| `src/lib/supabase.ts` | Test client or mock | -- | -- |
-| `src/lib/devSeed.ts` | Adapt for E2E fixtures | -- | -- |
-| `src/stores/*.ts` | Seed via localStorage | Event fire points | -- |
-| `index.html` | -- | Upgrade to `script.hash.js` or manual SPA tracking | -- |
-| `vite.config.ts` | Reference in webServer config | -- | -- |
-| `package.json` | Add Playwright devDep + scripts | -- | -- |
+Coach can leave notes/check-in messages for clients.
+
+```sql
+CREATE TABLE coach_notes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  -- Simple types: 'note' (coach internal), 'message' (visible to client), 'check_in' (prompted response)
+  note_type TEXT DEFAULT 'note' CHECK (note_type IN ('note', 'message', 'check_in')),
+  -- Client response (for check_in type)
+  client_response TEXT,
+  responded_at TIMESTAMPTZ,
+  -- Read tracking
+  seen_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_coach_notes_client ON coach_notes(client_id, created_at DESC);
+CREATE INDEX idx_coach_notes_coach ON coach_notes(coach_id, created_at DESC);
+CREATE INDEX idx_coach_notes_unseen ON coach_notes(client_id) WHERE seen_at IS NULL;
+```
+
+### Schema NOT Recommended
+
+| Rejected Idea | Why |
+|---------------|-----|
+| `coach_programs` (multi-week plans) | Scope creep. Start with single assignments, add programs later if needed. |
+| Separate `coach_macro_targets` table | Unnecessary. `client_assignments` with `assignment_type = 'macros'` plus `macro_targets` JSONB handles this cleanly. Coach can also directly UPDATE the existing `macro_targets` table (RLS already allows this). |
+| `conversations` / `messages` tables | Over-engineered for single-coach model. `coach_notes` with types covers check-ins and messages. |
+| Custom claims in JWT | Adds complexity. `profiles.role` column query is fast with index and caches well. |
+
+### Tables Already Deployed (No Changes Needed)
+
+- `profiles` -- Has `role` column, no changes
+- `coach_clients` -- Has coach-client relationship, no changes
+- `coach_client_summary` view -- May need minor updates for new fields
+- All data tables (weight_logs, workout_logs, etc.) -- RLS already allows coach read
 
 ---
 
-## Area 1: Playwright E2E Test Architecture
+## 2. Row Level Security (RLS) Policies
 
-### Directory Structure
+### Existing Policies (Already Deployed, No Changes)
 
-```
-/Users/ejasper/code/trained-app/
-+-- e2e/                              <-- NEW: E2E test root (outside src/)
-|   +-- fixtures/
-|   |   +-- base.ts                   <-- Extended test with custom fixtures
-|   |   +-- auth.fixture.ts           <-- Auth state management
-|   |   +-- seed.fixture.ts           <-- localStorage seeding
-|   +-- pages/
-|   |   +-- base.page.ts             <-- Shared page helpers
-|   |   +-- home.page.ts
-|   |   +-- onboarding.page.ts
-|   |   +-- workouts.page.ts
-|   |   +-- macros.page.ts
-|   |   +-- auth.page.ts
-|   |   +-- settings.page.ts
-|   +-- tests/
-|   |   +-- smoke.spec.ts            <-- App loads, nav works
-|   |   +-- onboarding.spec.ts       <-- Full onboarding flow
-|   |   +-- workout-flow.spec.ts     <-- Start/complete workout
-|   |   +-- macro-logging.spec.ts    <-- Log a meal
-|   |   +-- offline-sync.spec.ts     <-- Offline behavior + sync
-|   |   +-- auth-flow.spec.ts        <-- Login/logout
-|   +-- helpers/
-|   |   +-- storage.ts               <-- localStorage seeding utilities
-|   |   +-- wait.ts                   <-- Custom wait helpers
-+-- playwright.config.ts              <-- NEW: Playwright configuration
-+-- .github/
-|   +-- workflows/
-|       +-- e2e.yml                   <-- NEW: CI workflow
-```
+All existing RLS policies follow the correct pattern. Summary:
 
-### Why Outside `src/`
+| Table | Client Access | Coach Access |
+|-------|--------------|--------------|
+| `profiles` | Own row (SELECT, UPDATE) | Client rows via `coach_clients` join (SELECT only) |
+| `coach_clients` | Own relationship (SELECT) | Full CRUD on own relationships |
+| `weight_logs` | Full CRUD own rows | SELECT client rows |
+| `macro_targets` | Full CRUD own rows | SELECT + UPDATE client rows |
+| `daily_macro_logs` | Full CRUD own rows | SELECT client rows |
+| `logged_meals` | Full CRUD own rows | SELECT client rows |
+| `workout_logs` | Full CRUD own rows | SELECT client rows |
+| `user_xp` | Full CRUD own rows | SELECT client rows |
+| `xp_logs` | Full CRUD own rows | SELECT client rows |
 
-E2E tests run against the built/served app, not imported into the bundle. Keeping them in `e2e/` avoids:
-- Vite trying to process test files
-- TypeScript `include` conflicts (current tsconfig excludes `src/**/*.test.*`)
-- Confusion between Vitest (unit) and Playwright (E2E) test files
+### New Policies Needed
 
-### Fixture Architecture
+#### `coach_workout_templates`
 
-The key design decision: **use Playwright fixtures + localStorage seeding instead of Supabase test users**.
+```sql
+ALTER TABLE coach_workout_templates ENABLE ROW LEVEL SECURITY;
 
-Rationale:
-- The app is offline-first. Zustand + localStorage is the source of truth.
-- Supabase is only used for cloud sync, which is optional.
-- `devSeed.ts` already builds comprehensive test data for all 8 stores.
-- `VITE_DEV_BYPASS=true` skips auth and access gate entirely.
-- Testing against real Supabase in CI adds complexity, flakiness, and cost.
+-- Coach owns their templates
+CREATE POLICY "Coaches can manage own templates"
+  ON coach_workout_templates FOR ALL
+  USING (coach_id = auth.uid());
 
-```
-Fixture Composition:
-
-  base.ts
-  +-- Extends Playwright's test with:
-  |   +-- seededPage: Page with localStorage pre-populated
-  |   +-- cleanPage: Page with empty localStorage
-  |
-  +-- seed.fixture.ts
-  |   +-- Adapts devSeed.ts data format for Playwright
-  |   +-- injectStoreData(page, storeName, data)
-  |   +-- clearAllStores(page)
-  |   +-- STORE_KEYS constant (all 8 localStorage keys)
-  |
-  +-- auth.fixture.ts (optional, for Supabase integration tests only)
-      +-- Uses storageState for Supabase session
-      +-- Only needed if testing cloud sync E2E
+-- Clients can see templates assigned to them (via client_assignments)
+CREATE POLICY "Clients can view assigned templates"
+  ON coach_workout_templates FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM client_assignments ca
+      WHERE ca.template_id = coach_workout_templates.id
+      AND ca.client_id = auth.uid()
+      AND ca.status = 'active'
+    )
+  );
 ```
 
-### Seeding Strategy
+#### `client_assignments`
+
+```sql
+ALTER TABLE client_assignments ENABLE ROW LEVEL SECURITY;
+
+-- Coaches can manage assignments for their clients
+CREATE POLICY "Coaches can manage client assignments"
+  ON client_assignments FOR ALL
+  USING (coach_id = auth.uid());
+
+-- Clients can view their own assignments
+CREATE POLICY "Clients can view own assignments"
+  ON client_assignments FOR SELECT
+  USING (client_id = auth.uid());
+
+-- Clients can mark assignments as seen
+CREATE POLICY "Clients can mark assignments as seen"
+  ON client_assignments FOR UPDATE
+  USING (client_id = auth.uid())
+  WITH CHECK (client_id = auth.uid());
+```
+
+#### `coach_notes`
+
+```sql
+ALTER TABLE coach_notes ENABLE ROW LEVEL SECURITY;
+
+-- Coaches can manage notes for their clients
+CREATE POLICY "Coaches can manage notes"
+  ON coach_notes FOR ALL
+  USING (coach_id = auth.uid());
+
+-- Clients can view messages/check-ins addressed to them (NOT internal notes)
+CREATE POLICY "Clients can view their messages"
+  ON coach_notes FOR SELECT
+  USING (
+    client_id = auth.uid()
+    AND note_type IN ('message', 'check_in')
+  );
+
+-- Clients can update their response and seen_at
+CREATE POLICY "Clients can respond to check-ins"
+  ON coach_notes FOR UPDATE
+  USING (client_id = auth.uid())
+  WITH CHECK (client_id = auth.uid());
+```
+
+### RLS Performance Considerations
+
+The existing coach RLS policies use `EXISTS (SELECT 1 FROM coach_clients WHERE ...)` subqueries. With indexes already on `coach_clients(coach_id)` and `coach_clients(client_id)`, these are efficient.
+
+**Recommendation:** Add a composite partial index for the most common coach RLS check:
+
+```sql
+CREATE INDEX idx_coach_clients_active
+  ON coach_clients(coach_id, client_id)
+  WHERE status = 'active';
+```
+
+This partial index covers every coach RLS policy check with a single index scan.
+
+**Confidence:** HIGH -- this follows documented Supabase RLS performance best practices for EXISTS subqueries with filtered indexes.
+
+---
+
+## 3. Route Structure
+
+### Current Route Structure
+
+```
+/           -> Home
+/workouts   -> Workouts
+/macros     -> Macros
+/avatar     -> AvatarScreen
+/settings   -> Settings
+/coach      -> Coach (single flat screen)
+/achievements -> Achievements
+```
+
+### Recommended: Keep `/coach` as Entry, No Sub-routes Initially
+
+The existing Coach.tsx is already a functional single-page dashboard with modal-based client detail views. For the expansion, continue this pattern rather than introducing sub-routes.
+
+**Rationale:**
+- The coach dashboard is mobile-first (same PWA)
+- Modal-based navigation matches existing patterns (CheckInModal, XPClaimModal)
+- Sub-routes (`/coach/clients/:id`, `/coach/templates`) add complexity for routing, back-button handling, and lazy loading without clear UX benefit on mobile
+- The existing Coach.tsx already handles client selection + detail tabs via state
+
+**If sub-routes become necessary later** (e.g., template editor needs its own URL), add them as:
+```
+/coach              -> Client list (existing)
+/coach/templates    -> Template management (future)
+/coach/assign/:id   -> Assignment flow (future)
+```
+
+But start without sub-routes.
+
+### Navigation Changes
+
+The coach dashboard is NOT in the bottom nav (correct -- it is accessed via Settings). This should remain the same because:
+1. Most users are clients, not coaches (single coach, many clients)
+2. Adding a nav item for one user bloats the nav for everyone
+3. The Settings > Coach Dashboard link already works
+
+**No changes needed to Navigation.tsx.**
+
+---
+
+## 4. State Management
+
+### The Core Decision: Zustand vs React Query vs Direct Fetch
+
+| Approach | Pros | Cons | Verdict |
+|----------|------|------|---------|
+| **Zustand store for coach data** | Consistent with codebase | Coach data is server-authoritative, localStorage persistence is wrong | REJECT |
+| **React Query / TanStack Query** | Built for server-state, caching, stale-while-revalidate | New dependency, learning curve, different pattern from rest of app | REJECT for now |
+| **Custom hooks with in-memory cache** | Already used (`useClientDetails`), familiar pattern, no new deps | Manual cache management, no optimistic updates | USE THIS |
+
+**Recommendation: Extend the existing `useClientDetails` hook pattern.**
+
+The codebase already uses this pattern successfully:
+- `useClientDetails.ts` -- fetches weight/macros/activity with 5-minute Map-based cache
+- Direct Supabase queries (no Zustand)
+- State managed via `useState` inside the hook
+- Cache invalidation via `refresh()` callback
+
+New hooks following the same pattern:
 
 ```typescript
-// e2e/helpers/storage.ts - Core seeding utility
+// src/hooks/useCoachTemplates.ts
+// Fetches/creates/updates coach workout templates
+// Uses same Map-based cache pattern as useClientDetails
 
-// These match the Zustand persist keys from src/stores/*.ts
-const STORE_KEYS = {
-  user: 'gamify-gains-user',
-  workouts: 'gamify-gains-workouts',
-  macros: 'gamify-gains-macros',
-  xp: 'gamify-gains-xp',
-  avatar: 'gamify-gains-avatar',
-  achievements: 'gamify-gains-achievements',
-  access: 'gamify-gains-access',
-  reminders: 'gamify-gains-reminders',
-} as const
+// src/hooks/useClientAssignments.ts
+// For coach: fetches assignments for a client
+// For client: fetches own assignments (server-authoritative)
 
-// Seed before page navigates (via addInitScript or page.evaluate)
-async function seedStore(page: Page, key: string, state: object) {
-  await page.addInitScript(({ key, value }) => {
-    localStorage.setItem(key, value)
-  }, { key, value: JSON.stringify({ state, version: 0 }) })
+// src/hooks/useCoachNotes.ts
+// Fetches/creates notes for a client
+```
+
+### Client-Side: Coach Assignments in Zustand
+
+When the CLIENT opens their app, they need to see coach assignments. This data should NOT live in a separate store -- it should merge into existing stores.
+
+```
+Client opens app
+  -> loadAllFromCloud() (existing)
+  -> NEW: loadCoachAssignments()
+    -> Fetches active assignments from client_assignments
+    -> Macro assignment -> updates macroStore.targets (if newer)
+    -> Workout assignment -> updates workoutStore.customizations (if newer)
+    -> Message -> shows notification banner
+```
+
+**Key insight:** Coach assignments update EXISTING stores, not a new store. The client's Zustand stores remain the source of truth for their current workout plan and macro targets. Coach assignments are a mechanism to UPDATE those stores, not replace them.
+
+### Where Coach Data Lives at Runtime
+
+| Data | Where | Why |
+|------|-------|-----|
+| Client list | `useState` in Coach.tsx (fetched from `coach_client_summary` view) | Server-authoritative, no persistence needed |
+| Client details (weight, macros, activity) | `useClientDetails` hook with Map cache | Already implemented, works well |
+| Coach templates | New `useCoachTemplates` hook with Map cache | Server-authoritative, coach-only |
+| Assignments | New `useClientAssignments` hook | Server-authoritative |
+| Coach notes | New `useCoachNotes` hook | Server-authoritative |
+| Client's active macro targets | `macroStore` (Zustand, persisted) | Offline-first, may be set by coach |
+| Client's workout plan | `workoutStore` (Zustand, persisted) | Offline-first, may be set by coach |
+
+---
+
+## 5. Data Flow: Coach Assignments to Client Stores
+
+### How Coach-Assigned Macros Flow to Client
+
+```
+COACH SIDE:
+  Coach opens client detail
+    -> Views current macro targets (from macro_targets table via RLS)
+    -> Edits targets in UI
+    -> Two options:
+      a) Direct update: coach UPDATEs macro_targets row (RLS allows this)
+      b) Assignment: coach INSERTs into client_assignments (audit trail)
+    -> Recommendation: Use BOTH. Update macro_targets directly AND create
+       an assignment record for audit trail.
+
+CLIENT SIDE:
+  Client opens app (or returns from background after 30s)
+    -> flushPendingSync() fires (existing)
+    -> NEW: checkCoachUpdates() runs alongside
+      -> Queries macro_targets from Supabase for own user_id
+      -> Compares with macroStore.targets
+      -> If Supabase version is newer (updated_at comparison):
+        -> Updates macroStore.targets
+        -> Shows toast: "Your coach updated your macro targets"
+      -> Queries client_assignments WHERE seen_at IS NULL
+      -> If unseen assignments exist:
+        -> Shows notification banner
+        -> Marks as seen when user taps
+```
+
+### How Coach-Assigned Workouts Flow to Client
+
+```
+COACH SIDE:
+  Coach creates workout template (exercises JSONB matches existing Exercise shape)
+    -> Saves to coach_workout_templates
+  Coach assigns template to client
+    -> Creates client_assignments with template_id
+    -> Can set effective_date (start next week, etc.)
+
+CLIENT SIDE:
+  Client opens app
+    -> checkCoachUpdates() queries active workout assignments
+    -> If active workout assignment exists:
+      -> Converts template exercises to workoutStore.customizations format
+      -> Updates workoutStore.setCustomExercises() for the assigned workout type
+      -> Shows toast: "Your coach updated your workout plan"
+    -> Client still starts workouts normally (getTodayWorkout())
+    -> The customized exercises from coach assignment are automatically used
+       because workoutStore.startWorkout() already checks customizations first
+```
+
+### Sync Timing
+
+When does the client check for coach updates?
+
+| Trigger | Mechanism | Already Exists? |
+|---------|-----------|-----------------|
+| App open (cold start) | `authStore.syncData()` calls `loadAllFromCloud()` | YES -- add `checkCoachUpdates()` here |
+| Return from background (30s+) | `flushPendingSync()` in visibility change handler | YES -- add `checkCoachUpdates()` here |
+| Manual pull-to-refresh | Not implemented | Add if needed later |
+| Supabase Realtime subscription | Would provide instant updates | NOT RECOMMENDED initially (see below) |
+
+### Why Not Supabase Realtime?
+
+Supabase Realtime (Postgres Changes) would let the client get instant notifications when the coach updates their data. However:
+
+1. **Overkill for single-coach model.** Coach updates are infrequent (maybe 1-2x/week per client). Polling on app open is sufficient.
+2. **Adds WebSocket connection overhead.** Every client maintains a persistent connection. At 90K potential clients, this is 90K WebSocket connections.
+3. **Complexity.** Requires channel management, reconnection logic, and state synchronization -- for updates that happen very rarely.
+4. **PWA background limitations.** Service workers cannot maintain WebSocket connections. The client only receives updates when the app is in the foreground anyway.
+
+**Recommendation:** Poll on app open + visibility change. If latency becomes an issue (coach changes something and calls client to check), add a "Refresh" button. Realtime can be added later as an enhancement.
+
+**Confidence:** HIGH -- polling is the correct pattern for low-frequency server-authoritative updates in a PWA.
+
+---
+
+## 6. Auth Model
+
+### Current Implementation (Already Working)
+
+The auth model for coach identification is already implemented:
+
+```typescript
+// src/lib/supabase.ts
+export const isCoach = async (): Promise<boolean> => {
+  const user = await getUser()
+  const { data } = await client
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  return data?.role === 'coach'
 }
 ```
 
-The critical insight: Zustand persist stores data as `{ state: {...}, version: N }`. The seed data must match this envelope format exactly, as seen in `devSeed.ts` (e.g., `{ state: { profile: {...} }, version: 0 }`).
+```sql
+-- supabase/schema.sql
+CREATE TYPE user_role AS ENUM ('client', 'coach', 'admin');
 
-### Test Isolation
+CREATE TABLE profiles (
+  role user_role DEFAULT 'client' NOT NULL,
+  ...
+);
+```
 
-Each Playwright test gets a fresh browser context by default. This means:
-- localStorage is empty at test start (clean slate)
-- No cross-test contamination from Zustand stores
-- Each test seeds exactly the state it needs
+### How Coach Role is Set
 
-For tests that need a "logged in with data" state:
-1. Use `addInitScript` to inject localStorage BEFORE page load
-2. Set `VITE_DEV_BYPASS=true` in the dev/preview server env
-3. The app reads Zustand stores from localStorage on mount
+Currently: Manually via Supabase dashboard SQL.
 
-For tests that need a "fresh user" state:
-1. Don't seed anything -- localStorage is already empty
-2. The app shows AccessGate > Auth > Onboarding flow
+```sql
+UPDATE profiles SET role = 'coach' WHERE email = 'coach@example.com';
+```
 
-### Service Worker Handling
+**This is correct for a single-coach model.** No self-service coach registration is needed. The coach is the product owner.
 
-The PWA service worker complicates E2E testing because:
-- Cached responses may be stale
-- Service worker registration is async
-- Workbox runtime caching intercepts API calls
+### Recommendations
 
-**Recommendation:** Disable the service worker in E2E test builds.
+1. **Keep `profiles.role` column.** It works, it is simple, it is already deployed.
+2. **Do NOT use Supabase custom claims (JWT).** Custom claims require Edge Functions or a separate auth hook. The `profiles.role` query is fast enough (one indexed lookup on app load).
+3. **Cache the coach check.** Currently `isCoach()` is called in `Settings.tsx` on mount. The result should be cached in a `useState` or a lightweight store so it is not re-queried on every Settings re-render. (It already does this -- `const [isCoach, setIsCoach] = useState(false)` in Settings.tsx.)
+4. **For the coach screen itself:** The `/coach` route should verify the role on mount and redirect non-coaches. Currently it does NOT do this -- any authenticated user can navigate to `/coach` directly. The RLS policies prevent data access, but the UI should also guard.
 
-In `playwright.config.ts`, use `vite preview` (production build) but with service worker unregistered:
+### Auth Guard Recommendation
+
+Add a role check at the route level:
 
 ```typescript
-// In test setup or fixture
-await page.addInitScript(() => {
-  // Prevent service worker registration
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(r => r.unregister())
-    })
-  }
-})
-```
+// In Coach.tsx, add at the top of the component:
+const [authorized, setAuthorized] = useState<boolean | null>(null)
 
-Alternatively, for one dedicated `offline.spec.ts` test file, keep the service worker active and use `context.setOffline(true)` to test offline behavior.
-
-### Page Object Model
-
-Each page object encapsulates selectors and actions for a screen:
-
-```typescript
-// e2e/pages/home.page.ts
-export class HomePage {
-  constructor(private page: Page) {}
-
-  // Locators (prefer data-testid, role, or text)
-  get streakDisplay() { return this.page.getByTestId('streak-display') }
-  get checkInButton() { return this.page.getByRole('button', { name: /check.in/i }) }
-  get navigation() { return this.page.getByRole('navigation') }
-
-  // Actions
-  async navigateTo(tab: 'home' | 'workouts' | 'macros' | 'avatar' | 'settings') {
-    await this.navigation.getByRole('link', { name: new RegExp(tab, 'i') }).click()
-  }
-
-  async checkIn() {
-    await this.checkInButton.click()
-  }
-}
-```
-
-**Important:** The existing codebase does NOT use `data-testid` attributes. Adding them to key interactive elements is a prerequisite step. Target elements:
-- Navigation links
-- Primary action buttons on each screen
-- Form inputs in Onboarding and Macros
-- Modal triggers and close buttons
-
-### Playwright Configuration
-
-```typescript
-// playwright.config.ts
-import { defineConfig, devices } from '@playwright/test'
-
-export default defineConfig({
-  testDir: './e2e/tests',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? 'github' : 'html',
-  use: {
-    baseURL: 'http://localhost:4173',  // vite preview port
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-  },
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },  // PWA is mobile-first
-    },
-  ],
-  webServer: {
-    command: process.env.CI
-      ? 'npx vite preview --port 4173'
-      : 'npx vite dev --port 5173',
-    port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
-    env: {
-      VITE_DEV_BYPASS: 'true',
-    },
-  },
-})
-```
-
-**Note:** On CI, run `npm run build` before Playwright. The `webServer.command` for CI uses `vite preview` which serves the production build. This tests the real bundle (minified, tree-shaken) rather than the dev server.
-
-### CI Pipeline
-
-```yaml
-# .github/workflows/e2e.yml
-name: E2E Tests
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
-jobs:
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-        env:
-          VITE_DEV_BYPASS: 'true'
-      - run: npx playwright test
-        env:
-          CI: true
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-```
-
----
-
-## Area 2: Plausible Analytics Enhancement Architecture
-
-### Current State vs Target State
-
-```
-CURRENT                              TARGET
--------                              ------
-script.js (pageview only)    -->     script.hash.js OR manual SPA tracking
-8 events wired               -->     20+ events wired
-0 goals in dashboard         -->     All custom events as goals
-0 funnels                    -->     3 funnels defined
-No SPA pageview tracking     -->     Route-change pageviews
-```
-
-### SPA Pageview Tracking
-
-The current `script.js` from Plausible only tracks the initial page load. For a React SPA with `react-router-dom`, route changes are invisible to Plausible.
-
-**Solution:** Replace `script.js` with `script.hash.js` in `index.html`, OR add manual pageview tracking on route changes.
-
-Since the app uses `BrowserRouter` (history-based routing, not hash-based), the correct script extension is NOT `script.hash.js`. Instead, use the auto SPA tracking approach:
-
-**Option A (recommended):** Use `plausible-tracker` npm package for programmatic control:
-
-```typescript
-// src/lib/analytics.ts - enhanced
-import Plausible from 'plausible-tracker'
-
-const plausible = Plausible({
-  domain: 'trained-app-eta.vercel.app',
-  trackLocalhost: false,
-})
-
-// Call once on app mount
-export function enableSPAPageviews() {
-  plausible.enableAutoPageviews()  // Intercepts pushState/popstate
-}
-```
-
-**Option B (simpler):** Track pageviews manually in a route-change hook:
-
-```typescript
-// In App.tsx or a dedicated hook
-import { useLocation } from 'react-router-dom'
-
-function usePageviewTracking() {
-  const location = useLocation()
-  useEffect(() => {
-    if (window.plausible) {
-      window.plausible('pageview')
-    }
-  }, [location.pathname])
-}
-```
-
-**Recommendation:** Option B. It requires no new dependency, integrates with the existing `window.plausible` pattern already in the codebase, and is simpler to reason about. The script tag in `index.html` stays as-is.
-
-### Event Wiring Map
-
-Events defined in `analytics.ts` but NOT currently called anywhere in the app:
-
-| Event | Where to Wire | How |
-|---|---|---|
-| `mealLogged` | `Macros.tsx` (after meal add) | After `addMealToLog()` call |
-| `mealSaved` | `MealBuilder.tsx` (save button) | After `saveMeal()` call |
-| `proteinTargetHit` | `Macros.tsx` (target comparison) | When daily protein >= target |
-| `calorieTargetHit` | `Macros.tsx` (target comparison) | When daily calories >= target |
-| `badgeEarned` | `achievementsStore.ts` (badge check) | After new badge detected |
-| `avatarEvolved` | `avatarStore.ts` (evolution check) | After stage increases |
-| `appOpened` | `App.tsx` (mount effect) | On initial mount |
-| `settingsViewed` | `Settings.tsx` (mount) | On screen mount |
-| `achievementsViewed` | `Achievements.tsx` (mount) | On screen mount |
-| `dataExported` | `Settings.tsx` (export action) | After export completes |
-| `signupCompleted` | `authStore.ts` (signUp success) | After successful signup |
-| `loginCompleted` | `authStore.ts` (signIn success) | After successful login |
-| `coachDashboardViewed` | `Coach.tsx` (mount) | On screen mount |
-| `clientViewed` | `Coach.tsx` (client select) | When viewing client detail |
-
-### Funnel Definitions
-
-Three funnels to configure in the Plausible dashboard:
-
-**Funnel 1: Onboarding Completion** (3 steps)
-1. `Signup Completed` (custom event)
-2. `Onboarding Started` (custom event -- needs wiring)
-3. `Onboarding Completed` (custom event -- already wired)
-
-**Funnel 2: First Workout** (3 steps)
-1. `Onboarding Completed`
-2. `Workout Started` (already wired)
-3. `Workout Completed` (already wired)
-
-**Funnel 3: Daily Engagement Loop** (4 steps)
-1. `App Opened` (needs wiring)
-2. `Check-In Completed` (already wired)
-3. `Workout Completed` (already wired)
-4. `Meal Logged` (needs wiring)
-
-**Dashboard setup is manual:** Goals and funnels are configured in the Plausible web dashboard at `plausible.io/trained-app-eta.vercel.app/settings/goals`. Each custom event must be registered as a goal before it appears in analytics. Funnel steps reference these goals.
-
-### Data Flow for Analytics Events
-
-```
-User Action (e.g., completes workout)
-    |
-    v
-Screen Component (Workouts.tsx)
-    |
-    +-- 1. Update Zustand store (workoutStore.completeWorkout())
-    +-- 2. Fire analytics event (analytics.workoutCompleted(type, duration))
-    +-- 3. Schedule sync (scheduleSync())
-    |
-    v
-analytics.workoutCompleted()
-    |
-    +-- trackEvent('Workout Completed', { workout_type, duration_minutes })
-    |
-    v
-trackEvent()
-    |
-    +-- DEV? console.log('[Analytics]', ...)
-    +-- PROD? window.plausible('Workout Completed', { props: {...} })
-    |
-    v
-Plausible script (async, non-blocking)
-    +-- POST to plausible.io/api/event
-```
-
----
-
-## Area 3: Sentry Performance Monitoring Architecture
-
-### Current State vs Target State
-
-```
-CURRENT                              TARGET
--------                              ------
-Error tracking only          -->     Error + Performance monitoring
-No browser tracing           -->     browserTracingIntegration
-No route instrumentation     -->     reactRouterV6 integration
-10% sample rate              -->     10% (keep, appropriate for scale)
-No custom spans              -->     Spans on sync operations
-No Web Vitals                -->     LCP, FID, CLS tracked
-8 captureError calls         -->     8+ (add sync span context)
-0 addBreadcrumb calls        -->     Breadcrumbs on key user actions
-```
-
-### Sentry Init Enhancement
-
-The current `initSentry()` in `src/lib/sentry.ts` needs to add `browserTracingIntegration`. However, there is a complication: `reactRouterV6BrowserTracingIntegration` requires React hooks (`useEffect`, `useLocation`, `useNavigationType`) and React Router utilities (`createRoutesFromChildren`, `matchRoutes`), which means it must be called within the React tree, NOT in `main.tsx` before render.
-
-**Architecture decision:** Keep `Sentry.init()` in `main.tsx` (before render) but use the standard `browserTracingIntegration()` rather than the React Router-specific one. Route names will be captured from `window.location.pathname` automatically.
-
-Why not `reactRouterV6BrowserTracingIntegration`:
-- The app uses `<BrowserRouter>` + `<Routes>` pattern (declarative)
-- Sentry's v6 integration requires wrapping Routes with `withSentryReactRouterV6Routing(Routes)`
-- This requires restructuring the routing in `App.tsx`
-- The standard `browserTracingIntegration()` already captures page load + navigation via History API
-- The added value of route parameterization (e.g., `/user/:id` instead of `/user/123`) is minimal for this app (no dynamic route params exist)
-
-**Updated `initSentry()`:**
-
-```typescript
-// src/lib/sentry.ts - enhanced init
-import * as Sentry from '@sentry/react'
-
-export function initSentry() {
-  if (import.meta.env.DEV || !SENTRY_DSN) return
-
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: import.meta.env.MODE,
-    integrations: [
-      Sentry.browserTracingIntegration(),  // NEW: page load + navigation
-    ],
-    tracesSampleRate: 0.1,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 1.0,
-    ignoreErrors: [/* existing list */],
-    beforeSend(event) { /* existing PII filter */ },
+useEffect(() => {
+  isCoach().then(result => {
+    setAuthorized(result)
+    if (!result) navigate('/') // redirect non-coaches
   })
-}
+}, [])
+
+if (authorized === null) return <LoadingSkeleton />
+if (authorized === false) return null // redirect happens in effect
 ```
-
-### Custom Performance Spans
-
-Add spans to the most important operations to understand performance:
-
-```typescript
-// src/lib/sync.ts - add spans to sync operations
-import * as Sentry from '@sentry/react'
-
-export async function syncAllToCloud() {
-  return Sentry.startSpan(
-    { name: 'sync.all', op: 'sync' },
-    async () => {
-      // existing sync logic
-      // Each sub-sync can be a child span
-    }
-  )
-}
-```
-
-Key operations to instrument with spans:
-
-| Operation | Location | Span Name |
-|---|---|---|
-| Full sync to cloud | `sync.ts` `syncAllToCloud()` | `sync.all` |
-| Full load from cloud | `sync.ts` `loadAllFromCloud()` | `sync.load` |
-| Food API search | `foodApi.ts` `searchFoods()` | `api.food-search` |
-| Auth initialization | `authStore.ts` `initialize()` | `auth.init` |
-
-### Breadcrumb Strategy
-
-The `addBreadcrumb()` function exists but is never called. Add breadcrumbs at key user interaction points so that error reports include context:
-
-```typescript
-// Example: in Workouts.tsx
-addBreadcrumb('Started workout', 'user.action', { workoutType: type })
-
-// Example: in sync.ts
-addBreadcrumb('Sync completed', 'sync', { duration: elapsed })
-```
-
-Target breadcrumb locations:
-- Navigation between screens
-- Workout start/complete
-- Meal logging
-- Check-in completion
-- XP claim
-- Sync start/complete/error
-- Online/offline transitions
-
-### Files Modified
-
-| File | Change | Why |
-|---|---|---|
-| `src/lib/sentry.ts` | Add `browserTracingIntegration` to init | Enable performance tracing |
-| `src/lib/sentry.ts` | Add `startSpan` helper export | Consistent span API for app code |
-| `src/lib/sync.ts` | Wrap sync functions with spans | Track sync performance |
-| `src/lib/foodApi.ts` | Wrap search with span | Track API latency |
-| `src/stores/authStore.ts` | Add span to `initialize()` | Track auth init time |
-| Various screens | Add `addBreadcrumb()` calls | Context for error reports |
 
 ---
 
-## New Files Summary
+## 7. Component Architecture
 
-| File | Type | Purpose |
-|---|---|---|
-| `playwright.config.ts` | Config | Playwright test runner configuration |
-| `e2e/fixtures/base.ts` | Fixture | Extended test with seeded/clean page fixtures |
-| `e2e/fixtures/auth.fixture.ts` | Fixture | Auth state helpers (optional, for cloud sync tests) |
-| `e2e/fixtures/seed.fixture.ts` | Fixture | localStorage seeding from devSeed data format |
-| `e2e/pages/base.page.ts` | POM | Shared page object base (navigation, common actions) |
-| `e2e/pages/home.page.ts` | POM | Home screen locators + actions |
-| `e2e/pages/onboarding.page.ts` | POM | Onboarding flow locators + actions |
-| `e2e/pages/workouts.page.ts` | POM | Workouts screen locators + actions |
-| `e2e/pages/macros.page.ts` | POM | Macros screen locators + actions |
-| `e2e/pages/auth.page.ts` | POM | Auth screen locators + actions |
-| `e2e/pages/settings.page.ts` | POM | Settings screen locators + actions |
-| `e2e/helpers/storage.ts` | Utility | localStorage manipulation helpers |
-| `e2e/helpers/wait.ts` | Utility | Custom wait conditions |
-| `e2e/tests/smoke.spec.ts` | Test | App loads, nav works, no console errors |
-| `e2e/tests/onboarding.spec.ts` | Test | Full onboarding flow E2E |
-| `e2e/tests/workout-flow.spec.ts` | Test | Start/complete workout E2E |
-| `e2e/tests/macro-logging.spec.ts` | Test | Meal logging E2E |
-| `e2e/tests/offline-sync.spec.ts` | Test | Offline behavior + reconnect sync |
-| `e2e/tests/auth-flow.spec.ts` | Test | Login/signup flows (with dev bypass) |
-| `.github/workflows/e2e.yml` | CI | GitHub Actions workflow for E2E |
+### New Components Needed
 
-## Modified Files Summary
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `CoachTemplateEditor` | `src/components/CoachTemplateEditor.tsx` | Create/edit workout templates (exercise list editor) |
+| `MacroTargetEditor` | `src/components/MacroTargetEditor.tsx` | Edit macro targets for a client (reuse calculation logic from macroStore) |
+| `AssignmentCard` | `src/components/AssignmentCard.tsx` | Display an assignment in the client's view |
+| `CoachNoteBanner` | `src/components/CoachNoteBanner.tsx` | Show coach messages/check-in prompts to client |
+| `AssignmentFlow` | `src/components/AssignmentFlow.tsx` | Multi-step flow: pick template -> pick client -> set dates -> confirm |
+
+### Modified Components
+
+| Component | Change | Reason |
+|-----------|--------|--------|
+| `Coach.tsx` | Add "Assign Workout" and "Update Macros" buttons to client detail modal | Core new functionality |
+| `Coach.tsx` | Add templates tab or section | Coach needs to manage templates |
+| `Home.tsx` | Add coach notification banner | Client needs to see coach messages |
+| `Macros.tsx` | Add "Set by coach" indicator | Client should know when targets are coach-set |
+| `Workouts.tsx` | Add "Custom plan from coach" indicator | Client should know when plan is coach-assigned |
+| `sync.ts` | Add `checkCoachUpdates()` function | Client needs to pull coach changes |
+
+### Component Reuse
+
+Several existing components work directly for coach features with no changes:
+
+- `WeightChart` -- Already accepts generic `WeightEntry[]` data prop
+- `ProgressBar` -- Used by `ClientMacroAdherence`, reusable
+- `Card`, `Button`, `Input` (shadcn/ui) -- Standard throughout
+- `ClientActivityFeed` -- Already built for coach view
+- `ClientMacroAdherence` -- Already built for coach view
+
+### Existing Pattern for Exercise Editing
+
+The `workoutStore` already has `CustomExercise` and `WorkoutCustomization` types that match what the coach template editor needs:
+
+```typescript
+// Already exists in workoutStore.ts
+export interface CustomExercise {
+  id: string
+  name: string
+  targetSets: number
+  targetReps: string
+}
+
+export interface WorkoutCustomization {
+  workoutType: WorkoutType
+  exercises: CustomExercise[]
+}
+```
+
+The coach template editor can produce this same shape, making assignment to the client's workoutStore trivial.
+
+---
+
+## 8. Suggested Build Order
+
+Based on dependencies between components:
+
+### Phase 1: Schema + Coach Auth Guard (Foundation)
+
+**Dependencies:** None (builds on existing schema)
+**What:** New tables, RLS policies, migration, auth guard
+**Why first:** Everything else depends on the schema existing
+
+1. Create migration for `coach_workout_templates`, `client_assignments`, `coach_notes`
+2. Add RLS policies for new tables
+3. Add composite partial index for coach RLS performance
+4. Update `database.types.ts` with new table types
+5. Add auth guard to `Coach.tsx` (redirect non-coaches)
+
+### Phase 2: Coach Template Management (Coach UI)
+
+**Dependencies:** Phase 1
+**What:** Coach can create and manage workout templates
+
+1. `useCoachTemplates` hook (CRUD operations + Map cache)
+2. `CoachTemplateEditor` component (exercise list CRUD matching existing CustomExercise shape)
+3. Add templates section to `Coach.tsx`
+4. Dev mock data for templates
+
+### Phase 3: Coach Assignments + Macro Editing (Coach UI)
+
+**Dependencies:** Phases 1-2
+**What:** Coach can assign workouts and update macros for clients
+
+1. `useClientAssignments` hook
+2. `MacroTargetEditor` component (direct update to client's macro_targets)
+3. `AssignmentFlow` component (pick template -> pick client -> set dates)
+4. Add assignment + macro editing to client detail modal in `Coach.tsx`
+5. `useCoachNotes` hook + note input in client detail
+
+### Phase 4: Client Receives Coach Data (Client Side)
+
+**Dependencies:** Phase 3
+**What:** Client's app pulls coach assignments and updates stores
+
+1. `checkCoachUpdates()` function in `sync.ts`
+2. Wire into `loadAllFromCloud()` and visibility change handler
+3. `AssignmentCard` component for Home screen
+4. `CoachNoteBanner` component for messages
+5. "Set by coach" indicators on Macros and Workouts screens
+6. Mark assignments as seen (client UPDATE via RLS)
+
+### Phase 5: Polish + Edge Cases
+
+**Dependencies:** Phase 4
+**What:** Edge cases, check-in responses, expiration handling
+
+1. Check-in prompt flow (coach sends check-in, client responds)
+2. Assignment expiration handling (cron or check-on-load)
+3. Empty states for all new coach views
+4. Client pagination for coach dashboard (currently loads all)
+
+---
+
+## 9. Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Separate Zustand Store for Coach Data
+**What:** Creating a `coachStore.ts` with localStorage persistence for coach-side data.
+**Why bad:** Coach data is server-authoritative. Persisting it in localStorage creates stale data problems and sync conflicts. The coach could be on a different device.
+**Instead:** Use hooks with in-memory cache (Map-based, like `useClientDetails`).
+
+### Anti-Pattern 2: Zustand Store for Coach Assignments on Client Side
+**What:** Creating a `coachAssignmentsStore.ts` on the client side.
+**Why bad:** Assignments are server-authoritative. If the coach revokes an assignment, the client's localStorage still has it.
+**Instead:** Merge assignment data INTO existing stores (macroStore, workoutStore). Poll for changes on app open.
+
+### Anti-Pattern 3: Real-time WebSocket for Coach Updates
+**What:** Using Supabase Realtime channels for coach-to-client updates.
+**Why bad:** Overkill for infrequent updates, creates 90K persistent connections, does not work in PWA background.
+**Instead:** Poll on app open + visibility change. Sub-second latency is not needed.
+
+### Anti-Pattern 4: Separate Auth System for Coach
+**What:** Different login flow, separate JWT, admin panel.
+**Why bad:** Adds massive complexity. Coach is just a user with `role = 'coach'`.
+**Instead:** Same auth, same app, conditional UI based on `profiles.role`.
+
+### Anti-Pattern 5: Coach Editing Client's Zustand Directly
+**What:** Trying to push data directly into a client's localStorage.
+**Why bad:** Impossible -- coach and client are on different devices/browsers.
+**Instead:** Coach writes to Supabase. Client pulls from Supabase on next open.
+
+### Anti-Pattern 6: Building Multi-Coach Support Prematurely
+**What:** Adding `organization_id`, team permissions, coach-to-coach handoffs.
+**Why bad:** Scope creep. This is a single-coach product.
+**Instead:** Design for single coach. The `coach_id` foreign keys are already there if multi-coach is needed later, but do not build the infrastructure now.
+
+---
+
+## 10. Scalability Considerations
+
+| Concern | Current (1 coach, 10 clients) | At 1K clients | At 90K clients |
+|---------|-------------------------------|---------------|----------------|
+| `coach_client_summary` view | Fast (subquery per row) | Add pagination | Materialized view with refresh trigger |
+| RLS policy checks | Negligible | Add partial index (recommended above) | Partial index sufficient |
+| Coach loading all clients | Single query | Paginate (limit/offset) | Virtual scrolling + search |
+| Client polling for assignments | 1 query on app open | Same | Same (indexed, single-row lookup) |
+| Coach notes volume | Minimal | Paginate per client | Archive old notes |
+
+**Critical at scale:** The `coach_client_summary` view does correlated subqueries (latest weight, workouts last 7 days) per client row. At 90K clients, this view will be slow. Solutions:
+1. Paginate the client list (show 50 at a time with search)
+2. Replace correlated subqueries with a materialized view refreshed on a schedule
+3. Add `last_activity_at` denormalized column to `coach_clients` for sorting
+
+**Recommendation:** Add pagination to the client list from the start. The current code fetches ALL clients with `.select('*')`. Change to `.select('*').order('last_check_in_date', { ascending: false, nullsFirst: false }).limit(50)` and add search.
+
+---
+
+## 11. Database Types Update
+
+The `database.types.ts` file must be updated with the new tables. This can be generated via `supabase gen types typescript` or manually added:
+
+```typescript
+// Add to Database.public.Tables:
+
+coach_workout_templates: {
+  Row: {
+    id: string
+    created_at: string
+    updated_at: string
+    coach_id: string
+    name: string
+    description: string | null
+    workout_type: WorkoutType
+    exercises: Json
+    is_active: boolean
+  }
+  Insert: {
+    id?: string
+    created_at?: string
+    updated_at?: string
+    coach_id: string
+    name: string
+    description?: string | null
+    workout_type: WorkoutType
+    exercises?: Json
+    is_active?: boolean
+  }
+  Update: {
+    id?: string
+    created_at?: string
+    updated_at?: string
+    coach_id?: string
+    name?: string
+    description?: string | null
+    workout_type?: WorkoutType
+    exercises?: Json
+    is_active?: boolean
+  }
+  Relationships: []
+}
+
+client_assignments: {
+  Row: {
+    id: string
+    created_at: string
+    updated_at: string
+    coach_id: string
+    client_id: string
+    template_id: string | null
+    assignment_type: 'workout' | 'macros'
+    macro_targets: Json | null
+    effective_date: string
+    expires_date: string | null
+    notes: string | null
+    seen_at: string | null
+    status: 'active' | 'completed' | 'expired' | 'cancelled'
+  }
+  Insert: {
+    id?: string
+    created_at?: string
+    updated_at?: string
+    coach_id: string
+    client_id: string
+    template_id?: string | null
+    assignment_type: 'workout' | 'macros'
+    macro_targets?: Json | null
+    effective_date?: string
+    expires_date?: string | null
+    notes?: string | null
+    seen_at?: string | null
+    status?: 'active' | 'completed' | 'expired' | 'cancelled'
+  }
+  Update: {
+    id?: string
+    created_at?: string
+    updated_at?: string
+    coach_id?: string
+    client_id?: string
+    template_id?: string | null
+    assignment_type?: 'workout' | 'macros'
+    macro_targets?: Json | null
+    effective_date?: string
+    expires_date?: string | null
+    notes?: string | null
+    seen_at?: string | null
+    status?: 'active' | 'completed' | 'expired' | 'cancelled'
+  }
+  Relationships: []
+}
+
+coach_notes: {
+  Row: {
+    id: string
+    created_at: string
+    coach_id: string
+    client_id: string
+    content: string
+    note_type: 'note' | 'message' | 'check_in'
+    client_response: string | null
+    responded_at: string | null
+    seen_at: string | null
+  }
+  Insert: {
+    id?: string
+    created_at?: string
+    coach_id: string
+    client_id: string
+    content: string
+    note_type?: 'note' | 'message' | 'check_in'
+    client_response?: string | null
+    responded_at?: string | null
+    seen_at?: string | null
+  }
+  Update: {
+    id?: string
+    created_at?: string
+    coach_id?: string
+    client_id?: string
+    content?: string
+    note_type?: 'note' | 'message' | 'check_in'
+    client_response?: string | null
+    responded_at?: string | null
+    seen_at?: string | null
+  }
+  Relationships: []
+}
+```
+
+---
+
+## 12. Integration Points Summary
+
+### Files That Need Changes
 
 | File | Change Type | What Changes |
-|---|---|---|
-| `package.json` | Dependencies | Add `@playwright/test` devDep, add `test:e2e` script |
-| `src/lib/sentry.ts` | Enhancement | Add `browserTracingIntegration`, `startSpan` helper |
-| `src/lib/analytics.ts` | Enhancement | Add SPA pageview hook, wire to remaining events |
-| `src/lib/sync.ts` | Enhancement | Add Sentry performance spans |
-| `src/lib/foodApi.ts` | Enhancement | Add Sentry performance span |
-| `src/stores/authStore.ts` | Enhancement | Add Sentry span, add analytics events |
-| `src/screens/Macros.tsx` | Enhancement | Wire analytics events |
-| `src/screens/Settings.tsx` | Enhancement | Wire analytics events |
-| `src/screens/Achievements.tsx` | Enhancement | Wire analytics events |
-| `src/screens/Coach.tsx` | Enhancement | Wire analytics events |
-| `src/App.tsx` | Enhancement | Add SPA pageview tracking hook, add data-testid attrs |
-| `index.html` | Optional | May stay as-is if using manual SPA tracking |
-| Various components | Enhancement | Add `data-testid` attributes for E2E selectors |
-| Various screens | Enhancement | Add `addBreadcrumb()` calls |
+|------|-------------|-------------|
+| `supabase/migrations/002_coach_dashboard.sql` | NEW | New tables, indexes, RLS, triggers |
+| `src/lib/database.types.ts` | MODIFY | Add new table types |
+| `src/lib/sync.ts` | MODIFY | Add `checkCoachUpdates()` function |
+| `src/lib/supabase.ts` | NO CHANGE | `isCoach()` already works |
+| `src/screens/Coach.tsx` | MODIFY | Add template management, assignment, macro editing, auth guard |
+| `src/screens/Home.tsx` | MODIFY | Add coach notification banner |
+| `src/screens/Macros.tsx` | MODIFY | Add "Set by coach" indicator |
+| `src/screens/Workouts.tsx` | MODIFY | Add "Custom plan from coach" indicator |
+| `src/hooks/useCoachTemplates.ts` | NEW | Template CRUD hook |
+| `src/hooks/useClientAssignments.ts` | NEW | Assignment CRUD hook |
+| `src/hooks/useCoachNotes.ts` | NEW | Notes CRUD hook |
+| `src/components/CoachTemplateEditor.tsx` | NEW | Exercise list editor UI |
+| `src/components/MacroTargetEditor.tsx` | NEW | Macro target editing UI |
+| `src/components/AssignmentCard.tsx` | NEW | Client-facing assignment display |
+| `src/components/CoachNoteBanner.tsx` | NEW | Client-facing coach message display |
+| `src/components/AssignmentFlow.tsx` | NEW | Multi-step assignment creation flow |
+| `src/lib/devSeed.ts` | MODIFY | Add mock templates, assignments, notes |
 
----
+### Files That Do NOT Need Changes
 
-## Build Order and Dependencies
-
-```
-PHASE 1: PLAYWRIGHT INFRASTRUCTURE
-  |
-  |-- 1a. Install Playwright, create config, create CI workflow
-  |-- 1b. Create fixtures (base, seed) + storage helpers
-  |-- 1c. Add data-testid attributes to key UI elements
-  |-- 1d. Write smoke test (app loads, navigation works)
-  |
-  DEPENDS ON: Nothing (net new infrastructure)
-  UNBLOCKS: All other E2E tests
-
-PHASE 2: CORE E2E TEST FLOWS
-  |
-  |-- 2a. Onboarding flow test (fresh user > complete onboarding)
-  |-- 2b. Workout flow test (seeded user > start > complete workout)
-  |-- 2c. Macro logging test (seeded user > log meal)
-  |-- 2d. Offline/sync test (go offline > make changes > reconnect)
-  |
-  DEPENDS ON: Phase 1 (fixtures, page objects, data-testids)
-  UNBLOCKS: Confidence to make changes without manual testing
-
-PHASE 3: PLAUSIBLE ENHANCEMENT
-  |
-  |-- 3a. Add SPA pageview tracking (useLocation hook)
-  |-- 3b. Wire remaining 14 unwired analytics events
-  |-- 3c. Document funnel goals for dashboard setup
-  |
-  DEPENDS ON: Nothing (independent of Playwright)
-  UNBLOCKS: Funnel analysis in Plausible dashboard
-
-PHASE 4: SENTRY PERFORMANCE
-  |
-  |-- 4a. Add browserTracingIntegration to Sentry init
-  |-- 4b. Add custom spans to sync + API operations
-  |-- 4c. Wire addBreadcrumb calls at key interaction points
-  |
-  DEPENDS ON: Nothing (independent of Playwright and Plausible)
-  UNBLOCKS: Performance monitoring in Sentry dashboard
-```
-
-**Phase ordering rationale:**
-- Phases 1+2 (Playwright) should come first because they create a safety net for all future changes.
-- Phases 3 and 4 (Plausible + Sentry) are independent of each other and can be done in either order.
-- Phase 3 is smaller scope (mostly wiring existing events), so it could be combined with Phase 4 if desired.
-- Phase 4 touches `sentry.ts` init and `sync.ts` (critical paths), so having E2E tests first provides confidence.
-
----
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern: Testing Against Real Supabase in CI
-
-**Why bad:** Requires provisioning test database, managing test users, dealing with email confirmation, rate limits, network flakiness. Massively increases CI complexity and flake rate.
-
-**Instead:** Use `VITE_DEV_BYPASS=true` to skip auth. Seed Zustand stores via localStorage. The app's offline-first design means all core flows work without Supabase.
-
-### Anti-Pattern: Mocking Everything in E2E
-
-**Why bad:** If you mock Zustand, mock the router, mock localStorage... you're testing mocks, not the app.
-
-**Instead:** E2E tests should exercise the real app code. Seed real localStorage state, let Zustand hydrate from it, navigate real routes. Only mock external services (Supabase API, Plausible, Sentry) to prevent real network calls.
-
-### Anti-Pattern: One Giant Test File
-
-**Why bad:** Slow, hard to debug, can't run subsets.
-
-**Instead:** One spec file per user flow. Each test seeds its own state. Tests are independent and parallelizable.
-
-### Anti-Pattern: Putting Sentry React Router Integration Before Understanding the Routing
-
-**Why bad:** The `reactRouterV6BrowserTracingIntegration` requires passing React hooks to `Sentry.init()`, which runs before the React tree mounts. This creates a chicken-and-egg problem and requires restructuring `main.tsx` to use `createBrowserRouter` pattern instead of `<BrowserRouter>`.
-
-**Instead:** Use standard `browserTracingIntegration()` which hooks into the History API directly. It captures route changes without needing React Router integration. The app has no parameterized routes (no `/user/:id`), so route name grouping is not needed.
-
-### Anti-Pattern: Adding Analytics in Zustand Store Actions
-
-**Why bad:** Stores become coupled to analytics. Makes unit testing stores harder (need to mock analytics). Analytics is a side effect, not business logic.
-
-**Instead:** Fire analytics events at the component/screen level, after the store action succeeds. Keep stores pure.
-
----
-
-## Scalability Considerations
-
-| Concern | Now (beta, ~100 users) | At 10K users | At 1M users |
-|---|---|---|---|
-| Sentry traces | 10% sample rate is fine | Keep 10%, monitor quota | Consider 1-5%, use `tracesSampler` for targeted sampling |
-| Plausible | Hosted plan handles volume | Hosted plan handles volume | Self-host consideration |
-| E2E CI time | <2 min (2 browsers, ~6 tests) | <5 min (more tests) | Shard tests across workers |
-| E2E flakiness | Retries: 2 on CI | Add visual comparison | Consider dedicated test infra |
+| File | Why |
+|------|-----|
+| `src/stores/authStore.ts` | Auth flow unchanged |
+| `src/stores/syncStore.ts` | Sync status tracking unchanged |
+| `src/components/Navigation.tsx` | Coach not in bottom nav |
+| `src/screens/Auth.tsx` | Same auth for coach and client |
+| `src/screens/AccessGate.tsx` | Same access code flow |
+| `src/screens/Onboarding.tsx` | Coach does not go through onboarding differently |
+| `src/components/WeightChart.tsx` | Already generic, no changes |
+| `src/components/ClientActivityFeed.tsx` | Already built, no changes |
+| `src/components/ClientMacroAdherence.tsx` | Already built, no changes |
 
 ---
 
 ## Sources
 
-### Official Documentation (HIGH confidence)
-- [Playwright Fixtures](https://playwright.dev/docs/test-fixtures) -- fixture composition, test.extend
-- [Playwright Authentication](https://playwright.dev/docs/auth) -- storageState, setup projects
-- [Playwright Browser Contexts / Isolation](https://playwright.dev/docs/browser-contexts) -- test isolation model
-- [Playwright Page Object Models](https://playwright.dev/docs/pom) -- POM pattern
-- [Playwright CI Setup](https://playwright.dev/docs/ci-intro) -- GitHub Actions workflow
-- [Sentry React Tracing](https://docs.sentry.io/platforms/javascript/guides/react/tracing/) -- browserTracingIntegration setup
-- [Sentry React Router v6](https://docs.sentry.io/platforms/javascript/guides/react/features/react-router/v6/) -- reactRouterV6BrowserTracingIntegration (documented but NOT recommended for this app)
-- [Sentry Automatic Instrumentation](https://docs.sentry.io/platforms/javascript/guides/react/tracing/instrumentation/automatic-instrumentation/) -- what browserTracingIntegration captures
-- [Plausible Custom Events](https://plausible.io/docs/custom-event-goals) -- goal setup
-- [Plausible Funnel Analysis](https://plausible.io/docs/funnel-analysis) -- funnel configuration (2-8 steps)
-- [Plausible SPA Support](https://plausible.io/docs/spa-support) -- SPA pageview tracking options
-- [Plausible Custom Properties](https://plausible.io/docs/custom-props/for-custom-events) -- event properties
-
-### Community / Ecosystem (MEDIUM confidence)
-- [Supawright - Playwright + Supabase harness](https://github.com/isaacharrisholt/supawright) -- evaluated but NOT recommended (overkill for offline-first app)
-- [Testing Service Worker with vite-plugin-pwa](https://vite-pwa-org.netlify.app/guide/testing-service-worker) -- SW testing patterns
-- [Supabase Login via REST in Playwright](https://mokkapps.de/blog/login-at-supabase-via-rest-api-in-playwright-e2e-test) -- auth testing pattern
-- [plausible-tracker npm](https://github.com/plausible/plausible-tracker) -- programmatic Plausible client (evaluated, simpler manual approach recommended)
-
-### Codebase Analysis (HIGH confidence)
-- `src/lib/analytics.ts` -- 20 events defined, 8 wired
-- `src/lib/sentry.ts` -- error tracking only, no performance
-- `src/lib/sync.ts` -- sync operations without performance instrumentation
-- `src/lib/devSeed.ts` -- comprehensive seed data for all stores
-- `src/stores/*.ts` -- 8 Zustand stores with localStorage persist keys
-- `src/App.tsx` -- routing structure, auth flow, dev bypass
-- `vite.config.ts` -- PWA config, build config, test config
-- `package.json` -- current dependencies, no Playwright
+- Direct codebase analysis of all files listed above (HIGH confidence)
+- Existing `supabase/schema.sql` for current schema and RLS policies (HIGH confidence)
+- [Supabase RLS Documentation](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
+- [Supabase Realtime Documentation](https://supabase.com/docs/guides/realtime)
+- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)

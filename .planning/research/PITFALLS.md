@@ -1,595 +1,720 @@
-# E2E Testing & Analytics/Monitoring Pitfalls
+# Coach Dashboard Pitfalls
 
-**Research Date:** 2026-02-06
-**Context:** Adding Playwright E2E tests, Plausible funnel analytics, and Sentry performance monitoring to existing Trained fitness PWA (React 18 + Vite + Zustand + Supabase) before launching to ~90k followers. No E2E tests exist yet. No `data-testid` attributes exist in the codebase. Sentry and Plausible already partially integrated.
+**Research Date:** 2026-02-07
+**Context:** Adding coach dashboard features (invite, roster, workout programming, macro management, weekly check-ins) to existing Trained fitness PWA. The app is currently single-user, offline-first (Zustand localStorage as source of truth, Supabase as cloud sync). Coach features introduce multi-user relationships, server-authoritative data, and a fundamental paradigm shift for assigned vs. self-directed data.
 
 ---
 
 ## Table of Contents
 
-1. [Zero data-testid Attributes After Visual Overhaul](#1-zero-data-testid-attributes-after-visual-overhaul)
-2. [Supabase Auth Session Handling in Playwright](#2-supabase-auth-session-handling-in-playwright)
-3. [Service Worker Intercepting Playwright Network Mocking](#3-service-worker-intercepting-playwright-network-mocking)
-4. [Zustand localStorage Pollution Between Test Runs](#4-zustand-localstorage-pollution-between-test-runs)
-5. [Plausible Event Names Are Permanent History](#5-plausible-event-names-are-permanent-history)
-6. [Sentry Performance Monitoring Doubling Bundle Impact](#6-sentry-performance-monitoring-doubling-bundle-impact)
-7. [Animation-Induced Test Flakiness](#7-animation-induced-test-flakiness)
-8. [CI Environment Differences Breaking Playwright](#8-ci-environment-differences-breaking-playwright)
-9. [Test User Cleanup and Database State Leaking](#9-test-user-cleanup-and-database-state-leaking)
-10. [AccessGate and Auth Wall Blocking Every E2E Test](#10-accessgate-and-auth-wall-blocking-every-e2e-test)
-11. [Plausible Script Blocked in Test Environments](#11-plausible-script-blocked-in-test-environments)
-12. [Existing Unit Tests Broken After Design Refresh](#12-existing-unit-tests-broken-after-design-refresh)
-13. [Sentry Session Replay PII Leakage in Fitness Context](#13-sentry-session-replay-pii-leakage-in-fitness-context)
-14. [Sync Debounce Timer Causing Race Conditions in Tests](#14-sync-debounce-timer-causing-race-conditions-in-tests)
+1. [Offline-First vs. Server-Authoritative Paradigm Collision](#1-offline-first-vs-server-authoritative-paradigm-collision)
+2. [RLS Policy Performance Death at Scale](#2-rls-policy-performance-death-at-scale)
+3. [Coach-Assigned vs. Client-Owned Data Ownership Ambiguity](#3-coach-assigned-vs-client-owned-data-ownership-ambiguity)
+4. [Macro Target Overwrite Race Condition](#4-macro-target-overwrite-race-condition)
+5. [Supabase Email Rate Limits Blocking Bulk Invites](#5-supabase-email-rate-limits-blocking-bulk-invites)
+6. [Invite Link Security and Abuse Vectors](#6-invite-link-security-and-abuse-vectors)
+7. [coach_client_summary View N+1 Query Explosion](#7-coach_client_summary-view-n1-query-explosion)
+8. [Role Escalation via Client-Side Role Check](#8-role-escalation-via-client-side-role-check)
+9. [Coach Route Leaking Into Client Navigation](#9-coach-route-leaking-into-client-navigation)
+10. [Check-In Form Schema Rigidity](#10-check-in-form-schema-rigidity)
+11. [Assigned Workout vs. Logged Workout Data Model Confusion](#11-assigned-workout-vs-logged-workout-data-model-confusion)
+12. [Existing Sync System Writing Coach Data Back Incorrectly](#12-existing-sync-system-writing-coach-data-back-incorrectly)
+13. [Single Coach Account as a Single Point of Failure](#13-single-coach-account-as-a-single-point-of-failure)
+14. [Pagination Absence on 90K Client Roster](#14-pagination-absence-on-90k-client-roster)
+15. [Check-In Response Rate Collapse](#15-check-in-response-rate-collapse)
+16. [Coach Dashboard Bundle Bloating Client App](#16-coach-dashboard-bundle-bloating-client-app)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause test suites to be unreliable, analytics data to be permanently corrupted, or monitoring to miss real issues.
+Mistakes that cause data corruption, security breaches, or require architectural rewrites.
 
 ---
 
-### 1. Zero data-testid Attributes After Visual Overhaul
+### 1. Offline-First vs. Server-Authoritative Paradigm Collision
 
-**What goes wrong:** The codebase has zero `data-testid` attributes anywhere in `src/`. The recent shadcn/ui migration replaced nearly every component's markup and class names. Without stable test selectors, Playwright tests must rely on text content, ARIA roles, or CSS class names -- all of which are fragile. Tests written against current CSS classes (`bg-primary`, `text-muted-foreground`) will break on any future Tailwind or shadcn update. Tests written against text content break when copy changes. This creates a test suite that provides false confidence: it passes today but breaks on innocent changes.
+**What goes wrong:** The entire existing app treats Zustand localStorage as the source of truth. `loadAllFromCloud()` only runs on login; `syncAllToCloud()` pushes local state upward. This works for single-user self-directed data. But coach-assigned data (workout programs, macro targets set by coach, check-in schedules) is server-authoritative -- it originates on the server and must flow down to the client. The current sync architecture has NO mechanism for "server says your macros changed, update your local state." If the coach sets a client's macros to 2500 cal and the client's localStorage still has 2200 cal from their own calculation, the client sees 2200 until they log out and log back in.
 
-**Specific risk areas in this codebase:**
-- Navigation uses icon-only buttons (no visible text to select by)
-- Multiple screens use identical shadcn Button/Card components with no distinguishing attributes
-- Onboarding is a 10-step wizard where each step uses the same component structure
-- Modals (CheckInModal, XPClaimModal) overlay the main content, making parent element selection ambiguous
-- The AccessGate screen has a single input + button -- easy to target, but similar structure to the Auth screen
+**Why it happens in THIS codebase:** The `macroStore` calculates targets locally via `calculateMacros()` and persists them to localStorage via Zustand's `persist` middleware. The `syncMacroTargetsToCloud()` function pushes local targets UP to Supabase. There is no `loadMacroTargetsFromCloud()` function that checks whether the server has newer targets. The `loadAllFromCloud()` function only loads profile and weight logs -- it does NOT load macro targets, workout programs, or any coach-assigned data.
+
+**Specific collision points:**
+- `macro_targets` table: Coach updates via dashboard. Client's local macroStore still has old values. Next `syncMacroTargetsToCloud()` call OVERWRITES coach's update with stale client values.
+- Assigned workouts: Coach assigns a workout for Tuesday. Client is offline. When client comes online, `syncAllToCloud()` pushes THEIR workout templates up, but never pulls coach-assigned workouts down.
+- Check-in schedule: Coach expects weekly check-in. Client has no concept of coach-mandated schedules in their local stores.
 
 **Warning signs:**
-- Tests use selectors like `page.locator('.bg-primary')` or `page.locator('button:nth-child(2)')`
-- Tests break when a developer changes a button label from "Log Workout" to "Log Session"
-- Flaky failures where the selector matches multiple elements on the page
+- Coach sets macros for a client, but client still sees old macros
+- Coach assigns a workout, client never sees it
+- Client's `scheduleSync()` overwrites coach data after reconnecting
 
 **Prevention:**
-1. Add `data-testid` attributes to critical interactive elements BEFORE writing any Playwright tests. Target these areas first:
-   - Navigation links (home, workouts, macros, avatar, settings)
-   - Form inputs and submit buttons on Auth, AccessGate, and Onboarding
-   - Primary action buttons on each screen (log workout, log meal, check in, claim XP)
-   - Modal triggers and modal action buttons
-   - Key data displays (XP amount, streak count, level indicator)
-2. Follow a naming convention: `data-testid="screen-element"` (e.g., `data-testid="auth-email-input"`, `data-testid="home-checkin-button"`)
-3. Use Playwright's recommended locator priority: `getByRole` > `getByLabel` > `getByTestId` -- but for this app's icon-heavy navigation and modal-heavy flows, `getByTestId` will be the most reliable
-4. Do NOT use `getByText` for buttons whose labels might change during copy refinement
+1. Introduce a clear data ownership model with TWO categories:
+   - **Client-owned data** (workout logs, meal logs, weight entries, XP, streaks): Continues using current offline-first pattern. Client is source of truth. Sync pushes up.
+   - **Coach-owned data** (assigned workouts, macro targets set by coach, check-in templates): Server is source of truth. Client PULLS these on load and on realtime subscription. Client NEVER pushes these up.
+2. Add a `source` or `set_by` column to `macro_targets` table: `'self' | 'coach'`. When source is `'coach'`, the client's `calculateMacros()` function is disabled or shows "Set by coach" UI. The `syncMacroTargetsToCloud()` function SKIPS targets where source is `'coach'`.
+3. Create a new sync direction: `loadCoachDataFromCloud()` that runs on app load AND subscribes to Supabase Realtime for changes to coach-owned tables. This is the opposite of the existing push-only pattern.
+4. NEVER let `syncAllToCloud()` touch coach-owned rows. Guard every upsert with a check: "Is this data owned by the client?"
 
-**Detection:** Run `grep -r 'data-testid' src/` -- if it returns 0 results, this pitfall is active.
+**Detection:** After implementing coach macros, test this sequence: Coach sets macros -> Client opens app -> Client sees new macros -> Client goes offline -> Client logs a meal -> Client comes online -> Coach's macros should STILL be the targets, not overwritten.
 
-**Phase relevance:** Adding `data-testid` attributes should be the FIRST step of the E2E testing phase, before any Playwright test is written. It requires touching component files but is a zero-behavior-change modification.
+**Phase relevance:** This is the FOUNDATIONAL architectural decision. It must be resolved BEFORE any coach feature is built. Every other feature (assigned workouts, check-ins, macro management) depends on getting the data ownership model right.
 
 ---
 
-### 2. Supabase Auth Session Handling in Playwright
+### 2. RLS Policy Performance Death at Scale
 
-**What goes wrong:** Every test that exercises authenticated functionality needs a valid Supabase session. The naive approach -- typing email/password into the Auth screen for every test -- is slow (~3-5 seconds per login), flaky (network-dependent), and creates rate-limiting risk with Supabase auth endpoints. Worse, Supabase sessions are stored in localStorage by the `@supabase/supabase-js` client (key format: `sb-{project-ref}-auth-token`), and the session includes JWTs with expiration. If you save a `storageState` file with an expired JWT, all tests using that state will fail simultaneously with auth errors.
+**What goes wrong:** The existing schema already has RLS policies for coach access using `EXISTS` subqueries against the `coach_clients` table. Example from the current `schema.sql`:
 
-**This app's specific risk:**
-- The auth flow has THREE gates: AccessGate (access code) -> Auth (email/password) -> Onboarding (if new user). Tests must bypass or handle all three.
-- `authStore.initialize()` runs on every app load, calling `supabase.auth.getSession()` which validates the token
-- The `VITE_DEV_BYPASS` env var exists and skips all auth gates -- but using it in E2E tests means you never test auth flows
-- Supabase auth tokens expire after 1 hour by default; CI runs that take longer will see mid-run failures
-
-**Warning signs:**
-- Tests pass individually but fail when run as a suite (session expires during the run)
-- All tests fail simultaneously with "Invalid login credentials" or "JWT expired"
-- Test suite takes 5+ minutes because every test logs in through the UI
-- Rate limiting: Supabase returns 429 after too many auth requests in CI
-
-**Prevention:**
-1. Use Playwright's [project dependencies](https://playwright.dev/docs/auth) pattern: create a `setup` project that authenticates once via Supabase REST API (not through the UI), saves `storageState` to a JSON file, and all test projects depend on it
-2. Authenticate via the Supabase client library directly in `globalSetup`:
-   ```typescript
-   // global-setup.ts (conceptual approach)
-   const { data } = await supabase.auth.signInWithPassword({
-     email: TEST_USER_EMAIL,
-     password: TEST_USER_PASSWORD
-   })
-   // Save session to storageState file for Playwright to inject
-   ```
-3. Create a dedicated test user in Supabase with a known password -- do NOT use production accounts
-4. Set Supabase JWT expiration to a longer duration for test environments, or refresh the token in `globalSetup`
-5. For the AccessGate: either set the access code in test env config, or use `VITE_DEV_BYPASS=true` ONLY for non-auth tests
-
-**Phase relevance:** Auth setup infrastructure must be built FIRST in the E2E phase. Every subsequent test depends on it. Get this wrong and the entire E2E suite is unreliable.
-
----
-
-### 3. Service Worker Intercepting Playwright Network Mocking
-
-**What goes wrong:** The app uses `vite-plugin-pwa` with Workbox, and has runtime caching rules for USDA food API, Open Food Facts, and Supabase REST API. When Playwright tests run against the built app (production mode), the service worker activates and intercepts network requests. This means `page.route()` and `browserContext.route()` do NOT see requests handled by the service worker. If a test mocks the USDA API to return specific food data, the service worker may serve a cached response instead, and the mock never fires. The test passes or fails unpredictably depending on cache state.
-
-**This app's specific caching rules (from vite.config.ts):**
-- USDA food search: `CacheFirst` with 1-week TTL (100 entries)
-- Open Food Facts: `CacheFirst` with 1-week TTL (100 entries)
-- Supabase REST API: `NetworkFirst` with 24-hour TTL and 3-second timeout (50 entries)
-
-The `CacheFirst` strategy for food APIs is the most dangerous: once cached, tests will NEVER see fresh mock data.
-
-**Warning signs:**
-- Tests that mock API responses still get old data
-- Food search tests pass on first run but return stale results on subsequent runs
-- Tests pass locally (dev mode, no SW) but fail in CI (production build, SW active)
-- Intermittent failures where some workers get cached data and others don't
-
-**Prevention:**
-1. **Block the service worker in Playwright config** for all tests that don't specifically test SW behavior:
-   ```typescript
-   // playwright.config.ts
-   use: {
-     serviceWorkers: 'block'
-   }
-   ```
-2. Create a SEPARATE test project specifically for service worker testing (update prompts, offline behavior) where SW is allowed
-3. If running tests against `vite dev` server (not production build), the service worker won't be active -- this is simpler for most E2E tests
-4. For tests that DO need the SW, clear caches in `beforeEach`:
-   ```typescript
-   await page.evaluate(() => caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))))
-   ```
-5. Document clearly which test suites require SW and which don't
-
-**Detection:** If you see `page.route()` handlers that never fire, check the DevTools Application tab for active service workers.
-
-**Phase relevance:** This must be decided during Playwright config setup, BEFORE writing food search or Supabase data tests. A wrong default here creates hours of debugging later.
-
----
-
-### 4. Zustand localStorage Pollution Between Test Runs
-
-**What goes wrong:** Playwright creates a fresh browser context per test by default, which includes clean localStorage. This SHOULD prevent Zustand state leaks. However, there are two traps specific to this codebase:
-
-**Trap 1: storageState reuse carries Zustand data.** When you save `storageState` for auth reuse (Pitfall #2), that file includes ALL localStorage -- including the 8 Zustand persist stores (`gamify-gains-user`, `gamify-gains-workouts`, `gamify-gains-macros`, `gamify-gains-xp`, `gamify-gains-avatar`, `gamify-gains-achievements`, `gamify-gains-reminders`, `gamify-gains-access`). If the auth setup test also triggers onboarding or logs data, that state leaks into every subsequent test via the storageState file.
-
-**Trap 2: Test actions trigger Supabase sync.** The `scheduleSync()` function fires after most user actions with a 2-second debounce. If a test creates data (logs a workout, logs a meal), `scheduleSync()` writes to the REAL Supabase database. The next test, even with clean localStorage, may load that data from the cloud via `loadAllFromCloud()` when it initializes auth.
-
-**Zustand persist keys in this codebase:**
-| Key | Store | Persists To |
-|-----|-------|-------------|
-| `gamify-gains-user` | userStore | localStorage |
-| `gamify-gains-workouts` | workoutStore | localStorage |
-| `gamify-gains-macros` | macroStore | localStorage |
-| `gamify-gains-xp` | xpStore | localStorage |
-| `gamify-gains-avatar` | avatarStore | localStorage |
-| `gamify-gains-achievements` | achievementsStore | localStorage |
-| `gamify-gains-reminders` | remindersStore | localStorage |
-| `gamify-gains-access` | accessStore | localStorage |
-
-**Warning signs:**
-- Tests pass in isolation but fail when run as a suite
-- A workout logged in Test A appears in Test B's workout history
-- User profile from auth setup appears in tests that should start with no profile
-- Tests that check "empty state" UI fail because they see data from previous tests
-
-**Prevention:**
-1. When saving `storageState` for auth, ONLY include cookies and the Supabase auth token localStorage key -- strip out the `gamify-gains-*` keys:
-   ```typescript
-   // After saving storageState, filter it
-   const state = JSON.parse(fs.readFileSync(authFile))
-   state.origins[0].localStorage = state.origins[0].localStorage.filter(
-     item => item.name.startsWith('sb-')
-   )
-   fs.writeFileSync(authFile, JSON.stringify(state))
-   ```
-2. Add a `beforeEach` helper that clears Zustand stores (but NOT the auth token) by evaluating in the page:
-   ```typescript
-   await page.evaluate(() => {
-     Object.keys(localStorage)
-       .filter(k => k.startsWith('gamify-gains-'))
-       .forEach(k => localStorage.removeItem(k))
-   })
-   ```
-3. Use a dedicated test Supabase project (or at minimum, dedicated test user) so sync data doesn't contaminate the production database
-4. For tests that need specific state (e.g., "completed onboarding" state), seed the localStorage directly rather than running through the full onboarding flow
-
-**Phase relevance:** This infrastructure must be built alongside the auth setup (Pitfall #2). Both are part of the same Playwright test infrastructure phase.
-
----
-
-### 5. Plausible Event Names Are Permanent History
-
-**What goes wrong:** The app already has 22 custom events defined in `src/lib/analytics.ts`. Plausible tracks events by name. If you add new funnel/engagement events with names that are poorly chosen, inconsistent with existing names, or too generic, you are stuck with them. While Plausible allows editing the display name of a goal, the underlying event name in your codebase is what fires from the app. Historical data is tied to that event name. If you later realize "Workout Started" should have been "Workout Begun" (to match a naming convention), you have to keep firing both names during a transition period, or lose the ability to compare historical data across the rename.
-
-**Existing event names in this codebase (22 events):**
-```
-Onboarding Started, Onboarding Completed, Workout Started, Workout Completed,
-Quick Workout Logged, Meal Logged, Meal Saved, Protein Target Hit,
-Calorie Target Hit, Check-In Completed, XP Claimed, Level Up, Badge Earned,
-Avatar Evolved, App Opened, Settings Viewed, Achievements Viewed,
-Data Exported, Signup Completed, Login Completed, Coach Dashboard Viewed,
-Client Viewed
+```sql
+CREATE POLICY "Coaches can view client weight logs"
+  ON weight_logs FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM coach_clients
+      WHERE coach_clients.coach_id = auth.uid()
+      AND coach_clients.client_id = weight_logs.user_id
+      AND coach_clients.status = 'active'
+    )
+  );
 ```
 
-The naming convention is: `{Noun} {Past Tense Verb}` (e.g., "Workout Completed", "Badge Earned"). Some deviate: "Quick Workout Logged" (adjective+noun+verb), "App Opened" (noun+verb).
+This pattern is repeated 10 times across 8 tables. For a coach with 90,000 clients querying ANY client-related table, PostgreSQL executes this correlated subquery FOR EVERY ROW in the table. If `workout_logs` has 10 million rows (90K clients x ~110 workouts each), the `EXISTS` subquery runs 10 million times. Even with the `idx_coach_clients_coach` index, this becomes catastrophically slow.
+
+**Supabase documentation explicitly warns:** "A policy with EXISTS subquery executes for every row in the table. With 10,000 documents, Postgres runs 10,000 subqueries, even if you only need 10 rows." At 90K clients, this is orders of magnitude worse.
+
+**The `coach_client_summary` view compounds the problem:** It joins `coach_clients` + `profiles` + `user_xp` + two correlated subqueries (latest weight, workouts in last 7 days). This view has no RLS itself (it is `GRANT SELECT ON coach_client_summary TO authenticated`), but the underlying tables do. With 90K clients, this view will timeout.
 
 **Warning signs:**
-- New events use a different convention: "user_signed_up" (snake_case) vs "Signup Completed" (Title Case)
-- Funnel events overlap with existing events ("Signup" vs "Signup Completed")
-- Events are too granular (tracking every button click) making the dashboard noisy
-- Events are too broad ("Page Viewed") providing no actionable insight
-- Property names are inconsistent: `workout_type` in one event, `type` in another
+- Coach dashboard takes 10+ seconds to load client list
+- Supabase logs show queries timing out at 30 seconds
+- Coach viewing a single client profile is slow (RLS check runs against ALL coach_clients rows)
+- Database CPU spikes whenever coach accesses the dashboard
 
 **Prevention:**
-1. Document the naming convention BEFORE adding new events: `{Noun} {Past Tense Verb}` in Title Case with spaces (matching existing)
-2. Map the entire funnel as event names BEFORE implementing any:
+1. Replace `EXISTS` subqueries with security definer functions:
+   ```sql
+   CREATE OR REPLACE FUNCTION is_coach_of(client_user_id UUID)
+   RETURNS BOOLEAN AS $$
+     SELECT EXISTS (
+       SELECT 1 FROM coach_clients
+       WHERE coach_id = auth.uid()
+       AND client_id = client_user_id
+       AND status = 'active'
+     )
+   $$ LANGUAGE sql SECURITY DEFINER STABLE;
    ```
-   FUNNEL: App Opened -> Access Code Entered -> Signup Completed ->
-           Onboarding Completed -> First Workout Completed ->
-           First Meal Logged -> First Week Completed
+   Then wrap in `SELECT` for initPlan caching:
+   ```sql
+   CREATE POLICY "Coaches can view client weight logs"
+     ON weight_logs FOR SELECT
+     USING (user_id = (SELECT auth.uid()) OR (SELECT is_coach_of(user_id)));
    ```
-3. Review new event names against ALL 22 existing names for consistency
-4. Use custom properties for variants rather than creating new event names:
-   - GOOD: `trackEvent('Workout Completed', { is_first: true })`
-   - BAD: `trackEvent('First Workout Completed')` (creates a new event when a property suffices)
-5. Keep event count manageable -- Plausible dashboards become unusable past ~40 custom events
-6. For funnel tracking, Plausible requires events to be set up as goals first -- plan the Plausible dashboard configuration alongside the code changes
+2. Replace the `coach_client_summary` view with a security definer function that returns the summary data, bypassing RLS on the underlying tables and handling access control internally.
+3. Add explicit indexes:
+   - `CREATE INDEX idx_coach_clients_coach_status ON coach_clients(coach_id, status)` (composite for the common query pattern)
+   - Ensure `user_id` indexes exist on ALL tables the coach accesses
+4. NEVER query all 90K clients at once. Always paginate (see Pitfall #14).
+5. Test with realistic data volumes EARLY. Create 1,000 test clients minimum before considering the schema "working."
 
-**Phase relevance:** Event naming and funnel design should be completed as a planning step BEFORE any code is written. This is a one-way door. Get it right on paper first.
+**Phase relevance:** RLS optimization must happen in the FIRST phase when the data model is created. Retrofitting RLS performance on an existing schema with live data is painful. Get this right at the schema level before building any UI.
 
 ---
 
-### 6. Sentry Performance Monitoring Doubling Bundle Impact
+### 3. Coach-Assigned vs. Client-Owned Data Ownership Ambiguity
 
-**What goes wrong:** The app already includes `@sentry/react` (currently used for error tracking and session replay). Adding performance monitoring (tracing) imports additional code. The current Sentry config sets `tracesSampleRate: 0.1` but does not import `BrowserTracing` explicitly -- it relies on whatever the default Sentry.init provides. Explicitly adding `browserTracingIntegration()` and `replayIntegration()` to get full performance monitoring can significantly increase the Sentry portion of the bundle.
+**What goes wrong:** The existing `macro_targets` table has a single row per user (`UNIQUE(user_id)`). When the coach sets a client's macros, it updates this same row. When the client recalculates their own macros via the onboarding flow or settings, it also updates this same row. There is no way to distinguish "client calculated these" from "coach set these." This creates several failure modes:
 
-**Bundle impact breakdown (approximate, based on Sentry docs and community reports):**
-- `@sentry/react` core: ~30KB gzipped
-- `browserTracingIntegration()`: ~10-15KB gzipped additional
-- `replayIntegration()`: ~36KB gzipped (already included via `replaysOnErrorSampleRate: 1.0`)
-- Total potential: ~80KB+ gzipped for full Sentry
+- Client completes onboarding, which calls `calculateMacros()` and overwrites coach-set targets
+- Client clicks "Recalculate" in settings and blows away carefully tuned coach macros
+- Coach cannot tell if a client is following coach-set macros or their own calculation
+- If the coach removes a client, there is no "revert to self-calculated" path
 
-The app already splits Sentry into its own chunk (`manualChunks: { 'vendor-sentry': ['@sentry/react'] }` in vite.config.ts), which is good -- Sentry won't block initial render. But on mobile networks targeting 90k users, every KB matters for the initial app shell.
+**The same problem exists for workouts:** The existing `workoutStore` generates workout templates from hardcoded arrays (`THREE_DAY_TEMPLATES`, `FOUR_DAY_TEMPLATES`, etc.) based on the user's `trainingDaysPerWeek`. There is no concept of "coach assigned this specific workout for this specific date." If a coach assigns exercises, where do they go? Into the same `workoutStore`? Into a new table? How does the client distinguish "today's coach-assigned workout" from "today's auto-generated workout"?
 
 **Warning signs:**
-- `npm run build` output shows vendor-sentry chunk growing past 100KB
-- Lighthouse performance score drops after adding tracing
-- Time to Interactive increases on mobile 3G
-- Users on slow connections see a delay before the app becomes responsive
+- Coach sets macros, client recalculates, coach's work is lost
+- Client sees a workout but cannot tell if it is coach-assigned or self-generated
+- After being removed from coaching, client has no macros at all (coach-set targets were the only ones)
+- Coach assigns a workout but client also starts their auto-generated workout, creating duplicate logs
 
 **Prevention:**
-1. Audit what you actually need. For a PWA pre-launch, you likely need:
-   - Error tracking (already have)
-   - Session replay on errors (already have at `replaysOnErrorSampleRate: 1.0`)
-   - Web Vitals (can be done with Sentry's `browserTracingIntegration` OR lightweight alternatives)
-   - Page load timing (included in BrowserTracing)
-2. Use Sentry's tree-shaking flags in vite.config.ts to strip unused code:
-   ```typescript
-   define: {
-     __SENTRY_DEBUG__: false,
-     __SENTRY_TRACING__: true, // only if you actually use tracing
-   }
-   ```
-3. Consider whether `web-vitals` library (~1.5KB) is sufficient for Core Web Vitals instead of full Sentry tracing (~15KB)
-4. Keep `replaysSessionSampleRate: 0` (current setting) -- recording all sessions adds massive overhead
-5. After changes, verify bundle impact:
-   ```bash
-   npx vite build && ls -la dist/assets/vendor-sentry*.js
-   ```
-6. Set a bundle size budget: Sentry chunk should not exceed 50KB gzipped
+1. For macro targets: Add a `set_by` column (`'self' | 'coach'`) AND a `coach_macro_targets` table (or `set_by` + `coach_id` columns on `macro_targets`). When `set_by = 'coach'`, the client UI disables the "Recalculate" button and shows "Targets set by coach." When the coach relationship ends, fall back to `'self'` targets (which may need to be recalculated).
+2. For workouts: Create a NEW `assigned_workouts` table separate from `workout_logs`. Assigned workouts have:
+   - `coach_id`, `client_id`, `assigned_date`
+   - `exercises` (JSONB, same structure as current workout exercises)
+   - `status`: `'assigned' | 'completed' | 'skipped'`
+   The client app checks for assigned workouts FIRST. If one exists for today, show it. If not, fall back to the auto-generated template. The `workout_logs` table continues to record what the client ACTUALLY DID.
+3. Make the distinction visible in the UI: Coach-assigned items get a badge/indicator ("Assigned by Coach") so both coach and client know the data source.
+4. Handle the "uncoaching" flow: When coach removes a client, transition `set_by` from `'coach'` to `'self'` and prompt client to recalculate if desired.
 
-**Phase relevance:** Performance monitoring additions should happen AFTER E2E tests are working (so you can verify the monitoring does not break anything) and should include a bundle size check as an acceptance criterion.
+**Detection:** Test this sequence: Client has self-calculated macros -> Coach assigns new macros -> Client opens settings and sees "Set by coach" -> Client clicks "Recalculate" -> System blocks or warns "This will override coach-set targets."
+
+**Phase relevance:** Data ownership must be modeled in the SCHEMA phase, before any coach write operations are built. Retrofitting `set_by` after data is already mixed is a migration headache.
 
 ---
 
-### 7. Animation-Induced Test Flakiness
+### 4. Macro Target Overwrite Race Condition
 
-**What goes wrong:** The app uses Framer Motion (spring animations with critically damped springs after the redesign) and CSS transitions throughout. Playwright's auto-waiting waits for elements to be visible and stable, but "stable" does not mean "animation complete." A button that is animating via `spring` might be clickable but at the wrong position. A toast notification that fades in might be visible but not yet readable for text assertions. Modals (CheckInModal, XPClaimModal) that animate in may have their content intercepted by the parent overlay during the transition.
+**What goes wrong:** The existing `syncMacroTargetsToCloud()` function does an unconditional `upsert` on the `macro_targets` table. It reads from `useMacroStore.getState().targets` (localStorage) and writes to Supabase. If the coach updates a client's macros via the dashboard (writing directly to Supabase), and then the client's app triggers `scheduleSync()` (which fires `syncAllToCloud()` -> `syncMacroTargetsToCloud()`), the client's stale localStorage values OVERWRITE the coach's update.
 
-**This app's specific animation risk areas:**
-- `XPClaimModal`: Spring animation on mount -- if test clicks "Claim" too fast, the modal may not be fully rendered
-- `CheckInModal`: Overlay + content animation -- assertions on streak count may fire before the number animates to its final value
-- `Navigation`: `layoutId="nav-indicator"` creates a shared layout animation when switching tabs
-- Toast notifications (`sonner`): Appear with slide-in animation, disappear after timeout
-- Skeleton -> content transitions: Components use `Suspense` with skeleton fallbacks -- the transition from skeleton to content is a visual shift
+**Timeline of the race:**
+```
+T0: Client has macros { protein: 150, calories: 2200 } in localStorage
+T1: Coach sets macros { protein: 180, calories: 2500 } via dashboard (writes to Supabase)
+T2: Client logs a meal, which triggers scheduleSync()
+T3: After 2s debounce, syncMacroTargetsToCloud() runs
+T4: Client's stale { protein: 150, calories: 2200 } OVERWRITES coach's update in Supabase
+T5: Coach refreshes dashboard, sees their changes are gone
+```
+
+This is not hypothetical -- it will happen every time the coach updates macros for a client who has the app open or recently used.
 
 **Warning signs:**
-- Tests pass 90% of the time but fail randomly on modal assertions
-- `toBeVisible()` passes but `toHaveText('100 XP')` fails (content still animating)
-- Click actions fire but nothing happens (clicked during animation transition)
-- Tests pass locally (fast machine) but fail in CI (slower, headless)
+- Coach updates macros, refreshes, sees old values
+- Client always shows their self-calculated macros regardless of coach updates
+- Macro history shows ping-ponging between two sets of values
 
 **Prevention:**
-1. **Disable animations in test mode.** Add a CSS override when running in Playwright:
-   ```typescript
-   // In Playwright test setup
-   await page.addStyleTag({
-     content: `*, *::before, *::after {
-       animation-duration: 0s !important;
-       transition-duration: 0s !important;
-     }`
-   })
-   ```
-   Or better: use a Framer Motion `ReducedMotion` provider in test mode
-2. **Use `page.waitForLoadState('networkidle')` before assertions** -- not just `domcontentloaded`
-3. **Wait for specific content** rather than element visibility:
-   ```typescript
-   // BAD: flaky if content is animating
-   await expect(page.locator('[data-testid="xp-display"]')).toBeVisible()
-   // GOOD: waits for specific text content
-   await expect(page.locator('[data-testid="xp-display"]')).toHaveText(/\d+ XP/)
-   ```
-4. **For toast assertions**, wait for the toast to appear AND stabilize:
-   ```typescript
-   await expect(page.locator('[data-sonner-toast]')).toBeVisible()
-   await expect(page.locator('[data-sonner-toast]')).toContainText('Workout logged')
-   ```
-5. Set Playwright timeout configs appropriately: `expect.timeout` of 5000ms (default) is fine, but `actionTimeout` should be 10000ms for animations to settle
+1. Add a `last_modified_by` and `updated_at` column to `macro_targets`. Before upserting, check: if `last_modified_by = 'coach'` and `updated_at` is after the client's last sync, SKIP the upsert. The coach's write wins.
+2. Better: use the data ownership pattern from Pitfall #3. If `set_by = 'coach'`, the client sync function NEVER writes to `macro_targets`. It only reads.
+3. Even better: separate the sync into directional flows:
+   - `pushClientDataToCloud()`: Only pushes client-owned data (logs, weight, XP)
+   - `pullCoachDataFromCloud()`: Only reads coach-owned data (targets, assigned workouts)
+   The current `syncAllToCloud()` function must be refactored to NOT push coach-owned data.
+4. Use Supabase Realtime to push coach changes to the client immediately, rather than waiting for the next sync cycle.
 
-**Phase relevance:** Animation handling should be decided in the Playwright config phase, before individual test files are written. The CSS override approach is simplest and covers all cases.
+**Phase relevance:** This must be solved when building the macro management feature. The existing `syncMacroTargetsToCloud()` code must be modified BEFORE the coach can write to `macro_targets`.
+
+---
+
+### 5. Supabase Email Rate Limits Blocking Bulk Invites
+
+**What goes wrong:** The coach wants to invite clients by email. Supabase's built-in email service has severe rate limits:
+- Default SMTP: **2-3 emails per hour**
+- Custom SMTP: Default starts at **30 emails per hour** (configurable)
+- `auth.admin.inviteUserByEmail()` is subject to these same limits
+
+If the coach needs to invite even 50 clients in one session (a reasonable batch when onboarding to the platform), they will hit rate limits immediately. The default SMTP is completely unusable for this use case.
+
+**Additional email pitfalls:**
+- Supabase's default email sender has no SLA on deliverability -- emails may go to spam or not arrive at all
+- Email scanners (Microsoft SafeLinks, Proofpoint) may click the magic link in the invite, "consuming" it before the user does
+- No built-in way to track which invites were delivered, opened, or bounced
+- `auth.admin.inviteUserByEmail()` requires the service role key, which CANNOT be used from the client -- requires an Edge Function
+
+**Warning signs:**
+- Coach sends 10 invites, only 2 arrive
+- Supabase returns 429 (rate limit) after 3 invites
+- Clients report "invite link expired" because email scanners consumed the link
+- No way to know if an invite failed -- coach just waits and wonders
+
+**Prevention:**
+1. Set up custom SMTP immediately (Resend, Postmark, or SendGrid). Configure DKIM, DMARC, and SPF for the sending domain to maximize deliverability. Supabase docs are clear: "Do not use the default SMTP for production."
+2. Build a separate invite flow via Supabase Edge Functions + Resend API instead of using `auth.admin.inviteUserByEmail()`. This gives you:
+   - Custom email templates (branded, not generic Supabase template)
+   - Delivery tracking (Resend provides webhook events)
+   - Higher rate limits (Resend free tier: 100 emails/day, paid: 50K/month)
+   - Invite link that redirects through YOUR domain (prevents email scanner consumption)
+3. Implement client-side invite queuing: If the coach pastes 50 emails, queue them and send in batches of 10 with delays. Show progress UI ("Sending invites... 20/50").
+4. Store invite records in a `coach_invites` table:
+   ```
+   id, coach_id, email, status ('pending'|'sent'|'accepted'|'expired'),
+   created_at, expires_at, accepted_at
+   ```
+   This lets the coach see which invites are pending, resend failed ones, and know when clients accept.
+5. Set invite links to expire after 7 days (not 24 hours -- people check email irregularly). Allow the coach to resend.
+6. Use a redirect URL (e.g., `trained.app/invite?token=xxx`) that lands on YOUR app, not a raw Supabase auth link. This prevents email scanners from consuming the token.
+
+**Phase relevance:** Email infrastructure must be set up BEFORE the invite feature is built. This is infrastructure work (Edge Function + SMTP config + invite table) that blocks the entire invite flow.
+
+---
+
+### 6. Invite Link Security and Abuse Vectors
+
+**What goes wrong:** The invite system creates a pathway from "anonymous internet user" to "authenticated user with a coach relationship." This opens several abuse vectors:
+
+- **Invite link sharing:** A client shares their invite link on social media. Anyone who clicks it gets an account linked to the coach. With 90K followers, this could create thousands of unauthorized accounts.
+- **Invite link enumeration:** If invite tokens are sequential or predictable, attackers can guess valid tokens.
+- **Duplicate accounts:** The same email gets invited twice. Does it create two accounts? Two coach relationships? Or error silently?
+- **Self-invite:** Coach accidentally invites their own email. Does this create a circular coach-client relationship?
+- **Expired invites:** Client clicks an expired invite link. What happens? Generic error? Helpful message?
+
+**Warning signs:**
+- Unknown users appear in the coach's client roster
+- Coach sees duplicate entries for the same email
+- Invite links work indefinitely (no expiration enforced)
+- Client clicks invite, gets a confusing Supabase error page
+
+**Prevention:**
+1. Invite tokens must be cryptographically random (UUIDv4 minimum, or a signed JWT with expiry). NEVER use sequential IDs or short codes.
+2. Each invite token is single-use: once accepted, it is marked `status = 'accepted'` and cannot be reused. Attempts to reuse show "This invite has already been used."
+3. Before creating an invite:
+   - Check if the email is already a client of this coach (prevent duplicates)
+   - Check if the email matches the coach's own email (prevent self-invite)
+   - Check if a pending invite already exists for this email (offer to resend instead of creating a new one)
+4. Invite acceptance must happen within a Supabase Edge Function that:
+   - Validates the token
+   - Checks expiration
+   - Creates the user account (or links to existing)
+   - Creates the `coach_clients` relationship
+   - Marks the invite as accepted
+   - All in a single transaction
+5. Rate-limit invite creation: Max 100 invites per hour per coach. This prevents abuse if the coach account is compromised.
+6. The invite landing page should handle all error states gracefully:
+   - Expired: "This invite has expired. Please ask your coach to send a new one."
+   - Already used: "This invite has already been accepted."
+   - Invalid: "This invite link is invalid."
+   - Already a client: "You are already connected to this coach. Open the app."
+
+**Phase relevance:** Security design happens during the invite feature planning phase. The Edge Function that handles invite acceptance is the critical security boundary.
+
+---
+
+### 7. coach_client_summary View N+1 Query Explosion
+
+**What goes wrong:** The existing `coach_client_summary` view in `schema.sql` contains two correlated subqueries:
+
+```sql
+(SELECT weight FROM weight_logs wl WHERE wl.user_id = p.id ORDER BY date DESC LIMIT 1) as latest_weight,
+(SELECT date FROM weight_logs wl WHERE wl.user_id = p.id ORDER BY date DESC LIMIT 1) as latest_weight_date,
+(SELECT COUNT(*) FROM workout_logs wl WHERE wl.user_id = p.id AND wl.completed = true
+  AND wl.date >= CURRENT_DATE - INTERVAL '7 days') as workouts_last_7_days
+```
+
+For 90K clients, this executes 270K subqueries (3 per client). Even with indexes, this view will be extremely slow. The view also joins `profiles`, `user_xp`, and `coach_clients` -- at 90K rows, the join itself is expensive.
+
+Additionally, this view has `GRANT SELECT ON coach_client_summary TO authenticated` -- meaning ANY authenticated user can query it, not just coaches. A regular client could query `SELECT * FROM coach_client_summary` and potentially see other clients' data (depending on whether the view's security context respects RLS on underlying tables).
+
+**Warning signs:**
+- Coach dashboard client list takes 30+ seconds to load
+- Supabase connection pool exhausted when coach opens dashboard
+- Database CPU pegged at 100% during dashboard load
+- Regular clients can see the coach_client_summary view data
+
+**Prevention:**
+1. Replace the view with a security definer function that:
+   - Verifies the caller is a coach (`SELECT role FROM profiles WHERE id = auth.uid()`)
+   - Accepts pagination parameters (`page_size`, `page_offset`)
+   - Uses a single efficient query with `LATERAL` joins instead of correlated subqueries
+   - Returns only the columns needed for the current UI view
+2. For "latest weight" and "workouts last 7 days", consider materialized views or caching:
+   - A `client_activity_cache` table updated by triggers on `weight_logs` and `workout_logs`
+   - Or compute these on the client side after loading basic client data
+3. Drop the `GRANT SELECT ON coach_client_summary TO authenticated` and replace with RPC function access only.
+4. Add pagination WITHIN the function (see Pitfall #14).
+
+**Phase relevance:** The view must be rewritten or replaced when building the client roster feature. Do not build UI on top of this view as-is.
+
+---
+
+### 8. Role Escalation via Client-Side Role Check
+
+**What goes wrong:** The `profiles` table has a `role` column (`user_role` enum: 'client', 'coach', 'admin'). If the coach dashboard route (`/coach`) only checks this role on the CLIENT side (e.g., `if (profile.role !== 'coach') redirect('/')`) without server-side enforcement, a malicious user can:
+1. Modify localStorage to set `role: 'coach'`
+2. Navigate to `/coach`
+3. See the coach dashboard UI
+4. Make API calls that succeed because RLS only checks the `coach_clients` relationship, not the `role` column
+
+The existing RLS policies check `coach_clients.coach_id = auth.uid()` but do NOT verify that the user actually has `role = 'coach'` in the profiles table. If someone creates a row in `coach_clients` where they are the `coach_id` (which the "Coaches can manage their client relationships" policy allows for ANY authenticated user where `coach_id = auth.uid()`), they become a coach.
+
+**The critical RLS policy flaw:**
+```sql
+CREATE POLICY "Coaches can manage their client relationships"
+  ON coach_clients FOR ALL
+  USING (coach_id = auth.uid());
+```
+This policy says "any authenticated user can insert/update/delete rows in coach_clients where coach_id equals their own user ID." This means ANY user can create a coach-client relationship where they are the coach. There is no check that the user has `role = 'coach'`.
+
+**Warning signs:**
+- A regular client can access `/coach` by modifying localStorage
+- Users can create coach_clients rows making themselves a coach of other users
+- No server-side enforcement of the coach role
+
+**Prevention:**
+1. Fix the RLS policy on `coach_clients` to require `role = 'coach'`:
+   ```sql
+   CREATE POLICY "Coaches can manage their client relationships"
+     ON coach_clients FOR ALL
+     USING (
+       coach_id = auth.uid()
+       AND EXISTS (
+         SELECT 1 FROM profiles
+         WHERE profiles.id = auth.uid()
+         AND profiles.role = 'coach'
+       )
+     );
+   ```
+   Or better, use a security definer function to avoid the EXISTS subquery per-row.
+2. The `role` column in `profiles` must NOT be updatable by the user themselves. Add a policy:
+   ```sql
+   CREATE POLICY "Users cannot change their own role"
+     ON profiles FOR UPDATE
+     USING (auth.uid() = id)
+     WITH CHECK (
+       role = (SELECT role FROM profiles WHERE id = auth.uid())
+     );
+   ```
+   Or simply exclude `role` from the columns the user can update (use column-level permissions or a trigger that prevents role changes).
+3. Client-side role check is for UX only (don't show the coach button to non-coaches). Server-side RLS is the actual security boundary. NEVER trust client-side role checks for authorization.
+4. Set the coach role via a migration or admin action, NEVER via the client app.
+
+**Phase relevance:** RLS policy fixes must happen IMMEDIATELY when the coach schema is deployed. This is a security vulnerability in the existing schema that should be fixed before any coach features go live.
 
 ---
 
 ## Moderate Pitfalls
 
-Mistakes that cause delays, debugging sessions, or compromised test/monitoring quality.
+Mistakes that cause poor UX, increased support burden, or significant rework.
 
 ---
 
-### 8. CI Environment Differences Breaking Playwright
+### 9. Coach Route Leaking Into Client Navigation
 
-**What goes wrong:** Playwright tests pass locally (macOS, headed browser, fast machine) but fail in GitHub Actions (Linux, headless, slower, containerized). Common causes specific to this PWA:
-- **Font rendering differences:** The app uses Inter, Oswald, and JetBrains Mono via `@fontsource`. In CI, these web fonts may not render identically, affecting any screenshot comparison tests.
-- **Viewport differences:** Mobile PWA tests assume specific viewport sizes. CI default viewport may differ from local.
-- **Network timing:** Supabase calls that complete in <100ms locally may take 500ms+ in CI, causing timeout-sensitive assertions to fail.
-- **`page.pause()` left in code:** If a developer leaves `page.pause()` in a test for debugging, it hangs indefinitely in headless CI with no visible error -- just a timeout after the full test timeout.
+**What goes wrong:** The existing app has a bottom tab navigation with 5 tabs (Home, Workouts, Macros, Avatar, Settings). Adding a `/coach` route raises navigation questions:
+- Does the coach see the same bottom nav as clients?
+- Does the coach see a "Coach" tab in addition to their client tabs?
+- When a coach views a client's detail page, can they use the bottom nav to go back?
+- What happens when a coach accidentally navigates to a client route while on the coach dashboard?
+
+The most common mistake: adding coach routes as peers of client routes, so the router treats `/coach/clients/123` and `/workouts` as siblings. The coach clicks the browser back button from a client detail page and lands on their own workout screen instead of the coach dashboard.
 
 **Warning signs:**
-- Green locally, red in CI -- consistently
-- Tests pass on retry in CI (indicating timing, not logic issues)
-- Screenshot comparison tests always fail in CI
-- CI runs take 10x longer than local, or hang without output
+- Coach clicks back button and ends up on their own workout log
+- Client sees a "Coach" button/tab in their nav (even if it errors when clicked)
+- Deep linking to `/coach/clients/123` works for non-coach users (shows error or blank page)
+- Coach navigation breadcrumbs break when mixed with client navigation
 
 **Prevention:**
-1. **Configure explicit viewport** in `playwright.config.ts` matching the target mobile experience:
-   ```typescript
-   use: {
-     viewport: { width: 375, height: 812 }, // iPhone X
-   }
+1. Treat `/coach/*` as a completely separate navigation context. The coach dashboard has its OWN layout, its OWN nav (sidebar or top nav, NOT the client bottom tab bar), and its OWN route hierarchy.
+2. Use React Router's layout routes to isolate coach and client layouts:
    ```
-2. **Install browser dependencies in CI** -- Playwright needs system libraries:
-   ```yaml
-   - name: Install Playwright Browsers
-     run: npx playwright install --with-deps chromium
+   / -> ClientLayout (bottom tab nav)
+     /home
+     /workouts
+     /macros
+     /settings
+   /coach -> CoachLayout (different nav, e.g., sidebar)
+     /coach/clients
+     /coach/clients/:id
+     /coach/clients/:id/program
+     /coach/clients/:id/macros
+     /coach/clients/:id/checkins
    ```
-   Install only the browsers you test (chromium is sufficient for most PWA testing)
-3. **Never use `page.pause()` in committed code** -- add a lint rule or pre-commit hook to catch it
-4. **Set generous timeouts for CI** but strict locally:
-   ```typescript
-   timeout: process.env.CI ? 60000 : 30000,
-   ```
-5. **Run the dev server in CI, not the production build** (unless testing SW behavior) -- it avoids the build step and SW issues
-6. **Avoid screenshot comparison tests entirely** for this milestone -- they add complexity without matching the goal of "does the user flow work?"
-7. **Use `retries: 2` in CI only** to handle genuine flakiness, but investigate any test that needs retries regularly
+3. The coach user has a toggle or link to switch between "Coach view" and "My training" (their own client experience). This is a context switch, not a tab within the same nav.
+4. Add a route guard on `/coach/*` that redirects non-coach users to `/` immediately, before any coach components mount.
+5. For the "coach viewing a client" screen, provide explicit "Back to roster" navigation, not browser back button dependency.
 
-**Phase relevance:** CI integration should be the LAST step of the E2E phase, after all tests pass locally. Debugging CI failures without a working local suite is extremely painful.
+**Phase relevance:** Route structure must be decided in the first coach UI phase. Changing route hierarchy after building screens is a painful refactor.
 
 ---
 
-### 9. Test User Cleanup and Database State Leaking
+### 10. Check-In Form Schema Rigidity
 
-**What goes wrong:** E2E tests that create Supabase data (user profiles, workout logs, meal logs, XP records) leave that data behind. If tests run against the production Supabase instance, test data appears in the real database. If tests run against a test Supabase instance, data accumulates across runs, causing tests that expect empty/specific states to fail.
+**What goes wrong:** The coach wants clients to fill out a weekly check-in. The naive implementation hardcodes form fields:
 
-**This app's Supabase tables affected by E2E tests:**
-- `profiles` (user profile data)
-- `workout_logs` (workout history)
-- `daily_macro_logs` and `logged_meals` (nutrition data)
-- `macro_targets` (user macro settings)
-- `saved_meals` (user's saved meals)
-- `user_xp` (XP and level data)
-- `weight_logs` (weight tracking history)
-
-**Warning signs:**
-- Production dashboard shows test users in real data
-- Tests that check "no workouts yet" empty state see workouts from previous test runs
-- Database foreign key errors when cleanup deletes records in the wrong order
-- Supabase free tier row limits approached by test data accumulation
-
-**Prevention:**
-1. **NEVER run E2E tests against production Supabase.** Use one of:
-   - Supabase local development (via Docker: `supabase start`)
-   - A dedicated Supabase test project (free tier is fine for tests)
-2. **Create a test cleanup function** that runs in `globalTeardown`:
-   ```typescript
-   // Delete in correct order respecting foreign keys
-   await supabase.from('logged_meals').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('daily_macro_logs').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('saved_meals').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('workout_logs').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('user_xp').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('weight_logs').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('macro_targets').delete().eq('user_id', TEST_USER_ID)
-   await supabase.from('profiles').delete().eq('id', TEST_USER_ID)
-   ```
-3. Use the [supawright](https://github.com/isaacharrisholt/supawright) library which handles cleanup automatically, respecting foreign key constraints
-4. Prefix test user email with a recognizable pattern (e.g., `test+{timestamp}@trained.app`) so test data is identifiable
-5. If using Supabase local, add a `supabase db reset` step to CI before running tests
-
-**Phase relevance:** Database strategy must be decided during Playwright infrastructure setup. It determines the entire test environment configuration.
-
----
-
-### 10. AccessGate and Auth Wall Blocking Every E2E Test
-
-**What goes wrong:** The app has a three-layer authentication wall: AccessGate (access code) -> Auth (email/password) -> Onboarding (if first time). The `App.tsx` renders these as conditional returns -- if `!hasAccess`, ONLY the AccessGate renders. If `!user`, ONLY the Auth screen renders. If `!profile.onboardingComplete`, ONLY Onboarding renders. This means a Playwright test that tries to navigate to `/workouts` will see the AccessGate instead, with no route change and no error.
-
-**The `VITE_DEV_BYPASS` escape hatch:**
-The app already has `const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'` which skips AccessGate, Auth, and Onboarding checks. BUT: if you use this for ALL tests, you never test the actual auth flow that 90k users will experience.
-
-**Warning signs:**
-- Every test fails because it sees the AccessGate instead of the expected screen
-- Tests navigate to `/workouts` but assertions about workout UI fail -- they are actually asserting against the AccessGate screen
-- Tests pass with `VITE_DEV_BYPASS=true` but the auth flow itself is untested
-- Switching between bypass and non-bypass modes requires rebuilding the app
-
-**Prevention:**
-1. Create TWO Playwright projects in the config:
-   - `auth-tests`: Tests AccessGate, Auth, and Onboarding flows. Uses NO bypass. Authenticates through the UI.
-   - `app-tests`: Tests all authenticated features. Uses `storageState` from auth setup (which includes the access token and auth session). Does NOT use `VITE_DEV_BYPASS`.
-2. The `storageState` from auth setup must include:
-   - `gamify-gains-access` localStorage key (so AccessGate is bypassed)
-   - `sb-{project-ref}-auth-token` localStorage key (so Auth is bypassed)
-   - Optionally: a seeded `gamify-gains-user` with `onboardingComplete: true` (so Onboarding is bypassed)
-3. Do NOT rely on `VITE_DEV_BYPASS` for E2E tests -- it skips real code paths
-4. For the auth setup project, authenticate through the AccessGate + Auth screens once, save the state, and all app tests reuse it
-
-**Phase relevance:** This is the foundation of the entire test architecture. Decide the project structure and auth strategy before writing any tests.
-
----
-
-### 11. Plausible Script Blocked in Test Environments
-
-**What goes wrong:** The Plausible script is loaded from `https://plausible.io/js/script.js` via a `<script>` tag in `index.html`. In test environments (local dev, CI), this script may not load because: (a) the test server runs on `localhost` and the `data-domain` is `trained-app-eta.vercel.app`, so Plausible ignores events; (b) Playwright may block external scripts; or (c) ad blockers in the test browser block `plausible.io`. When `window.plausible` is undefined, all `trackEvent()` calls silently do nothing. This is fine for test execution, but it means you cannot verify that analytics events are actually firing correctly.
-
-**The existing guard in analytics.ts:**
 ```typescript
-if (import.meta.env.DEV) {
-  console.log('[Analytics]', event, props)
-  return
+interface CheckIn {
+  weight: number
+  sleepHours: number
+  energyLevel: 1 | 2 | 3 | 4 | 5
+  stressLevel: 1 | 2 | 3 | 4 | 5
+  notes: string
 }
 ```
-This means in dev mode, events are logged to console but NOT sent to Plausible. Tests running against the dev server will never exercise the real Plausible path.
+
+Then the coach asks: "Can I add a question about soreness?" No. "Can I remove the stress question?" No. "Can I ask different questions for clients on a cut vs. a bulk?" No. The form is frozen at build time.
+
+Even if you make the form "dynamic" by storing questions in a database, the data structure matters enormously:
+- If answers are stored as named columns (`weight`, `sleep_hours`, etc.), adding a question requires a migration
+- If answers are stored as JSONB, you gain flexibility but lose queryability ("show me all clients whose sleep dropped below 6 hours")
+- If questions change week-to-week, historical comparisons break ("this week's question 3 is different from last week's question 3")
 
 **Warning signs:**
-- Analytics events fire in dev console but not in production
-- Plausible dashboard shows zero events after deploying new tracking
-- Events fire in production but with wrong property names (never caught in tests)
-- Funnel analysis shows broken funnels because intermediate events were never fired
+- Coach requests a form change, developer says "that requires a code deployment"
+- Coach cannot compare check-in responses across weeks because questions changed
+- Data analysis requires parsing JSONB, not simple SQL queries
+- Different clients answer different sets of questions with no structure
 
 **Prevention:**
-1. Create a test utility that intercepts `trackEvent` calls and records them:
-   ```typescript
-   // test-helpers/analytics.ts
-   export async function getTrackedEvents(page: Page): Promise<Array<{event: string, props?: object}>> {
-     return page.evaluate(() => (window as any).__TEST_ANALYTICS_EVENTS__ || [])
-   }
-   ```
-   And in analytics.ts, add a test hook:
-   ```typescript
-   if (import.meta.env.VITE_TEST_ANALYTICS === 'true') {
-     (window as any).__TEST_ANALYTICS_EVENTS__ = (window as any).__TEST_ANALYTICS_EVENTS__ || []
-     (window as any).__TEST_ANALYTICS_EVENTS__.push({ event, props })
-   }
-   ```
-2. Write explicit E2E tests that verify critical events fire during user flows:
-   - "When user completes onboarding, `Onboarding Completed` event fires with `training_days` prop"
-   - "When user logs a workout, `Workout Completed` event fires with `workout_type` and `duration_minutes`"
-3. Do NOT test analytics by checking the Plausible dashboard -- that has a delay and is not deterministic
-4. Verify event property names match the Plausible goal configuration before deploying
+1. Use a hybrid schema:
+   ```sql
+   -- Template: defines what questions are asked
+   CREATE TABLE checkin_templates (
+     id UUID PRIMARY KEY,
+     coach_id UUID REFERENCES profiles(id),
+     name TEXT,
+     questions JSONB NOT NULL,
+     -- questions: [{ id: "q1", type: "number", label: "Weight (lbs)", required: true }, ...]
+     created_at TIMESTAMPTZ DEFAULT NOW()
+   );
 
-**Phase relevance:** Analytics verification tests should be written AFTER the funnel event names are finalized (Pitfall #5) but as part of the E2E test suite.
+   -- Response: what the client answered
+   CREATE TABLE checkin_responses (
+     id UUID PRIMARY KEY,
+     template_id UUID REFERENCES checkin_templates(id),
+     client_id UUID REFERENCES profiles(id),
+     week_of DATE NOT NULL,
+     answers JSONB NOT NULL,
+     -- answers: { "q1": 185, "q2": 7, "q3": "Feeling good" }
+     submitted_at TIMESTAMPTZ,
+     reviewed_at TIMESTAMPTZ,
+     coach_notes TEXT
+   );
+   ```
+2. Use stable question IDs (`q1`, `q2`) that persist across template versions. When the coach adds a question, it gets a new ID. When they remove one, the old ID just stops appearing in new templates but historical answers remain queryable.
+3. For the MVP, start with a DEFAULT template that has the most common questions (weight, sleep, energy, stress, notes). Let the coach customize later. Do not over-engineer the template builder in v1.
+4. Store answers as JSONB but with a defined question schema (type, label, options for selects). This gives flexibility without losing structure.
+5. Version templates: when the coach modifies a template, create a new version. Link responses to specific template versions so historical context is preserved.
+
+**Phase relevance:** Schema design for check-ins happens during the check-in feature phase. Getting the template+response pattern right prevents a rewrite when the coach inevitably asks for customization.
 
 ---
 
-### 12. Existing Unit Tests Broken After Design Refresh
+### 11. Assigned Workout vs. Logged Workout Data Model Confusion
 
-**What goes wrong:** The app has 6 existing test files (3 store tests, 3 component tests). The store tests (`workoutStore.test.ts`, `macroStore.test.ts`, `xpStore.test.ts`) are likely fine -- they test business logic, not UI. But the component tests (`Button.test.tsx`, `Card.test.tsx`, `ProgressBar.test.tsx`) were written before the shadcn/ui migration and almost certainly assert against old class names, old component APIs, or old rendering behavior. Running `vitest run` and seeing failures creates a demoralizing start to the testing milestone.
+**What goes wrong:** The existing `workout_logs` table records what the client ACTUALLY DID (exercises, sets, reps, weights, completion status). The coach needs to assign what the client SHOULD DO (exercises, target sets, target reps, date). These are fundamentally different data types that look superficially similar.
 
-**Specific risk areas:**
-- `Button.test.tsx`: The Button component was completely replaced by shadcn's Button with CVA variants. Old tests may assert against variant class names that no longer exist.
-- `Card.test.tsx`: Card structure changed in the shadcn migration. Tests may assert against old child component structure.
-- `ProgressBar.test.tsx`: May assert against old progress bar implementation.
-- `src/test/setup.ts`: Mocks localStorage, but may not mock the new shadcn dependencies or Radix UI primitives properly.
+The trap: storing assigned workouts in the same `workout_logs` table with a `status = 'assigned'` flag. This creates confusion:
+- The existing `getWorkoutHistory()` function returns `workoutLogs.filter(log => log.completed)`. Does it now need to filter out assigned-but-not-started workouts?
+- The XP system awards XP for completed workouts. Does an assigned workout that is completed count? What if the client did a different workout than assigned?
+- The `isWorkoutCompletedToday()` check would need to consider whether a coach-assigned workout exists AND whether the client did it.
+- The Zustand `workoutStore` persist would try to sync assigned workouts to localStorage, bloating local storage with potentially hundreds of future assigned workouts.
 
 **Warning signs:**
-- `npm run test:run` fails immediately with import errors or missing component exports
-- Tests compile but fail on class name assertions (`expected 'bg-surface' but received 'bg-card'`)
-- Tests assert against component props that no longer exist in the shadcn version
+- Client's workout history shows "assigned" workouts they never did
+- XP is awarded incorrectly for assigned vs. completed workouts
+- `workoutStore` localStorage grows unboundedly with assigned workouts
+- Queries for "what did the client do" return what the coach assigned, not what was logged
 
 **Prevention:**
-1. Run the existing test suite FIRST, before writing any new code. Document what passes and what fails:
+1. Create a SEPARATE `assigned_workouts` table:
+   ```sql
+   CREATE TABLE assigned_workouts (
+     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+     coach_id UUID NOT NULL REFERENCES profiles(id),
+     client_id UUID NOT NULL REFERENCES profiles(id),
+     assigned_date DATE NOT NULL,
+     title TEXT,
+     exercises JSONB NOT NULL,
+     notes TEXT,
+     created_at TIMESTAMPTZ DEFAULT NOW(),
+     UNIQUE(client_id, assigned_date) -- one assignment per client per day
+   );
+   ```
+2. Keep `workout_logs` exclusively for LOGGED (completed) workouts. No changes to the existing table.
+3. The client flow becomes:
+   - App loads -> check `assigned_workouts` for today -> if exists, show "Coach's workout for today" with the assigned exercises pre-loaded
+   - Client starts the assigned workout -> creates a new `workout_logs` entry with a reference to the assigned workout: `assigned_workout_id UUID REFERENCES assigned_workouts(id)`
+   - Client can modify exercises (add, skip, change weight) during the actual workout
+   - On completion, `workout_logs` records what they ACTUALLY did, `assigned_workout_id` links back to what they were SUPPOSED to do
+4. The coach dashboard can then compare: assigned vs. actual (did the client follow the program?).
+5. The existing `workoutStore` continues to manage `workout_logs` as before. A NEW `assignedWorkoutStore` (or server-fetched data, NOT persisted to localStorage) handles assigned workouts.
+
+**Phase relevance:** The assigned workout data model must be designed when building the workout programming feature. It should be a separate table from day one.
+
+---
+
+### 12. Existing Sync System Writing Coach Data Back Incorrectly
+
+**What goes wrong:** The existing `syncAllToCloud()` function calls these in sequence:
+```typescript
+syncProfileToCloud()
+syncWeightLogsToCloud()
+syncMacroTargetsToCloud()   // DANGER: will overwrite coach-set macros
+syncSavedMealsToCloud()
+syncXPToCloud()
+syncDailyMacroLogToCloud()
+// Plus recent workout logs
+```
+
+Every single one of these does an unconditional `upsert` based on what is in localStorage. None of them check whether the server has newer data, and none of them skip coach-owned rows. This means:
+
+- If the coach sets a client's macro targets in Supabase, the next `scheduleSync()` from the client overwrites them (see Pitfall #4)
+- If a new `assigned_workouts` table is added, but the sync function does not know about it, assigned workouts never reach the client's UI (because they are not in localStorage and `loadAllFromCloud()` does not fetch them)
+- `syncProfileToCloud()` uses `upsert` on `profiles`. If the coach updates a client's profile notes or any other coach-managed field on the profiles table, the client's sync overwrites it
+
+**Warning signs:**
+- Any coach-written data disappears within minutes of the client opening the app
+- Coach sees their changes briefly, then they revert
+- Debugging reveals that `syncAllToCloud()` is the culprit, running on a 2-second debounce after any client action
+
+**Prevention:**
+1. Refactor `syncAllToCloud()` into two functions:
+   - `pushClientOwnedData()`: Syncs workout logs, meal logs, weight logs, XP, client-calculated macro targets (ONLY if `set_by = 'self'`), streaks
+   - `pullCoachOwnedData()`: Fetches assigned workouts, coach-set macro targets, check-in templates, and any coach-managed profile fields
+2. `scheduleSync()` calls `pushClientOwnedData()` only. `pullCoachOwnedData()` is called on app init AND via Supabase Realtime subscription.
+3. For each table, define ownership clearly in code:
+   ```typescript
+   const SYNC_OWNERSHIP = {
+     macro_targets: 'conditional', // 'self' -> push, 'coach' -> pull only
+     workout_logs: 'client',       // always push
+     assigned_workouts: 'coach',   // always pull, never push
+     checkin_responses: 'client',  // client fills in, push up
+     checkin_templates: 'coach',   // coach creates, pull down
+   }
+   ```
+4. Add a `loadAllFromCloud()` expansion that includes coach data tables in the pull. Currently it only loads profile and weight logs.
+
+**Phase relevance:** Sync refactoring must happen alongside or immediately after the data ownership model (Pitfall #1). It is tightly coupled with every coach feature.
+
+---
+
+### 13. Single Coach Account as a Single Point of Failure
+
+**What goes wrong:** The constraint says "single coach account" -- only one person will be the coach. This creates operational risks:
+
+- If the coach's password is compromised, the attacker has access to ALL client data
+- If the coach loses access to their email, password reset is impossible
+- If the coach's Supabase session expires during a bulk operation (editing 50 client programs), work is lost
+- There is no audit trail of coach actions (who changed this client's macros? Only one person could have, but when?)
+- If the coach's device is lost/stolen, there is no way to revoke their session remotely without Supabase admin access
+
+**Warning signs:**
+- Coach locked out of their account with no recovery path
+- Coach makes a mistake (wrong macros for wrong client) with no way to see what changed
+- No way to temporarily delegate coach access (e.g., during vacation)
+
+**Prevention:**
+1. Enable MFA for the coach account. Supabase supports TOTP-based MFA. This is non-negotiable for an account that manages 90K users' data.
+2. Store a recovery mechanism (backup email, recovery codes) outside the app.
+3. Add an `audit_log` table:
+   ```sql
+   CREATE TABLE audit_log (
+     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+     actor_id UUID REFERENCES profiles(id),
+     action TEXT NOT NULL, -- 'set_macros', 'assign_workout', 'invite_client', etc.
+     target_client_id UUID REFERENCES profiles(id),
+     details JSONB,
+     created_at TIMESTAMPTZ DEFAULT NOW()
+   );
+   ```
+   This provides accountability and lets the coach review their own actions ("What did I set for client X last week?").
+4. Build autosave for coach dashboard forms. If the session expires mid-edit, the coach should not lose work. Use localStorage for draft state on the coach side, syncing to Supabase only on explicit save.
+5. Consider session management: the coach might use the dashboard on their phone AND laptop simultaneously. Supabase handles concurrent sessions, but UI should handle this gracefully (no data corruption from two tabs editing the same client).
+
+**Phase relevance:** MFA and audit logging should be implemented in the first coach infrastructure phase, before the coach starts managing real client data.
+
+---
+
+### 14. Pagination Absence on 90K Client Roster
+
+**What goes wrong:** Querying `SELECT * FROM coach_client_summary WHERE coach_id = ?` with 90K clients returns 90K rows. Even if each row is small (500 bytes), that is 45MB of data transferred over the network. The browser will struggle to render 90K rows. The Supabase PostgREST default limit is 1000 rows, so without explicit pagination, the coach sees only the first 1000 clients and thinks they are missing clients.
+
+**Compounding issues:**
+- Supabase's JS client does not paginate by default. `supabase.from('table').select('*')` returns up to 1000 rows silently.
+- If you add `.range(0, 9999)` to get more, you hit PostgREST memory limits.
+- Client-side search (filtering 90K rows in the browser) is impossible -- must be server-side.
+- Sorting by "last workout" or "streak" requires the correlated subqueries from the view, which are already slow (Pitfall #7).
+
+**Warning signs:**
+- Coach sees exactly 1000 clients (PostgREST default limit) and thinks clients are missing
+- Searching for a client name loads all 90K rows then filters in JS
+- Scrolling the client list crashes the browser tab
+- Coach tries to load "all clients" and the request times out
+
+**Prevention:**
+1. Implement server-side pagination from day one:
+   ```typescript
+   const PAGE_SIZE = 25
+   const { data } = await supabase
+     .rpc('get_coach_clients', {
+       p_page: currentPage,
+       p_page_size: PAGE_SIZE,
+       p_search: searchQuery,
+       p_sort_by: sortColumn,
+       p_sort_dir: sortDirection
+     })
+   ```
+2. Build the RPC function to handle search, sort, and pagination in PostgreSQL:
+   ```sql
+   CREATE FUNCTION get_coach_clients(
+     p_page INT DEFAULT 1,
+     p_page_size INT DEFAULT 25,
+     p_search TEXT DEFAULT NULL,
+     p_sort_by TEXT DEFAULT 'username',
+     p_sort_dir TEXT DEFAULT 'asc'
+   ) RETURNS TABLE (...) AS $$
+   BEGIN
+     -- Verify caller is coach
+     -- Query with LIMIT/OFFSET (or better, keyset pagination)
+     -- Return total_count alongside results for pagination UI
+   END;
+   $$ LANGUAGE plpgsql SECURITY DEFINER;
+   ```
+3. Use keyset pagination (cursor-based) instead of OFFSET for large datasets. OFFSET becomes slower as page number increases.
+4. Add a client search input that queries the server, not filters client-side. Use `ILIKE` or full-text search on username/email.
+5. Show a total client count in the UI so the coach knows how many clients they have.
+6. Use virtual scrolling (e.g., `@tanstack/react-virtual`) if displaying more than 50 rows at once.
+7. Consider an "active clients" filter that defaults to showing only clients with recent activity (workout in last 30 days), reducing the default result set.
+
+**Phase relevance:** Pagination must be implemented in the FIRST client roster UI. Building without it and adding later requires rewriting the entire list component and its data fetching.
+
+---
+
+### 15. Check-In Response Rate Collapse
+
+**What goes wrong:** The coach adds a weekly check-in form. Week 1, 80% of clients fill it out. Week 4, 30%. Week 8, 10%. This is a well-documented pattern in coaching apps: check-in compliance drops rapidly unless actively managed. The technical pitfall is building the check-in system without the mechanisms to prevent this collapse.
+
+**Common failure modes:**
+- No reminder/notification when check-in is due (the app has no push notification infrastructure)
+- Check-in form is too long (clients get form fatigue)
+- No consequence or feedback loop for missed check-ins (coach does not review them, so clients stop filling them out)
+- Check-in is buried 3 taps deep in the app (Home -> Settings -> Check-in)
+- Coach cannot see at a glance which clients have NOT submitted their check-in
+
+**Warning signs:**
+- Check-in submission rate drops below 50% within a month
+- Coach spends more time chasing check-ins than reviewing them
+- Clients report not knowing a check-in was due
+- Coach dashboard has no "pending check-ins" view
+
+**Prevention:**
+1. Surface the check-in prominently on the client's home screen when it is due. Not buried in a menu. A persistent card: "Weekly check-in due by Sunday" with a single tap to open the form.
+2. Keep the default check-in SHORT: 3-5 questions maximum. Weight, sleep quality (1-5 scale), energy (1-5 scale), one free-text note. The coach can customize later, but the default should take under 60 seconds.
+3. Build a "pending check-ins" view on the coach dashboard that shows which clients have NOT submitted their check-in this week. Sort by "days overdue."
+4. Track check-in completion as an existing gamification hook: award XP for submitting weekly check-ins. This leverages the app's existing gamification system (XP, streaks, badges).
+5. If push notifications are out of scope, use the check-in status in the home screen UI: show a badge/indicator that draws the client's attention.
+6. Coach review flow: when the coach reviews a check-in, the client should see that it was reviewed (e.g., "Coach reviewed your check-in" in the app). This creates a feedback loop.
+
+**Phase relevance:** Check-in UX decisions (placement, length, gamification integration) must be part of the check-in feature design phase. The technical implementation is straightforward; the UX design determines adoption.
+
+---
+
+### 16. Coach Dashboard Bundle Bloating Client App
+
+**What goes wrong:** The coach dashboard needs components that regular clients never use: data tables, bulk actions, client detail views, workout builders, date pickers for scheduling, rich text editors for coach notes. If these components are imported directly in the main bundle, every client downloads coach code they will never use. Given that only ONE user (the coach) uses these features but 90K users download the app, this is a terrible efficiency tradeoff.
+
+**Specific concerns:**
+- Data table component (e.g., `@tanstack/react-table`) can add 15-30KB gzipped
+- Date picker for workout scheduling adds another 10-20KB
+- Coach-specific form components and validation
+- Any charting library for client progress views
+- The coach layout with sidebar navigation
+
+**Warning signs:**
+- Bundle size increases significantly after adding coach features
+- Lighthouse performance score drops for clients
+- Time to Interactive increases because coach code is being parsed
+
+**Prevention:**
+1. Use React lazy loading for ALL coach routes:
+   ```typescript
+   const CoachLayout = lazy(() => import('./layouts/CoachLayout'))
+   const CoachDashboard = lazy(() => import('./pages/coach/Dashboard'))
+   const ClientDetail = lazy(() => import('./pages/coach/ClientDetail'))
+   ```
+   This ensures coach code is in a separate chunk that is ONLY downloaded when navigating to `/coach/*`.
+2. Verify chunk splitting with the build output:
    ```bash
-   npm run test:run 2>&1 | tee test-audit-results.txt
+   npm run build
+   # Check that coach chunks are separate from main chunks
    ```
-2. Fix or delete broken tests based on a simple rule: if the test asserts business logic (store behavior), fix it. If it asserts visual output (CSS classes, DOM structure), delete it and replace with E2E tests that verify the actual user experience.
-3. Do NOT spend days fixing component snapshot tests -- E2E tests provide better coverage for visual behavior
-4. Update `src/test/setup.ts` if needed for new dependencies (Radix UI portals, etc.)
-5. Consider adding `vitest run` to CI as a gate AFTER fixing the tests, so regressions are caught going forward
+3. Do not import coach-specific libraries at the top level. If `@tanstack/react-table` is used only in coach views, it should be in the lazy-loaded coach chunk.
+4. The coach layout, coach stores (if any), and coach API functions should all be co-located under `src/pages/coach/` or `src/features/coach/` so the code-split boundary is clean.
+5. Set a bundle size budget: client main chunk should not increase by more than 5KB after adding coach features (the only addition should be the lazy import wrapper and route definition).
 
-**Phase relevance:** Existing test repair should happen BEFORE new E2E tests are written. It provides a baseline and catches any business logic regressions introduced during the design refresh.
-
----
-
-### 13. Sentry Session Replay PII Leakage in Fitness Context
-
-**What goes wrong:** The app has `replaysOnErrorSampleRate: 1.0` -- every session with an error gets a replay recorded. Sentry session replay captures DOM snapshots, which include text content. In a fitness app, this means replays may capture: body weight, age, calorie intake, macro targets, meal names, workout exercises and weights lifted, streak data, and potentially email addresses from the auth screen. The existing `beforeSend` filter redacts email patterns from error messages, but session replay captures the DOM directly -- the `beforeSend` hook does not apply to replay data.
-
-**Specific PII risk areas in this app:**
-- Settings screen: displays email, weight, height, age, gender
-- Macros screen: food search queries, logged meals (dietary data is health PII in many jurisdictions)
-- Workouts screen: exercises, weights, reps (fitness data)
-- Profile/onboarding: username, body metrics
-
-**Warning signs:**
-- Sentry replay dashboard shows user body weights, meal details, and email addresses
-- GDPR/CCPA compliance review flags session replay as a PII vector
-- Users discover their fitness data is being recorded and lose trust
-
-**Prevention:**
-1. Configure Sentry replay masking for sensitive DOM elements:
-   ```typescript
-   replayIntegration({
-     maskAllText: false, // Don't mask everything -- too aggressive
-     maskAllInputs: true, // Mask all form inputs
-     blockAllMedia: false,
-     // Mask specific sensitive selectors
-     mask: [
-       '[data-sentry-mask]', // Opt-in masking
-       'input[type="email"]',
-       'input[type="password"]',
-     ],
-   })
-   ```
-2. Add `data-sentry-mask` to components displaying: weight, meals, body metrics, email
-3. Alternatively, add `data-sentry-block` to entire screens (Settings, Macros) to exclude them from replay entirely
-4. Review the current Sentry replay configuration and test it: trigger an error, then check the replay in Sentry dashboard to see what's captured
-5. Document what IS and IS NOT captured in a privacy log
-
-**Phase relevance:** This should be reviewed during the Sentry performance monitoring phase, BEFORE the launch to 90k users. Post-launch discovery of PII leakage is a trust-destroying event.
-
----
-
-### 14. Sync Debounce Timer Causing Race Conditions in Tests
-
-**What goes wrong:** The `scheduleSync()` function in `src/lib/sync.ts` uses a 2-second debounce timer. When a Playwright test performs an action (e.g., logs a workout), the sync fires 2 seconds later. If the test makes an assertion immediately after the action, it may pass -- but 2 seconds later, `syncAllToCloud()` fires and modifies Supabase state. The NEXT test, which depends on a clean database, sees unexpected data. Alternatively, if a test checks that data was synced, it needs to wait at least 2 seconds + network time, introducing artificial delays.
-
-**Code path:**
-```
-User action -> scheduleSync() -> 2s debounce -> syncAllToCloud() -> Supabase writes
-```
-
-**Warning signs:**
-- Tests that check Supabase state fail intermittently (sync hasn't fired yet)
-- Tests that should have clean state see data from previous tests (sync fired AFTER cleanup)
-- Adding `await page.waitForTimeout(3000)` makes tests pass (bad sign -- timing dependency)
-- Test suite takes 2x longer than expected due to sync wait times
-
-**Prevention:**
-1. **For most E2E tests, block Supabase network requests** so sync never completes:
-   ```typescript
-   await page.route('**/rest/v1/**', route => route.abort())
-   ```
-   This tests the offline-first behavior (Zustand stores work without Supabase) which is the primary UX path anyway.
-2. **For tests that explicitly test sync behavior**, wait for the sync indicator:
-   ```typescript
-   // Trigger action
-   await page.click('[data-testid="log-workout-button"]')
-   // Wait for sync to complete (SyncStatusIndicator shows then hides)
-   await expect(page.locator('[data-testid="sync-indicator"]')).toBeVisible()
-   await expect(page.locator('[data-testid="sync-indicator"]')).toBeHidden({ timeout: 10000 })
-   ```
-3. **In test teardown**, flush pending syncs before cleanup:
-   ```typescript
-   await page.evaluate(() => {
-     // Clear any pending sync timers
-     const syncTimerId = (window as any).__syncTimer
-     if (syncTimerId) clearTimeout(syncTimerId)
-   })
-   ```
-4. Consider exposing `flushPendingSync()` to the test environment for deterministic sync testing
-
-**Phase relevance:** Sync handling strategy should be decided during Playwright infrastructure setup, alongside the database strategy (Pitfall #9) and localStorage strategy (Pitfall #4). These three are interconnected.
+**Phase relevance:** Code splitting must be configured when creating the first coach route. Adding lazy loading after building multiple coach components requires refactoring all imports.
 
 ---
 
@@ -597,71 +722,75 @@ User action -> scheduleSync() -> 2s debounce -> syncAllToCloud() -> Supabase wri
 
 | Phase Topic | Likely Pitfall | Mitigation | Severity |
 |---|---|---|---|
-| Playwright infrastructure setup | Auth wall blocks all tests (#10) | Two-project config with storageState | Critical |
-| Playwright infrastructure setup | Service worker intercepts mocks (#3) | `serviceWorkers: 'block'` default | Critical |
-| Playwright infrastructure setup | No test selectors exist (#1) | Add data-testid before writing tests | Critical |
-| Playwright infrastructure setup | Zustand state leaks via storageState (#4) | Filter storageState, clean in beforeEach | Critical |
-| Playwright infrastructure setup | Sync debounce causes races (#14) | Block Supabase routes or wait for indicator | Moderate |
-| Test database strategy | Test data pollutes production (#9) | Use local/test Supabase instance | Critical |
-| Existing test repair | Old tests broken by design refresh (#12) | Audit first, fix logic tests, delete visual tests | Moderate |
-| Writing E2E tests | Animation causes flaky assertions (#7) | CSS override to disable animations | Moderate |
-| CI integration | Environment differences (#8) | Explicit viewport, deps, generous timeouts | Moderate |
-| Analytics planning | Event names are permanent (#5) | Document naming convention, plan funnel on paper | Critical |
-| Analytics verification | Can't test Plausible in dev mode (#11) | Test hook to intercept trackEvent calls | Moderate |
-| Sentry performance | Bundle size doubles (#6) | Audit integrations, tree-shake, set size budget | Moderate |
-| Sentry configuration | Session replay captures PII (#13) | Mask sensitive elements, review before launch | Moderate |
+| Schema/data model | Offline-first vs. server-authoritative collision (#1) | Define data ownership model before building features | Critical |
+| Schema/data model | Coach-assigned vs. client-owned ambiguity (#3) | Add `set_by` columns, separate assigned_workouts table | Critical |
+| Schema/data model | Assigned vs. logged workout confusion (#11) | Separate tables for assignments and logs | Critical |
+| RLS/security | RLS performance at 90K scale (#2) | Security definer functions, initPlan caching | Critical |
+| RLS/security | Role escalation via coach_clients RLS flaw (#8) | Fix policy to require role = 'coach' | Critical |
+| Email/invite infrastructure | Rate limits blocking bulk invites (#5) | Custom SMTP + Edge Function + Resend API | Critical |
+| Email/invite infrastructure | Invite link security (#6) | Cryptographic tokens, single-use, expiry | Moderate |
+| Sync system | Existing sync overwriting coach data (#12) | Directional sync: push client data, pull coach data | Critical |
+| Sync system | Macro target overwrite race (#4) | Ownership-aware sync, conditional upsert | Critical |
+| Coach roster UI | N+1 query in summary view (#7) | Replace view with RPC function, LATERAL joins | Moderate |
+| Coach roster UI | Pagination absence (#14) | Server-side pagination from day one | Critical |
+| Coach UI/navigation | Coach route leaking into client nav (#9) | Separate layouts, route hierarchy isolation | Moderate |
+| Check-in feature | Form schema rigidity (#10) | Template + response pattern with JSONB answers | Moderate |
+| Check-in feature | Response rate collapse (#15) | Home screen placement, short form, XP incentive | Moderate |
+| Build/performance | Coach bundle bloating client app (#16) | React lazy loading for all coach routes | Moderate |
+| Operations | Single coach SPOF (#13) | MFA, audit log, autosave | Moderate |
 
 ---
 
 ## Recommended Phase Order Based on Pitfalls
 
-The pitfall analysis suggests this ordering to prevent compounding failures:
+The pitfall analysis reveals a clear dependency chain:
 
-1. **Existing Test Audit & Repair** -- Fix or remove broken unit tests first. This gives a baseline and catches design refresh regressions. Quick win for confidence.
+1. **Data Ownership Model + Schema** (Pitfalls #1, #3, #11) -- Define which data is client-owned vs. coach-owned. Create `assigned_workouts` table, add `set_by` to `macro_targets`. Fix the `coach_clients` RLS policy (#8). This is the foundation everything else builds on.
 
-2. **Test Selectors & Infrastructure** -- Add `data-testid` attributes to the codebase. Configure Playwright with two projects (auth-tests, app-tests), storageState, service worker blocking, and animation disabling. Decide database strategy. This is pure infrastructure -- no actual test assertions yet.
+2. **Sync System Refactor** (Pitfalls #4, #12) -- Split `syncAllToCloud()` into directional flows. Add `pullCoachDataFromCloud()`. Guard upserts against overwriting coach data. Must happen before any coach write operations exist.
 
-3. **E2E Test Suite** -- Write tests for critical user journeys: auth flow, onboarding, workout logging, meal logging, check-in, XP claim. Use the infrastructure from step 2.
+3. **Email Infrastructure + Invite System** (Pitfalls #5, #6) -- Set up custom SMTP, Edge Function for invite handling, `coach_invites` table. Cannot invite clients without this.
 
-4. **Analytics Event Planning** -- Design funnel event names on paper. Review against existing 22 events. Get naming right before coding.
+4. **Client Roster with Pagination** (Pitfalls #2, #7, #14) -- Replace `coach_client_summary` view with paginated RPC function. Build list UI with server-side search/sort. Use lazy-loaded coach routes (#16).
 
-5. **Analytics Implementation & Verification** -- Add new Plausible events. Write E2E tests that verify events fire. Configure Plausible dashboard goals and funnels.
+5. **Workout Programming** (Pitfall #11 implementation) -- Build assigned workout CRUD for coach. Build client-side assigned workout display. Link to existing workout logging.
 
-6. **Sentry Performance Monitoring** -- Add tracing integration. Configure replay masking. Verify bundle size stays within budget. Set up operational alerts.
+6. **Macro Management** (Pitfalls #3, #4 implementation) -- Build coach macro setting UI. Ensure client UI shows "Set by coach" when applicable. Test the overwrite prevention end-to-end.
 
-7. **CI Integration** -- Wire Playwright into GitHub Actions. Configure for headless Chromium. Add test reports. Gate deploys on test pass.
+7. **Check-In System** (Pitfalls #10, #15) -- Build template + response schema. Build client check-in form (home screen placement). Build coach review UI.
 
-The critical insight: **Steps 1-2 must happen before Step 3**, and **Step 4 must happen before Step 5**. The infrastructure and planning phases prevent the most expensive mistakes.
+**The critical insight:** Pitfalls #1, #3, #4, #8, and #12 form an interconnected cluster around data ownership and sync direction. These MUST be solved together in the first phase. Building any coach write feature without solving them first guarantees data corruption.
 
 ---
 
 ## Sources
 
-### Playwright & E2E Testing
-- [Playwright Authentication Docs](https://playwright.dev/docs/auth) -- storageState pattern, project dependencies, global setup
-- [Playwright Best Practices](https://playwright.dev/docs/best-practices) -- locator priority, test isolation
-- [Playwright Browser Context Isolation](https://playwright.dev/docs/browser-contexts) -- fresh localStorage per test
-- [Supawright: Playwright Test Harness for Supabase](https://github.com/isaacharrisholt/supawright) -- automatic cleanup with FK-aware deletion
-- [Mokkapps: Login at Supabase via REST API in Playwright](https://mokkapps.de/blog/login-at-supabase-via-rest-api-in-playwright-e2e-test) -- REST API auth for speed
-- [Semaphore: Flaky Tests in Rendering and Animation Workflows](https://semaphore.io/blog/flaky-tests-ui) -- animation timing solutions
-- [BetterStack: Avoiding Flaky Tests in Playwright](https://betterstack.com/community/guides/testing/avoid-flaky-playwright-tests/) -- timeout and retry patterns
-- [BrowserStack: Playwright Selectors Best Practices 2026](https://www.browserstack.com/guide/playwright-selectors-best-practices) -- data-testid usage
-- [Vite PWA: Testing Service Worker](https://vite-pwa-org.netlify.app/guide/testing-service-worker) -- SW testing strategies
+### Supabase RLS and Performance
+- [Supabase RLS Performance and Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) -- EXISTS subquery performance, security definer functions, initPlan caching (HIGH confidence)
+- [Supabase Performance and Security Advisors](https://supabase.com/docs/guides/database/database-advisors?lint=0003_auth_rls_initplan) -- auth.uid() initPlan pattern (HIGH confidence)
+- [Supabase RLS Discussion #14576](https://github.com/orgs/supabase/discussions/14576) -- Community performance patterns (MEDIUM confidence)
+- [Optimizing RLS Performance with Supabase](https://www.antstack.com/blog/optimizing-rls-performance-with-supabase/) -- Security definer function examples (MEDIUM confidence)
 
-### Plausible Analytics
-- [Plausible Custom Event Goals](https://plausible.io/docs/custom-event-goals) -- goal setup, naming requirements
-- [Plausible Custom Properties](https://plausible.io/docs/custom-props/for-custom-events) -- attaching properties to events
+### Supabase Email and Invites
+- [Supabase Auth Rate Limits](https://supabase.com/docs/guides/auth/rate-limits) -- Default 2-3/hour, custom SMTP 30/hour configurable (HIGH confidence)
+- [Supabase Custom SMTP Configuration](https://supabase.com/docs/guides/auth/auth-smtp) -- DKIM/DMARC/SPF setup (HIGH confidence)
+- [Supabase Sending Emails with Edge Functions](https://supabase.com/docs/guides/functions/examples/send-emails) -- Resend API integration (HIGH confidence)
+- [Supabase Email Rate Limit Discussion #16209](https://github.com/orgs/supabase/discussions/16209) -- Custom SMTP rate limit is 30/hour initially (MEDIUM confidence)
+- [Supabase inviteUserByEmail API Reference](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail) -- Requires service role key (HIGH confidence)
 
-### Sentry Monitoring
-- [Sentry: How to Reduce Bundle Size of JS SDKs](https://sentry.zendesk.com/hc/en-us/articles/32588203861403-How-can-I-reduce-the-bundle-size-of-JS-SDKs) -- tree-shaking, integration removal
-- [Sentry: Tree Shaking for React](https://docs.sentry.io/platforms/javascript/guides/react/configuration/tree-shaking/) -- build flags, dead code elimination
-- [Sentry: Session Replay Performance Overhead](https://docs.sentry.io/product/explore/session-replay/web/performance-overhead/) -- bundle size breakdown, DOM complexity impact
-- [Sentry Blog: Reduced Replay SDK by 35%](https://blog.sentry.io/sentry-bundle-size-how-we-reduced-replay-sdk-by-35/) -- bundle optimization techniques
+### Offline-First Architecture
+- [Offline-First Frontend Apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) -- Conflict resolution strategies (MEDIUM confidence)
+- [Data Synchronization in PWAs](https://gtcsys.com/comprehensive-faqs-guide-data-synchronization-in-pwas-offline-first-strategies-and-conflict-resolution/) -- Last-write-wins vs. custom merge (MEDIUM confidence)
+- [Federated State: Zustand + TanStack Query](https://dev.to/martinrojas/federated-state-done-right-zustand-tanstack-query-and-the-patterns-that-actually-work-27c0) -- Client vs. server state separation (MEDIUM confidence)
 
-### Codebase Analysis
-- Direct analysis of: `src/lib/analytics.ts` (22 existing events), `src/lib/sentry.ts` (current config), `src/lib/sync.ts` (2s debounce, retry logic), `src/lib/supabase.ts` (client config), `src/stores/authStore.ts` (3-layer auth), `src/stores/syncStore.ts` (non-persisted), `vite.config.ts` (SW caching rules, manual chunks), `src/App.tsx` (AccessGate/Auth/Onboarding gates), `src/test/setup.ts` (existing test infrastructure), `package.json` (dependency versions)
-- `grep` analysis: 0 `data-testid` attributes, 8 Zustand persist stores with `gamify-gains-*` keys, 6 existing test files
+### Fitness Coaching Platform Patterns
+- [Online Coaching Platform Development](https://themindstudios.com/blog/online-coaching-platform-development/) -- Feature requirements, common patterns (MEDIUM confidence)
+- [TrueCoach Dashboard Features](https://truecoach.co/features/dashboard/) -- Reference for coach dashboard UX (LOW confidence, competitor observation)
+- [Personal Training Trends 2026](https://blog.everfit.io/personal-training-trend) -- Data-driven coaching, automation trends (LOW confidence)
+
+### Codebase Analysis (HIGH confidence)
+- Direct analysis of: `supabase/schema.sql` (existing RLS policies, coach_client_summary view, data model), `src/lib/sync.ts` (sync direction, upsert patterns, 2s debounce), `src/stores/macroStore.ts` (local macro calculation, no server pull), `src/stores/workoutStore.ts` (template-based workout generation, no concept of assignments), `src/stores/authStore.ts` (login-triggered sync), `src/stores/syncStore.ts` (non-persisted sync status)
 
 ---
 
-*Research compiled: 2026-02-06*
+*Research compiled: 2026-02-07*
