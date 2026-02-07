@@ -44,12 +44,9 @@ async function waitForApp(page: import('@playwright/test').Page) {
 }
 
 test.describe('Core Journey Tests', () => {
-  // ============================================================
-  // E2E-07: Full workout logging flow
-  // ============================================================
-  // Uses baseTest because we need a custom workout schedule where
-  // every day is a training day (avoids day-of-week failures).
-  // ============================================================
+  // E2E-08 is inside this describe block (uses seededPage fixture).
+  // E2E-07, E2E-09, E2E-10 are outside (use baseTest with manual seeding).
+  // E2E-11 is also inside (uses seededPage fixture).
 })
 
 baseTest('E2E-07: workout -- start, log sets, complete workout', async ({ page }) => {
@@ -196,4 +193,299 @@ test('E2E-08: macros -- log meal via Quick Log, totals update', async ({ seededP
   await page.getByText("TODAY'S MEALS").click()
   await expect(page.locator('[data-testid="macros-meal-entry"]').first()).toBeVisible({ timeout: 5000 })
   await expect(page.locator('[data-testid="macros-meal-entry"]')).toHaveCount(2, { timeout: 5000 })
+})
+
+// ============================================================
+// E2E-09: Daily check-in and streak maintenance
+// ============================================================
+// Uses baseTest because we need custom seed with lastCheckInDate = yesterday.
+// Default seed has lastCheckInDate = today (already checked in).
+// ============================================================
+baseTest('E2E-09: check-in -- complete daily check-in, maintain streak', async ({ page }) => {
+  // Seed all stores
+  await seedAllStores(page)
+
+  // Override user store: set lastCheckInDate to yesterday so the check-in
+  // button appears (default seed sets it to today = already checked in).
+  await page.addInitScript(() => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    const yesterdayStr = yesterday.toISOString().split('T')[0]
+
+    const userState = {
+      profile: {
+        username: 'E2ETestUser',
+        gender: 'male',
+        fitnessLevel: 'intermediate',
+        trainingDaysPerWeek: 4,
+        weight: 185,
+        height: 70,
+        age: 28,
+        goal: 'recomp',
+        avatarBase: 'dominant',
+        createdAt: 1734652800000,
+        currentStreak: 7,
+        longestStreak: 14,
+        lastCheckInDate: yesterdayStr,
+        streakPaused: false,
+        onboardingComplete: true,
+        units: 'imperial',
+        goalWeight: 180,
+      },
+      weightHistory: [
+        { date: '2025-01-01', weight: 188.0 },
+        { date: '2025-01-02', weight: 187.8 },
+        { date: '2025-01-03', weight: 187.5 },
+      ],
+    }
+
+    const envelope = JSON.stringify({ state: userState, version: 0 })
+    localStorage.setItem('gamify-gains-user', envelope)
+  })
+
+  // Also override XP store to have a today log with checkIn: false
+  await page.addInitScript(() => {
+    const today = new Date().toISOString().split('T')[0]
+    const xpState = {
+      totalXP: 2500,
+      currentLevel: 8,
+      pendingXP: 150,
+      weeklyHistory: [
+        { weekOf: '2025-01-01', xpEarned: 1200, levelReached: 6 },
+        { weekOf: '2025-01-08', xpEarned: 1300, levelReached: 8 },
+      ],
+      dailyLogs: [
+        {
+          date: today,
+          workout: false,
+          protein: false,
+          calories: false,
+          checkIn: false,
+          perfectDay: false,
+          streakBonus: 70,
+          total: 150,
+          claimed: false,
+        },
+      ],
+      lastClaimDate: '2025-01-08',
+    }
+
+    const envelope = JSON.stringify({ state: xpState, version: 0 })
+    localStorage.setItem('gamify-gains-xp', envelope)
+  })
+
+  // Disable animations
+  await disableAnimations(page)
+
+  // Navigate to app
+  await page.goto('/')
+  await waitForApp(page)
+
+  // Check-in button should be visible (user hasn't checked in today)
+  await baseExpect(page.locator('[data-testid="home-checkin-button"]')).toBeVisible({ timeout: 10000 })
+
+  // Click check-in button
+  await page.locator('[data-testid="home-checkin-button"]').click()
+
+  // CheckInModal should open
+  await baseExpect(page.locator('[data-testid="checkin-modal"]')).toBeVisible({ timeout: 5000 })
+
+  // Verify streak display is visible
+  await baseExpect(page.locator('[data-testid="checkin-streak-display"]')).toBeVisible()
+
+  // Click Submit Report
+  await page.locator('[data-testid="checkin-confirm-button"]').click()
+
+  // Wait for success state ("Report Accepted")
+  await baseExpect(page.getByText('Report Accepted.')).toBeVisible({ timeout: 5000 })
+
+  // Click Continue to close modal
+  await page.getByRole('button', { name: /continue/i }).click()
+
+  // The check-in button should be gone, replaced by "Daily Report Complete" card
+  await baseExpect(page.locator('[data-testid="home-checkin-button"]')).not.toBeVisible({ timeout: 5000 })
+  await baseExpect(page.getByText('Daily Report Complete')).toBeVisible()
+})
+
+// ============================================================
+// E2E-10: Weekly XP claim (Date mocked to Sunday)
+// ============================================================
+// Uses baseTest because we need Date mocked to Sunday AND custom XP store.
+// ============================================================
+baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
+  // Mock Date to a known Sunday BEFORE any page scripts run
+  await page.addInitScript(() => {
+    const sunday = new Date('2025-01-19T12:00:00')
+    const RealDate = globalThis.Date
+
+    class MockDate extends RealDate {
+      constructor(...args: unknown[]) {
+        if (args.length === 0) {
+          super(sunday.getTime())
+        } else {
+          // @ts-expect-error spread args
+          super(...args)
+        }
+      }
+      static override now() { return sunday.getTime() }
+      static override parse(s: string) { return RealDate.parse(s) }
+      static override UTC(...args: unknown[]) {
+        // @ts-expect-error spread args
+        return RealDate.UTC(...args)
+      }
+    }
+
+    globalThis.Date = MockDate as DateConstructor
+    Object.setPrototypeOf(MockDate.prototype, RealDate.prototype)
+  })
+
+  // Seed all stores
+  await seedAllStores(page)
+
+  // Override user store: set lastCheckInDate to the mocked Sunday so the
+  // check-in button doesn't appear (keeps the home screen focused on XP claim).
+  await seedStore(page, STORE_KEYS.user, {
+    profile: {
+      username: 'E2ETestUser',
+      gender: 'male',
+      fitnessLevel: 'intermediate',
+      trainingDaysPerWeek: 4,
+      weight: 185,
+      height: 70,
+      age: 28,
+      goal: 'recomp',
+      avatarBase: 'dominant',
+      createdAt: 1734652800000,
+      currentStreak: 7,
+      longestStreak: 14,
+      lastCheckInDate: '2025-01-19', // Mocked Sunday
+      streakPaused: false,
+      onboardingComplete: true,
+      units: 'imperial',
+      goalWeight: 180,
+    },
+    weightHistory: [],
+  }, 0)
+
+  // Override XP store with claimable state
+  await seedStore(page, STORE_KEYS.xp, {
+    totalXP: 2500,
+    currentLevel: 8,
+    pendingXP: 350,
+    weeklyHistory: [
+      { weekOf: '2025-01-01', xpEarned: 1200, levelReached: 6 },
+      { weekOf: '2025-01-08', xpEarned: 1300, levelReached: 8 },
+    ],
+    dailyLogs: [
+      {
+        date: '2025-01-18',
+        workout: true,
+        protein: true,
+        calories: true,
+        checkIn: true,
+        perfectDay: true,
+        streakBonus: 70,
+        total: 350,
+        claimed: false,
+      },
+    ],
+    lastClaimDate: '2025-01-12', // 7+ days ago
+  }, 0)
+
+  // Disable animations
+  await disableAnimations(page)
+
+  // Navigate
+  await page.goto('/')
+  await waitForApp(page)
+
+  // XP claim button should be visible (it's Sunday and pendingXP > 0)
+  await baseExpect(page.locator('[data-testid="home-claim-xp-button"]')).toBeVisible({ timeout: 10000 })
+
+  // Click the claim card
+  await page.locator('[data-testid="home-claim-xp-button"]').click()
+
+  // XPClaimModal should open
+  await baseExpect(page.locator('[data-testid="xpclaim-modal"]')).toBeVisible({ timeout: 5000 })
+
+  // Verify amount display
+  await baseExpect(page.locator('[data-testid="xpclaim-amount-display"]')).toBeVisible()
+  await baseExpect(page.locator('[data-testid="xpclaim-amount-display"]')).toContainText('350')
+
+  // Click CLAIM REWARD
+  await page.locator('[data-testid="xpclaim-claim-button"]').click()
+
+  // Wait for claiming animation to finish and "Reward Claimed" text to appear.
+  // The animation has a 2s count-up + 500ms delay before phase changes.
+  // With animations disabled, the count-up interval still runs (JS setTimeout).
+  await baseExpect(page.getByText('Reward Claimed')).toBeVisible({ timeout: 10000 })
+
+  // Click Continue to close modal
+  await page.getByRole('button', { name: /continue/i }).click()
+
+  // XP claim button should be gone (already claimed)
+  await baseExpect(page.locator('[data-testid="home-claim-xp-button"]')).not.toBeVisible({ timeout: 5000 })
+})
+
+// ============================================================
+// E2E-11: Offline -> online sync cycle
+// ============================================================
+test('E2E-11: offline sync -- data persists offline, sync triggers on reconnect', async ({ seededPage: page, context }) => {
+  // Mock Supabase REST endpoints for when sync triggers on reconnect
+  await page.route('**/rest/v1/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: '{}',
+  }))
+
+  // Also mock auth endpoints that sync may call
+  await page.route('**/auth/v1/**', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      data: { user: { id: 'e2e-test-user', email: 'e2e@test.com' } },
+    }),
+  }))
+
+  // Verify initially no "Offline" indicator
+  await expect(page.getByText('Offline')).not.toBeVisible()
+
+  // Go offline
+  await context.setOffline(true)
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')))
+
+  // Verify offline indicator appears
+  await expect(page.getByText('Offline')).toBeVisible({ timeout: 5000 })
+
+  // Navigate to Macros and log some data while offline
+  await page.locator('[data-testid="nav-macros"]').click()
+  await expect(page.locator('[data-testid="macros-screen"]')).toBeVisible({ timeout: 10000 })
+
+  // Fill protein via Quick Log
+  await page.locator('[data-testid="macros-food-search-input"]').fill('165')
+
+  // Click Log Macros (only protein is enough)
+  await page.locator('[data-testid="macros-add-meal-button"]').click()
+
+  // Verify data is in localStorage
+  const macroData = await page.evaluate(() => localStorage.getItem('gamify-gains-macros'))
+  baseExpect(macroData).toBeTruthy()
+
+  // Verify the logged data is in the store
+  const parsed = JSON.parse(macroData!)
+  baseExpect(parsed.state.dailyLogs).toBeDefined()
+  baseExpect(parsed.state.dailyLogs.length).toBeGreaterThan(0)
+
+  // Go back online
+  await context.setOffline(false)
+  await page.evaluate(() => window.dispatchEvent(new Event('online')))
+
+  // Verify offline indicator disappears (sync triggers on reconnect)
+  await expect(page.getByText('Offline')).not.toBeVisible({ timeout: 10000 })
+
+  // Verify data STILL in localStorage after the online/offline cycle
+  const macroDataAfter = await page.evaluate(() => localStorage.getItem('gamify-gains-macros'))
+  baseExpect(macroDataAfter).toBeTruthy()
+  const parsedAfter = JSON.parse(macroDataAfter!)
+  baseExpect(parsedAfter.state.dailyLogs.length).toBeGreaterThan(0)
 })
