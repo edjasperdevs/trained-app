@@ -48,11 +48,11 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
   3. `npx playwright test --list` shows the test runner configured with Vite dev server integration and at least one placeholder test discoverable
   4. All navigation elements, form inputs, action buttons, and modals across screens have `data-testid` attributes following a consistent `screen-element` naming convention
   5. A Playwright test can start with a pre-authenticated state (localStorage seeded with valid Zustand stores, bypassing the AccessGate/Auth/Onboarding wall) and tests run in isolation with no state leakage between them
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Repair existing unit/component tests and fix type errors
-- [ ] 01-02: Install Playwright, configure projects, build auth/seed fixtures, add data-testid attributes
+- [ ] 01-01-PLAN.md -- Repair 4 failing component test assertions to match post-shadcn class names
+- [ ] 01-02-PLAN.md -- Install Playwright, configure with Vite dev server, build localStorage seeding fixtures, add data-testid attributes to all screens
 
 ---
 
