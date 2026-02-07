@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 1 complete. Ready for Phase 2 (Invitations).
+**Current focus:** Phase 2 (Invitations) in progress. Data layer complete, Edge Function and Coach UI remaining.
 
 ## Current Position
 
 Phase: 2 of 6 (Invitations)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-07 -- Phase 1 (Foundation) verified and complete
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 02-01-PLAN.md (invites data layer)
 
-Progress: [██░░░░░░░░] 17%
+Progress: [███░░░░░░░] 22%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [██░░░░░░░░] 17%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 3
-- Average duration: 2.3min
-- Total execution time: 7min
+- Total plans completed: 4
+- Average duration: 2.5min
+- Total execution time: 10min
 
 ## Accumulated Context
 
@@ -44,6 +44,9 @@ Recent decisions affecting current work:
 - 01-02: Network errors during role check fail closed (redirect) with toast warning
 - 01-03: syncAllToCloud kept as @deprecated for backward compatibility
 - 01-03: pullCoachData resets local setBy to 'self' when server shows set_by='self' (handles coach revert)
+- 02-01: invite_status is PostgreSQL ENUM (not TEXT CHECK) for type safety and indexability
+- 02-01: UNIQUE(coach_id, email) is unconditional -- one invite row per pair, upsert on resend
+- 02-01: Auto-link runs inside handle_new_user trigger (same transaction, atomic)
 
 ### Pending Todos
 
@@ -58,5 +61,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Phase 1 (Foundation) complete -- ready for Phase 2 (Invitations)
+Stopped at: Completed 02-01-PLAN.md (invites data layer)
 Resume file: None
