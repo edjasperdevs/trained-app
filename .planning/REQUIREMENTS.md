@@ -7,12 +7,12 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Coach route (`/coach/*`) is protected -- non-coach users are redirected away
-- [ ] **INFRA-02**: Data ownership model separates client-owned data (offline-first, push to Supabase) from coach-owned data (server-authoritative, pull from Supabase)
-- [ ] **INFRA-03**: Sync system is directional -- `pushClientData()` for client-owned, `pullCoachData()` for coach-owned -- preventing coach-set data from being overwritten
-- [ ] **INFRA-04**: Existing `coach_clients` RLS policy requires `role = 'coach'` to prevent unauthorized coach escalation
+- [x] **INFRA-01**: Coach route (`/coach/*`) is protected -- non-coach users are redirected away
+- [x] **INFRA-02**: Data ownership model separates client-owned data (offline-first, push to Supabase) from coach-owned data (server-authoritative, pull from Supabase)
+- [x] **INFRA-03**: Sync system is directional -- `pushClientData()` for client-owned, `pullCoachData()` for coach-owned -- preventing coach-set data from being overwritten
+- [x] **INFRA-04**: Existing `coach_clients` RLS policy requires `role = 'coach'` to prevent unauthorized coach escalation
 - [ ] **INFRA-05**: Client roster is paginated with server-side search and sort (handles 90K scale)
-- [ ] **INFRA-06**: Coach dashboard is lazy-loaded -- zero bundle size impact on client app
+- [x] **INFRA-06**: Coach dashboard is lazy-loaded -- zero bundle size impact on client app
 
 ### Invitations
 
@@ -90,12 +90,12 @@ Deferred to future milestones. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
-| INFRA-03 | Phase 1 | Pending |
-| INFRA-04 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
+| INFRA-03 | Phase 1 | Complete |
+| INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 3 | Pending |
-| INFRA-06 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Complete |
 | INVITE-01 | Phase 2 | Pending |
 | INVITE-02 | Phase 2 | Pending |
 | INVITE-03 | Phase 2 | Pending |
