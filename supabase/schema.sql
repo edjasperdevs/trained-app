@@ -17,6 +17,7 @@ CREATE TYPE activity_level AS ENUM ('sedentary', 'light', 'moderate', 'active');
 CREATE TYPE workout_type AS ENUM ('push', 'pull', 'legs', 'upper', 'lower');
 CREATE TYPE xp_source AS ENUM ('workout', 'protein', 'calories', 'checkin', 'claim');
 CREATE TYPE coach_client_status AS ENUM ('pending', 'active', 'inactive');
+CREATE TYPE invite_status AS ENUM ('pending', 'accepted', 'expired');
 
 -- ===========================================
 -- TABLES
@@ -55,6 +56,21 @@ CREATE TABLE coach_clients (
   status coach_client_status DEFAULT 'pending' NOT NULL,
   notes TEXT,
   UNIQUE(coach_id, client_id)
+);
+
+-- Invites (coach invitation lifecycle)
+CREATE TABLE invites (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  status invite_status DEFAULT 'pending' NOT NULL,
+  token UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
+  accepted_at TIMESTAMPTZ,
+  accepted_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  CONSTRAINT unique_active_invite UNIQUE (coach_id, email)
 );
 
 -- Weight logs
@@ -161,6 +177,10 @@ CREATE TABLE xp_logs (
 
 CREATE INDEX idx_coach_clients_coach ON coach_clients(coach_id);
 CREATE INDEX idx_coach_clients_client ON coach_clients(client_id);
+CREATE INDEX idx_invites_coach ON invites(coach_id);
+CREATE INDEX idx_invites_email ON invites(email);
+CREATE INDEX idx_invites_token ON invites(token);
+CREATE INDEX idx_invites_status ON invites(coach_id, status);
 CREATE INDEX idx_weight_logs_user_date ON weight_logs(user_id, date DESC);
 CREATE INDEX idx_daily_macro_logs_user_date ON daily_macro_logs(user_id, date DESC);
 CREATE INDEX idx_logged_meals_user_date ON logged_meals(user_id, date DESC);
@@ -174,6 +194,7 @@ CREATE INDEX idx_xp_logs_user_date ON xp_logs(user_id, date DESC);
 -- Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE coach_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weight_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE macro_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_macro_logs ENABLE ROW LEVEL SECURITY;
@@ -227,6 +248,26 @@ CREATE POLICY "Coaches can manage their client relationships"
 CREATE POLICY "Clients can view their coach relationship"
   ON coach_clients FOR SELECT
   USING (client_id = auth.uid());
+
+-- Invites: Coaches manage their own invites
+CREATE POLICY "Coaches can manage own invites"
+  ON invites FOR ALL
+  USING (
+    coach_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+    )
+  )
+  WITH CHECK (
+    coach_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+    )
+  );
 
 -- Weight logs: Own data + coach can view client data
 CREATE POLICY "Users can manage own weight logs"
@@ -360,15 +401,36 @@ CREATE POLICY "Coaches can view client XP logs"
 -- FUNCTIONS & TRIGGERS
 -- ===========================================
 
--- Auto-create profile on user signup
+-- Auto-create profile on user signup, auto-accept pending invites
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Create profile (existing behavior)
   INSERT INTO public.profiles (id, email)
   VALUES (NEW.id, NEW.email);
 
+  -- Create XP record (existing behavior)
   INSERT INTO public.user_xp (user_id)
   VALUES (NEW.id);
+
+  -- Auto-accept pending invites for this email
+  UPDATE public.invites
+  SET status = 'accepted',
+      accepted_at = NOW(),
+      accepted_by = NEW.id,
+      updated_at = NOW()
+  WHERE email = NEW.email
+    AND status = 'pending'
+    AND expires_at > NOW();
+
+  -- Create coach-client relationships for accepted invites
+  INSERT INTO public.coach_clients (coach_id, client_id, status)
+  SELECT i.coach_id, NEW.id, 'active'
+  FROM public.invites i
+  WHERE i.email = NEW.email
+    AND i.status = 'accepted'
+    AND i.accepted_by = NEW.id
+  ON CONFLICT (coach_id, client_id) DO NOTHING;
 
   RETURN NEW;
 END;
@@ -394,6 +456,10 @@ CREATE TRIGGER profiles_updated_at
 
 CREATE TRIGGER macro_targets_updated_at
   BEFORE UPDATE ON macro_targets
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER invites_updated_at
+  BEFORE UPDATE ON invites
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- Prevent users from escalating their own role via profile UPDATE
