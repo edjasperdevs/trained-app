@@ -14,6 +14,15 @@ const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
 type ClientDetailTab = 'overview' | 'progress' | 'activity'
 
+interface InviteRow {
+  id: string
+  email: string
+  status: 'pending' | 'accepted' | 'expired'
+  created_at: string
+  expires_at: string
+  accepted_at: string | null
+}
+
 interface ClientSummary {
   client_id: string | null
   status: 'pending' | 'active' | 'inactive' | null
@@ -42,6 +51,7 @@ export function Coach() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [inviteMessage, setInviteMessage] = useState('')
+  const [invites, setInvites] = useState<InviteRow[]>([])
 
   const {
     weightData: clientWeightData,
@@ -61,6 +71,7 @@ export function Coach() {
 
   useEffect(() => {
     fetchClients()
+    fetchInvites()
   }, [])
 
   useEffect(() => {
@@ -103,6 +114,39 @@ export function Coach() {
       }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchInvites = async () => {
+    try {
+      if (devBypass) {
+        setInvites([])
+        return
+      }
+
+      const client = getSupabaseClient()
+
+      const { data, error } = await client
+        .from('invites')
+        .select('id, email, status, created_at, expires_at, accepted_at')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching invites:', error)
+        return
+      }
+
+      // Compute display status: if status is 'pending' but expires_at is past, display as 'expired'
+      const processedInvites = (data || []).map((inv) => ({
+        ...inv,
+        status: (inv.status === 'pending' && new Date(inv.expires_at) < new Date()
+          ? 'expired'
+          : inv.status) as InviteRow['status'],
+      }))
+
+      setInvites(processedInvites)
+    } catch (err) {
+      console.error('Error fetching invites:', err)
     }
   }
 
@@ -196,16 +240,19 @@ export function Coach() {
         toast.success('Client added!')
         setInviteEmail('')
         fetchClients()
+        fetchInvites()
       } else if (data?.action === 'invite_sent') {
         setInviteStatus('success')
         setInviteMessage('Invite sent!')
         toast.success('Invite sent!')
         setInviteEmail('')
+        fetchInvites()
       } else {
         setInviteStatus('success')
         setInviteMessage('Invite sent!')
         toast.success('Invite sent!')
         setInviteEmail('')
+        fetchInvites()
       }
 
       setTimeout(() => {
@@ -284,6 +331,22 @@ export function Coach() {
     if (daysSinceCheckIn <= 3) return '🟡'
     return '🔴'
   }
+
+  const getTimeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const minutes = Math.floor(diff / (1000 * 60))
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+    if (minutes < 1) return 'Just now'
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return `${hours}h ago`
+    if (days === 1) return '1 day ago'
+    return `${days} days ago`
+  }
+
+  // Filter invites to show only non-accepted (pending + expired)
+  const visibleInvites = invites.filter(inv => inv.status !== 'accepted')
 
   if (isLoading) {
     return (
@@ -368,6 +431,55 @@ export function Coach() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Pending Invites */}
+        {visibleInvites.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <h2 className="text-sm font-semibold text-muted-foreground">PENDING INVITES</h2>
+              <span className="text-xs bg-warning/20 text-warning px-2 py-0.5 rounded-full font-medium">
+                {visibleInvites.length}
+              </span>
+            </div>
+            <div className="space-y-2" data-sentry-mask>
+              {visibleInvites.map((invite) => (
+                <Card key={invite.id} className="py-0">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{invite.email}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className={cn(
+                            'text-xs px-2 py-0.5 rounded-full font-medium',
+                            invite.status === 'pending'
+                              ? 'bg-warning/20 text-warning'
+                              : 'bg-muted text-muted-foreground'
+                          )}>
+                            {invite.status === 'pending' ? 'Pending' : 'Expired'}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Sent {getTimeAgo(invite.created_at)}
+                          </span>
+                        </div>
+                      </div>
+                      {invite.status === 'pending' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs"
+                          onClick={() => handleInviteClient(invite.email)}
+                          disabled={inviteStatus === 'loading'}
+                        >
+                          Resend
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Client List */}
         {clients.length === 0 ? (
