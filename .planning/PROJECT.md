@@ -2,11 +2,11 @@
 
 ## What This Is
 
-Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic. The app has completed three milestones (launch polish, design refresh, pre-launch confidence) and is ready for production deployment.
+Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic. The app is adding a coach dashboard so the sole coach can invite clients, manage their workout programs and macro targets, and review structured weekly check-ins — all from a dedicated `/coach` route.
 
 ## Core Value
 
-**When this launches to 90k people, nothing is broken and you can see exactly how they're using it.** E2E tests catch regressions before users do. Analytics and monitoring tell you what's working and what's not — from day one.
+**The coach can manage every client's training from one place — programs, macros, check-ins — and clients see their personalized plans without friction.** The coach dashboard is the command center; the client app is the delivery mechanism.
 
 ## Requirements
 
@@ -43,11 +43,17 @@ Previous milestones delivered:
 
 ### Active
 
-None — ready for deployment. Next milestone TBD after launch feedback.
+v1.3 Coach Dashboard:
+
+- [ ] Invite clients by email (signup invite sent)
+- [ ] Client roster with activity summaries (last workout, streak, macro adherence)
+- [ ] Workout programming (assign specific workouts to specific dates on client calendar)
+- [ ] Macro management (set client daily calorie/protein/carb/fat targets)
+- [ ] Structured weekly check-ins (client fills out form, coach reviews responses)
+- [ ] Coach route (`/coach`) — separate area, single coach account
 
 ### Out of Scope
 
-- Coach dashboard — still client-only
 - Native mobile app — still PWA
 - Light mode — dark-only
 - Marketing site — app only
@@ -59,9 +65,10 @@ None — ready for deployment. Next milestone TBD after launch feedback.
 **Current State:**
 - Three milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence)
 - 139 unit tests + 10 E2E tests passing
-- 22 Plausible analytics events wired with 3 funnel definitions
-- Sentry: performance tracing, source maps, session replay with PII masking, ErrorBoundary capture
-- Ready for production deployment to ~90k followers
+- App is fully client-facing — no coach/admin capabilities yet
+- Supabase handles auth and cloud sync but no multi-user data relationships
+- No email sending infrastructure (invites will need a solution)
+- No real-time or messaging infrastructure
 
 **Tech Stack:**
 - React 18 + TypeScript + Vite + Tailwind v4 + shadcn/ui + CVA
@@ -76,11 +83,11 @@ None — ready for deployment. Next milestone TBD after launch feedback.
 
 ## Constraints
 
-- **Timeline**: Ready to ship — launch when confident
-- **Functionality**: Zero behavior changes in v1.2 — testing and observability only
-- **Privacy**: Plausible is privacy-first (no cookies) — keep it that way
-- **Bundle size**: Monitoring additions must not bloat the client
-- **Existing tools**: Build on Sentry + Plausible — don't add new vendors
+- **Single coach**: Only one coach account — no multi-tenancy needed
+- **Supabase**: All backend through Supabase (auth, database, edge functions, realtime) — no separate backend
+- **Privacy**: Client data visible only to coach — clients cannot see each other
+- **Existing aesthetic**: Coach dashboard follows the same premium dark design system (shadcn/ui, CVA)
+- **PWA**: Still a PWA — no native app
 
 ## Key Decisions
 
@@ -94,5 +101,7 @@ None — ready for deployment. Next milestone TBD after launch feedback.
 | Dual Playwright projects | Separate auth tests from bypassed tests | ✓ Good — clean isolation |
 | maskAllText: false + [data-sentry-mask] | Readable replays + PII protection | ✓ Good — minimal masking, maximum insight |
 
+| Coach dashboard at /coach | Single coach, Supabase-only backend, keeps existing design system | — Pending |
+
 ---
-*Last updated: 2026-02-07 after v1.2 milestone*
+*Last updated: 2026-02-07 after v1.3 milestone started*

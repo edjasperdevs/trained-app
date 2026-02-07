@@ -4,17 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-07)
 
-**Core value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
-**Current focus:** v1.2 milestone complete. Ready for deployment or next milestone.
+**Core value:** The coach can manage every client's training from one place — programs, macros, check-ins — and clients see their personalized plans without friction
+**Current focus:** v1.3 Coach Dashboard — defining requirements
 
 ## Current Position
 
-Phase: Milestone complete
-Plan: N/A
-Status: v1.2 Pre-Launch Confidence shipped
-Last activity: 2026-02-07 — v1.2 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-07 — Milestone v1.3 started
 
-Progress: [██████████] 100% (3 milestones shipped)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -41,5 +41,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: v1.2 milestone archived
+Stopped at: Milestone v1.3 initialized — defining requirements
 Resume file: None
