@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
-**Current focus:** Phase 1 complete -- ready for Phase 2 (E2E Critical Journeys)
+**Current focus:** Phase 2 in progress -- E2E Critical Journeys (auth tests done, core journeys next)
 
 ## Current Position
 
-Phase: 1 of 4 (Test Foundation) -- COMPLETE
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-07 -- Completed 01-02-PLAN.md (Playwright E2E infrastructure and data-testid selectors)
+Phase: 2 of 4 (E2E Critical Journeys)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 02-01-PLAN.md (Auth and onboarding E2E tests)
 
-Progress: [██░░░░░░░░] 29% (2/7 plans)
+Progress: [███░░░░░░░] 43% (3/7 plans)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [██░░░░░░░░] 29% (2/7 plans)
 - Average plan duration: 7.4min
 
 **Current Milestone:**
-- Total plans completed: 2
-- Average duration: 8min
-- Total execution time: 0.27 hours
+- Total plans completed: 3
+- Average duration: 10min
+- Total execution time: 0.52 hours
 
 *Updated after each plan completion*
 
@@ -45,10 +45,14 @@ Recent decisions affecting current work:
 - Chromium-only project for now (mobile browsers deferred to Phase 2)
 - page.addInitScript for localStorage seeding (before Zustand hydration)
 - getByRole over getByText for E2E assertions (avoids strict mode violations)
+- Dual Playwright projects: chromium (port 5173, bypass) + chromium-auth (port 5174, no bypass)
+- VITE_DEV_BYPASS=false in process env overrides .env file for auth tests
+- Catch-all page.route handler for Supabase auth mocking (URL-based dispatch)
+- Locator.or() pattern for handling parent-unmount race conditions in E2E tests
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
@@ -57,5 +61,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 01-02-PLAN.md (Phase 1 complete)
+Stopped at: Completed 02-01-PLAN.md (Auth E2E tests)
 Resume file: None
