@@ -31,7 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Client app loads coach-assigned data (macros, workouts) from Supabase on app open without the client pushing stale data back
   4. A non-coach user cannot insert rows into `coach_clients` via the Supabase API (RLS enforces `role = 'coach'`)
   5. Coach dashboard code is not included in the client app's JavaScript bundle
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 01-01-PLAN.md -- Schema migration (set_by column, RLS fix, role protection trigger)
+- [ ] 01-02-PLAN.md -- CoachGuard route protection component + App.tsx wiring
+- [ ] 01-03-PLAN.md -- Directional sync refactor (pushClientData, pullCoachData)
 
 ### Phase 2: Invitations
 **Goal**: Coach can invite new clients by email and the coach-client relationship is automatically created when the invite is accepted
@@ -96,7 +100,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
+| 1. Foundation | 0/3 | Not started | - |
 | 2. Invitations | 0/TBD | Not started | - |
 | 3. Client Roster | 0/TBD | Not started | - |
 | 4. Macro Management | 0/TBD | Not started | - |
