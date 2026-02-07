@@ -10,6 +10,7 @@ export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active'
 export type WorkoutType = 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'rest'
 export type XPSource = 'workout' | 'protein' | 'calories' | 'checkin' | 'claim'
 export type CoachClientStatus = 'pending' | 'active' | 'inactive'
+export type MacroSetBy = 'self' | 'coach'
 
 export type Json =
   | string
@@ -147,6 +148,8 @@ export interface Database {
           carbs: number
           fats: number
           activity_level: ActivityLevel
+          set_by: MacroSetBy
+          set_by_coach_id: string | null
         }
         Insert: {
           id?: string
@@ -158,6 +161,8 @@ export interface Database {
           carbs: number
           fats: number
           activity_level: ActivityLevel
+          set_by?: MacroSetBy
+          set_by_coach_id?: string | null
         }
         Update: {
           id?: string
@@ -169,6 +174,8 @@ export interface Database {
           carbs?: number
           fats?: number
           activity_level?: ActivityLevel
+          set_by?: MacroSetBy
+          set_by_coach_id?: string | null
         }
         Relationships: []
       }
@@ -403,6 +410,7 @@ export interface Database {
       workout_type: WorkoutType
       xp_source: XPSource
       coach_client_status: CoachClientStatus
+      macro_set_by: MacroSetBy
     }
     CompositeTypes: {
       [_ in never]: never
