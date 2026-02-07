@@ -6,9 +6,11 @@ import { WeightChart, ClientMacroAdherence, ClientActivityFeed } from '@/compone
 import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useClientDetails } from '@/hooks/useClientDetails'
+import { useClientRoster, ClientSummary } from '@/hooks/useClientRoster'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
-import { getMockClients, getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
+import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
+import { Search } from 'lucide-react'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
@@ -23,28 +25,21 @@ interface InviteRow {
   accepted_at: string | null
 }
 
-interface ClientSummary {
-  client_id: string | null
-  status: 'pending' | 'active' | 'inactive' | null
-  username: string | null
-  email: string | null
-  current_streak: number | null
-  longest_streak: number | null
-  last_check_in_date: string | null
-  goal: string | null
-  onboarding_complete: boolean | null
-  current_level: number | null
-  total_xp: number | null
-  latest_weight: number | null
-  latest_weight_date: string | null
-  workouts_last_7_days: number | null
-}
-
 export function Coach() {
   const user = useAuthStore((state) => state.user)
-  const [clients, setClients] = useState<ClientSummary[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    clients,
+    totalCount,
+    page,
+    search,
+    isLoading,
+    error,
+    totalPages,
+    setPage,
+    setSearch,
+    refresh,
+  } = useClientRoster()
+
   const [selectedClient, setSelectedClient] = useState<ClientSummary | null>(null)
   const [activeTab, setActiveTab] = useState<ClientDetailTab>('overview')
   const [showAddClient, setShowAddClient] = useState(false)
@@ -70,7 +65,6 @@ export function Coach() {
   }, [selectedClient?.client_id])
 
   useEffect(() => {
-    fetchClients()
     fetchInvites()
   }, [])
 
@@ -83,39 +77,6 @@ export function Coach() {
       analytics.clientViewed()
     }
   }, [selectedClient])
-
-  const fetchClients = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      if (devBypass) {
-        setClients(getMockClients())
-        return
-      }
-
-      const client = getSupabaseClient()
-
-      const { data, error } = await client
-        .from('coach_client_summary')
-        .select('*')
-
-      if (error) throw error
-
-      setClients(data || [])
-    } catch (err) {
-      console.error('Error fetching clients:', err)
-      if (err instanceof Error && err.message.includes('network')) {
-        setError('Network error - check your connection')
-        toast.error('Unable to load clients - check your internet')
-      } else {
-        setError('Failed to load clients')
-        toast.error('Failed to load clients')
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const fetchInvites = async () => {
     try {
@@ -191,7 +152,7 @@ export function Coach() {
           setInviteMessage('User already had an account -- added as client!')
           toast.success('Client added!')
           setInviteEmail('')
-          fetchClients()
+          refresh()
         } else {
           // Simulate 'invite_sent' -- new user
           setInviteStatus('success')
@@ -239,7 +200,7 @@ export function Coach() {
         setInviteMessage('User already had an account -- added as client!')
         toast.success('Client added!')
         setInviteEmail('')
-        fetchClients()
+        refresh()
         fetchInvites()
       } else if (data?.action === 'invite_sent') {
         setInviteStatus('success')
@@ -280,7 +241,7 @@ export function Coach() {
         removeMockClient(clientId)
         toast.success('Client removed')
         setSelectedClient(null)
-        fetchClients()
+        refresh()
         return
       }
 
@@ -297,7 +258,7 @@ export function Coach() {
 
       toast.success('Client removed')
       setSelectedClient(null)
-      fetchClients()
+      refresh()
     } catch (err) {
       console.error('Error removing client:', err)
       if (err instanceof Error && err.message.includes('network')) {
@@ -348,7 +309,7 @@ export function Coach() {
   // Filter invites to show only non-accepted (pending + expired)
   const visibleInvites = invites.filter(inv => inv.status !== 'accepted')
 
-  if (isLoading) {
+  if (isLoading && clients.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -359,14 +320,14 @@ export function Coach() {
     )
   }
 
-  if (error) {
+  if (error && clients.length === 0 && !search.trim()) {
     return (
       <div className="min-h-screen flex items-center justify-center px-5">
         <Card className="py-0">
           <CardContent className="text-center p-4">
             <span className="text-4xl block mb-4">⚠️</span>
             <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={fetchClients}>Retry</Button>
+            <Button onClick={refresh}>Retry</Button>
           </CardContent>
         </Card>
       </div>
@@ -380,57 +341,72 @@ export function Coach() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Coach Dashboard</h1>
-            <p className="text-muted-foreground">{clients.length} client{clients.length !== 1 ? 's' : ''}</p>
+            <p className="text-muted-foreground">{totalCount} client{totalCount !== 1 ? 's' : ''}</p>
           </div>
           <Button onClick={() => setShowAddClient(true)}>
             + Invite Client
           </Button>
         </div>
+
+        {/* Search Input */}
+        {(totalCount > 0 || search.trim()) && (
+          <div className="relative mt-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search clients..."
+              className="pl-9"
+            />
+          </div>
+        )}
       </div>
 
       <div className="px-5 py-6 space-y-4">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="py-0 text-center">
-            <CardContent className="p-3">
-              <p className="text-2xl font-bold font-digital text-success">
-                {clients.filter(c => {
-                  const days = c.last_check_in_date
-                    ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
-                    : 999
-                  return days <= 1
-                }).length}
-              </p>
-              <p className="text-xs text-muted-foreground">Active Today</p>
-            </CardContent>
-          </Card>
-          <Card className="py-0 text-center">
-            <CardContent className="p-3">
-              <p className="text-2xl font-bold font-digital text-warning">
-                {clients.filter(c => {
-                  const days = c.last_check_in_date
-                    ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
-                    : 999
-                  return days > 1 && days <= 3
-                }).length}
-              </p>
-              <p className="text-xs text-muted-foreground">Need Check-in</p>
-            </CardContent>
-          </Card>
-          <Card className="py-0 text-center">
-            <CardContent className="p-3">
-              <p className="text-2xl font-bold font-digital text-destructive">
-                {clients.filter(c => {
-                  const days = c.last_check_in_date
-                    ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
-                    : 999
-                  return days > 3
-                }).length}
-              </p>
-              <p className="text-xs text-muted-foreground">Falling Off</p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Quick Stats -- only show when all clients fit on one page */}
+        {totalPages <= 1 && clients.length > 0 && (
+          <div className="grid grid-cols-3 gap-3">
+            <Card className="py-0 text-center">
+              <CardContent className="p-3">
+                <p className="text-2xl font-bold font-digital text-success">
+                  {clients.filter(c => {
+                    const days = c.last_check_in_date
+                      ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
+                      : 999
+                    return days <= 1
+                  }).length}
+                </p>
+                <p className="text-xs text-muted-foreground">Active Today</p>
+              </CardContent>
+            </Card>
+            <Card className="py-0 text-center">
+              <CardContent className="p-3">
+                <p className="text-2xl font-bold font-digital text-warning">
+                  {clients.filter(c => {
+                    const days = c.last_check_in_date
+                      ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
+                      : 999
+                    return days > 1 && days <= 3
+                  }).length}
+                </p>
+                <p className="text-xs text-muted-foreground">Need Check-in</p>
+              </CardContent>
+            </Card>
+            <Card className="py-0 text-center">
+              <CardContent className="p-3">
+                <p className="text-2xl font-bold font-digital text-destructive">
+                  {clients.filter(c => {
+                    const days = c.last_check_in_date
+                      ? Math.floor((Date.now() - new Date(c.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
+                      : 999
+                    return days > 3
+                  }).length}
+                </p>
+                <p className="text-xs text-muted-foreground">Falling Off</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Pending Invites */}
         {visibleInvites.length > 0 && (
@@ -483,59 +459,84 @@ export function Coach() {
 
         {/* Client List */}
         {clients.length === 0 ? (
-          <Card className="py-0">
-            <CardContent className="text-center py-8">
-              <span className="text-4xl block mb-4">👥</span>
-              <p className="text-muted-foreground mb-2">No clients yet</p>
-              <p className="text-sm text-muted-foreground mb-4">Invite your first client to get started</p>
-              <Button onClick={() => setShowAddClient(true)}>Invite Client</Button>
-            </CardContent>
-          </Card>
+          search.trim() ? (
+            <Card className="py-0">
+              <CardContent className="text-center py-8">
+                <span className="text-4xl block mb-4">🔍</span>
+                <p className="text-muted-foreground mb-2">No clients match your search</p>
+                <p className="text-sm text-muted-foreground mb-4">Try a different name or email</p>
+                <Button variant="ghost" onClick={() => setSearch('')}>Clear search</Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="py-0">
+              <CardContent className="text-center py-8">
+                <span className="text-4xl block mb-4">👥</span>
+                <p className="text-muted-foreground mb-2">No clients yet</p>
+                <p className="text-sm text-muted-foreground mb-4">Invite your first client to get started</p>
+                <Button onClick={() => setShowAddClient(true)}>Invite Client</Button>
+              </CardContent>
+            </Card>
+          )
         ) : (
           <div className="space-y-2" data-sentry-mask>
-            {clients
-              .sort((a, b) => {
-                // Sort by needs attention first
-                const aDays = a.last_check_in_date
-                  ? Math.floor((Date.now() - new Date(a.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
-                  : 999
-                const bDays = b.last_check_in_date
-                  ? Math.floor((Date.now() - new Date(b.last_check_in_date).getTime()) / (1000 * 60 * 60 * 24))
-                  : 999
-                return bDays - aDays
-              })
-              .map((client, index) => (
-                <div
-                  key={client.client_id}
-                  className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-                  style={{ animationDelay: `${index * 50}ms` }}
+            {clients.map((client, index) => (
+              <div
+                key={client.client_id}
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <Card
+                  className="py-0 cursor-pointer hover:bg-card/80 transition-colors"
+                  onClick={() => setSelectedClient(client)}
                 >
-                  <Card
-                    className="py-0 cursor-pointer hover:bg-card/80 transition-colors"
-                    onClick={() => setSelectedClient(client)}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{getStatusEmoji(client)}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold truncate">
-                            {client.username || client.email?.split('@')[0] || 'Unknown'}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">{client.email}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-digital ${getStatusColor(client)}`}>
-                            Lvl {client.current_level || 1}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {client.current_streak || 0} day streak
-                          </p>
-                        </div>
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{getStatusEmoji(client)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate">
+                          {client.username || client.email?.split('@')[0] || 'Unknown'}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">{client.email}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                      <div className="text-right">
+                        <p className={`text-sm font-digital ${getStatusColor(client)}`}>
+                          {client.workouts_last_7_days || 0} workouts
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {client.current_streak || 0} day streak
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {page + 1} of {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
           </div>
         )}
       </div>
