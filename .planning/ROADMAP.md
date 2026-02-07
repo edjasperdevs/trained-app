@@ -86,7 +86,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Document event naming convention and funnel definitions (ANLYT-01, ANLYT-04)
+- [x] 03-01-PLAN.md -- Document event naming convention and funnel definitions (ANLYT-01, ANLYT-04)
 - [ ] 03-02-PLAN.md -- Wire 14 missing events, verify SPA pageview tracking (ANLYT-02, ANLYT-03)
 
 ---
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|---------------|--------|-----------|
 | 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
 | 2. E2E Critical Journeys | 2/2 | Complete | 2026-02-07 |
-| 3. Analytics Enhancement | 0/2 | Not started | - |
+| 3. Analytics Enhancement | 1/2 | In progress | - |
 | 4. Monitoring Hardening | 0/1 | Not started | - |
 
 ---
