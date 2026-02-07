@@ -43,6 +43,7 @@ export default defineConfig({
       url: 'http://localhost:5174',
       reuseExistingServer: !process.env.CI,
       env: {
+        VITE_DEV_BYPASS: 'false',
         VITE_SUPABASE_URL: 'http://fake-supabase.test',
         VITE_SUPABASE_ANON_KEY: 'fake-anon-key-for-e2e',
       },

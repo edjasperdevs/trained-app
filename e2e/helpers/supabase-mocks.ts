@@ -3,6 +3,9 @@
  *
  * Sets up page.route() interceptors that mock Supabase auth API responses,
  * allowing auth tests to run without a real Supabase backend.
+ *
+ * The fake Supabase URL is http://fake-supabase.test (configured in
+ * playwright.config.ts webServer env vars for port 5174).
  */
 import type { Page } from '@playwright/test'
 
@@ -11,63 +14,73 @@ const FAKE_USER = {
   email: 'e2e@test.com',
   aud: 'authenticated',
   role: 'authenticated',
-  created_at: new Date().toISOString(),
+  created_at: '2026-01-01T00:00:00.000Z',
 }
 
 const FAKE_SESSION = {
   access_token: 'fake-access-token-e2e',
   token_type: 'bearer',
   expires_in: 3600,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
   refresh_token: 'fake-refresh-token-e2e',
   user: FAKE_USER,
 }
 
 /**
  * Mock Supabase auth for the sign-up flow.
- * Intercepts: signup, token refresh, user endpoint, and REST API calls.
+ *
+ * After sign-up, returns a valid session so the app transitions to Onboarding.
  * Must be called BEFORE page.goto().
  */
 export async function mockSupabaseSignUp(page: Page) {
-  // Mock signup endpoint
-  await page.route('**/auth/v1/signup', async (route) => {
+  // Catch-all for auth endpoints on the fake Supabase URL
+  await page.route('**/auth/v1/**', async (route) => {
+    const url = route.request().url()
+    const method = route.request().method()
+
+    // POST /auth/v1/signup -- sign-up request
+    if (url.includes('/auth/v1/signup') && method === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: FAKE_USER,
+          session: FAKE_SESSION,
+        }),
+      })
+      return
+    }
+
+    // POST /auth/v1/token -- token refresh or password login
+    if (url.includes('/auth/v1/token') && method === 'POST') {
+      // Return valid session for any token request (refresh after signup)
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(FAKE_SESSION),
+      })
+      return
+    }
+
+    // GET /auth/v1/user -- get user endpoint
+    if (url.includes('/auth/v1/user') && method === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(FAKE_USER),
+      })
+      return
+    }
+
+    // Any other auth endpoint -- return empty success
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({
-        user: FAKE_USER,
-        session: FAKE_SESSION,
-      }),
+      body: '{}',
     })
   })
 
-  // Mock token refresh endpoint
-  await page.route('**/auth/v1/token?grant_type=refresh_token', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_SESSION),
-    })
-  })
-
-  // Mock user endpoint (GET)
-  await page.route('**/auth/v1/user', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_USER),
-    })
-  })
-
-  // Mock initial session check (getSession calls token endpoint)
-  await page.route('**/auth/v1/token?grant_type=*', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_SESSION),
-    })
-  })
-
-  // Mock generic REST API calls to prevent failures
+  // Mock generic REST API calls to prevent Supabase data sync failures
   await page.route('**/rest/v1/**', async (route) => {
     await route.fulfill({
       status: 200,
@@ -79,60 +92,82 @@ export async function mockSupabaseSignUp(page: Page) {
 
 /**
  * Mock Supabase auth for the sign-in flow.
- * Intercepts: password login, token refresh, user endpoint, and REST API calls.
+ *
+ * Initial session check returns no session (so Auth screen shows).
+ * Password sign-in returns a valid session so the app transitions to Home.
  * Must be called BEFORE page.goto().
  */
 export async function mockSupabaseSignIn(page: Page) {
-  // Mock password login endpoint
-  await page.route('**/auth/v1/token?grant_type=password', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_SESSION),
-    })
-  })
+  // Track whether a successful sign-in has occurred
+  let signedIn = false
 
-  // Mock token refresh endpoint
-  await page.route('**/auth/v1/token?grant_type=refresh_token', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_SESSION),
-    })
-  })
-
-  // Mock user endpoint (GET)
-  await page.route('**/auth/v1/user', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(FAKE_USER),
-    })
-  })
-
-  // Mock initial session check -- return 401 so app shows Auth screen initially
-  // (no existing session before sign-in)
-  await page.route('**/auth/v1/token?grant_type=*', async (route) => {
-    // Check if this is the password grant (sign-in) or refresh (initial check)
+  // Catch-all for auth endpoints on the fake Supabase URL
+  await page.route('**/auth/v1/**', async (route) => {
     const url = route.request().url()
-    if (url.includes('grant_type=password')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(FAKE_SESSION),
-      })
-    } else {
-      // For refresh token or other grant types during init, return error
-      // so the app shows auth screen
+    const method = route.request().method()
+
+    // POST /auth/v1/token -- token requests
+    if (url.includes('/auth/v1/token') && method === 'POST') {
+      if (url.includes('grant_type=password')) {
+        // Password sign-in -- return valid session
+        signedIn = true
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_SESSION),
+        })
+        return
+      }
+
+      if (signedIn) {
+        // After sign-in, token refresh should succeed
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_SESSION),
+        })
+        return
+      }
+
+      // Before sign-in, return error so app shows Auth screen
       await route.fulfill({
         status: 400,
         contentType: 'application/json',
-        body: JSON.stringify({ error: 'invalid_grant', error_description: 'No session' }),
+        body: JSON.stringify({
+          error: 'invalid_grant',
+          error_description: 'No session found',
+        }),
       })
+      return
     }
+
+    // GET /auth/v1/user
+    if (url.includes('/auth/v1/user') && method === 'GET') {
+      if (signedIn) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_USER),
+        })
+      } else {
+        await route.fulfill({
+          status: 401,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'not_authenticated' }),
+        })
+      }
+      return
+    }
+
+    // POST /auth/v1/signup or anything else -- just succeed
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{}',
+    })
   })
 
-  // Mock generic REST API calls to prevent failures
+  // Mock generic REST API calls to prevent Supabase data sync failures
   await page.route('**/rest/v1/**', async (route) => {
     await route.fulfill({
       status: 200,
