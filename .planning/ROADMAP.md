@@ -34,7 +34,7 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
 - [x] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
 - [x] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
 - [x] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
-- [ ] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
+- [x] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
 
 ## Phase Details
 
@@ -103,8 +103,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Configure Sentry tracing, replay integration, source map upload, ErrorBoundary wiring (MON-01, MON-02, MON-04 partial)
-- [ ] 04-02-PLAN.md -- Add PII masking to health/fitness screens, configure Sentry alert rules (MON-03, MON-04)
+- [x] 04-01-PLAN.md -- Configure Sentry tracing, replay integration, source map upload, ErrorBoundary wiring (MON-01, MON-02, MON-04 partial)
+- [x] 04-02-PLAN.md -- Add PII masking to health/fitness screens, configure Sentry alert rules (MON-03, MON-04)
 
 ## Progress
 
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
 | 2. E2E Critical Journeys | 2/2 | Complete | 2026-02-07 |
 | 3. Analytics Enhancement | 2/2 | Complete | 2026-02-07 |
-| 4. Monitoring Hardening | 0/2 | Not started | - |
+| 4. Monitoring Hardening | 2/2 | Complete | 2026-02-07 |
 
 ---
 *Roadmap created: 2026-02-06*

@@ -45,10 +45,10 @@ Requirements for pre-launch confidence -- E2E testing, analytics enhancement, an
 
 ### Monitoring Hardening
 
-- [ ] **MON-01**: Sentry `browserTracingIntegration()` activated (captures page load performance + Web Vitals)
-- [ ] **MON-02**: Source maps uploaded to Sentry (readable stack traces in production)
-- [ ] **MON-03**: Alert rules configured for error rate spikes post-launch
-- [ ] **MON-04**: Session replay masks health/fitness PII (body weight, meals, body metrics)
+- [x] **MON-01**: Sentry `browserTracingIntegration()` activated (captures page load performance + Web Vitals)
+- [x] **MON-02**: Source maps uploaded to Sentry (readable stack traces in production)
+- [ ] **MON-03**: Alert rules configured for error rate spikes post-launch — **Manual TODO: create in Sentry Dashboard**
+- [x] **MON-04**: Session replay masks health/fitness PII (body weight, meals, body metrics)
 
 ## Future Requirements
 
@@ -103,10 +103,10 @@ Deferred to post-launch.
 | ANLYT-02 | Phase 3 | Complete |
 | ANLYT-03 | Phase 3 | Complete |
 | ANLYT-04 | Phase 3 | Complete |
-| MON-01 | Phase 4 | Pending |
-| MON-02 | Phase 4 | Pending |
-| MON-03 | Phase 4 | Pending |
-| MON-04 | Phase 4 | Pending |
+| MON-01 | Phase 4 | Complete |
+| MON-02 | Phase 4 | Complete |
+| MON-03 | Phase 4 | Manual TODO |
+| MON-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 21 total
@@ -115,4 +115,4 @@ Deferred to post-launch.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-07 after Phase 3 completion*
+*Last updated: 2026-02-07 after Phase 4 completion*
