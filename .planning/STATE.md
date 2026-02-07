@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 2 complete. Ready for Phase 3 (Client Roster).
+**Current focus:** Phase 3 (Client Roster) -- Plan 01 complete, Plan 02 next.
 
 ## Current Position
 
 Phase: 3 of 6 (Client Roster)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-07 -- Phase 2 (Invitations) verified and complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 03-01-PLAN.md (Roster Data Layer)
 
-Progress: [██████░░░░] 33%
+Progress: [███████░░░] 37%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [██████░░░░] 33%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 2.7min
-- Total execution time: 16min
+- Total execution time: 18min
 
 ## Accumulated Context
 
@@ -53,6 +53,10 @@ Recent decisions affecting current work:
 - 02-03: Accepted invites excluded from invite section (appear in client list via auto-link)
 - 02-03: Dev bypass returns empty invites array (server-authoritative, no meaningful mock)
 - 02-03: Resend reuses handleInviteClient with emailOverride param
+- 03-01: security_invoker via CREATE OR REPLACE (not DROP+CREATE) to avoid downtime
+- 03-01: ClientSummary interface defined in useClientRoster.ts for shared reuse
+- 03-01: Estimated count for pagination performance
+- 03-01: Dev bypass filters mock data client-side matching server behavior shape
 
 ### Pending Todos
 
@@ -61,6 +65,7 @@ Recent decisions affecting current work:
 - Verify source maps + PII masking + session replay post-deploy
 - Set up Resend API key and deploy send-invite Edge Function before invite testing
 - Apply migration 003_invitations.sql to Supabase
+- Apply migration 004_roster_enhancements.sql to Supabase
 
 ### Blockers/Concerns
 
@@ -69,5 +74,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Phase 2 (Invitations) complete -- ready for Phase 3 (Client Roster)
+Stopped at: Completed 03-01-PLAN.md (Roster Data Layer)
 Resume file: None
