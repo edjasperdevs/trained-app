@@ -80,6 +80,8 @@ interface MacroStore {
   dailyLogs: DailyMacroLog[]
   savedMeals: SavedMeal[]
   activityLevel: ActivityLevel
+  setBy: 'self' | 'coach'
+  setByCoachId: string | null
 
   // Actions
   calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => void
@@ -103,6 +105,7 @@ interface MacroStore {
   isProteinTargetHit: () => boolean
   isCalorieTargetHit: () => boolean
   isPerfectDay: () => boolean
+  setCoachTargets: (targets: MacroTargets, coachId: string) => void
   setActivityLevel: (level: ActivityLevel) => void
   resetMacros: () => void
   exportData: () => string
@@ -131,6 +134,8 @@ export const useMacroStore = create<MacroStore>()(
       dailyLogs: [],
       savedMeals: [],
       activityLevel: 'moderate',
+      setBy: 'self',
+      setByCoachId: null,
 
       calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => {
         // Mifflin-St Jeor Equation for BMR
@@ -157,7 +162,9 @@ export const useMacroStore = create<MacroStore>()(
 
         set({
           targets: { protein, calories: adjustedCalories, carbs, fats },
-          activityLevel: activity
+          activityLevel: activity,
+          setBy: 'self',
+          setByCoachId: null,
         })
 
         // Generate meal plan after setting targets
@@ -518,12 +525,24 @@ export const useMacroStore = create<MacroStore>()(
         return get().isProteinTargetHit() && get().isCalorieTargetHit()
       },
 
+      setCoachTargets: (targets, coachId) => {
+        set({
+          targets,
+          setBy: 'coach',
+          setByCoachId: coachId,
+        })
+        // Regenerate meal plan with new targets
+        get().generateMealPlan()
+      },
+
       setActivityLevel: (level) => set({ activityLevel: level }),
 
       resetMacros: () => set({
         targets: null,
         mealPlan: [],
-        dailyLogs: []
+        dailyLogs: [],
+        setBy: 'self',
+        setByCoachId: null,
       }),
 
       exportData: () => {
