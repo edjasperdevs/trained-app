@@ -33,7 +33,7 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
 
 - [x] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
 - [x] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
-- [ ] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
+- [x] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
 - [ ] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
 
 ## Phase Details
@@ -87,7 +87,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- Document event naming convention and funnel definitions (ANLYT-01, ANLYT-04)
-- [ ] 03-02-PLAN.md -- Wire 14 missing events, verify SPA pageview tracking (ANLYT-02, ANLYT-03)
+- [x] 03-02-PLAN.md -- Wire 14 missing events, verify SPA pageview tracking (ANLYT-02, ANLYT-03)
 
 ---
 
@@ -114,7 +114,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|---------------|--------|-----------|
 | 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
 | 2. E2E Critical Journeys | 2/2 | Complete | 2026-02-07 |
-| 3. Analytics Enhancement | 1/2 | In progress | - |
+| 3. Analytics Enhancement | 2/2 | Complete | 2026-02-07 |
 | 4. Monitoring Hardening | 0/1 | Not started | - |
 
 ---

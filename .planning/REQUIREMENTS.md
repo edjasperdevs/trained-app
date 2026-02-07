@@ -38,10 +38,10 @@ Requirements for pre-launch confidence -- E2E testing, analytics enhancement, an
 
 ### Analytics Enhancement
 
-- [ ] **ANLYT-01**: Event naming convention documented and applied to all existing + new events
-- [ ] **ANLYT-02**: All 14 unwired Plausible events connected to their corresponding screens/actions
-- [ ] **ANLYT-03**: SPA pageview tracking fires on route changes (not just initial load)
-- [ ] **ANLYT-04**: Funnel definitions documented: sign up → onboarding complete → first workout → 7-day retention
+- [x] **ANLYT-01**: Event naming convention documented and applied to all existing + new events
+- [x] **ANLYT-02**: All 14 unwired Plausible events connected to their corresponding screens/actions
+- [x] **ANLYT-03**: SPA pageview tracking fires on route changes (not just initial load)
+- [x] **ANLYT-04**: Funnel definitions documented: sign up → onboarding complete → first workout → 7-day retention
 
 ### Monitoring Hardening
 
@@ -99,10 +99,10 @@ Deferred to post-launch.
 | E2E-09 | Phase 2 | Complete |
 | E2E-10 | Phase 2 | Complete |
 | E2E-11 | Phase 2 | Complete |
-| ANLYT-01 | Phase 3 | Pending |
-| ANLYT-02 | Phase 3 | Pending |
-| ANLYT-03 | Phase 3 | Pending |
-| ANLYT-04 | Phase 3 | Pending |
+| ANLYT-01 | Phase 3 | Complete |
+| ANLYT-02 | Phase 3 | Complete |
+| ANLYT-03 | Phase 3 | Complete |
+| ANLYT-04 | Phase 3 | Complete |
 | MON-01 | Phase 4 | Pending |
 | MON-02 | Phase 4 | Pending |
 | MON-03 | Phase 4 | Pending |
@@ -115,4 +115,4 @@ Deferred to post-launch.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-07 after Phase 2 completion*
+*Last updated: 2026-02-07 after Phase 3 completion*
