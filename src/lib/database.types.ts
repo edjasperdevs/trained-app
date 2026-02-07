@@ -10,6 +10,7 @@ export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active'
 export type WorkoutType = 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'rest'
 export type XPSource = 'workout' | 'protein' | 'calories' | 'checkin' | 'claim'
 export type CoachClientStatus = 'pending' | 'active' | 'inactive'
+export type InviteStatus = 'pending' | 'accepted' | 'expired'
 export type MacroSetBy = 'self' | 'coach'
 
 export type Json =
@@ -110,6 +111,45 @@ export interface Database {
           coach_id?: string
           client_id?: string
           status?: CoachClientStatus
+        }
+        Relationships: []
+      }
+      invites: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          coach_id: string
+          email: string
+          status: InviteStatus
+          token: string
+          expires_at: string
+          accepted_at: string | null
+          accepted_by: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id: string
+          email: string
+          status?: InviteStatus
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          accepted_by?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id?: string
+          email?: string
+          status?: InviteStatus
+          token?: string
+          expires_at?: string
+          accepted_at?: string | null
+          accepted_by?: string | null
         }
         Relationships: []
       }
@@ -410,6 +450,7 @@ export interface Database {
       workout_type: WorkoutType
       xp_source: XPSource
       coach_client_status: CoachClientStatus
+      invite_status: InviteStatus
       macro_set_by: MacroSetBy
     }
     CompositeTypes: {
