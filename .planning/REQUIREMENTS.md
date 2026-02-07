@@ -1,62 +1,58 @@
-# Requirements: Trained Design Refresh
+# Requirements: Trained Pre-Launch Confidence
 
-**Defined:** 2026-02-05
-**Core Value:** The app must look and feel like it belongs next to Equinox, Whoop, and PUSH -- premium, dark, disciplined
+**Defined:** 2026-02-06
+**Core Value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
 
-## Previous Milestone (Launch Polish) -- Complete
+## Previous Milestones -- Complete
 
-All 16 requirements delivered. See archived milestone for details.
+### Launch Polish (v1.0) -- 16 requirements delivered
+### Design Refresh (v1.1) -- 25 requirements delivered
+
+See archived milestones for details.
 
 ## v1 Requirements
 
-Requirements for design refresh -- full visual overhaul with theme system simplification.
+Requirements for pre-launch confidence -- E2E testing, analytics enhancement, and monitoring hardening.
 
-### Foundation
+### Test Repair
 
-- [x] **FOUND-01**: Migrate Tailwind CSS v3 to v4 with `@theme` directive replacing JS token system
-- [x] **FOUND-02**: Define premium design tokens (surface hierarchy, border radius 12-16px, spacing scale, subtle borders)
-- [x] **FOUND-03**: Audit and replace all hardcoded colors (67 identified) with token references
-- [x] **FOUND-04**: Upgrade framer-motion to motion v12 (find-and-replace imports)
-- [x] **FOUND-05**: Self-host fonts via Fontsource (replace Google Fonts CDN)
-- [x] **FOUND-06**: Create `cn()` utility + install CVA, tailwind-merge, clsx
+- [ ] **TEST-01**: Existing unit/component tests pass after design refresh (`vitest run` green)
+- [ ] **TEST-02**: `tsc --noEmit` passes with zero type errors
 
-### Theme Removal
+### E2E Infrastructure
 
-- [x] **THEME-01**: Remove all `isTrained` branching (394 ternaries across 21 files) -- resolve to Trained values
-- [x] **THEME-02**: Delete GYG theme, ThemeProvider, useTheme hook, theme toggle
-- [x] **THEME-03**: Add localStorage migration for `app-theme` key on boot
+- [ ] **E2E-01**: Playwright installed and configured with Vite dev server integration
+- [ ] **E2E-02**: `data-testid` attributes added to all interactive elements across screens
+- [ ] **E2E-03**: Auth fixture seeds localStorage with valid Zustand store state (bypasses UI login)
+- [ ] **E2E-04**: Test isolation clears localStorage between tests (no state leakage)
 
-### Visual Refresh -- Components
+### E2E Critical Journeys
 
-- [x] **VIS-01**: Redesign primitive components with CVA variants (Button, Card, ProgressBar, Toast, inputs)
-- [x] **VIS-02**: Replace glass effects on standard cards with solid surface colors (keep glass for overlays only)
-- [x] **VIS-03**: Remove/mute glow effects -- keep ONE hero glow per screen maximum
-- [x] **VIS-04**: Refine focus rings, input styling, and form design to premium standard
+- [ ] **E2E-05**: E2E test covers access gate → sign up → onboarding → home screen
+- [ ] **E2E-06**: E2E test covers sign in → home screen with existing data
+- [ ] **E2E-07**: E2E test covers full workout logging flow (add exercise, log sets, save)
+- [ ] **E2E-08**: E2E test covers meal logging flow (search food, add entry, view macros)
+- [ ] **E2E-09**: E2E test covers daily check-in and streak maintenance
+- [ ] **E2E-10**: E2E test covers weekly XP claim ritual
+- [ ] **E2E-11**: E2E test covers offline → online sync cycle (service worker blocked, localStorage persists, sync triggers on reconnect)
 
-### Visual Refresh -- Screens
+### Analytics Enhancement
 
-- [x] **SCREEN-01**: Apply premium typography scale across all screens (3-4 sizes, weight-driven hierarchy)
-- [x] **SCREEN-02**: Fix uppercase overuse (restrict to section headers and primary CTAs only)
-- [x] **SCREEN-03**: Apply generous spacing system (20-24px screen padding, 16-24px card padding)
-- [x] **SCREEN-04**: Convert CheckInModal and XPClaimModal to bottom sheet pattern
-- [x] **SCREEN-05**: Update skeleton loading and empty state colors to match new palette
+- [ ] **ANLYT-01**: Event naming convention documented and applied to all existing + new events
+- [ ] **ANLYT-02**: All 14 unwired Plausible events connected to their corresponding screens/actions
+- [ ] **ANLYT-03**: SPA pageview tracking fires on route changes (not just initial load)
+- [ ] **ANLYT-04**: Funnel definitions documented: sign up → onboarding complete → first workout → 7-day retention
 
-### Animation
+### Monitoring Hardening
 
-- [x] **ANIM-01**: Replace bouncy animations with critically damped springs (damping 25-30, stiffness 300+)
-- [x] **ANIM-02**: Remove playful keyframe animations (float, xp-pop); mute pulse-glow
-- [x] **ANIM-03**: Ensure `prefers-reduced-motion` compliance via motion v12
+- [ ] **MON-01**: Sentry `browserTracingIntegration()` activated (captures page load performance + Web Vitals)
+- [ ] **MON-02**: Source maps uploaded to Sentry (readable stack traces in production)
+- [ ] **MON-03**: Alert rules configured for error rate spikes post-launch
+- [ ] **MON-04**: Session replay masks health/fitness PII (body weight, meals, body metrics)
 
-### Cleanup & Deploy
+## Future Requirements
 
-- [x] **CLEAN-01**: Delete all theme infrastructure (`src/themes/` directory, tailwind.config.js, legacy CSS rules)
-- [x] **CLEAN-02**: Final `tsc --noEmit` verification + full test suite pass
-- [x] **DEPLOY-01**: Service worker strategy for atomic design refresh release (force-update consideration)
-- [x] **DEPLOY-02**: Build "What's New" interstitial or update prompt for returning users
-
-## v2 Requirements
-
-Deferred to post-refresh.
+Deferred to post-launch.
 
 ### Advanced Visual
 - **ADV-01**: OKLCH color space conversion
@@ -65,57 +61,58 @@ Deferred to post-refresh.
 - **ADV-04**: Storybook for component documentation
 
 ### Extended Testing
-- **TEST-01**: Device matrix testing (iOS Safari, Android Chrome, desktop)
-- **TEST-02**: Comprehensive offline mode testing post-refresh
-- **TEST-03**: Cross-device sync testing
-- **TEST-04**: WCAG AAA contrast compliance (beyond AA)
+- **XTEST-01**: Cross-browser matrix (Chromium, WebKit, Firefox) in CI
+- **XTEST-02**: CI pipeline integration (GitHub Actions + Playwright)
+- **XTEST-03**: WCAG AAA contrast compliance (beyond AA)
+
+### Advanced Monitoring
+- **XMON-01**: Custom Sentry spans on sync/API operations
+- **XMON-02**: Breadcrumb trail enhancement
+- **XMON-03**: Web Vitals reporting via Plausible custom events
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Coach dashboard redesign | Client experience only |
-| New features or functionality | Visual refresh only, no behavior changes |
-| Light mode | Dark-only, matches luxury gym aesthetic |
-| Native mobile app | Still PWA |
-| Marketing site | App screens only |
-| Data/store changes | Zero state changes that could affect user data |
+| Cross-browser CI matrix | Complexity for launch; run locally on Chromium first |
+| Web Vitals via Plausible | Sentry browserTracingIntegration captures these already |
+| Custom Sentry spans | Over-instrumentation pre-launch; add based on real issues |
+| A/B testing infrastructure | Premature for initial launch |
+| Custom analytics backend | Plausible + Sentry sufficient |
+| New features or functionality | Testing and observability only |
+| Light mode | Dark-only |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1: Foundation | Complete |
-| FOUND-02 | Phase 1: Foundation | Complete |
-| FOUND-03 | Phase 1: Foundation | Complete |
-| FOUND-04 | Phase 1: Foundation | Complete |
-| FOUND-05 | Phase 1: Foundation | Complete |
-| FOUND-06 | Phase 1: Foundation | Complete |
-| THEME-01 | Phase 2: Theme Removal | Complete |
-| THEME-02 | Phase 2: Theme Removal | Complete |
-| THEME-03 | Phase 2: Theme Removal | Complete |
-| VIS-01 | Phase 3: Component Primitives | Complete |
-| VIS-02 | Phase 3: Component Primitives | Complete |
-| VIS-03 | Phase 3: Component Primitives | Complete |
-| VIS-04 | Phase 3: Component Primitives | Complete |
-| SCREEN-01 | Phase 4: Screen Refresh | Complete |
-| SCREEN-02 | Phase 4: Screen Refresh | Complete |
-| SCREEN-03 | Phase 4: Screen Refresh | Complete |
-| SCREEN-04 | Phase 4: Screen Refresh | Complete |
-| SCREEN-05 | Phase 4: Screen Refresh | Complete |
-| ANIM-01 | Phase 5: Animation Refinement | Complete |
-| ANIM-02 | Phase 5: Animation Refinement | Complete |
-| ANIM-03 | Phase 5: Animation Refinement | Complete |
-| CLEAN-01 | Phase 6: Cleanup | Complete |
-| CLEAN-02 | Phase 6: Cleanup | Complete |
-| DEPLOY-01 | Phase 7: Deploy | Complete |
-| DEPLOY-02 | Phase 7: Deploy | Complete |
+| TEST-01 | TBD | Pending |
+| TEST-02 | TBD | Pending |
+| E2E-01 | TBD | Pending |
+| E2E-02 | TBD | Pending |
+| E2E-03 | TBD | Pending |
+| E2E-04 | TBD | Pending |
+| E2E-05 | TBD | Pending |
+| E2E-06 | TBD | Pending |
+| E2E-07 | TBD | Pending |
+| E2E-08 | TBD | Pending |
+| E2E-09 | TBD | Pending |
+| E2E-10 | TBD | Pending |
+| E2E-11 | TBD | Pending |
+| ANLYT-01 | TBD | Pending |
+| ANLYT-02 | TBD | Pending |
+| ANLYT-03 | TBD | Pending |
+| ANLYT-04 | TBD | Pending |
+| MON-01 | TBD | Pending |
+| MON-02 | TBD | Pending |
+| MON-03 | TBD | Pending |
+| MON-04 | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 25 total
-- Mapped to phases: 25
-- Unmapped: 0
+- v1 requirements: 21 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 21
 
 ---
-*Requirements defined: 2026-02-05*
-*Last updated: 2026-02-05 -- Phase 4 requirements marked complete*
+*Requirements defined: 2026-02-06*
+*Last updated: 2026-02-06 after initial definition*
