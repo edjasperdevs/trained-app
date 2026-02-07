@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
-**Current focus:** Phase 3 complete -- Analytics Enhancement. All events wired, funnels defined, SPA pageviews verified.
+**Current focus:** Phase 4 in progress -- Monitoring Hardening. Sentry tracing, replay, and source maps configured. Alert rules and PII masking remaining.
 
 ## Current Position
 
-Phase: 3 of 4 (Analytics Enhancement)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-07 -- Completed 03-02-PLAN.md (Wire analytics events into screens)
+Phase: 4 of 4 (Monitoring Hardening)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 04-01-PLAN.md (Sentry tracing, replay, source maps, ErrorBoundary wiring)
 
-Progress: [████████░░] 86% (6/7 plans)
+Progress: [█████████░] 88% (7/8 plans)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [████████░░] 86% (6/7 plans)
 - Average plan duration: 7.4min
 
 **Current Milestone:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 8.3min
-- Total execution time: 0.83 hours
+- Total execution time: 0.96 hours
 
 *Updated after each plan completion*
 
@@ -58,6 +58,10 @@ Recent decisions affecting current work:
 - SPA pageviews work automatically via Plausible standard script.js + BrowserRouter -- no manual fallback needed
 - useRef guards for proteinTargetHit/calorieTargetHit to fire once per session
 - Avatar evolution detection uses before/after store comparison (prevStage !== newStage)
+- maskAllText: false with explicit [data-sentry-mask] selectors for PII (readable replays + PII protection)
+- replaysSessionSampleRate: 0.1 for replay coverage beyond error sessions
+- SentryRoutes wrapper at module level (required by Sentry docs)
+- Re-export withSentryReactRouterV6Routing from sentry.ts for centralized imports
 
 ### Pending Todos
 
@@ -70,5 +74,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 03-02-PLAN.md (Wire analytics events) -- Phase 3 complete (2/2 plans)
+Stopped at: Completed 04-01-PLAN.md (Sentry tracing, replay, source maps) -- Phase 4 plan 1/2 done
 Resume file: None
