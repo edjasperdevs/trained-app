@@ -1,8 +1,12 @@
-import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { X } from 'lucide-react'
-import { Card, Button } from '@/components'
+import { X, Beef, CheckCircle, Trophy, Dumbbell, Gift, LucideIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { useRemindersStore, ActiveReminder, ReminderType } from '@/stores/remindersStore'
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Beef, CheckCircle, Trophy, Dumbbell, Gift
+}
 
 interface ReminderCardProps {
   reminder: ActiveReminder
@@ -33,25 +37,24 @@ export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
   const style = TYPE_STYLES[reminder.type]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10, height: 0, marginBottom: 0 }}
-      transition={{ duration: 0.2 }}
-    >
+    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
       <Card
-        className={`cursor-pointer border-l-[3px] ${style}`}
+        className={`py-0 cursor-pointer border-l-[3px] ${style}`}
         onClick={handleAction}
       >
+        <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className="text-2xl">
-            {reminder.icon}
+            {(() => {
+              const Icon = ICON_MAP[reminder.icon]
+              return Icon ? <Icon size={24} className="text-muted-foreground" /> : null
+            })()}
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-sm">
               {reminder.title}
             </p>
-            <p className="text-xs text-text-secondary truncate">{reminder.description}</p>
+            <p className="text-xs text-muted-foreground truncate">{reminder.description}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={handleAction}>
@@ -59,15 +62,16 @@ export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
             </Button>
             <button
               onClick={handleDismiss}
-              className="text-text-secondary hover:text-text-primary p-1 transition-colors"
+              className="text-muted-foreground hover:text-foreground p-1 transition-colors"
               title="Dismiss"
             >
               <X size={14} />
             </button>
           </div>
         </div>
+        </CardContent>
       </Card>
-    </motion.div>
+    </div>
   )
 }
 

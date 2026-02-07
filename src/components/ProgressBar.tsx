@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
 
@@ -54,24 +53,21 @@ export function ProgressBar({
   label,
   color = 'primary',
   size = 'md',
-  animate = true,
 }: ProgressBarProps) {
   const percentage = Math.min((progress / maxProgress) * 100, 100)
 
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex justify-between text-xs text-text-secondary mb-1.5">
+        <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
           <span>{label}</span>
           <span className="font-mono">{Math.round(progress)}/{maxProgress}</span>
         </div>
       )}
       <div className={cn(progressTrackVariants({ size }))}>
-        <motion.div
-          className={cn(progressBarVariants({ color }))}
-          initial={animate ? { width: 0 } : { width: `${percentage}%` }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+        <div
+          className={cn(progressBarVariants({ color }), 'transition-all duration-500 ease-out')}
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

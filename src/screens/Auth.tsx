@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import { Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
 import { Button } from '@/components/ui/button'
@@ -119,11 +118,7 @@ export function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-5">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-bold tracking-wide">TRAINED</h1>
@@ -136,11 +131,7 @@ export function Auth() {
 
         {/* Email Confirmation Banner */}
         {needsEmailConfirmation && mode === 'login' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4"
-          >
+          <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <Alert className="border-warning/30 bg-warning/10">
               <Mail className="size-4 text-warning" />
               <AlertTitle className="text-warning">Confirm Your Email</AlertTitle>
@@ -152,7 +143,7 @@ export function Auth() {
                 </p>
               </AlertDescription>
             </Alert>
-          </motion.div>
+          </div>
         )}
 
         <Card>
@@ -277,7 +268,7 @@ export function Auth() {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   )
 }

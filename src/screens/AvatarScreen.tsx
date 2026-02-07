@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { Avatar } from '@/components'
 import { useAvatarStore, useXPStore, EVOLUTION_STAGES } from '@/stores'
 import { LABELS, AVATAR_STAGES } from '@/design/constants'
@@ -52,14 +51,8 @@ export function AvatarScreen() {
         </h1>
 
         {/* Main Avatar Display */}
-        <div className="flex justify-center">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300, delay: 0.1 }}
-          >
-            <Avatar size="xl" showMood showLevel level={currentLevel} />
-          </motion.div>
+        <div className="flex justify-center animate-in zoom-in-90 fade-in duration-500 delay-100">
+          <Avatar size="xl" showMood showLevel level={currentLevel} />
         </div>
       </div>
 
@@ -174,17 +167,15 @@ export function AvatarScreen() {
               const stageName = AVATAR_STAGES[stage.stage - 1] || stage.name
 
               return (
-                <motion.div
+                <div
                   key={stage.stage}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
                   className={cn(
-                    'flex items-center gap-3 p-2 rounded-lg',
+                    'flex items-center gap-3 p-2 rounded-lg animate-in fade-in slide-in-from-left-4 duration-300',
                     isCurrent && 'bg-primary/10 border border-primary/30',
                     isNext && 'bg-secondary/10 border border-secondary/30',
                     !isUnlocked && !isNext && 'opacity-40'
                   )}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className={cn(
                     'w-10 h-10 flex items-center justify-center rounded-lg',
@@ -215,7 +206,7 @@ export function AvatarScreen() {
                   {isUnlocked && (
                     <Check size={16} className="text-success" />
                   )}
-                </motion.div>
+                </div>
               )
             })}
           </CardContent>

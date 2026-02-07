@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { Card, ProgressBar, EmptyState } from '@/components'
+import { ProgressBar, EmptyState } from '@/components'
+import { Card, CardContent } from '@/components/ui/card'
 import { useAchievementsStore, Badge, BadgeRarity, RARITY_COLORS } from '@/stores'
 import { LABELS } from '@/design/constants'
 import {
   Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check, Award,
   Zap, Star, Gem, Crown, Shield, Play, CheckCircle, LucideIcon
 } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 // Map icon names to Lucide components
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -38,7 +39,7 @@ const RARITY_BG: Record<BadgeRarity, string> = {
 }
 
 const RARITY_TEXT: Record<BadgeRarity, string> = {
-  common: 'text-text-secondary',
+  common: 'text-muted-foreground',
   rare: 'text-info',
   epic: 'text-primary',
   legendary: 'text-warning'
@@ -63,56 +64,54 @@ interface BadgeCardProps {
 
 function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`
-        relative p-4 rounded-xl border-2 transition-all
-        ${earned ? RARITY_COLORS[badge.rarity] : 'border-border/50'}
-        ${earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-bg-card/50'}
-        ${earned ? RARITY_GLOW[badge.rarity] : ''}
-      `}
+    <div
+      className={cn(
+        'relative p-4 rounded-xl border-2 transition-all animate-in fade-in slide-in-from-bottom-2 duration-300',
+        earned ? RARITY_COLORS[badge.rarity] : 'border-border/50',
+        earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-card/50',
+        earned && RARITY_GLOW[badge.rarity]
+      )}
+      style={{ animationDelay: `${index * 50}ms` }}
     >
       {/* Rarity Label */}
       <div className="absolute top-2 right-2">
-        <span className={`text-[10px] font-semibold ${earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}`}>
+        <span className={cn('text-[10px] font-semibold', earned ? RARITY_TEXT[badge.rarity] : 'text-muted-foreground')}>
           {RARITY_LABELS[badge.rarity]}
         </span>
       </div>
 
       <div className="flex items-start gap-4">
         {/* Badge Icon */}
-        <div className={`relative ${!earned && 'grayscale opacity-40'}`}>
-          <div className={`
-            w-14 h-14 rounded-xl flex items-center justify-center
-            ${earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-bg-secondary'}
-          `}>
+        <div className={cn('relative', !earned && 'grayscale opacity-40')}>
+          <div className={cn(
+            'w-14 h-14 rounded-xl flex items-center justify-center',
+            earned ? `bg-gradient-to-br ${RARITY_BG[badge.rarity]}` : 'bg-card'
+          )}>
             <BadgeIcon
               iconName={badge.icon}
               size={28}
-              className={earned ? RARITY_TEXT[badge.rarity] : 'text-text-secondary'}
+              className={earned ? RARITY_TEXT[badge.rarity] : 'text-muted-foreground'}
             />
           </div>
           {earned && (
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-accent-success rounded-full flex items-center justify-center">
-              <Check size={12} className="text-text-on-primary" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full flex items-center justify-center">
+              <Check size={12} className="text-primary-foreground" />
             </div>
           )}
         </div>
 
         {/* Badge Info */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-bold ${!earned && 'text-text-secondary'}`}>
+          <h3 className={cn('font-bold', !earned && 'text-muted-foreground')}>
             {badge.name}
           </h3>
-          <p className={`text-sm mt-0.5 ${earned ? 'text-text-secondary' : 'text-text-secondary'}`}>
+          <p className={cn('text-sm mt-0.5', earned ? 'text-muted-foreground' : 'text-muted-foreground')}>
             {badge.description}
           </p>
 
           {/* Progress or Earned Date */}
           {earned ? (
-            <p className="text-xs text-text-secondary mt-2">
+            <p className="text-xs text-muted-foreground mt-2">
               Unlocked {new Date(earnedAt!).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -122,8 +121,8 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
           ) : (
             <div className="mt-3">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-text-secondary">Progress</span>
-                <span className={`font-medium ${progress.percentage >= 80 ? 'text-accent-success' : 'text-text-secondary'}`}>
+                <span className="text-muted-foreground">Progress</span>
+                <span className={cn('font-medium', progress.percentage >= 80 ? 'text-success' : 'text-muted-foreground')}>
                   {progress.current} / {progress.required}
                 </span>
               </div>
@@ -133,7 +132,7 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
                 color={progress.percentage >= 80 ? 'success' : progress.percentage >= 50 ? 'primary' : 'secondary'}
               />
               {progress.percentage >= 80 && (
-                <p className="text-xs text-accent-success mt-1 font-medium flex items-center gap-1">
+                <p className="text-xs text-success mt-1 font-medium flex items-center gap-1">
                   Almost there! <Flame size={12} />
                 </p>
               )}
@@ -141,7 +140,7 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -218,14 +217,14 @@ export function Achievements() {
     .sort((a, b) => b.progress.percentage - a.progress.percentage)[0]
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-24">
+    <div className="min-h-screen pb-24">
       {/* Header */}
-      <div className="pt-8 pb-6 px-5 bg-surface">
+      <div className="pt-8 pb-6 px-5 bg-card">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            className="w-10 h-10 bg-surface-elevated flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors rounded"
+            className="w-10 h-10 bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors rounded"
           >
             <ChevronLeft size={20} />
           </button>
@@ -233,31 +232,33 @@ export function Achievements() {
             <h1 className="text-2xl font-bold">
               {LABELS.achievements}
             </h1>
-            <p className="text-text-secondary text-sm">
+            <p className="text-muted-foreground text-sm">
               Track your marks of devotion
             </p>
           </div>
         </div>
 
         {/* Overall Progress */}
-        <Card className="bg-gradient-to-br from-accent-primary/10 to-accent-secondary/10 border-accent-primary/20">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-bg-secondary flex items-center justify-center">
-                <Trophy size={36} className="text-accent-primary" />
+        <Card className="py-0 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-card flex items-center justify-center">
+                  <Trophy size={36} className="text-primary" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                  {percentComplete}%
+                </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-accent-primary text-bg-primary text-xs font-bold px-2 py-0.5 rounded-full">
-                {percentComplete}%
+              <div className="flex-1">
+                <p className="text-2xl font-bold">
+                  {totalEarned} <span className="text-muted-foreground font-normal">/ {totalBadges}</span>
+                </p>
+                <p className="text-sm text-muted-foreground mb-2">Badges Earned</p>
+                <ProgressBar progress={percentComplete} size="md" color="gradient" />
               </div>
             </div>
-            <div className="flex-1">
-              <p className="text-2xl font-bold">
-                {totalEarned} <span className="text-text-secondary font-normal">/ {totalBadges}</span>
-              </p>
-              <p className="text-sm text-text-secondary mb-2">Badges Earned</p>
-              <ProgressBar progress={percentComplete} size="md" color="gradient" />
-            </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
 
@@ -267,11 +268,13 @@ export function Achievements() {
           {(['legendary', 'epic', 'rare', 'common'] as BadgeRarity[]).map(rarity => (
             <div
               key={rarity}
-              className={`p-3 rounded-lg bg-gradient-to-br ${RARITY_BG[rarity]} border ${
+              className={cn(
+                'p-3 rounded-lg bg-gradient-to-br border',
+                RARITY_BG[rarity],
                 earnedByRarity[rarity] > 0 ? RARITY_COLORS[rarity] : 'border-border/30'
-              }`}
+              )}
             >
-              <p className={`text-xs font-semibold ${RARITY_TEXT[rarity]}`}>
+              <p className={cn('text-xs font-semibold', RARITY_TEXT[rarity])}>
                 {RARITY_LABELS[rarity]}
               </p>
               <p className="text-lg font-bold mt-1">
@@ -283,28 +286,30 @@ export function Achievements() {
 
         {/* Closest to Unlock */}
         {closestBadge && closestBadge.progress.percentage > 0 && (
-          <Card className="border-accent-primary/30">
-            <div className="flex items-center gap-2 mb-3">
-              <Target size={18} className="text-accent-primary" />
-              <h3 className="font-semibold text-sm text-text-secondary">CLOSEST TO UNLOCK</h3>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-bg-secondary flex items-center justify-center">
-                <BadgeIcon iconName={closestBadge.badge.icon} size={24} className="text-accent-primary" />
+          <Card className="py-0 border-primary/30">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Target size={18} className="text-primary" />
+                <h3 className="font-semibold text-sm text-muted-foreground">CLOSEST TO UNLOCK</h3>
               </div>
-              <div className="flex-1">
-                <p className="font-semibold">{closestBadge.badge.name}</p>
-                <p className="text-xs text-text-secondary">{closestBadge.badge.description}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex-1">
-                    <ProgressBar progress={closestBadge.progress.percentage} size="sm" color="primary" />
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
+                  <BadgeIcon iconName={closestBadge.badge.icon} size={24} className="text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold">{closestBadge.badge.name}</p>
+                  <p className="text-xs text-muted-foreground">{closestBadge.badge.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1">
+                      <ProgressBar progress={closestBadge.progress.percentage} size="sm" color="primary" />
+                    </div>
+                    <span className="text-xs text-primary font-medium">
+                      {closestBadge.progress.current}/{closestBadge.progress.required}
+                    </span>
                   </div>
-                  <span className="text-xs text-accent-primary font-medium">
-                    {closestBadge.progress.current}/{closestBadge.progress.required}
-                  </span>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
         )}
 
@@ -316,17 +321,17 @@ export function Achievements() {
               <button
                 key={cat.id}
                 onClick={() => setFilter(cat.id)}
-                className={`
-                  flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-                  ${filter === cat.id
-                    ? 'bg-accent-primary text-bg-primary shadow-lg shadow-accent-primary/20'
-                    : 'bg-bg-card text-text-secondary hover:text-text-primary'}
-                `}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+                  filter === cat.id
+                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                    : 'bg-card text-muted-foreground hover:text-foreground'
+                )}
               >
                 <Icon size={16} />
                 <span>{cat.label}</span>
                 {filter === cat.id && (
-                  <span className="ml-1 bg-bg-primary/20 px-1.5 py-0.5 rounded text-xs">
+                  <span className="ml-1 bg-primary-foreground/20 px-1.5 py-0.5 rounded text-xs">
                     {filteredBadges.length}
                   </span>
                 )}
@@ -337,24 +342,22 @@ export function Achievements() {
 
         {/* Badges List */}
         <div className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {sortedBadges.map((badge, index) => {
-              const earned = hasEarnedBadge(badge.id)
-              const earnedData = earnedBadges.find(b => b.id === badge.id)
-              const progress = getBadgeProgress(badge.id)
+          {sortedBadges.map((badge, index) => {
+            const earned = hasEarnedBadge(badge.id)
+            const earnedData = earnedBadges.find(b => b.id === badge.id)
+            const progress = getBadgeProgress(badge.id)
 
-              return (
-                <BadgeCard
-                  key={badge.id}
-                  badge={badge}
-                  earned={earned}
-                  earnedAt={earnedData?.earnedAt}
-                  progress={progress}
-                  index={index}
-                />
-              )
-            })}
-          </AnimatePresence>
+            return (
+              <BadgeCard
+                key={badge.id}
+                badge={badge}
+                earned={earned}
+                earnedAt={earnedData?.earnedAt}
+                progress={progress}
+                index={index}
+              />
+            )
+          })}
         </div>
 
         {/* Empty State */}

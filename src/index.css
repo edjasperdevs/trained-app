@@ -110,6 +110,7 @@
   --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-pulse-slow: pulse-slow 2s ease-in-out infinite;
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
 
   @keyframes pulse-glow {
     0%, 100% { opacity: 0.7; }
@@ -124,6 +125,11 @@
   @keyframes pulse-slow {
     0%, 100% { opacity: 0.8; }
     50% { opacity: 1; }
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
   }
 }
 

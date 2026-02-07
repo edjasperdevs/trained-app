@@ -250,7 +250,7 @@ const createBadges = (): Badge[] => [
 const BADGES = createBadges()
 
 const RARITY_COLORS: Record<BadgeRarity, string> = {
-  common: 'border-gray-500',
+  common: 'border-border',
   rare: 'border-blue-500',
   epic: 'border-purple-500',
   legendary: 'border-yellow-500'

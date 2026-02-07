@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card } from '@/components'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   Dumbbell,
   Sword,
@@ -42,6 +43,7 @@ import {
 import { EVOLUTION_STAGES } from '@/stores/avatarStore'
 import { analytics } from '@/lib/analytics'
 import { LABELS, AVATAR_STAGES } from '@/design/constants'
+import { cn } from '@/lib/cn'
 
 type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'avatar' | 'features' | 'tutorial' | 'evolution'
 
@@ -78,21 +80,6 @@ const getDefaultDays = (trainingDays: TrainingDays): DayOfWeek[] => {
     default:
       return [1, 3, 5]
   }
-}
-
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
-    opacity: 0
-  }),
-  center: {
-    x: 0,
-    opacity: 1
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 300 : -300,
-    opacity: 0
-  })
 }
 
 // Load saved progress from localStorage
@@ -153,7 +140,7 @@ export function Onboarding() {
   const savedProgress = loadSavedProgress()
 
   const [step, setStep] = useState<Step>(savedProgress?.step || 'welcome')
-  const [direction, setDirection] = useState(1)
+  const [_direction, setDirection] = useState(1)
   const [data, setData] = useState<OnboardingData>(savedProgress?.data || defaultOnboardingData)
 
   const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'avatar', 'features', 'tutorial']
@@ -212,20 +199,21 @@ export function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col px-5 py-8">
+    <div className="min-h-screen flex flex-col px-5 pt-8 pb-24">
       {/* Progress indicator */}
       {step !== 'welcome' && (
         <div className="mb-8">
-          <p className="text-center text-xs text-text-secondary mb-2">
+          <p className="text-center text-xs text-muted-foreground mb-2">
             Step {currentIndex} of {steps.length - 1}
           </p>
           <div className="flex gap-1 justify-center">
             {steps.slice(1).map((s, i) => (
               <div
                 key={s}
-                className={`h-1 w-8 rounded-full transition-colors ${
-                  i < currentIndex ? 'bg-accent-primary' : 'bg-secondary'
-                }`}
+                className={cn(
+                  'h-1 w-8 rounded-full transition-colors',
+                  i < currentIndex ? 'bg-primary' : 'bg-secondary'
+                )}
               />
             ))}
           </div>
@@ -234,106 +222,95 @@ export function Onboarding() {
 
       {/* Step content */}
       <div className="flex-1 flex items-center justify-center">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={step}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="w-full max-w-md"
-          >
-            {step === 'welcome' && <WelcomeStep onNext={goNext} />}
-            {step === 'name' && (
-              <NameStep
-                value={data.username}
-                onChange={(v) => updateData('username', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'gender' && (
-              <GenderStep
-                value={data.gender}
-                onChange={(v) => updateData('gender', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'fitness' && (
-              <FitnessStep
-                value={data.fitnessLevel}
-                onChange={(v) => updateData('fitnessLevel', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'days' && (
-              <DaysStep
-                value={data.trainingDaysPerWeek}
-                onChange={(v) => {
-                  updateData('trainingDaysPerWeek', v)
-                  updateData('selectedDays', getDefaultDays(v))
-                }}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'schedule' && (
-              <ScheduleStep
-                trainingDays={data.trainingDaysPerWeek}
-                selectedDays={data.selectedDays}
-                onChange={(v) => updateData('selectedDays', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'goal' && (
-              <GoalStep
-                weight={data.weight}
-                height={data.height}
-                age={data.age}
-                goal={data.goal}
-                onWeightChange={(v) => updateData('weight', v)}
-                onHeightChange={(v) => updateData('height', v)}
-                onAgeChange={(v) => updateData('age', v)}
-                onGoalChange={(v) => updateData('goal', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'avatar' && (
-              <AvatarStep
-                value={data.avatarBase}
-                onChange={(v) => updateData('avatarBase', v)}
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'features' && (
-              <FeaturesStep
-                onNext={goNext}
-                onBack={goBack}
-              />
-            )}
-            {step === 'tutorial' && (
-              <TutorialStep
-                username={data.username}
-                onFinish={finishOnboarding}
-                onBack={goBack}
-              />
-            )}
-            {step === 'evolution' && (
-              <EvolutionStep
-                username={data.username}
-                avatarBase={data.avatarBase}
-                onContinue={finishEvolution}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <div className="w-full max-w-md animate-in fade-in duration-300">
+          {step === 'welcome' && <WelcomeStep onNext={goNext} />}
+          {step === 'name' && (
+            <NameStep
+              value={data.username}
+              onChange={(v) => updateData('username', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'gender' && (
+            <GenderStep
+              value={data.gender}
+              onChange={(v) => updateData('gender', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'fitness' && (
+            <FitnessStep
+              value={data.fitnessLevel}
+              onChange={(v) => updateData('fitnessLevel', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'days' && (
+            <DaysStep
+              value={data.trainingDaysPerWeek}
+              onChange={(v) => {
+                updateData('trainingDaysPerWeek', v)
+                updateData('selectedDays', getDefaultDays(v))
+              }}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'schedule' && (
+            <ScheduleStep
+              trainingDays={data.trainingDaysPerWeek}
+              selectedDays={data.selectedDays}
+              onChange={(v) => updateData('selectedDays', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'goal' && (
+            <GoalStep
+              weight={data.weight}
+              height={data.height}
+              age={data.age}
+              goal={data.goal}
+              onWeightChange={(v) => updateData('weight', v)}
+              onHeightChange={(v) => updateData('height', v)}
+              onAgeChange={(v) => updateData('age', v)}
+              onGoalChange={(v) => updateData('goal', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'avatar' && (
+            <AvatarStep
+              value={data.avatarBase}
+              onChange={(v) => updateData('avatarBase', v)}
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'features' && (
+            <FeaturesStep
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'tutorial' && (
+            <TutorialStep
+              username={data.username}
+              onFinish={finishOnboarding}
+              onBack={goBack}
+            />
+          )}
+          {step === 'evolution' && (
+            <EvolutionStep
+              username={data.username}
+              avatarBase={data.avatarBase}
+              onContinue={finishEvolution}
+            />
+          )}
+        </div>
       </div>
     </div>
   )
@@ -344,34 +321,25 @@ export function Onboarding() {
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="text-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mb-8"
-      >
+      <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
         <h1 className="text-4xl font-bold mb-4">
           Trained
         </h1>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <p className="text-lg text-text-secondary mb-6">
+      </div>
+      <div className="animate-in fade-in duration-500 delay-500">
+        <p className="text-lg text-muted-foreground mb-6">
           The protocol for building discipline through fitness.
         </p>
-        <p className="text-text-secondary mb-8 leading-relaxed">
+        <p className="text-muted-foreground mb-8 leading-relaxed">
           This is not a game. This is a system.<br />
           Track your workouts. Hit your macros.<br />
           Report in daily. Earn your rank.
         </p>
-        <p className="text-sm text-text-secondary mb-8 italic">
+        <p className="text-sm text-muted-foreground mb-8 italic">
           Structure creates freedom.
         </p>
-      </motion.div>
-      <Button onClick={onNext} fullWidth size="lg">
+      </div>
+      <Button onClick={onNext} className="w-full" size="lg">
         Start
       </Button>
     </div>
@@ -394,16 +362,16 @@ function NameStep({
       <h2 className="text-2xl font-bold mb-2">
         What should we call you?
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         This is how the protocol will address you.
       </p>
 
-      <input
+      <Input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Enter your name..."
-        className="input-base py-3 mb-6"
+        className="h-12 mb-6"
         maxLength={20}
         autoFocus
       />
@@ -412,7 +380,7 @@ function NameStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth disabled={!value.trim()}>
+        <Button onClick={onNext} className="flex-1" disabled={!value.trim()}>
           Continue
         </Button>
       </div>
@@ -441,24 +409,26 @@ function GenderStep({
       <h2 className="text-2xl font-bold mb-2">
         Biological sex
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         Used for accurate metabolic calculations only.
       </p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => (
-          <Card
+          <button
             key={opt.gender}
             onClick={() => onChange(opt.gender)}
-            hover
-            className={`border-2 ${value === opt.gender ? 'border-accent-primary' : 'border-transparent'}`}
+            className={cn(
+              'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
+              value === opt.gender ? 'border-primary' : 'border-transparent'
+            )}
           >
             <div className="flex items-center gap-4">
               <p className="font-semibold text-lg">
                 {opt.label}
               </p>
             </div>
-          </Card>
+          </button>
         ))}
       </div>
 
@@ -466,7 +436,7 @@ function GenderStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth>
+        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -496,23 +466,25 @@ function FitnessStep({
       <h2 className="text-2xl font-bold mb-2">
         Training experience
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         How would you describe your current relationship with the gym?
       </p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => (
-          <Card
+          <button
             key={opt.level}
             onClick={() => onChange(opt.level)}
-            hover
-            className={`border-2 ${value === opt.level ? 'border-accent-primary' : 'border-transparent'}`}
+            className={cn(
+              'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
+              value === opt.level ? 'border-primary' : 'border-transparent'
+            )}
           >
             <div>
               <p className="font-semibold">{opt.label}</p>
-              <p className="text-sm text-text-secondary">{opt.description}</p>
+              <p className="text-sm text-muted-foreground">{opt.description}</p>
             </div>
-          </Card>
+          </button>
         ))}
       </div>
 
@@ -520,7 +492,7 @@ function FitnessStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth>
+        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -550,17 +522,19 @@ function DaysStep({
       <h2 className="text-2xl font-bold mb-2">
         Weekly commitment
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         A commitment is a commitment. Choose what you can sustain.
       </p>
 
       <div className="space-y-3 mb-6">
         {options.map((opt) => (
-          <Card
+          <button
             key={opt.days}
             onClick={() => onChange(opt.days)}
-            hover
-            className={`border-2 ${value === opt.days ? 'border-accent-primary' : 'border-transparent'}`}
+            className={cn(
+              'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
+              value === opt.days ? 'border-primary' : 'border-transparent'
+            )}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -568,11 +542,11 @@ function DaysStep({
                   {opt.label}
                 </p>
               </div>
-              <div className="text-2xl font-bold text-accent-primary font-digital">
+              <div className="text-2xl font-bold text-primary font-digital">
                 {opt.days}x
               </div>
             </div>
-          </Card>
+          </button>
         ))}
       </div>
 
@@ -580,7 +554,7 @@ function DaysStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth>
+        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -632,7 +606,7 @@ function ScheduleStep({
       <h2 className="text-2xl font-bold mb-2">
         Select your training days
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         {`Choose ${trainingDays} days. These can be changed later in settings.`}
       </p>
 
@@ -646,15 +620,14 @@ function ScheduleStep({
               key={day}
               onClick={() => toggleDay(index as DayOfWeek)}
               disabled={!isSelected && !canAdd}
-              className={`
-                py-3 text-center text-sm font-medium transition-all rounded
-                ${isSelected
-                  ? 'bg-accent-primary text-text-on-primary'
+              className={cn(
+                'py-3 text-center text-sm font-medium transition-all rounded',
+                isSelected
+                  ? 'bg-primary text-primary-foreground'
                   : canAdd
-                    ? 'bg-bg-secondary text-text-secondary hover:bg-bg-card hover:text-text-primary'
-                    : 'bg-bg-secondary text-text-secondary cursor-not-allowed'
-                }
-              `}
+                    ? 'bg-card text-muted-foreground hover:bg-card hover:text-foreground'
+                    : 'bg-card text-muted-foreground cursor-not-allowed'
+              )}
             >
               {day}
             </button>
@@ -663,8 +636,8 @@ function ScheduleStep({
       </div>
 
       {/* Selected days summary */}
-      <div className="p-3 mb-6 bg-bg-card border border-border/50 rounded">
-        <p className="text-sm text-text-secondary mb-2">
+      <div className="p-3 mb-6 bg-card border border-border/50 rounded">
+        <p className="text-sm text-muted-foreground mb-2">
           {selectedDays.length} of {trainingDays} days selected:
         </p>
         <p className="text-sm font-medium">
@@ -676,7 +649,7 @@ function ScheduleStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth disabled={selectedDays.length !== trainingDays}>
+        <Button onClick={onNext} className="flex-1" disabled={selectedDays.length !== trainingDays}>
           Continue
         </Button>
       </div>
@@ -767,48 +740,45 @@ function GoalStep({
   const feet = Math.floor(height / 12)
   const inches = height % 12
 
-  const inputClass = 'input-base py-3 font-digital text-xl'
-  const inputErrorClass = 'border-error'
-
   return (
     <div>
       <h2 className="text-2xl font-bold mb-2">
         Current stats
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         These numbers are where you start. Not where you stay.
       </p>
 
       {/* Height */}
       <div className="mb-4">
-        <label className="block text-sm text-text-secondary mb-2 font-medium">
+        <label className="block text-sm text-muted-foreground mb-2 font-medium">
           Height
         </label>
         <div className="flex gap-3">
           <div className="flex-1">
             <div className="relative">
-              <input
+              <Input
                 type="number"
-                value={feet}
-                onChange={(e) => handleHeightChange(Number(e.target.value) * 12 + inches)}
-                className={`${inputClass} pr-12 ${(height < VALIDATION.height.min || height > VALIDATION.height.max) ? inputErrorClass : ''}`}
+                value={feet || ''}
+                onChange={(e) => handleHeightChange(e.target.value === '' ? 0 : Number(e.target.value) * 12 + inches)}
+                className={cn('h-12 font-mono tabular-nums text-xl pr-12', (height < VALIDATION.height.min || height > VALIDATION.height.max) && 'border-destructive')}
                 min={4}
                 max={8}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">ft</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">ft</span>
             </div>
           </div>
           <div className="flex-1">
             <div className="relative">
-              <input
+              <Input
                 type="number"
-                value={inches}
-                onChange={(e) => handleHeightChange(feet * 12 + Number(e.target.value))}
-                className={`${inputClass} pr-12 ${(height < VALIDATION.height.min || height > VALIDATION.height.max) ? inputErrorClass : ''}`}
+                value={inches || ''}
+                onChange={(e) => handleHeightChange(e.target.value === '' ? 0 : feet * 12 + Number(e.target.value))}
+                className={cn('h-12 font-mono tabular-nums text-xl pr-12', (height < VALIDATION.height.min || height > VALIDATION.height.max) && 'border-destructive')}
                 min={0}
                 max={11}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">in</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">in</span>
             </div>
           </div>
         </div>
@@ -817,27 +787,27 @@ function GoalStep({
       {/* Weight and Age side by side */}
       <div className="flex gap-3 mb-4">
         <div className="flex-1">
-          <label className="block text-sm text-text-secondary mb-2 font-medium">
+          <label className="block text-sm text-muted-foreground mb-2 font-medium">
             Weight (lbs)
           </label>
-          <input
+          <Input
             type="number"
-            value={weight}
-            onChange={(e) => handleWeightChange(Number(e.target.value))}
-            className={`${inputClass} ${(weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) ? inputErrorClass : ''}`}
+            value={weight || ''}
+            onChange={(e) => handleWeightChange(e.target.value === '' ? 0 : Number(e.target.value))}
+            className={cn('h-12 font-mono tabular-nums text-xl', (weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) && 'border-destructive')}
             min={VALIDATION.weight.min}
             max={VALIDATION.weight.max}
           />
         </div>
         <div className="flex-1">
-          <label className="block text-sm text-text-secondary mb-2 font-medium">
+          <label className="block text-sm text-muted-foreground mb-2 font-medium">
             Age
           </label>
-          <input
+          <Input
             type="number"
-            value={age}
-            onChange={(e) => handleAgeChange(Number(e.target.value))}
-            className={`${inputClass} ${(age < VALIDATION.age.min || age > VALIDATION.age.max) ? inputErrorClass : ''}`}
+            value={age || ''}
+            onChange={(e) => handleAgeChange(e.target.value === '' ? 0 : Number(e.target.value))}
+            className={cn('h-12 font-mono tabular-nums text-xl', (age < VALIDATION.age.min || age > VALIDATION.age.max) && 'border-destructive')}
             min={VALIDATION.age.min}
             max={VALIDATION.age.max}
           />
@@ -846,9 +816,9 @@ function GoalStep({
 
       {/* Validation errors */}
       {validationErrors.length > 0 && (
-        <div className="p-3 mb-4 bg-error/10 border border-error/30 rounded">
+        <div className="p-3 mb-4 bg-destructive/10 border border-destructive/30 rounded">
           {validationErrors.map((error, index) => (
-            <p key={index} className="text-sm text-error">{error}</p>
+            <p key={index} className="text-sm text-destructive">{error}</p>
           ))}
         </div>
       )}
@@ -859,24 +829,26 @@ function GoalStep({
 
       <div className="space-y-3 mb-4">
         {goals.map((opt) => (
-          <Card
+          <button
             key={opt.value}
             onClick={() => onGoalChange(opt.value)}
-            hover
-            className={`border-2 ${goal === opt.value ? 'border-accent-primary' : 'border-transparent'}`}
+            className={cn(
+              'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
+              goal === opt.value ? 'border-primary' : 'border-transparent'
+            )}
           >
             <div className="flex items-center justify-between">
               <p className="font-semibold">{opt.label}</p>
-              <p className="text-sm text-text-secondary">{opt.description}</p>
+              <p className="text-sm text-muted-foreground">{opt.description}</p>
             </div>
-          </Card>
+          </button>
         ))}
       </div>
 
       {/* Helper text for selected objective */}
       {goal && (
-        <div className="p-3 mb-6 bg-bg-card border border-border/50 rounded">
-          <p className="text-sm text-text-secondary leading-relaxed">
+        <div className="p-3 mb-6 bg-card border border-border/50 rounded">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {goalHelperText[goal]}
           </p>
         </div>
@@ -886,7 +858,7 @@ function GoalStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth disabled={!isValid}>
+        <Button onClick={onNext} className="flex-1" disabled={!isValid}>
           Continue
         </Button>
       </div>
@@ -911,7 +883,7 @@ function AvatarStep({
       label: LABELS.avatarClasses.dominant,
       description: 'Control. Authority. Leads from the front.',
       icon: Sword,
-      color: 'text-error'
+      color: 'text-destructive'
     },
     {
       base: 'switch',
@@ -934,7 +906,7 @@ function AvatarStep({
       <h2 className="text-2xl font-bold mb-2">
         Choose your persona
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         This represents your avatar identity as you progress.
       </p>
 
@@ -942,22 +914,24 @@ function AvatarStep({
         {options.map((opt) => {
           const Icon = opt.icon
           return (
-            <Card
+            <button
               key={opt.base}
               onClick={() => onChange(opt.base)}
-              hover
-              className={`border-2 ${value === opt.base ? 'border-accent-primary' : 'border-transparent'}`}
+              className={cn(
+                'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
+                value === opt.base ? 'border-primary' : 'border-transparent'
+              )}
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-bg-secondary rounded flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center flex-shrink-0">
                   <Icon size={24} className={opt.color} />
                 </div>
                 <div>
                   <p className="font-semibold">{opt.label}</p>
-                  <p className="text-sm text-text-secondary">{opt.description}</p>
+                  <p className="text-sm text-muted-foreground">{opt.description}</p>
                 </div>
               </div>
-            </Card>
+            </button>
           )
         })}
       </div>
@@ -966,7 +940,7 @@ function AvatarStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth>
+        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -1009,7 +983,7 @@ function FeaturesStep({
       <h2 className="text-2xl font-bold mb-2">
         How the protocol works
       </h2>
-      <p className="text-text-secondary mb-6">
+      <p className="text-muted-foreground mb-6">
         Four areas of focus. Master them all.
       </p>
 
@@ -1017,26 +991,25 @@ function FeaturesStep({
         {features.map((feature, index) => {
           const Icon = feature.icon
           return (
-            <motion.div
+            <div
               key={feature.title}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              className="animate-in fade-in slide-in-from-left-4 duration-300"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <Card>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-bg-secondary flex items-center justify-center flex-shrink-0 rounded">
-                    <Icon size={20} className="text-accent-primary" />
+              <Card className="py-0">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="w-10 h-10 bg-muted flex items-center justify-center flex-shrink-0 rounded">
+                    <Icon size={20} className="text-primary" />
                   </div>
                   <div>
                     <p className="font-semibold mb-1 text-sm">
                       {feature.title}
                     </p>
-                    <p className="text-sm text-text-secondary">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
-                </div>
+                </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )
         })}
       </div>
@@ -1045,7 +1018,7 @@ function FeaturesStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext} fullWidth>
+        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -1066,47 +1039,42 @@ function TutorialStep({
 
   return (
     <div className="text-center">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mb-6"
-      >
-        <Shield size={48} className="mx-auto text-accent-primary" />
-      </motion.div>
+      <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+        <Shield size={48} className="mx-auto text-primary" />
+      </div>
       <h2 className="text-2xl font-bold mb-2">
         Protocol initialized, {username}.
       </h2>
-      <p className="text-text-secondary mb-6">Earn {LABELS.xpFull} ({xpLabel}) through:</p>
+      <p className="text-muted-foreground mb-6">Earn {LABELS.xpFull} ({xpLabel}) through:</p>
 
       <div className="space-y-3 text-left mb-8">
-        <Card>
-          <div className="flex justify-between items-center">
-            <span className="text-text-secondary">Workout completed</span>
-            <span className="text-accent-primary font-digital font-bold">+50 {xpLabel}</span>
-          </div>
+        <Card className="py-0">
+          <CardContent className="p-4 flex justify-between items-center">
+            <span className="text-muted-foreground">Workout completed</span>
+            <span className="text-primary font-digital font-bold">+50 {xpLabel}</span>
+          </CardContent>
         </Card>
-        <Card>
-          <div className="flex justify-between items-center">
-            <span className="text-text-secondary">Protein target hit</span>
-            <span className="text-accent-primary font-digital font-bold">+30 {xpLabel}</span>
-          </div>
+        <Card className="py-0">
+          <CardContent className="p-4 flex justify-between items-center">
+            <span className="text-muted-foreground">Protein target hit</span>
+            <span className="text-primary font-digital font-bold">+30 {xpLabel}</span>
+          </CardContent>
         </Card>
-        <Card>
-          <div className="flex justify-between items-center">
-            <span className="text-text-secondary">Calorie target hit</span>
-            <span className="text-accent-primary font-digital font-bold">+20 {xpLabel}</span>
-          </div>
+        <Card className="py-0">
+          <CardContent className="p-4 flex justify-between items-center">
+            <span className="text-muted-foreground">Calorie target hit</span>
+            <span className="text-primary font-digital font-bold">+20 {xpLabel}</span>
+          </CardContent>
         </Card>
-        <Card>
-          <div className="flex justify-between items-center">
-            <span className="text-text-secondary">Daily report submitted</span>
-            <span className="text-accent-primary font-digital font-bold">+10 {xpLabel}</span>
-          </div>
+        <Card className="py-0">
+          <CardContent className="p-4 flex justify-between items-center">
+            <span className="text-muted-foreground">Daily report submitted</span>
+            <span className="text-primary font-digital font-bold">+10 {xpLabel}</span>
+          </CardContent>
         </Card>
       </div>
 
-      <p className="text-sm text-text-secondary mb-6">
+      <p className="text-sm text-muted-foreground mb-6">
         {xpLabel} accumulates all week. Claim your reward every Sunday.
       </p>
 
@@ -1114,7 +1082,7 @@ function TutorialStep({
         <Button variant="ghost" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onFinish} fullWidth size="lg">
+        <Button onClick={onFinish} className="flex-1" size="lg">
           Begin
         </Button>
       </div>
@@ -1141,7 +1109,7 @@ function EvolutionStep({
   const newStageName = AVATAR_STAGES[1] || newStage.name
 
   const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
-    dominant: { icon: Sword, color: 'text-error' },
+    dominant: { icon: Sword, color: 'text-destructive' },
     switch: { icon: Wand2, color: 'text-primary' },
     submissive: { icon: Zap, color: 'text-warning' }
   }
@@ -1157,25 +1125,21 @@ function EvolutionStep({
   return (
     <div className="text-center">
       {/* Background glow effect */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: showNew ? 0.3 : 0 }}
-        transition={{ duration: 0.5 }}
+      <div
+        className={cn(
+          'absolute inset-0 pointer-events-none transition-opacity duration-500',
+          showNew ? 'opacity-30' : 'opacity-0'
+        )}
         style={{
           background: 'radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, transparent 70%)'
         }}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-4"
-      >
-        <span className="text-sm font-semibold text-accent-primary">
+      <div className="mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <span className="text-sm font-semibold text-primary">
           First Advancement
         </span>
-      </motion.div>
+      </div>
 
       <h2 className="text-2xl font-bold mb-8">
         {`Welcome, ${username}.`}
@@ -1183,146 +1147,94 @@ function EvolutionStep({
 
       {/* Evolution animation */}
       <div className="relative h-48 flex items-center justify-center mb-8">
-        <AnimatePresence mode="wait">
-          {!showNew ? (
-            <motion.div
-              key="old"
-              initial={{ scale: 1 }}
-              animate={{
-                scale: [1, 1.1, 1, 1.1, 1],
-              }}
-              exit={{
-                scale: 1.5,
-                opacity: 0,
-                filter: 'blur(10px)'
-              }}
-              transition={{
-                duration: 0.5,
-                repeat: Infinity,
-                repeatDelay: 0.5
-              }}
-              className="text-center"
-            >
+        {!showNew ? (
+          <div className="text-center animate-pulse">
+            {(() => {
+              const OldIcon = STAGE_ICON_MAP[oldStage.emoji] || Circle
+              return (
+                <>
+                  <div className="mb-2">
+                    <OldIcon size={80} className="mx-auto text-muted-foreground" />
+                  </div>
+                  <p className="text-muted-foreground">{oldStageName}</p>
+                </>
+              )
+            })()}
+          </div>
+        ) : (
+          <div className="text-center animate-in zoom-in-50 duration-500">
+            <div className="animate-bounce">
               {(() => {
-                const OldIcon = STAGE_ICON_MAP[oldStage.emoji] || Circle
+                const NewIcon = STAGE_ICON_MAP[newStage.emoji] || Zap
                 return (
-                  <>
-                    <div className="mb-2">
-                      <OldIcon size={80} className="mx-auto text-text-secondary" />
-                    </div>
-                    <p className="text-text-secondary">{oldStageName}</p>
-                  </>
+                  <div className="mb-2">
+                    <NewIcon size={80} className="mx-auto text-primary" />
+                  </div>
                 )
               })()}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="new"
-              initial={{
-                scale: 0,
-                rotate: 0,
-                opacity: 0
-              }}
-              animate={{
-                scale: 1,
-                rotate: 0,
-                opacity: 1
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 25
-              }}
-              className="text-center"
-            >
-              <motion.div
-                animate={{
-                  y: [0, -10, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'easeInOut'
-                }}
-              >
-                {(() => {
-                  const NewIcon = STAGE_ICON_MAP[newStage.emoji] || Zap
-                  return (
-                    <div className="mb-2">
-                      <NewIcon size={80} className="mx-auto text-accent-primary" />
-                    </div>
-                  )
-                })()}
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-xl font-bold text-accent-primary"
-              >
-                {newStageName}
-              </motion.p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+            <p className="text-xl font-bold text-primary animate-in fade-in duration-300 delay-300">
+              {newStageName}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Level/Rank up indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: showNew ? 0.5 : 2 }}
-        className="mb-6"
+      <div
+        className={cn(
+          'mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500',
+          showNew ? 'delay-500' : 'delay-[2000ms]'
+        )}
       >
-        <Card className="inline-block px-6">
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-xs text-text-secondary">
-                {LABELS.level}
-              </p>
-              <p className="text-2xl font-bold font-digital text-text-secondary">0</p>
-            </div>
-            <motion.div
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 0.5, repeat: Infinity }}
-              className="text-accent-primary text-xl"
-            >
-              &rarr;
-            </motion.div>
-            <div className="text-center">
-              <p className="text-xs text-text-secondary">
-                {LABELS.level}
-              </p>
-              <p className="text-2xl font-bold font-digital text-accent-primary">1</p>
-            </div>
-            <div className="ml-2">
-              {(() => {
-                const AvatarIcon = avatarIcons[avatarBase].icon
-                return <AvatarIcon size={28} className={avatarIcons[avatarBase].color} />
-              })()}
-            </div>
-          </div>
-        </Card>
-      </motion.div>
+        <div className="inline-block">
+          <Card className="py-0">
+            <CardContent className="px-6 py-4 flex items-center gap-4">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  {LABELS.level}
+                </p>
+                <p className="text-2xl font-bold font-digital text-muted-foreground">0</p>
+              </div>
+              <div className="text-primary text-xl animate-bounce">
+                &rarr;
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  {LABELS.level}
+                </p>
+                <p className="text-2xl font-bold font-digital text-primary">1</p>
+              </div>
+              <div className="ml-2">
+                {(() => {
+                  const AvatarIcon = avatarIcons[avatarBase].icon
+                  return <AvatarIcon size={28} className={avatarIcons[avatarBase].color} />
+                })()}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: showNew ? 0.7 : 2.2 }}
-        className="text-text-secondary mb-8"
+      <p
+        className={cn(
+          'text-muted-foreground mb-8 animate-in fade-in duration-500',
+          showNew ? 'delay-700' : 'delay-[2200ms]'
+        )}
       >
         The protocol begins now.
-      </motion.p>
+      </p>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: showNew ? 1 : 2.5 }}
+      <div
+        className={cn(
+          'animate-in fade-in slide-in-from-bottom-4 duration-500',
+          showNew ? 'delay-1000' : 'delay-[2500ms]'
+        )}
       >
-        <Button onClick={onContinue} fullWidth size="lg">
+        <Button onClick={onContinue} className="w-full" size="lg">
           Begin
         </Button>
-      </motion.div>
+      </div>
     </div>
   )
 }

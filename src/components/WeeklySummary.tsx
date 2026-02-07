@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
-import { motion } from 'motion/react'
-import { Card } from './Card'
+import { Card, CardContent } from '@/components/ui/card'
 import { useXPStore, useWorkoutStore, useMacroStore, useUserStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { Dumbbell, CheckCircle2, Target, Star, Zap, Flame } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 interface WeeklyStats {
   workoutsCompleted: number
@@ -101,120 +101,123 @@ export function WeeklySummary() {
   const daysSoFar = getDaysSoFar()
 
   return (
-    <Card>
+    <Card className="py-0">
+      <CardContent className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text-secondary">
+        <h3 className="text-sm font-semibold text-muted-foreground">
           Weekly Summary
         </h3>
-        <span className="text-xs text-text-secondary">
+        <span className="text-xs text-muted-foreground">
           Day {daysSoFar} of 7
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {/* Workouts */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="p-3 bg-surface-elevated rounded"
+        <div
+          className={cn(
+            'p-3 bg-muted rounded',
+            'animate-in fade-in zoom-in-90 duration-300'
+          )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <Dumbbell size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">Workouts</span>
+            <Dumbbell size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Workouts</span>
           </div>
           <p className="text-xl font-bold font-mono">
             {stats.workoutsCompleted}
-            <span className="text-sm text-text-secondary font-normal">
+            <span className="text-sm text-muted-foreground font-normal">
               /{stats.workoutsPlanned}
             </span>
           </p>
-        </motion.div>
+        </div>
 
         {/* Check-ins */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.05 }}
-          className="p-3 bg-surface-elevated rounded"
+        <div
+          className={cn(
+            'p-3 bg-muted rounded',
+            'animate-in fade-in zoom-in-90 duration-300 delay-75'
+          )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">Reports</span>
+            <CheckCircle2 size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Reports</span>
           </div>
           <p className="text-xl font-bold font-mono">
             {stats.daysLogged}
-            <span className="text-sm text-text-secondary font-normal">
+            <span className="text-sm text-muted-foreground font-normal">
               /{daysSoFar}
             </span>
           </p>
-        </motion.div>
+        </div>
 
         {/* Protein Days */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="p-3 bg-surface-elevated rounded"
+        <div
+          className={cn(
+            'p-3 bg-muted rounded',
+            'animate-in fade-in zoom-in-90 duration-300 delay-100'
+          )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <Target size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">Protein Days</span>
+            <Target size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Protein Days</span>
           </div>
           <p className="text-xl font-bold font-mono text-primary">
             {stats.proteinDaysHit}
           </p>
-        </motion.div>
+        </div>
 
         {/* Perfect Days */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 }}
-          className="p-3 bg-surface-elevated rounded"
+        <div
+          className={cn(
+            'p-3 bg-muted rounded',
+            'animate-in fade-in zoom-in-90 duration-300 delay-150'
+          )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <Star size={16} className="text-text-secondary" />
-            <span className="text-xs text-text-secondary">Full Compliance</span>
+            <Star size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Full Compliance</span>
           </div>
           <p className="text-xl font-bold font-mono text-warning">
             {stats.perfectDays}
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* XP Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-3 pt-3 border-t border-border flex items-center justify-between"
+      <div
+        className={cn(
+          'mt-3 pt-3 border-t border-border flex items-center justify-between',
+          'animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200'
+        )}
       >
         <div className="flex items-center gap-2">
-          <Zap size={16} className="text-text-secondary" />
-          <span className="text-sm text-text-secondary">Weekly {LABELS.xp}</span>
+          <Zap size={16} className="text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Weekly {LABELS.xp}</span>
         </div>
         <span className="font-bold font-mono text-secondary">
           +{stats.xpEarned} {LABELS.xp}
         </span>
-      </motion.div>
+      </div>
 
       {/* Streak */}
       {stats.currentStreak > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="mt-2 flex items-center justify-between"
+        <div
+          className={cn(
+            'mt-2 flex items-center justify-between',
+            'animate-in fade-in slide-in-from-bottom-2 duration-300 delay-300'
+          )}
         >
           <div className="flex items-center gap-2">
-            <Flame size={16} className="text-text-secondary" />
-            <span className="text-sm text-text-secondary">{LABELS.streak}</span>
+            <Flame size={16} className="text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{LABELS.streak}</span>
           </div>
           <span className="font-bold font-mono text-warning">
             {stats.currentStreak} days
           </span>
-        </motion.div>
+        </div>
       )}
+      </CardContent>
     </Card>
   )
 }

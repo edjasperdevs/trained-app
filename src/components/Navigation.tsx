@@ -1,5 +1,4 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
@@ -35,24 +34,16 @@ export function Navigation() {
               className="flex flex-col items-center justify-center w-16 h-full relative"
             >
               {isActive && (
-                <motion.div
-                  layoutId="nav-indicator"
-                  className="absolute -top-0.5 h-0.5 bg-primary w-10 rounded-full"
-                />
+                <div className="absolute -top-0.5 h-0.5 bg-primary w-10 rounded-full" />
               )}
-              <motion.div
-                animate={isActive ? { scale: 1.1 } : { scale: 1 }}
-                transition={{ duration: 0.15 }}
-              >
-                <item.icon
-                  size={22}
-                  strokeWidth={isActive ? 2 : 1.5}
-                  className={cn(
-                    'transition-colors duration-150',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
-                  )}
-                />
-              </motion.div>
+              <item.icon
+                size={22}
+                strokeWidth={isActive ? 2 : 1.5}
+                className={cn(
+                  'transition-colors duration-150',
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                )}
+              />
               <span className={cn(
                 'text-[10px] mt-0.5 transition-colors duration-150 font-medium',
                 isActive ? 'text-primary' : 'text-muted-foreground'

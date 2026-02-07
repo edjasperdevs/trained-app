@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import type { ActivityItem } from '@/hooks/useClientDetails'
 
 interface ClientActivityFeedProps {
@@ -14,7 +13,7 @@ interface GroupedActivities {
 export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
   if (activities.length === 0) {
     return (
-      <div className="text-center py-8 text-text-secondary">
+      <div className="text-center py-8 text-muted-foreground">
         <span className="text-3xl block mb-2">📭</span>
         <p className="text-sm">No recent activity</p>
       </div>
@@ -75,35 +74,32 @@ export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
   }
 
   const getXPColor = (amount: number): string => {
-    if (amount >= 100) return 'text-accent-secondary'
-    if (amount >= 50) return 'text-accent-primary'
-    return 'text-accent-success'
+    if (amount >= 100) return 'text-secondary'
+    if (amount >= 50) return 'text-primary'
+    return 'text-success'
   }
 
   return (
     <div className="space-y-4">
       {grouped.map((group, groupIndex) => (
-        <motion.div
+        <div
           key={group.date}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: groupIndex * 0.05 }}
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: `${groupIndex * 50}ms` }}
         >
-          <p className="text-xs font-semibold text-text-secondary mb-2">{group.label}</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-2">{group.label}</p>
           <div className="space-y-2">
             {group.items.map((activity, itemIndex) => (
-              <motion.div
+              <div
                 key={activity.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: groupIndex * 0.05 + itemIndex * 0.02 }}
-                className="flex items-center gap-3 bg-bg-card/50 rounded-lg p-2"
+                className="flex items-center gap-3 bg-muted/50 rounded-lg p-2 animate-in fade-in slide-in-from-left-2 duration-200"
+                style={{ animationDelay: `${groupIndex * 50 + itemIndex * 20}ms` }}
               >
                 <span className="text-lg">{getActivityIcon(activity)}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">{activity.description}</p>
                   {activity.detail && (
-                    <p className="text-xs text-text-secondary">{activity.detail}</p>
+                    <p className="text-xs text-muted-foreground">{activity.detail}</p>
                   )}
                 </div>
                 {activity.xpAmount && (
@@ -111,10 +107,10 @@ export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
                     +{activity.xpAmount} XP
                   </span>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   )

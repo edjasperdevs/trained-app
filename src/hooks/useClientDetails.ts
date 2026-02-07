@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase'
 import type { XPSource, WorkoutType } from '@/lib/database.types'
+import { getMockClientDetails } from '@/lib/devSeed'
+
+const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
 export interface WeightData {
   date: string
@@ -233,6 +236,16 @@ export function useClientDetails(clientId: string | null) {
     setError(null)
 
     try {
+      if (devBypass) {
+        const mock = getMockClientDetails(id)
+        if (currentClientRef.current === id) {
+          setWeightData(mock.weightData)
+          setMacroData(mock.macroData)
+          setActivityData(mock.activityData as ActivityItem[])
+        }
+        return
+      }
+
       const [weight, macros, activity] = await Promise.all([
         fetchClientWeight(id),
         fetchClientMacros(id),
