@@ -61,7 +61,10 @@ Plans:
   2. Coach can search clients by name or email and results update with server-side filtering
   3. Coach can drill into a client to see weight history, macro adherence trends, and activity feed
   4. Roster loads in under 2 seconds with 100+ clients (server-side pagination, no full table scan)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 03-01-PLAN.md -- Database migration (security_invoker on view) + useClientRoster hook (pagination, search, debounce)
+- [ ] 03-02-PLAN.md -- Coach.tsx refactor (search input, pagination controls, updated client cards)
 
 ### Phase 4: Macro Management
 **Goal**: Coach can remotely set a client's daily macro targets and the client sees the updated targets on their next app open
@@ -106,7 +109,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|---------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-02-07 |
 | 2. Invitations | 3/3 | Complete | 2026-02-07 |
-| 3. Client Roster | 0/TBD | Not started | - |
+| 3. Client Roster | 0/2 | Not started | - |
 | 4. Macro Management | 0/TBD | Not started | - |
 | 5. Workout Programming | 0/TBD | Not started | - |
 | 6. Weekly Check-ins | 0/TBD | Not started | - |
