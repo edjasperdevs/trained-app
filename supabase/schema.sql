@@ -485,7 +485,8 @@ CREATE TRIGGER prevent_role_escalation
 -- ===========================================
 
 -- Client summary view for coaches
-CREATE OR REPLACE VIEW coach_client_summary AS
+CREATE OR REPLACE VIEW coach_client_summary
+WITH (security_invoker = true) AS
 SELECT
   cc.coach_id,
   cc.client_id,
