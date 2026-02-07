@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
-import { flushPendingSync } from '@/lib/sync'
+import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
 import { CoachGuard } from '@/components/CoachGuard'
@@ -59,7 +59,7 @@ function AppContent() {
     const handleOnline = () => {
       useSyncStore.getState().setOnline(true)
       useSyncStore.getState().setStatus('synced')
-      // Flush pending syncs on reconnection
+      pullCoachData()
       flushPendingSync()
     }
 
@@ -75,7 +75,8 @@ function AppContent() {
         // If returning after 30+ seconds AND online, trigger sync
         const elapsed = Date.now() - lastHidden
         if (elapsed > 30_000 && navigator.onLine) {
-          flushPendingSync()
+          pullCoachData() // Pull any coach updates
+          flushPendingSync() // Push any pending client changes
         }
       }
     }

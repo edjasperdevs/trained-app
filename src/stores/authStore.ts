@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
-import { syncAllToCloud, loadAllFromCloud } from '@/lib/sync'
+import { pushClientData, pullCoachData, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
 import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
 
@@ -177,8 +177,10 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       // First load any existing cloud data
       await loadAllFromCloud()
-      // Then sync local changes to cloud
-      await syncAllToCloud()
+      // Pull coach-set data (macros, future: workouts)
+      await pullCoachData()
+      // Then push client-owned changes to cloud
+      await pushClientData()
     } catch (error) {
       console.error('Sync error:', error)
       // Show user-friendly error message

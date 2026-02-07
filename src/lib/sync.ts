@@ -237,7 +237,7 @@ export async function syncMacroTargetsToCloud() {
   const { data: { user } } = await client.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const { targets, activityLevel } = useMacroStore.getState()
+  const { targets, activityLevel, setBy, setByCoachId } = useMacroStore.getState()
   if (!targets) return { error: 'No targets set' }
 
   const { error } = await client
@@ -248,7 +248,9 @@ export async function syncMacroTargetsToCloud() {
       calories: targets.calories,
       carbs: targets.carbs,
       fats: targets.fats,
-      activity_level: activityLevel
+      activity_level: activityLevel,
+      set_by: setBy,
+      set_by_coach_id: setByCoachId,
     }, {
       onConflict: 'user_id'
     })
@@ -411,9 +413,89 @@ export async function loadAvatarFromCloud() {
 }
 
 // ==========================================
+// Directional Sync Functions
+// ==========================================
+
+/**
+ * Push client-owned data to Supabase.
+ * Skips macro targets when set_by = 'coach' to prevent overwriting coach-set values.
+ */
+export async function pushClientData() {
+  const results: Record<string, { error: string | null }> = {
+    profile: await withRetryResult(syncProfileToCloud),
+    weightLogs: await withRetryResult(syncWeightLogsToCloud),
+    savedMeals: await withRetryResult(syncSavedMealsToCloud),
+    xp: await withRetryResult(syncXPToCloud),
+  }
+
+  // Only push macro targets if client-owned
+  const { setBy } = useMacroStore.getState()
+  if (setBy !== 'coach') {
+    results.macroTargets = await withRetryResult(syncMacroTargetsToCloud)
+  }
+
+  // Sync today's macro log (daily logs are always client-owned)
+  const today = new Date().toISOString().split('T')[0]
+  await withRetryResult(() => syncDailyMacroLogToCloud(today))
+
+  // Sync recent workouts with retry
+  const recentWorkouts = useWorkoutStore.getState().workoutLogs.slice(-10)
+  for (const workout of recentWorkouts) {
+    await withRetryResult(() => syncWorkoutLogToCloud(workout.id))
+  }
+
+  if (import.meta.env.DEV) console.log('[Sync] Push client data results:', results)
+  return results
+}
+
+/**
+ * Pull coach-set data from Supabase.
+ * Currently handles macro_targets with set_by = 'coach'.
+ * Structured to be extended for additional coach-owned data in later phases.
+ */
+export async function pullCoachData() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Pull macro targets — check if coach-set
+  const { data: macroData, error: macroError } = await client
+    .from('macro_targets')
+    .select('protein, calories, carbs, fats, activity_level, set_by, set_by_coach_id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!macroError && macroData && macroData.set_by === 'coach') {
+    // Coach has set these targets — update local store
+    useMacroStore.getState().setCoachTargets(
+      {
+        protein: macroData.protein,
+        calories: macroData.calories,
+        carbs: macroData.carbs,
+        fats: macroData.fats,
+      },
+      macroData.set_by_coach_id || ''
+    )
+    if (import.meta.env.DEV) console.log('[Sync] Pulled coach-set macro targets')
+  } else if (!macroError && macroData && macroData.set_by === 'self') {
+    const store = useMacroStore.getState()
+    if (store.setBy === 'coach') {
+      // Coach reverted ownership — reset local store
+      useMacroStore.setState({ setBy: 'self', setByCoachId: null })
+    }
+  }
+
+  if (import.meta.env.DEV) console.log('[Sync] Pull coach data complete')
+  return { error: null }
+}
+
+// ==========================================
 // Full Sync (Initial load or manual sync)
 // ==========================================
 
+/** @deprecated Use pushClientData() + pullCoachData() instead */
 export async function syncAllToCloud() {
   // Use retry wrapper for each sync operation
   const results = {
@@ -479,7 +561,7 @@ export function scheduleSync() {
     const store = useSyncStore.getState()
     store.setStatus('syncing')
     try {
-      await syncAllToCloud()
+      await pushClientData()
       store.setStatus('synced')
       store.setPendingChanges(false)
       store.setLastSyncedAt(new Date().toISOString())
@@ -506,7 +588,7 @@ export async function flushPendingSync() {
 
   store.setStatus('syncing')
   try {
-    await syncAllToCloud()
+    await pushClientData()
     store.setStatus('synced')
     store.setPendingChanges(false)
     store.setLastSyncedAt(new Date().toISOString())
