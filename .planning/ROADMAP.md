@@ -32,7 +32,7 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
 **Milestone Goal:** Nothing is broken and you can see exactly how users interact from day one
 
 - [x] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
-- [ ] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
+- [x] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
 - [ ] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
 - [ ] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
 
@@ -69,8 +69,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Auth and onboarding journey tests: chromium-auth project + Supabase mocks + access gate/signup/onboarding/signin E2E tests (E2E-05, E2E-06)
-- [ ] 02-02-PLAN.md -- Core feature journey tests: workout logging, meal logging, daily check-in, weekly XP claim, offline sync E2E tests (E2E-07 through E2E-11)
+- [x] 02-01-PLAN.md -- Auth and onboarding journey tests: chromium-auth project + Supabase mocks + access gate/signup/onboarding/signin E2E tests (E2E-05, E2E-06)
+- [x] 02-02-PLAN.md -- Core feature journey tests: workout logging, meal logging, daily check-in, weekly XP claim, offline sync E2E tests (E2E-07 through E2E-11)
 
 ---
 
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
-| 2. E2E Critical Journeys | 0/2 | Not started | - |
+| 2. E2E Critical Journeys | 2/2 | Complete | 2026-02-07 |
 | 3. Analytics Enhancement | 0/2 | Not started | - |
 | 4. Monitoring Hardening | 0/1 | Not started | - |
 
