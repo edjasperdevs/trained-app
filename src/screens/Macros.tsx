@@ -49,7 +49,7 @@ export function Macros() {
   ]
 
   return (
-    <div className="min-h-screen pb-20">
+    <div data-testid="macros-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="bg-card pt-8 pb-4 px-5">
         <h1 className="text-2xl font-bold mb-4">Macros</h1>
@@ -168,22 +168,26 @@ function DailyView({
     <div className="space-y-6">
       {/* Main Progress Rings */}
       <div className="grid grid-cols-2 gap-4">
-        <MacroRing
-          label="Protein"
-          current={progress.protein.current}
-          target={progress.protein.target}
-          unit="g"
-          color="cyan"
-          hit={proteinHit}
-        />
-        <MacroRing
-          label="Calories"
-          current={progress.calories.current}
-          target={progress.calories.target}
-          unit=""
-          color="purple"
-          hit={caloriesHit}
-        />
+        <div data-testid="macros-protein-display">
+          <MacroRing
+            label="Protein"
+            current={progress.protein.current}
+            target={progress.protein.target}
+            unit="g"
+            color="cyan"
+            hit={proteinHit}
+          />
+        </div>
+        <div data-testid="macros-calories-display">
+          <MacroRing
+            label="Calories"
+            current={progress.calories.current}
+            target={progress.calories.target}
+            unit=""
+            color="purple"
+            hit={caloriesHit}
+          />
+        </div>
       </div>
 
       {/* Secondary Macros */}
@@ -226,6 +230,7 @@ function DailyView({
                 onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
                 placeholder={String(targets.protein)}
                 className="font-digital"
+                data-testid="macros-food-search-input"
               />
             </div>
             <div>
@@ -243,6 +248,7 @@ function DailyView({
             onClick={handleQuickLog}
             className="w-full"
             disabled={!quickLog.protein && !quickLog.calories}
+            data-testid="macros-add-meal-button"
           >
             Log Macros
           </Button>
@@ -313,6 +319,7 @@ function DailyView({
                   <div
                     key={meal.id}
                     className="flex items-center justify-between bg-card rounded-lg p-3"
+                    data-testid="macros-meal-entry"
                   >
                     <div>
                       <p className="font-semibold text-sm">{meal.name}</p>
@@ -758,7 +765,7 @@ function LogMealView({
 
       {/* Saved Meals */}
       {savedMeals.length > 0 ? (
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="macros-saved-meals">
           <h3 className="text-sm font-semibold text-muted-foreground">SAVED MEALS ({savedMeals.length})</h3>
 
           {savedMeals.map((meal) => (

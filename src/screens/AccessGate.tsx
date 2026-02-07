@@ -60,7 +60,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-5">
+    <div data-testid="access-gate" className="min-h-screen flex flex-col items-center justify-center p-5">
       {/* Logo/Header */}
       <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="mb-4">
@@ -92,6 +92,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   onChange={(e) => handleCodeChange(e.target.value)}
                   placeholder="XXXX-XXXX-XXXX-XXXX"
                   aria-label="License key"
+                  data-testid="access-code-input"
                   className={cn(
                     'text-center text-lg font-mono tracking-wider uppercase h-12',
                     error && 'border-destructive'
@@ -114,6 +115,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                 className="w-full"
                 size="lg"
                 disabled={code.length < 6 || isValidating}
+                data-testid="access-submit-button"
               >
                 {isValidating ? (
                   <span className="flex items-center justify-center gap-2">

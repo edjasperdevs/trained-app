@@ -223,7 +223,7 @@ export function Workouts() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div data-testid="workouts-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="pt-8 pb-6 px-5 bg-card">
         <h1 className="text-2xl font-bold mb-2">
@@ -272,7 +272,7 @@ export function Workouts() {
                         </div>
                       ) : (
                         <div className="flex flex-col gap-2">
-                          <Button onClick={handleStartWorkout}>
+                          <Button onClick={handleStartWorkout} data-testid="workouts-start-button">
                             Start Workout
                           </Button>
                         </div>
@@ -382,7 +382,7 @@ export function Workouts() {
             </div>
 
             {/* History */}
-            <div>
+            <div data-testid="workouts-history">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold">Recent Workouts</h2>
                 <button
@@ -802,7 +802,7 @@ function ActiveWorkoutView({
           const lastWorkout = getLastWorkout(exercise.name)
 
           return (
-            <Card key={exercise.id} className="py-0">
+            <Card key={exercise.id} className="py-0" data-testid="workouts-exercise-card">
               <button
                 onClick={() => setExpandedExercise(isExpanded ? null : exercise.id)}
                 className="w-full p-4 flex items-center justify-between"
@@ -918,6 +918,7 @@ function ActiveWorkoutView({
                                 value={set.weight || ''}
                                 onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
                                 className="w-16 text-center font-digital text-sm"
+                                data-testid="workouts-set-weight-input"
                               />
                             </div>
                             <span className="text-muted-foreground text-sm">×</span>
@@ -927,6 +928,7 @@ function ActiveWorkoutView({
                               value={set.reps || ''}
                               onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
                               className="w-14 text-center font-digital text-sm"
+                              data-testid="workouts-set-reps-input"
                             />
                           {set.completed ? (
                             <div className="flex items-center gap-1">
@@ -957,6 +959,7 @@ function ActiveWorkoutView({
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => onCompleteSet(exercise.id, setIndex)}
+                                data-testid="workouts-set-checkbox"
                               >
                                 Done
                               </Button>
@@ -997,6 +1000,7 @@ function ActiveWorkoutView({
           className={cn('w-full', allSetsComplete && 'animate-pulse')}
           size="lg"
           disabled={!allSetsComplete}
+          data-testid="workouts-complete-button"
         >
           {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
         </Button>

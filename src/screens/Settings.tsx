@@ -258,7 +258,7 @@ export function Settings() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div data-testid="settings-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="pt-8 pb-6 px-5 bg-card">
         <h1 className="text-2xl font-bold">
@@ -656,6 +656,7 @@ export function Settings() {
                 variant="ghost"
                 className="w-full"
                 onClick={handleExport}
+                data-testid="settings-export-button"
               >
                 Export Progress
               </Button>
@@ -745,6 +746,7 @@ export function Settings() {
                     await signOut()
                     navigate('/auth')
                   }}
+                  data-testid="settings-signout-button"
                 >
                   Sign Out
                 </Button>
@@ -895,6 +897,7 @@ function AchievementsCard({ onViewAll }: { onViewAll: () => void }) {
           <button
             onClick={onViewAll}
             className="text-xs text-primary font-medium flex items-center gap-1"
+            data-testid="settings-achievements-link"
           >
             View All
             <ChevronRight size={14} />

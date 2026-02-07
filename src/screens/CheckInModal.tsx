@@ -160,6 +160,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       <div
         className="w-full max-w-md bg-card p-6 max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
+        data-testid="checkin-modal"
       >
         {!submitted ? (
           <>
@@ -243,7 +244,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
               {/* Streak Bonus */}
               {profile?.currentStreak !== undefined && (
-                <div className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
+                <div data-testid="checkin-streak-display" className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
                   <div className="flex items-center gap-3">
                     <Flame size={20} className="text-warning" />
                     <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
@@ -265,7 +266,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               </div>
             </div>
 
-            <Button onClick={handleSubmit} className="w-full" size="lg">
+            <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button">
               Submit Report
             </Button>
           </>

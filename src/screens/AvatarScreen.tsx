@@ -43,7 +43,7 @@ export function AvatarScreen() {
   const nextStageName = nextEvolution ? (AVATAR_STAGES[nextEvolution.stage - 1] || nextEvolution.name) : null
 
   return (
-    <div className="min-h-screen pb-20">
+    <div data-testid="avatar-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="pt-8 pb-12 px-5 bg-card">
         <h1 className="text-2xl font-bold mb-6 text-center">
@@ -51,7 +51,7 @@ export function AvatarScreen() {
         </h1>
 
         {/* Main Avatar Display */}
-        <div className="flex justify-center animate-in zoom-in-90 fade-in duration-500 delay-100">
+        <div className="flex justify-center animate-in zoom-in-90 fade-in duration-500 delay-100" data-testid="avatar-display">
           <Avatar size="xl" showMood showLevel level={currentLevel} />
         </div>
       </div>
@@ -92,7 +92,7 @@ export function AvatarScreen() {
               <div className="w-16 h-16 bg-muted flex items-center justify-center rounded-lg">
                 <StageIcon iconName={currentEvolution.emoji} size={32} className="text-primary" />
               </div>
-              <div>
+              <div data-testid="avatar-stage">
                 <h3 className="text-xl font-bold">
                   {currentStageName}
                 </h3>
@@ -213,7 +213,7 @@ export function AvatarScreen() {
         </Card>
 
         {/* Mood */}
-        <Card>
+        <Card data-testid="avatar-mood">
           <CardContent className="py-3">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Current State</span>

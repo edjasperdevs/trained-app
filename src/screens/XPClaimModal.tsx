@@ -210,6 +210,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
         <div
           className="animate-in slide-in-from-bottom duration-300 w-full max-w-md bg-card max-h-[90vh] overflow-y-auto rounded-t-lg sm:rounded-lg"
           onClick={(e) => e.stopPropagation()}
+          data-testid="xpclaim-modal"
         >
           {/* Preview Phase */}
           {phase === 'preview' && (
@@ -247,7 +248,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Ready to Claim</span>
-                    <span className="text-3xl font-bold font-mono text-primary">
+                    <span className="text-3xl font-bold font-mono text-primary" data-testid="xpclaim-amount-display">
                       {pendingXP} {LABELS.xp}
                     </span>
                   </div>
@@ -258,7 +259,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <Button variant="ghost" onClick={onClose}>
                   Later
                 </Button>
-                <Button onClick={handleClaim} className="w-full" size="lg">
+                <Button onClick={handleClaim} className="w-full" size="lg" data-testid="xpclaim-claim-button">
                   <span className="flex items-center gap-2">
                     <Sparkles size={18} />
                     CLAIM REWARD

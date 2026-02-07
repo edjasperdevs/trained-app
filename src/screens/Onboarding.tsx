@@ -199,10 +199,10 @@ export function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-5 pt-8 pb-24">
+    <div data-testid="onboarding-screen" className="min-h-screen flex flex-col px-5 pt-8 pb-24">
       {/* Progress indicator */}
       {step !== 'welcome' && (
-        <div className="mb-8">
+        <div data-testid="onboarding-progress" className="mb-8">
           <p className="text-center text-xs text-muted-foreground mb-2">
             Step {currentIndex} of {steps.length - 1}
           </p>
@@ -358,7 +358,7 @@ function NameStep({
   onBack: () => void
 }) {
   return (
-    <div>
+    <div data-testid="onboarding-step-2">
       <h2 className="text-2xl font-bold mb-2">
         What should we call you?
       </h2>
@@ -374,13 +374,14 @@ function NameStep({
         className="h-12 mb-6"
         maxLength={20}
         autoFocus
+        data-testid="onboarding-username-input"
       />
 
       <div className="flex gap-3">
-        <Button variant="ghost" onClick={onBack}>
+        <Button variant="ghost" onClick={onBack} data-testid="onboarding-back-button">
           Back
         </Button>
-        <Button onClick={onNext} className="flex-1" disabled={!value.trim()}>
+        <Button onClick={onNext} className="flex-1" disabled={!value.trim()} data-testid="onboarding-next-button">
           Continue
         </Button>
       </div>
@@ -405,7 +406,7 @@ function GenderStep({
   ]
 
   return (
-    <div>
+    <div data-testid="onboarding-step-3">
       <h2 className="text-2xl font-bold mb-2">
         Biological sex
       </h2>
@@ -418,6 +419,7 @@ function GenderStep({
           <button
             key={opt.gender}
             onClick={() => onChange(opt.gender)}
+            data-testid={`onboarding-gender-${opt.gender}`}
             className={cn(
               'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
               value === opt.gender ? 'border-primary' : 'border-transparent'
@@ -531,6 +533,7 @@ function DaysStep({
           <button
             key={opt.days}
             onClick={() => onChange(opt.days)}
+            data-testid={`onboarding-training-days-${opt.days}`}
             className={cn(
               'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
               value === opt.days ? 'border-primary' : 'border-transparent'
@@ -741,7 +744,7 @@ function GoalStep({
   const inches = height % 12
 
   return (
-    <div>
+    <div data-testid="onboarding-step-7">
       <h2 className="text-2xl font-bold mb-2">
         Current stats
       </h2>
@@ -764,6 +767,7 @@ function GoalStep({
                 className={cn('h-12 font-mono tabular-nums text-xl pr-12', (height < VALIDATION.height.min || height > VALIDATION.height.max) && 'border-destructive')}
                 min={4}
                 max={8}
+                data-testid="onboarding-height-input"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">ft</span>
             </div>
@@ -797,6 +801,7 @@ function GoalStep({
             className={cn('h-12 font-mono tabular-nums text-xl', (weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) && 'border-destructive')}
             min={VALIDATION.weight.min}
             max={VALIDATION.weight.max}
+            data-testid="onboarding-weight-input"
           />
         </div>
         <div className="flex-1">
@@ -810,6 +815,7 @@ function GoalStep({
             className={cn('h-12 font-mono tabular-nums text-xl', (age < VALIDATION.age.min || age > VALIDATION.age.max) && 'border-destructive')}
             min={VALIDATION.age.min}
             max={VALIDATION.age.max}
+            data-testid="onboarding-age-input"
           />
         </div>
       </div>
@@ -832,6 +838,7 @@ function GoalStep({
           <button
             key={opt.value}
             onClick={() => onGoalChange(opt.value)}
+            data-testid={`onboarding-goal-${opt.value}`}
             className={cn(
               'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
               goal === opt.value ? 'border-primary' : 'border-transparent'

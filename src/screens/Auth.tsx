@@ -117,7 +117,7 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-5">
+    <div data-testid="auth-screen" className="min-h-screen flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -171,6 +171,7 @@ export function Auth() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
+                  data-testid="auth-email-input"
                 />
               </div>
 
@@ -185,6 +186,7 @@ export function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
+                    data-testid="auth-password-input"
                   />
                 </div>
               )}
@@ -219,7 +221,7 @@ export function Auth() {
               )}
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading} data-testid="auth-submit-button">
                 {isLoading ? 'Loading...' : (
                   mode === 'login' ? 'Sign In' :
                   mode === 'signup' ? 'Create Account' :
@@ -236,6 +238,7 @@ export function Auth() {
                   <button
                     onClick={() => { setMode('signup'); setError(''); setSuccess('') }}
                     className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    data-testid="auth-toggle-mode"
                   >
                     Don't have an account? <span className="text-primary">Sign up</span>
                   </button>
@@ -252,6 +255,7 @@ export function Auth() {
                 <button
                   onClick={() => { setMode('login'); setError(''); setSuccess('') }}
                   className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  data-testid="auth-toggle-mode"
                 >
                   Already have an account? <span className="text-primary">Sign in</span>
                 </button>

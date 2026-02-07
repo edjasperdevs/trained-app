@@ -112,7 +112,7 @@ export function Home() {
   ]
 
   return (
-    <div className="min-h-screen pb-20">
+    <div data-testid="home-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="bg-card pt-8 pb-6 px-5">
         <div className="flex items-center justify-between mb-4">
@@ -125,7 +125,7 @@ export function Home() {
             </h1>
           </div>
           {profile?.currentStreak ? (
-            <StreakBadge />
+            <div data-testid="home-streak-display"><StreakBadge /></div>
           ) : null}
         </div>
 
@@ -194,8 +194,10 @@ export function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
           <CardContent className="p-4 relative">
             <div className="flex items-center gap-6">
-              <Avatar size="lg" showMood showLevel level={currentLevel} />
-              <div className="flex-1">
+              <div data-testid="home-level-display">
+                <Avatar size="lg" showMood showLevel level={currentLevel} />
+              </div>
+              <div className="flex-1" data-testid="home-xp-display">
                 <XPDisplay showPending />
               </div>
             </div>
@@ -211,6 +213,7 @@ export function Home() {
             <Card
               className="py-0 cursor-pointer border-l-[3px] border-l-warning"
               onClick={() => setShowClaimModal(true)}
+              data-testid="home-claim-xp-button"
             >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -422,6 +425,7 @@ export function Home() {
               onClick={() => setShowCheckIn(true)}
               className="w-full"
               size="lg"
+              data-testid="home-checkin-button"
             >
               <span className="flex items-center justify-center gap-2">
                 <Sparkles size={20} />
