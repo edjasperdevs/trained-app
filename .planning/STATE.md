@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 1 of 6 (Foundation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-07 -- Completed 01-01-PLAN.md (coach foundation schema)
+Last activity: 2026-02-07 -- Completed 01-02-PLAN.md (coach route guard)
 
-Progress: [███░░░░░░░] 33% (Phase 1)
+Progress: [██████░░░░] 67% (Phase 1)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [███░░░░░░░] 33% (Phase 1)
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: 2min
-- Total execution time: 2min
+- Total execution time: 4min
 
 ## Accumulated Context
 
@@ -39,6 +39,9 @@ Recent decisions affecting current work:
 - v1.3: Data ownership split -- client-owned (offline-first, push) vs coach-owned (server-authoritative, pull)
 - 01-01: set_by uses TEXT with CHECK constraint (not enum) for simplicity
 - 01-01: Role protection trigger checks JWT claims for service_role
+- 01-02: CoachGuard eagerly imported (not lazy) -- tiny component, must render before Coach chunk
+- 01-02: Direct file import for CoachGuard (not barrel) to preserve code-splitting
+- 01-02: Network errors during role check fail closed (redirect) with toast warning
 
 ### Pending Todos
 
@@ -53,5 +56,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 01-01-PLAN.md (coach foundation schema)
+Stopped at: Completed 01-02-PLAN.md (coach route guard)
 Resume file: None
