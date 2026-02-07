@@ -5,6 +5,7 @@ import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStor
 import { flushPendingSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
+import { CoachGuard } from '@/components/CoachGuard'
 import { AccessGate, Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
@@ -166,7 +167,7 @@ function AppContent() {
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/coach" element={<Suspense fallback={<HomeSkeleton />}><Coach /></Suspense>} />
+          <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           {devBypass && <Route path="/auth" element={<Auth />} />}
           {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
