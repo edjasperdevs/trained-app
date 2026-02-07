@@ -48,8 +48,8 @@ Plans:
   4. When an invited user completes signup, they appear in the coach's client roster without manual linking
 **Plans**: 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Database migration (invites table, RLS, handle_new_user trigger extension, TypeScript types)
-- [ ] 02-02-PLAN.md -- Edge Function (send-invite with Resend email, CORS helper)
+- [x] 02-01-PLAN.md -- Database migration (invites table, RLS, handle_new_user trigger extension, TypeScript types)
+- [x] 02-02-PLAN.md -- Edge Function (send-invite with Resend email, CORS helper)
 - [ ] 02-03-PLAN.md -- Coach UI (invite modal refactor, invite status list)
 
 ### Phase 3: Client Roster
@@ -105,7 +105,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-02-07 |
-| 2. Invitations | 0/3 | Not started | - |
+| 2. Invitations | 2/3 | In progress | - |
 | 3. Client Roster | 0/TBD | Not started | - |
 | 4. Macro Management | 0/TBD | Not started | - |
 | 5. Workout Programming | 0/TBD | Not started | - |
