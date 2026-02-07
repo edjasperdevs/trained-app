@@ -1,18 +1,18 @@
-# Trained Design Refresh
+# Trained
 
 ## What This Is
 
-Full visual overhaul of the Trained fitness gamification PWA. Transforming the current "too playful" aesthetic into a premium Equinox/luxury gym vibe — darker palette, cleaner typography, refined components. Removing the dual-theme system (dropping GYG) to simplify the codebase and go all-in on one cohesive identity.
+Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic inspired by Equinox and Whoop. The app just completed a full visual overhaul (shadcn/ui migration, Tailwind v4, theme system removal) and needs pre-launch confidence before going live to everyone at once.
 
 ## Core Value
 
-**The app must look and feel like it belongs next to Equinox, Whoop, and PUSH.** Every screen, component, and interaction should signal premium discipline — not gamified fun. Dark, minimal, confident.
+**When this launches to 90k people, nothing is broken and you can see exactly how they're using it.** E2E tests catch regressions before users do. Analytics and monitoring tell you what's working and what's not — from day one.
 
 ## Requirements
 
 ### Validated
 
-Previous milestone (Launch Polish) delivered:
+Previous milestones delivered:
 
 - ✓ User authentication (email/password, session persistence) — existing
 - ✓ Onboarding flow (10-step wizard with progress indicator) — existing
@@ -29,70 +29,71 @@ Previous milestone (Launch Polish) delivered:
 - ✓ Sentry error monitoring wired into all error paths — launch polish
 - ✓ Plausible analytics (22 custom events) — existing
 - ✓ WCAG AA color contrast compliance — launch polish
+- ✓ Premium dark aesthetic (Tailwind v4, shadcn/ui, CVA variants) — design refresh
+- ✓ Single-theme codebase (GYG removed, 394 ternaries resolved) — design refresh
+- ✓ Animation refinement (critically damped springs, no playful motion) — design refresh
+- ✓ "What's New" update prompt for returning users — design refresh
 
 ### Active
 
-Design refresh work:
+Pre-launch confidence work:
 
-- [ ] Remove GYG theme and dual-theme system entirely
-- [ ] New color palette — darker, premium, Equinox-inspired
-- [ ] Typography refresh — sharper, more commanding
-- [ ] Component library redesign — cards, buttons, inputs, modals
-- [ ] Screen-by-screen visual refresh
-- [ ] Animation refinement — subtle, premium motion
-- [ ] Dark mode optimization — true blacks, careful contrast
+- [ ] E2E test suite with Playwright covering critical user journeys
+- [ ] Existing test suite updated and passing after design refresh
+- [ ] Cross-browser verification (iOS Safari, Android Chrome, desktop)
+- [ ] Funnel analytics (sign up → onboarding → first workout → habit)
+- [ ] Engagement tracking (workout completion, meal logging, streak maintenance)
+- [ ] Performance monitoring (Core Web Vitals, API latency, page load times)
+- [ ] Operational dashboard (error rates, failed API calls, slow pages)
 
 ### Out of Scope
 
-- Coach dashboard redesign — still client-only
-- New features — visual refresh only, no functionality changes
-- Mobile app (native) — still PWA
-- Light mode — dark-only, matches luxury gym aesthetic
-- Marketing site redesign — app screens only
+- Coach dashboard — still client-only
+- New features or functionality changes — testing and observability only
+- Native mobile app — still PWA
+- Light mode — dark-only
+- Marketing site — app only
+- A/B testing infrastructure — premature for launch
+- Custom analytics backend — leverage Plausible + Sentry
 
 ## Context
 
 **Current State:**
-- 5-phase launch polish complete (audit, performance, UX, resilience, launch prep)
-- App is functionally solid — this is purely visual
-- Dual-theme system adds complexity: ThemeProvider, useTheme hook, two theme configs, CSS variables mapped to theme tokens
-- Theme tokens in TWO places: `src/themes/trained.ts` + `src/index.css` `:root` — removing GYG means simplifying to one source of truth
-- ~11k lines of TypeScript/TSX
+- Design refresh milestone complete (7 phases, 25 requirements, all shipped)
+- shadcn/ui migration merged to master
+- Sentry already wired into 8 catch blocks + auth
+- Plausible already tracking 22 custom events
+- Some existing tests but likely need updating after the massive visual overhaul
+- No E2E tests exist yet
+- Launching to ~90k followers — no beta group, everyone at once
 
-**Target Aesthetic:**
-- Equinox / luxury gym — exclusive, disciplined, premium
-- Dark backgrounds (near-black), subtle gradients
-- Minimal color — accent used sparingly for emphasis
-- Clean sans-serif typography with strong hierarchy
-- Generous whitespace, refined spacing
-- Subtle animations — no bouncy/playful motion
+**What Exists (to build on):**
+- Sentry for error monitoring — needs performance monitoring added
+- Plausible for event tracking — needs funnel/engagement events added
+- Existing unit/component tests — need audit and repair
 
-**Comparable Apps:**
-- Equinox+ (luxury fitness)
-- Whoop (performance tracking)
-- PUSH (strength tracking)
-- Peloton (premium fitness)
-
-**Timeline:**
-- This week — same urgency as launch polish
+**Gap Analysis:**
+- No E2E tests → can't verify critical paths don't regress
+- No funnel tracking → can't see where users drop off
+- No performance monitoring → can't detect slow experiences
+- Existing tests may be broken → false confidence
 
 ## Constraints
 
-- **Timeline**: This week — move fast
-- **Functionality**: Zero behavior changes — visual only
-- **Data**: No store/state changes that could affect user data
-- **Accessibility**: Maintain WCAG AA contrast ratios with new palette
-- **PWA**: Service worker, caching, offline support must keep working
+- **Timeline**: Before launch — move fast
+- **Functionality**: Zero behavior changes — testing and observability only
+- **Privacy**: Plausible is privacy-first (no cookies) — keep it that way
+- **Bundle size**: Monitoring additions must not bloat the client
+- **Existing tools**: Build on Sentry + Plausible — don't add new vendors
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Drop GYG theme entirely | Simplify codebase, go all-in on Trained identity | — Pending |
-| Full visual overhaul | Current design too playful for target audience | — Pending |
-| Equinox as north star | Premium gym aesthetic resonates with fitness enthusiasts | — Pending |
-| Dark-only (no light mode) | Matches luxury gym vibe, simpler to maintain | — Pending |
-| Visual-only (no features) | Don't break what launch polish just fixed | — Pending |
+| Playwright for E2E | Fast, reliable, multi-browser support, Microsoft-backed | — Pending |
+| Build on Sentry + Plausible | Already integrated, avoid vendor sprawl | — Pending |
+| E2E over unit tests | User journey coverage more valuable pre-launch than isolated unit coverage | — Pending |
+| No beta group | Launching to everyone at once — tests must provide the confidence | — Pending |
 
 ---
-*Last updated: 2026-02-05 after design refresh milestone initialization*
+*Last updated: 2026-02-06 after pre-launch confidence milestone initialization*
