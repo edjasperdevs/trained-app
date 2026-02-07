@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { WeightEntry } from '@/stores'
 
 interface WeightChartProps {
@@ -19,7 +18,7 @@ export function WeightChart({
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-text-secondary text-sm bg-surface border border-border rounded-xl"
+        className="flex items-center justify-center text-muted-foreground text-sm bg-card border border-border rounded-xl"
         style={{ height }}
       >
         No weight data yet
@@ -72,7 +71,7 @@ export function WeightChart({
   return (
     <div className="relative" style={{ height }}>
       {/* Y-axis labels */}
-      <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-xs text-text-secondary font-digital">
+      <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between text-xs text-muted-foreground font-digital">
         <span>{Math.round(chartMax)}</span>
         <span>{Math.round((chartMax + chartMin) / 2)}</span>
         <span>{Math.round(chartMin)}</span>
@@ -86,14 +85,14 @@ export function WeightChart({
           className="w-full h-full"
         >
           {/* Grid lines */}
-          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
-          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
-          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-text-primary/10" />
+          <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" strokeWidth="0.5" className="text-foreground/10" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" className="text-foreground/10" />
+          <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" strokeWidth="0.5" className="text-foreground/10" />
 
           {/* Goal line */}
           {showGoalLine && goalLineY !== null && goalLineY >= 0 && goalLineY <= 100 && (
             <>
-              <motion.line
+              <line
                 x1="0"
                 y1={goalLineY}
                 x2="100"
@@ -101,35 +100,30 @@ export function WeightChart({
                 stroke="var(--chart-goal-alpha)"
                 strokeWidth="1"
                 strokeDasharray="4 2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                className="animate-in fade-in duration-500"
               />
-              <motion.text
+              <text
                 x="2"
                 y={goalLineY - 2}
                 fill="var(--chart-goal-text)"
                 fontSize="3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
+                className="animate-in fade-in duration-500 delay-100"
               >
                 Goal
-              </motion.text>
+              </text>
             </>
           )}
 
           {/* Area fill */}
-          <motion.path
+          <path
             d={areaD}
             fill="url(#weightGradientNew)"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
-            transition={{ duration: 0.5 }}
+            className="animate-in fade-in duration-500"
+            opacity="0.4"
           />
 
           {/* Line */}
-          <motion.path
+          <path
             d={pathD}
             fill="none"
             stroke="url(#lineGradientNew)"
@@ -137,22 +131,16 @@ export function WeightChart({
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
           />
 
           {/* Data points */}
           {points.map((point, index) => (
-            <motion.circle
+            <circle
               key={index}
               cx={point.x}
               cy={point.y}
               r="1.5"
-              className="fill-accent-primary"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: index * 0.03, duration: 0.2 }}
+              className="fill-primary"
             />
           ))}
 
@@ -161,7 +149,7 @@ export function WeightChart({
             const y = 100 - ((avg.weight - chartMin) / chartRange) * 100
             const x = (avg.dataIndex / (data.length - 1 || 1)) * 100
             return (
-              <motion.circle
+              <circle
                 key={`avg-${index}`}
                 cx={x}
                 cy={y}
@@ -169,9 +157,6 @@ export function WeightChart({
                 fill="none"
                 stroke="var(--chart-avg-stroke)"
                 strokeWidth="1"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.8 + index * 0.1 }}
               />
             )
           })}
@@ -190,7 +175,7 @@ export function WeightChart({
         </svg>
 
         {/* X-axis labels */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-text-secondary transform translate-y-5">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-muted-foreground transform translate-y-5">
           {data.length > 0 && <span>{formatDate(data[0].date)}</span>}
           {data.length > 1 && <span>{formatDate(data[data.length - 1].date)}</span>}
         </div>
@@ -198,9 +183,9 @@ export function WeightChart({
 
       {/* Current value indicator */}
       {data.length > 0 && (
-        <div className="absolute top-0 right-0 bg-surface border border-border rounded-lg px-3 py-1.5">
-          <span className="text-xs text-text-secondary">Latest: </span>
-          <span className="font-digital font-bold text-accent-primary">
+        <div className="absolute top-0 right-0 bg-card border border-border rounded-lg px-3 py-1.5">
+          <span className="text-xs text-muted-foreground">Latest: </span>
+          <span className="font-digital font-bold text-primary">
             {data[data.length - 1].weight} {unit}
           </span>
         </div>

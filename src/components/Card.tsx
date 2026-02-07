@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { ReactNode } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
@@ -8,9 +7,9 @@ export const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-surface border border-border',
-        elevated: 'bg-surface-elevated border border-border shadow-card',
-        subtle: 'bg-surface/50 border border-border/50',
+        default: 'bg-card border border-border',
+        elevated: 'bg-muted border border-border shadow-card',
+        subtle: 'bg-card/50 border border-border/50',
       },
       padding: {
         none: '',
@@ -49,25 +48,37 @@ export function Card({
   'aria-label': ariaLabel,
   'aria-disabled': ariaDisabled,
 }: CardProps) {
-  const Component = onClick ? motion.button : motion.div
+  const classes = cn(
+    cardVariants({ variant, padding }),
+    hover && 'card-hover cursor-pointer hover:scale-[1.01] hover:-translate-y-0.5 transition-transform',
+    onClick && 'text-left w-full active:scale-[0.98] transition-transform',
+    className
+  )
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        role={role}
+        aria-checked={ariaChecked}
+        aria-label={ariaLabel}
+        aria-disabled={ariaDisabled}
+        className={classes}
+      >
+        {children}
+      </button>
+    )
+  }
 
   return (
-    <Component
-      onClick={onClick}
+    <div
       role={role}
       aria-checked={ariaChecked}
       aria-label={ariaLabel}
       aria-disabled={ariaDisabled}
-      whileHover={hover ? { scale: 1.01, y: -2 } : undefined}
-      whileTap={onClick ? { scale: 0.98 } : undefined}
-      className={cn(
-        cardVariants({ variant, padding }),
-        hover && 'card-hover cursor-pointer',
-        onClick && 'text-left w-full',
-        className
-      )}
+      className={classes}
     >
       {children}
-    </Component>
+    </div>
   )
 }

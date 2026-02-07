@@ -1,8 +1,8 @@
-import { motion, AnimatePresence } from 'motion/react'
 import { useState, useEffect } from 'react'
 import { useXPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { ProgressBar } from './ProgressBar'
+import { cn } from '@/lib/cn'
 
 interface XPDisplayProps {
   compact?: boolean
@@ -68,19 +68,14 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
   return (
     <div className="relative">
       {/* Floating XP gains */}
-      <AnimatePresence>
-        {xpGains.map(gain => (
-          <motion.div
-            key={gain.id}
-            initial={{ opacity: 1, y: 0, x: '-50%' }}
-            animate={{ opacity: 0, y: -40 }}
-            exit={{ opacity: 0 }}
-            className="absolute left-1/2 -top-2 text-success font-bold font-mono pointer-events-none z-10"
-          >
-            +{gain.amount} {LABELS.xp}
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      {xpGains.map(gain => (
+        <div
+          key={gain.id}
+          className="absolute left-1/2 -top-2 -translate-x-1/2 text-success font-bold font-mono pointer-events-none z-10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+        >
+          +{gain.amount} {LABELS.xp}
+        </div>
+      ))}
 
       <div className="text-center">
         {/* Level display */}
@@ -105,23 +100,24 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
         </div>
 
         {/* XP numbers */}
-        <div className="flex justify-between text-xs text-text-secondary">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span className="font-mono">{Math.round(levelProgress)}%</span>
           <span className="font-mono">{xpToNextLevel.toLocaleString()} {LABELS.xp} to next</span>
         </div>
 
         {/* Pending XP indicator */}
         {showPending && pendingXP > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 p-3 border bg-surface border-border rounded"
+          <div
+            className={cn(
+              'mt-3 p-3 border bg-card border-border rounded',
+              'animate-in fade-in zoom-in-95 duration-300'
+            )}
           >
             <p className="text-sm text-secondary">
               <span className="font-mono font-bold">+{pendingXP} {LABELS.xp}</span> pending
             </p>
-            <p className="text-[10px] text-text-secondary mt-0.5">Claim on Sunday</p>
-          </motion.div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Claim on Sunday</p>
+          </div>
         )}
       </div>
     </div>

@@ -10,7 +10,7 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **UI Components:** shadcn/ui (Radix primitives + CVA)
 - **State Management:** Zustand (persisted to localStorage)
 - **Backend:** Supabase (auth, cloud sync, profiles)
-- **Animations:** Framer Motion
+- **Animations:** tw-animate-css
 - **Icons:** Lucide React
 - **PWA:** vite-plugin-pwa (prompt-based updates, offline support)
 - **Error Monitoring:** Sentry
@@ -44,7 +44,6 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Coach Dashboard** — Client list, progress tracking, weight charts, macro adherence, activity feed
 - **Data Export/Import** — Full profile backup and restore
 - **Access Code Gating** — Required at app entry
-- **Dual-Theme System** — TRAINED (dark, discipline) and GYG (RPG-gamified) themes
 
 ## Project Structure
 
@@ -54,8 +53,7 @@ src/
 ├── components/          # Domain components (Avatar, EmptyState, SyncStatusIndicator...)
 ├── screens/             # Route components (Home, Workouts, Macros, Achievements, Settings...)
 ├── stores/              # Zustand stores (user, xp, workout, macro, avatar, achievements, sync...)
-├── lib/                 # Utilities (sync, sentry, analytics, haptics, errors, foodApi, dateUtils...)
-├── themes/              # Theme system (trained.ts, gyg.ts, ThemeProvider)
+├── lib/                 # Utilities (sync, sentry, analytics, haptics, errors, foodApi, devSeed...)
 ├── App.tsx              # Router with per-route Suspense boundaries
 └── main.tsx             # Entry point with Sentry ErrorBoundary
 ```
@@ -88,7 +86,66 @@ npm run test:run
 | `VITE_SENTRY_DSN` | Production | Sentry DSN for error monitoring |
 | `VITE_USDA_API_KEY` | Recommended | USDA FoodData Central API key |
 | `VITE_ACCESS_CODES` | Yes | Comma-separated access codes |
-| `VITE_DEV_BYPASS` | No | Set to `true` to skip auth/access gates for UI testing |
+| `VITE_DEV_BYPASS` | No | Set to `true` to skip auth/access/onboarding gates for UI testing |
+
+## Dev Testing
+
+### Quick Start
+
+Set `VITE_DEV_BYPASS=true` in `.env.local` to bypass auth, access code, and onboarding gates. Then seed test data from the browser console:
+
+```js
+seedTestData()   // Populate all stores with realistic data, then reload
+clearTestData()  // Wipe all localStorage stores, then reload
+```
+
+### Seeded Test Data (localStorage)
+
+The seed utility (`src/lib/devSeed.ts`) populates the following via `window.seedTestData()`:
+
+| Store | Data |
+|-------|------|
+| **User Profile** | "TestUser", male, 28yo, 185lbs, intermediate, 4-day split, 7-day streak, goal weight 180 |
+| **Weight History** | 30 days of entries trending from ~188 to ~185 lbs |
+| **Workouts** | ~14 completed workout logs (push/pull/legs/upper), one minimal compliance day |
+| **Macros** | 15 days of macro logs with 4 meals/day, 2 saved meals (Post-Workout Shake, Chicken Rice Bowl) |
+| **XP** | 30 days of XP logs, level ~8-10, pending claim on current day |
+| **Avatar** | Dominant base, evolution stage matched to level, happy mood |
+| **Achievements** | 6 earned badges (first-rep, day-one, iron-will, warming-up, well-fueled, rising) |
+| **Reminders** | All reminder types enabled, none dismissed |
+| **Access** | Pre-granted with test license key |
+
+### Coach Dashboard Mock Data
+
+When `VITE_DEV_BYPASS=true`, the Coach page (`/coach`) uses mock data instead of Supabase:
+
+| Client | Email | Status | Notes |
+|--------|-------|--------|-------|
+| **SarahLifts** | sarah@example.com | Active (green) | 15-day streak, level 12, checked in today, 30 days weight data |
+| **MikeG** | mike@example.com | Needs attention (yellow) | 3-day streak, level 7, last check-in 2 days ago |
+| **JakeR** | jake@example.com | Falling off (red) | 0 streak, level 4, last check-in 5 days ago |
+| **FreshStart** | newbie@example.com | Pending (gray) | Hasn't completed onboarding |
+
+**Add Client flow:** Enter `alex@example.com` to test adding a new client (AlexK). Any other email returns "User not found."
+
+Each mock client has weight trends, macro adherence data, and activity feeds viewable in the detail modal tabs.
+
+### Routes
+
+All routes are available in dev bypass mode:
+
+| Route | Screen |
+|-------|--------|
+| `/` | Home (dashboard, quests, streaks) |
+| `/workouts` | Workout logging and history |
+| `/macros` | Macro tracking and meal builder |
+| `/avatar` | Avatar evolution and stats |
+| `/achievements` | Badge collection |
+| `/settings` | Profile, data export/import |
+| `/coach` | Coach dashboard (mock data in dev bypass) |
+| `/auth` | Auth screen (accessible directly in dev bypass) |
+| `/access` | Access gate screen (accessible directly in dev bypass) |
+| `/onboarding` | Onboarding wizard (accessible directly in dev bypass) |
 
 ## License
 

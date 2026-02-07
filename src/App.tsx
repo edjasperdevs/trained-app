@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync } from '@/lib/sync'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
@@ -12,7 +12,7 @@ const Workouts = lazy(() => import('@/screens/Workouts').then(m => ({ default: m
 const Macros = lazy(() => import('@/screens/Macros').then(m => ({ default: m.Macros })))
 const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ default: m.AvatarScreen })))
 const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
-// const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach }))) // Disabled for client-only launch
+const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
 
 function AppContent() {
@@ -103,7 +103,7 @@ function AppContent() {
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-text-secondary">Loading...</p>
+            <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
       </>
@@ -157,10 +157,11 @@ function AppContent() {
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/coach" element={<Navigate to="/" replace />} />
+          <Route path="/coach" element={<Suspense fallback={<HomeSkeleton />}><Coach /></Suspense>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           {devBypass && <Route path="/auth" element={<Auth />} />}
           {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
+          {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Navigation />

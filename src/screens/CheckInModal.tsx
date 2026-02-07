@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Button, Card, BadgeUnlockModal } from '@/components'
+import { BadgeUnlockModal } from '@/components'
 import {
   useUserStore,
   useXPStore,
@@ -11,6 +10,8 @@ import {
 } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
+import { cn } from '@/lib/cn'
+import { Button } from '@/components/ui/button'
 import { Dumbbell, Beef, Zap, CheckCircle2, Star, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
 
 interface CheckInModalProps {
@@ -131,14 +132,11 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     // Track analytics
     analytics.checkInCompleted((profile?.currentStreak || 0) + 1)
 
-    // Animate - set all animations at once to avoid multiple state updates
-    // Framer-motion handles the stagger via transition.delay
     setSubmitted(true)
     setEarnedXP(totalXP)
     setXpAnimations(animations)
 
-    // Check for new badges after animations complete
-    // Use reduced delay since framer-motion stagger (0.15s) is faster than our old JS stagger (0.3s)
+    // Check for new badges after a delay
     const badgeCheckDelay = animations.length * 150 + 800
     setTimeout(() => {
       const newBadges = checkAndAwardBadges()
@@ -152,219 +150,181 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Daily check-in"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center"
-        onClick={() => onClose(false)}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Daily check-in"
+      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200"
+      onClick={() => onClose(false)}
+    >
+      <div
+        className="w-full max-w-md bg-card p-6 max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="w-full max-w-md bg-surface p-6 max-h-[90vh] overflow-y-auto rounded-t-lg sm:rounded-lg"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {!submitted ? (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">
-                  {LABELS.checkIn}
-                </h2>
-                <button
-                  onClick={() => onClose(false)}
-                  aria-label="Close check-in"
-                  className="text-text-secondary hover:text-text-primary"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+        {!submitted ? (
+          <>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">
+                {LABELS.checkIn}
+              </h2>
+              <button
+                onClick={() => onClose(false)}
+                aria-label="Close check-in"
+                className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-              <div className="space-y-4 mb-6">
-                {/* Workout */}
-                {todayWorkout ? (
-                  <QuestCheckbox
-                    label={`Completed ${todayWorkout.name}`}
-                    xp={XP_VALUES.WORKOUT}
-                    checked={data.workout}
-                    onChange={(v) => setData(d => ({ ...d, workout: v }))}
-                    icon={Dumbbell}
-                    disabled={workoutCompleted}
-                    xpLabel={LABELS.xp}
-                  />
-                ) : (
-                  <Card className="opacity-60" padding="sm">
-                    <div className="flex items-center gap-3">
-                      <Moon size={20} className="text-text-secondary" />
-                      <span className="text-text-secondary">
-                        Recovery Day - No training scheduled
-                      </span>
-                    </div>
-                  </Card>
-                )}
-
-                {/* Protein */}
+            <div className="space-y-3 mb-6">
+              {/* Workout */}
+              {todayWorkout ? (
                 <QuestCheckbox
-                  label="Hit Protein Target"
-                  xp={XP_VALUES.PROTEIN}
-                  checked={data.protein}
-                  onChange={(v) => setData(d => ({ ...d, protein: v }))}
-                  icon={Beef}
+                  label={`Completed ${todayWorkout.name}`}
+                  xp={XP_VALUES.WORKOUT}
+                  checked={data.workout}
+                  onChange={(v) => setData(d => ({ ...d, workout: v }))}
+                  icon={Dumbbell}
+                  disabled={workoutCompleted}
                   xpLabel={LABELS.xp}
                 />
+              ) : (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted text-muted-foreground opacity-60">
+                  <Moon size={20} />
+                  <span>Recovery Day - No training scheduled</span>
+                </div>
+              )}
 
-                {/* Calories */}
-                <QuestCheckbox
-                  label="Hit Calorie Target"
-                  xp={XP_VALUES.CALORIES}
-                  checked={data.calories}
-                  onChange={(v) => setData(d => ({ ...d, calories: v }))}
-                  icon={Zap}
-                  xpLabel={LABELS.xp}
-                />
+              {/* Protein */}
+              <QuestCheckbox
+                label="Hit Protein Target"
+                xp={XP_VALUES.PROTEIN}
+                checked={data.protein}
+                onChange={(v) => setData(d => ({ ...d, protein: v }))}
+                icon={Beef}
+                xpLabel={LABELS.xp}
+              />
 
-                {/* Check-in (always checked) */}
-                <QuestCheckbox
-                  label={LABELS.checkIn}
-                  xp={XP_VALUES.CHECK_IN}
-                  checked={data.checkIn}
-                  onChange={() => {}}
-                  icon={CheckCircle2}
-                  disabled
-                  xpLabel={LABELS.xp}
-                />
+              {/* Calories */}
+              <QuestCheckbox
+                label="Hit Calorie Target"
+                xp={XP_VALUES.CALORIES}
+                checked={data.calories}
+                onChange={(v) => setData(d => ({ ...d, calories: v }))}
+                icon={Zap}
+                xpLabel={LABELS.xp}
+              />
 
-                {/* Perfect Day Bonus */}
-                {perfectDay && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                  >
-                    <Card className="bg-success/10 border-success/30" padding="sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Star size={20} className="text-success" />
-                          <span className="text-success font-semibold text-sm">
-                            Full Compliance Bonus!
-                          </span>
-                        </div>
-                        <span className="text-success font-mono font-bold">
-                          +{XP_VALUES.PERFECT_DAY} {LABELS.xp}
-                        </span>
-                      </div>
-                    </Card>
-                  </motion.div>
-                )}
+              {/* Check-in (always checked) */}
+              <QuestCheckbox
+                label={LABELS.checkIn}
+                xp={XP_VALUES.CHECK_IN}
+                checked={data.checkIn}
+                onChange={() => {}}
+                icon={CheckCircle2}
+                disabled
+                xpLabel={LABELS.xp}
+              />
 
-                {/* Streak Bonus */}
-                {profile?.currentStreak !== undefined && (
-                  <Card className="bg-warning/10 border-warning/20" padding="sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Flame size={20} className="text-warning" />
-                        <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
-                      </div>
-                      <span className="text-warning font-mono font-bold">
-                        +{streakBonus} {LABELS.xp}
-                      </span>
-                    </div>
-                  </Card>
-                )}
-              </div>
-
-              {/* Total XP Preview */}
-              <div className="bg-surface-elevated p-4 mb-6 rounded">
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Total {LABELS.xp}</span>
-                  <span className="text-2xl font-bold font-mono text-primary">
-                    +{calculateXP()} {LABELS.xp}
+              {/* Perfect Day Bonus */}
+              {perfectDay && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/30 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="flex items-center gap-3">
+                    <Star size={20} className="text-success" />
+                    <span className="text-success font-semibold text-sm">
+                      Full Compliance Bonus!
+                    </span>
+                  </div>
+                  <span className="text-success font-mono font-bold">
+                    +{XP_VALUES.PERFECT_DAY} {LABELS.xp}
                   </span>
                 </div>
-              </div>
+              )}
 
-              <Button onClick={handleSubmit} fullWidth size="lg">
-                Submit Report
-              </Button>
-            </>
-          ) : (
-            <div className="text-center py-8">
-              {/* Success Animation */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', delay: 0.2 }}
-                className="mb-4"
-              >
-                <PartyPopper size={56} className="mx-auto text-primary" />
-              </motion.div>
-
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-2xl font-bold mb-2"
-              >
-                Report Accepted.
-              </motion.h2>
-
-              {/* XP Breakdown Animation */}
-              <div className="space-y-2 my-6 relative">
-                <AnimatePresence>
-                  {xpAnimations.map((anim, index) => (
-                    <motion.div
-                      key={anim.id}
-                      initial={{ opacity: 0, x: -50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.15 }}
-                      className="flex items-center justify-between bg-surface-elevated px-4 py-2 rounded"
-                    >
-                      <span className="text-text-primary">{anim.label}</span>
-                      <span className="text-success font-mono font-bold">
-                        +{anim.amount} {LABELS.xp}
-                      </span>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-
-              {/* Total with animation */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: xpAnimations.length * 0.15 + 0.3, type: 'spring' }}
-                className="p-6 mb-6 bg-primary-muted rounded border border-primary/30"
-              >
-                <p className="text-text-secondary mb-1">Total Earned</p>
-                <p className="text-4xl font-bold font-mono text-primary">
-                  +{earnedXP} {LABELS.xp}
-                </p>
-                <p className="text-sm text-text-secondary mt-2">
-                  Pending until Sunday ritual
-                </p>
-              </motion.div>
-
-              <Button onClick={() => onClose(true)} variant="ghost" fullWidth>
-                Continue
-              </Button>
+              {/* Streak Bonus */}
+              {profile?.currentStreak !== undefined && (
+                <div className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
+                  <div className="flex items-center gap-3">
+                    <Flame size={20} className="text-warning" />
+                    <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
+                  </div>
+                  <span className="text-warning font-mono font-bold">
+                    +{streakBonus} {LABELS.xp}
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </motion.div>
 
-        {/* Badge Unlock Modal */}
-        {showBadgeModal && unlockedBadges.length > 0 && (
-          <BadgeUnlockModal
-            badgeIds={unlockedBadges}
-            onClose={() => setShowBadgeModal(false)}
-          />
+            {/* Total XP Preview */}
+            <div className="bg-muted p-4 mb-6 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Total {LABELS.xp}</span>
+                <span className="text-2xl font-bold font-mono text-primary">
+                  +{calculateXP()} {LABELS.xp}
+                </span>
+              </div>
+            </div>
+
+            <Button onClick={handleSubmit} className="w-full" size="lg">
+              Submit Report
+            </Button>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            {/* Success */}
+            <div className="mb-4 animate-in zoom-in-0 duration-500">
+              <PartyPopper size={56} className="mx-auto text-primary" />
+            </div>
+
+            <h2 className="text-2xl font-bold mb-2 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
+              Report Accepted.
+            </h2>
+
+            {/* XP Breakdown */}
+            <div className="space-y-2 my-6 relative">
+              {xpAnimations.map((anim, index) => (
+                <div
+                  key={anim.id}
+                  className="flex items-center justify-between bg-muted px-4 py-2 rounded-lg animate-in fade-in slide-in-from-left-8 duration-300"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                >
+                  <span>{anim.label}</span>
+                  <span className="text-success font-mono font-bold">
+                    +{anim.amount} {LABELS.xp}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Total */}
+            <div
+              className="p-6 mb-6 bg-primary/10 rounded-lg border border-primary/30 animate-in fade-in zoom-in-90 duration-500"
+              style={{ animationDelay: `${xpAnimations.length * 150 + 300}ms` }}
+            >
+              <p className="text-muted-foreground mb-1">Total Earned</p>
+              <p className="text-4xl font-bold font-mono text-primary">
+                +{earnedXP} {LABELS.xp}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Pending until Sunday ritual
+              </p>
+            </div>
+
+            <Button onClick={() => onClose(true)} variant="ghost" className="w-full">
+              Continue
+            </Button>
+          </div>
         )}
-      </motion.div>
-    </AnimatePresence>
+      </div>
+
+      {/* Badge Unlock Modal */}
+      {showBadgeModal && unlockedBadges.length > 0 && (
+        <BadgeUnlockModal
+          badgeIds={unlockedBadges}
+          onClose={() => setShowBadgeModal(false)}
+        />
+      )}
+    </div>
   )
 }
 
@@ -386,42 +346,35 @@ function QuestCheckbox({
   xpLabel?: string
 }) {
   return (
-    <Card
+    <button
+      type="button"
       onClick={disabled ? undefined : () => onChange(!checked)}
-      hover={!disabled}
       role="checkbox"
       aria-checked={checked}
       aria-label={`${label}: ${xp} ${xpLabel}`}
       aria-disabled={disabled}
-      className={`${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${
-        checked ? 'border-success/50' : ''
-      }`}
-      padding="sm"
+      className={cn(
+        'flex items-center gap-3 w-full p-3 rounded-lg border text-left transition-colors',
+        disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-muted/50',
+        checked ? 'border-success/50 bg-card' : 'border-border bg-card'
+      )}
     >
-      <div className="flex items-center gap-3">
-        <div
-          aria-hidden="true"
-          className={`w-6 h-6 border-2 flex items-center justify-center transition-colors rounded ${
-            checked
-              ? 'bg-success border-success'
-              : 'border-border'
-          }`}
-        >
-          {checked && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-            >
-              <Check size={14} className="text-text-on-primary" />
-            </motion.div>
-          )}
-        </div>
-        <Icon size={20} className={checked ? 'text-success' : 'text-text-secondary'} />
-        <span className="flex-1">{label}</span>
-        <span className={`font-mono font-bold ${checked ? 'text-success' : 'text-text-secondary'}`}>
-          +{xp} {xpLabel}
-        </span>
+      <div
+        aria-hidden="true"
+        className={cn(
+          'w-6 h-6 border-2 flex items-center justify-center transition-all rounded',
+          checked ? 'bg-success border-success scale-100' : 'border-border scale-100'
+        )}
+      >
+        {checked && (
+          <Check size={14} className="text-primary-foreground animate-in zoom-in-0 duration-150" />
+        )}
       </div>
-    </Card>
+      <Icon size={20} className={checked ? 'text-success' : 'text-muted-foreground'} />
+      <span className="flex-1">{label}</span>
+      <span className={cn('font-mono font-bold', checked ? 'text-success' : 'text-muted-foreground')}>
+        +{xp} {xpLabel}
+      </span>
+    </button>
   )
 }

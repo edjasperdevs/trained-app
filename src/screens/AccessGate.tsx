@@ -6,7 +6,6 @@
  */
 
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import { useAccessStore } from '@/stores/accessStore'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
@@ -63,11 +62,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-5">
       {/* Logo/Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
+      <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="mb-4">
           <Shield size={72} className="mx-auto text-primary" />
         </div>
@@ -77,15 +72,10 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
         <p className="text-muted-foreground mt-2">
           The protocol for building discipline
         </p>
-      </motion.div>
+      </div>
 
       {/* Access Code Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-        className="w-full max-w-md"
-      >
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500 delay-200">
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Enter Access Code</CardTitle>
@@ -111,15 +101,11 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   autoFocus
                 />
                 {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-2"
-                  >
+                  <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
                     <Alert variant="destructive">
                       <AlertDescription className="text-center">{error}</AlertDescription>
                     </Alert>
-                  </motion.div>
+                  </div>
                 )}
               </div>
 
@@ -131,12 +117,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
               >
                 {isValidating ? (
                   <span className="flex items-center justify-center gap-2">
-                    <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <Zap size={18} />
-                    </motion.span>
+                    <Zap size={18} className="animate-spin" />
                     Validating...
                   </span>
                 ) : (
@@ -157,11 +138,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
               </button>
 
               {showHelp && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="mt-4 space-y-3"
-                >
+                <div className="mt-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="bg-muted p-4 rounded-lg">
                     <h3 className="font-semibold mb-2 flex items-center gap-2 text-sm">
                       <BookOpen size={18} className="text-primary" /> Get the Ebook
@@ -202,79 +179,47 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                       support@trained.fitness
                     </a>
                   </div>
-                </motion.div>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Footer */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-muted-foreground/50 text-xs mt-8 text-center"
-      >
+      <p className="text-muted-foreground/50 text-xs mt-8 text-center animate-in fade-in duration-500 delay-500">
         © {new Date().getFullYear()} Trained. All rights reserved.
-      </motion.p>
+      </p>
 
       {/* Success Modal */}
       {showSuccess && (
-        <motion.div
+        <div
           role="dialog"
           aria-modal="true"
           aria-label="Access granted"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300"
         >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="w-full max-w-sm"
-          >
+          <div className="w-full max-w-sm animate-in zoom-in-90 duration-300">
             <Card>
               <CardContent className="text-center">
-                {/* Celebration Animation */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, times: [0, 0.6, 1] }}
-                  className="mb-4"
-                >
+                {/* Celebration */}
+                <div className="mb-4 animate-in zoom-in-0 duration-500">
                   <Shield size={72} className="mx-auto text-primary" />
-                </motion.div>
+                </div>
 
-                <motion.h2
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-2xl font-bold mb-2 font-heading"
-                >
+                <h2 className="text-2xl font-bold mb-2 font-heading animate-in fade-in slide-in-from-bottom-2 duration-300 delay-200">
                   Access Granted.
-                </motion.h2>
+                </h2>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-muted-foreground mb-6"
-                >
+                <p className="text-muted-foreground mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-300">
                   {email ? (
                     <>Welcome, <span className="text-foreground font-medium">{email}</span>.</>
                   ) : (
                     <>Your access code has been verified.</>
                   )}
-                </motion.p>
+                </p>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="space-y-3"
-                >
+                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300 delay-400">
                   <div className="bg-muted p-3 text-sm text-muted-foreground flex items-center gap-2 rounded-lg">
                     <Check size={16} className="text-primary" /> Full protocol access unlocked
                   </div>
@@ -284,14 +229,9 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   <div className="bg-muted p-3 text-sm text-muted-foreground flex items-center gap-2 rounded-lg">
                     <Check size={16} className="text-primary" /> All protocol features enabled
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-6"
-                >
+                <div className="mt-6 animate-in fade-in duration-300 delay-600">
                   <Button
                     onClick={handleContinue}
                     className="w-full"
@@ -301,11 +241,11 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                       Begin <Shield size={18} />
                     </span>
                   </Button>
-                </motion.div>
+                </div>
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </div>
   )

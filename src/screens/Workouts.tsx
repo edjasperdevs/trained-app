@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Button, Card, ProgressBar, EmptyState } from '@/components'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { ProgressBar, EmptyState } from '@/components'
 import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
 import { scheduleSync } from '@/lib/sync'
+import { cn } from '@/lib/cn'
 import { Clock, Dumbbell } from 'lucide-react'
 
 export function Workouts() {
@@ -219,14 +223,14 @@ export function Workouts() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="pt-8 pb-6 px-5 bg-surface">
+      <div className="pt-8 pb-6 px-5 bg-card">
         <h1 className="text-2xl font-bold mb-2">
           Training
         </h1>
         {currentPlan && (
-          <p className="text-text-secondary">
+          <p className="text-muted-foreground">
             {currentPlan.trainingDays}-Day Split
           </p>
         )}
@@ -252,62 +256,66 @@ export function Workouts() {
             <div>
               <h2 className="text-lg font-bold mb-3">Today</h2>
               {todayWorkout ? (
-                <Card>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xl font-bold">{todayWorkout.name}</p>
-                      <p className="text-sm text-gray-400">
-                        Day {todayWorkout.dayNumber} of your week
-                      </p>
-                    </div>
-                    {isCompleted ? (
-                      <div className="flex items-center gap-2 text-accent-success">
-                        <span className="text-2xl">✓</span>
-                        <span className="font-semibold">Done!</span>
+                <Card className="py-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xl font-bold">{todayWorkout.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Day {todayWorkout.dayNumber} of your week
+                        </p>
                       </div>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        <Button onClick={handleStartWorkout}>
-                          Start Workout
-                        </Button>
+                      {isCompleted ? (
+                        <div className="flex items-center gap-2 text-success">
+                          <span className="text-2xl">✓</span>
+                          <span className="font-semibold">Done!</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2">
+                          <Button onClick={handleStartWorkout}>
+                            Start Workout
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {!isCompleted && (
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <button
+                          onClick={() => setShowMinimalModal(true)}
+                          className="
+                            w-full flex items-center justify-center gap-2 py-2.5 px-4
+                            text-sm font-medium transition-all
+                            border border-border text-muted-foreground hover:border-primary hover:text-primary
+                            rounded-lg
+                          "
+                        >
+                          <Clock size={16} />
+                          {`Log ${LABELS.minimalWorkout.toLowerCase()} instead`}
+                        </button>
                       </div>
                     )}
-                  </div>
-                  {!isCompleted && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <button
-                        onClick={() => setShowMinimalModal(true)}
-                        className="
-                          w-full flex items-center justify-center gap-2 py-2.5 px-4
-                          text-sm font-medium transition-all
-                          border border-border text-text-secondary hover:border-primary hover:text-primary
-                          rounded-lg
-                        "
-                      >
-                        <Clock size={16} />
-                        {`Log ${LABELS.minimalWorkout.toLowerCase()} instead`}
-                      </button>
-                    </div>
-                  )}
-                  {isCompleted && (
-                    <div className="mt-3 pt-3 border-t border-gray-800">
-                      <p className="text-sm text-gray-400">
-                        +{XP_VALUES.WORKOUT} XP earned
-                      </p>
-                    </div>
-                  )}
+                    {isCompleted && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-sm text-muted-foreground">
+                          +{XP_VALUES.WORKOUT} XP earned
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
                 </Card>
               ) : (
-                <Card>
-                  <div className="text-center py-4">
-                    <span className="text-4xl mb-3 block">😴</span>
-                    <p className="text-xl font-bold">
-                      Recovery Day
-                    </p>
-                    <p className="text-text-secondary">
-                      Recovery is part of the protocol
-                    </p>
-                  </div>
+                <Card className="py-0">
+                  <CardContent className="p-4">
+                    <div className="text-center py-4">
+                      <span className="text-4xl mb-3 block">😴</span>
+                      <p className="text-xl font-bold">
+                        Recovery Day
+                      </p>
+                      <p className="text-muted-foreground">
+                        Recovery is part of the protocol
+                      </p>
+                    </div>
+                  </CardContent>
                 </Card>
               )}
             </div>
@@ -323,16 +331,16 @@ export function Workouts() {
                       <button
                         key={type}
                         onClick={() => setEditingWorkoutType(type)}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-bg-card hover:bg-bg-secondary transition-colors"
+                        className="flex items-center gap-2 p-3 rounded-lg bg-card hover:bg-card/80 transition-colors"
                       >
                         <span className="text-xl">{getWorkoutEmoji(type)}</span>
                         <div className="flex-1 text-left">
                           <p className="font-semibold text-sm capitalize">{type}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {isCustomized ? 'Customized' : 'Default'}
                           </p>
                         </div>
-                        <span className="text-gray-500">
+                        <span className="text-muted-foreground">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -357,13 +365,13 @@ export function Workouts() {
                   return (
                     <div
                       key={index}
-                      className={`
-                        aspect-square rounded-lg flex flex-col items-center justify-center text-xs
-                        ${isToday ? 'bg-accent-primary/20 border border-accent-primary' : 'bg-bg-card'}
-                        ${isPast && workout?.type !== 'rest' ? 'opacity-60' : ''}
-                      `}
+                      className={cn(
+                        'aspect-square rounded-lg flex flex-col items-center justify-center text-xs',
+                        isToday ? 'bg-primary/20 border border-primary' : 'bg-card',
+                        isPast && workout?.type !== 'rest' && 'opacity-60'
+                      )}
                     >
-                      <span className="text-gray-500 mb-1">{day}</span>
+                      <span className="text-muted-foreground mb-1">{day}</span>
                       <span className="text-lg">
                         {workout?.type === 'rest' ? '😴' : getWorkoutEmoji(workout?.type || 'rest')}
                       </span>
@@ -379,21 +387,20 @@ export function Workouts() {
                 <h2 className="text-lg font-bold">Recent Workouts</h2>
                 <button
                   onClick={() => setShowHistory(!showHistory)}
-                  className="text-accent-primary text-sm"
+                  className="text-primary text-sm"
                 >
                   {showHistory ? 'Hide' : 'Show All'}
                 </button>
               </div>
 
-              <AnimatePresence>
-                {(showHistory ? workoutHistory : workoutHistory.slice(0, 3)).map((log, index) => (
-                  <motion.div
-                    key={log.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="mb-2" padding="sm">
+              {(showHistory ? workoutHistory : workoutHistory.slice(0, 3)).map((log, index) => (
+                <div
+                  key={log.id}
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <Card className="py-0 mb-2">
+                    <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
@@ -401,7 +408,7 @@ export function Workouts() {
                             <p className="font-semibold capitalize text-sm">
                               {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
                             </p>
-                            <p className="text-xs text-text-secondary">
+                            <p className="text-xs text-muted-foreground">
                               {new Date(log.date).toLocaleDateString('en-US', {
                                 weekday: 'short',
                                 month: 'short',
@@ -411,8 +418,8 @@ export function Workouts() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-accent-success text-sm">✓ Complete</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-success text-sm">✓ Complete</p>
+                          <p className="text-xs text-muted-foreground">
                             {log.isMinimal
                               ? 'Minimal'
                               : `${log.exercises.reduce((acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0)} sets`}
@@ -420,14 +427,14 @@ export function Workouts() {
                         </div>
                       </div>
                       {log.isMinimal && log.notes && (
-                        <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-800 italic">
+                        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border italic">
                           "{log.notes}"
                         </p>
                       )}
-                    </Card>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
 
               {workoutHistory.length === 0 && (
                 <EmptyState
@@ -444,30 +451,26 @@ export function Workouts() {
 
       {/* Minimal Workout Modal */}
       {showMinimalModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowMinimalModal(false)}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-surface p-6 w-full max-w-md rounded-lg"
+          <div
+            className="bg-card p-6 w-full max-w-md rounded-lg animate-in slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-bold mb-2">
               {LABELS.minimalWorkout}
             </h2>
-            <p className="text-sm text-text-secondary mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               {`Short on time? Log what you did instead. You'll still earn ${LABELS.xp} for staying compliant!`}
             </p>
 
-            <textarea
+            <Textarea
               value={minimalNotes}
               onChange={(e) => setMinimalNotes(e.target.value)}
               placeholder="What did you do? (e.g., 20 pushups, 5 min walk, stretching...)"
-              className="input-base h-32 text-sm resize-none mb-4"
+              className="h-32 text-sm resize-none mb-4"
               autoFocus
             />
 
@@ -482,33 +485,29 @@ export function Workouts() {
                 Cancel
               </Button>
               <Button
-                fullWidth
+                className="flex-1"
                 onClick={handleMinimalWorkout}
                 disabled={!minimalNotes.trim()}
               >
                 Log {LABELS.minimalWorkout} (+{XP_VALUES.WORKOUT} {LABELS.xp})
               </Button>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
 
       {/* Exercise Editor Modal */}
       {editingWorkoutType && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => {
             setEditingWorkoutType(null)
             setNewExercise({ name: '', targetSets: '3', targetReps: '8-12' })
             setEditingExerciseId(null)
           }}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-bg-secondary rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto"
+          <div
+            className="bg-card rounded-xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -522,7 +521,7 @@ export function Workouts() {
                   setNewExercise({ name: '', targetSets: '3', targetReps: '8-12' })
                   setEditingExerciseId(null)
                 }}
-                className="text-gray-500 hover:text-gray-300"
+                className="text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
@@ -539,39 +538,39 @@ export function Workouts() {
                 return (
                   <div
                     key={exerciseId}
-                    className="bg-bg-card rounded-lg p-3"
+                    className="bg-card rounded-lg p-3"
                   >
                     {isEditing ? (
                       /* Inline Edit Mode */
                       <div className="space-y-2">
-                        <input
+                        <Input
                           type="text"
                           value={editExercise.name}
                           onChange={(e) => setEditExercise(prev => ({ ...prev, name: e.target.value }))}
-                          className="input-base text-sm"
+                          className="text-sm"
                           autoFocus
                         />
                         <div className="flex gap-2">
-                          <input
+                          <Input
                             type="number"
                             value={editExercise.targetSets}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetSets: e.target.value }))}
-                            className="input-base w-16 text-sm text-center"
+                            className="w-16 text-sm text-center"
                             placeholder="Sets"
                           />
-                          <span className="text-gray-500 self-center">×</span>
-                          <input
+                          <span className="text-muted-foreground self-center">×</span>
+                          <Input
                             type="text"
                             value={editExercise.targetReps}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetReps: e.target.value }))}
-                            className="input-base flex-1 text-sm"
+                            className="flex-1 text-sm"
                             placeholder="Reps"
                           />
                         </div>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setEditingExerciseId(null)}
-                            className="flex-1 text-sm text-gray-400 py-1"
+                            className="flex-1 text-sm text-muted-foreground py-1"
                           >
                             Cancel
                           </button>
@@ -584,7 +583,7 @@ export function Workouts() {
                               })
                               setEditingExerciseId(null)
                             }}
-                            className="flex-1 text-sm text-accent-primary py-1 font-semibold"
+                            className="flex-1 text-sm text-primary py-1 font-semibold"
                           >
                             Save
                           </button>
@@ -598,21 +597,21 @@ export function Workouts() {
                           <button
                             onClick={() => index > 0 && reorderExercise(editingWorkoutType, index, index - 1)}
                             disabled={index === 0}
-                            className={`text-xs px-1 ${index === 0 ? 'text-gray-700' : 'text-gray-500 hover:text-white'}`}
+                            className={`text-xs px-1 ${index === 0 ? 'text-muted-foreground/30' : 'text-muted-foreground hover:text-foreground'}`}
                           >
                             ▲
                           </button>
                           <button
                             onClick={() => index < arr.length - 1 && reorderExercise(editingWorkoutType, index, index + 1)}
                             disabled={index === arr.length - 1}
-                            className={`text-xs px-1 ${index === arr.length - 1 ? 'text-gray-700' : 'text-gray-500 hover:text-white'}`}
+                            className={`text-xs px-1 ${index === arr.length - 1 ? 'text-muted-foreground/30' : 'text-muted-foreground hover:text-foreground'}`}
                           >
                             ▼
                           </button>
                         </div>
                         <div className="flex-1">
                           <p className="font-semibold text-sm">{exercise.name}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             {exercise.targetSets} sets × {exercise.targetReps}
                           </p>
                         </div>
@@ -626,7 +625,7 @@ export function Workouts() {
                               targetReps: exercise.targetReps
                             })
                           }}
-                          className="text-gray-500 hover:text-accent-primary p-1"
+                          className="text-muted-foreground hover:text-primary p-1"
                           title="Edit exercise"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -637,7 +636,7 @@ export function Workouts() {
                         {/* Delete Button */}
                         <button
                           onClick={() => removeExercise(editingWorkoutType, exerciseId)}
-                          className="text-gray-500 hover:text-accent-danger p-1"
+                          className="text-muted-foreground hover:text-destructive p-1"
                           title="Remove exercise"
                         >
                           ✕
@@ -650,36 +649,34 @@ export function Workouts() {
             </div>
 
             {/* Add New Exercise */}
-            <div className="border-t border-gray-700 pt-4 mb-4">
-              <h3 className="text-sm font-semibold text-gray-400 mb-3">ADD EXERCISE</h3>
+            <div className="border-t border-border pt-4 mb-4">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-3">ADD EXERCISE</h3>
               <div className="space-y-3">
-                <input
+                <Input
                   type="text"
                   value={newExercise.name}
                   onChange={(e) => setNewExercise(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Exercise name"
-                  className="input-base"
                 />
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 block mb-1">Sets</label>
-                    <input
+                    <label className="text-xs text-muted-foreground block mb-1">Sets</label>
+                    <Input
                       type="number"
                       value={newExercise.targetSets}
                       onChange={(e) => setNewExercise(prev => ({ ...prev, targetSets: e.target.value }))}
-                      className="input-base font-digital"
+                      className="font-digital"
                       min={1}
                       max={10}
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-gray-500 block mb-1">Reps</label>
-                    <input
+                    <label className="text-xs text-muted-foreground block mb-1">Reps</label>
+                    <Input
                       type="text"
                       value={newExercise.targetReps}
                       onChange={(e) => setNewExercise(prev => ({ ...prev, targetReps: e.target.value }))}
                       placeholder="e.g., 8-12"
-                      className="input-base"
                     />
                   </div>
                 </div>
@@ -694,7 +691,7 @@ export function Workouts() {
                       setNewExercise({ name: '', targetSets: '3', targetReps: '8-12' })
                     }
                   }}
-                  fullWidth
+                  className="w-full"
                   disabled={!newExercise.name.trim()}
                 >
                   Add Exercise
@@ -710,13 +707,13 @@ export function Workouts() {
                     resetToDefaults(editingWorkoutType)
                   }
                 }}
-                className="w-full text-center text-sm text-gray-500 hover:text-accent-danger py-2"
+                className="w-full text-center text-sm text-muted-foreground hover:text-destructive py-2"
               >
                 Reset to Defaults
               </button>
             )}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
     </div>
   )
@@ -779,19 +776,21 @@ function ActiveWorkoutView({
   return (
     <div className="space-y-4">
       {/* Progress Header */}
-      <Card>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-xl font-bold capitalize">{workout.workoutType} Day</p>
-            <p className="text-sm text-gray-400">Week {workout.weekNumber}, Day {workout.dayNumber}</p>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xl font-bold capitalize">{workout.workoutType} Day</p>
+              <p className="text-sm text-muted-foreground">Week {workout.weekNumber}, Day {workout.dayNumber}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold font-digital text-primary">
+                {Math.round(progress)}%
+              </p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold font-digital text-accent-primary">
-              {Math.round(progress)}%
-            </p>
-          </div>
-        </div>
-        <ProgressBar progress={progress} color="gradient" size="lg" />
+          <ProgressBar progress={progress} color="gradient" size="lg" />
+        </CardContent>
       </Card>
 
       {/* Exercises */}
@@ -803,26 +802,26 @@ function ActiveWorkoutView({
           const lastWorkout = getLastWorkout(exercise.name)
 
           return (
-            <Card key={exercise.id} padding="none">
+            <Card key={exercise.id} className="py-0">
               <button
                 onClick={() => setExpandedExercise(isExpanded ? null : exercise.id)}
                 className="w-full p-4 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <span className={`text-lg ${isComplete ? 'text-accent-success' : 'text-gray-500'}`}>
+                  <span className={`text-lg ${isComplete ? 'text-success' : 'text-muted-foreground'}`}>
                     {isComplete ? '✓' : exIndex + 1}
                   </span>
                   <div className="text-left">
-                    <p className={`font-semibold ${isComplete ? 'text-accent-success' : ''}`}>
+                    <p className={`font-semibold ${isComplete ? 'text-success' : ''}`}>
                       {exercise.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {exercise.targetSets} sets × {exercise.targetReps} reps
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-muted-foreground">
                     {completedSets}/{exercise.sets.length}
                   </span>
                   <span className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
@@ -831,157 +830,151 @@ function ActiveWorkoutView({
                 </div>
               </button>
 
-              <AnimatePresence>
-                {isExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-4 pb-4 border-t border-gray-800 pt-3">
-                      {/* Previous Performance */}
-                      {lastWorkout && (
-                        <div className="mb-4 p-3 bg-bg-secondary/50 rounded-lg border border-gray-700/50">
-                          <div className="flex items-center justify-between">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setShowHistoryFor(exercise.name)
-                              }}
-                              className="text-left hover:opacity-80 transition-opacity"
-                            >
-                              <p className="text-xs text-gray-500 mb-1">
-                                Last Workout <span className="text-accent-primary">→ View History</span>
-                              </p>
-                              <p className="text-sm">
-                                <span className="text-accent-primary font-digital font-bold">{lastWorkout.bestWeight}</span>
-                                <span className="text-gray-400"> lbs × </span>
-                                <span className="text-accent-primary font-digital font-bold">{lastWorkout.bestReps}</span>
-                                <span className="text-gray-400"> reps</span>
-                              </p>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {new Date(lastWorkout.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                {lastWorkout.sets.length > 1 && ` • ${lastWorkout.sets.length} sets`}
-                              </p>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                // Pre-fill all sets with last workout's weight
-                                exercise.sets.forEach((set, idx) => {
-                                  if (!set.completed && !set.skipped && set.weight === 0) {
-                                    const lastSet = lastWorkout.sets[idx] || lastWorkout.sets[0]
-                                    if (lastSet) {
-                                      onUpdateSet(exercise.id, idx, 'weight', lastSet.weight)
-                                    }
-                                  }
-                                })
-                              }}
-                              className="text-xs bg-accent-primary/20 text-accent-primary px-3 py-1.5 rounded-lg hover:bg-accent-primary/30 transition-colors"
-                            >
-                              Use Weight
-                            </button>
-                          </div>
-                          {/* Show all sets from last time */}
-                          <div className="flex gap-2 mt-2 flex-wrap">
-                            {lastWorkout.sets.map((s, i) => (
-                              <span key={i} className="text-xs text-gray-500 bg-bg-card px-2 py-0.5 rounded">
-                                {s.weight}×{s.reps}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Current Sets */}
-                      <div className="space-y-3">
-                        {exercise.sets.map((set, setIndex) => {
-                          const lastSet = lastWorkout?.sets[setIndex]
-                          const isImprovement = lastSet && set.completed &&
-                            (set.weight > lastSet.weight || (set.weight === lastSet.weight && set.reps > lastSet.reps))
-
-                          return (
-                            <div
-                              key={setIndex}
-                              className={`${set.completed || set.skipped ? 'opacity-60' : ''}`}
-                            >
-                              {/* Last workout hint for this set */}
-                              {lastSet && !set.completed && !set.skipped && (
-                                <div className="text-xs text-gray-600 mb-1 ml-10">
-                                  Last: {lastSet.weight} × {lastSet.reps}
-                                </div>
-                              )}
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-500 w-10">
-                                  Set {setIndex + 1}
-                                </span>
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    placeholder={lastSet ? String(lastSet.weight) : '0'}
-                                    value={set.weight || ''}
-                                    onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
-                                    className="input-base w-16 text-center font-digital text-sm"
-                                  />
-                                </div>
-                                <span className="text-gray-500 text-sm">×</span>
-                                <input
-                                  type="number"
-                                  placeholder={lastSet ? String(lastSet.reps) : '0'}
-                                  value={set.reps || ''}
-                                  onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
-                                  className="input-base w-14 text-center font-digital text-sm"
-                                />
-                              {set.completed ? (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    onClick={() => onUncompleteSet(exercise.id, setIndex)}
-                                    className="text-accent-success hover:text-accent-primary transition-colors px-2"
-                                    title="Click to edit"
-                                  >
-                                    ✓
-                                  </button>
-                                  {isImprovement && (
-                                    <span className="text-xs text-accent-warning" title="Personal Record!">
-                                      🔥
-                                    </span>
-                                  )}
-                                </div>
-                              ) : set.skipped ? (
-                                <button
-                                  onClick={() => onUncompleteSet(exercise.id, setIndex)}
-                                  className="text-gray-500 hover:text-accent-primary transition-colors px-2 text-sm"
-                                  title="Click to undo skip"
-                                >
-                                  Skip
-                                </button>
-                              ) : (
-                                <div className="flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => onCompleteSet(exercise.id, setIndex)}
-                                  >
-                                    Done
-                                  </Button>
-                                  <button
-                                    onClick={() => onSkipSet(exercise.id, setIndex)}
-                                    className="text-xs text-gray-500 hover:text-gray-300 px-2"
-                                  >
-                                    Skip
-                                  </button>
-                                </div>
-                              )}
-                              </div>
-                            </div>
-                          )
-                        })}
+              <div className={cn(
+                'overflow-hidden transition-all duration-300',
+                isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+              )}>
+                <div className="px-4 pb-4 border-t border-border pt-3">
+                  {/* Previous Performance */}
+                  {lastWorkout && (
+                    <div className="mb-4 p-3 bg-card/50 rounded-lg border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowHistoryFor(exercise.name)
+                          }}
+                          className="text-left hover:opacity-80 transition-opacity"
+                        >
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Last Workout <span className="text-primary">→ View History</span>
+                          </p>
+                          <p className="text-sm">
+                            <span className="text-primary font-digital font-bold">{lastWorkout.bestWeight}</span>
+                            <span className="text-muted-foreground"> lbs × </span>
+                            <span className="text-primary font-digital font-bold">{lastWorkout.bestReps}</span>
+                            <span className="text-muted-foreground"> reps</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(lastWorkout.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {lastWorkout.sets.length > 1 && ` • ${lastWorkout.sets.length} sets`}
+                          </p>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Pre-fill all sets with last workout's weight
+                            exercise.sets.forEach((set, idx) => {
+                              if (!set.completed && !set.skipped && set.weight === 0) {
+                                const lastSet = lastWorkout.sets[idx] || lastWorkout.sets[0]
+                                if (lastSet) {
+                                  onUpdateSet(exercise.id, idx, 'weight', lastSet.weight)
+                                }
+                              }
+                            })
+                          }}
+                          className="text-xs bg-primary/20 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/30 transition-colors"
+                        >
+                          Use Weight
+                        </button>
+                      </div>
+                      {/* Show all sets from last time */}
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        {lastWorkout.sets.map((s, i) => (
+                          <span key={i} className="text-xs text-muted-foreground bg-card px-2 py-0.5 rounded">
+                            {s.weight}×{s.reps}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  )}
+
+                  {/* Current Sets */}
+                  <div className="space-y-3">
+                    {exercise.sets.map((set, setIndex) => {
+                      const lastSet = lastWorkout?.sets[setIndex]
+                      const isImprovement = lastSet && set.completed &&
+                        (set.weight > lastSet.weight || (set.weight === lastSet.weight && set.reps > lastSet.reps))
+
+                      return (
+                        <div
+                          key={setIndex}
+                          className={`${set.completed || set.skipped ? 'opacity-60' : ''}`}
+                        >
+                          {/* Last workout hint for this set */}
+                          {lastSet && !set.completed && !set.skipped && (
+                            <div className="text-xs text-muted-foreground mb-1 ml-10">
+                              Last: {lastSet.weight} × {lastSet.reps}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-muted-foreground w-10">
+                              Set {setIndex + 1}
+                            </span>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                placeholder={lastSet ? String(lastSet.weight) : '0'}
+                                value={set.weight || ''}
+                                onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
+                                className="w-16 text-center font-digital text-sm"
+                              />
+                            </div>
+                            <span className="text-muted-foreground text-sm">×</span>
+                            <Input
+                              type="number"
+                              placeholder={lastSet ? String(lastSet.reps) : '0'}
+                              value={set.reps || ''}
+                              onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
+                              className="w-14 text-center font-digital text-sm"
+                            />
+                          {set.completed ? (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => onUncompleteSet(exercise.id, setIndex)}
+                                className="text-success hover:text-primary transition-colors px-2"
+                                title="Click to edit"
+                              >
+                                ✓
+                              </button>
+                              {isImprovement && (
+                                <span className="text-xs text-warning" title="Personal Record!">
+                                  🔥
+                                </span>
+                              )}
+                            </div>
+                          ) : set.skipped ? (
+                            <button
+                              onClick={() => onUncompleteSet(exercise.id, setIndex)}
+                              className="text-muted-foreground hover:text-primary transition-colors px-2 text-sm"
+                              title="Click to undo skip"
+                            >
+                              Skip
+                            </button>
+                          ) : (
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => onCompleteSet(exercise.id, setIndex)}
+                              >
+                                Done
+                              </Button>
+                              <button
+                                onClick={() => onSkipSet(exercise.id, setIndex)}
+                                className="text-xs text-muted-foreground hover:text-foreground px-2"
+                              >
+                                Skip
+                              </button>
+                            </div>
+                          )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
             </Card>
           )
         })}
@@ -990,7 +983,7 @@ function ActiveWorkoutView({
       {/* Add Exercise Button */}
       <button
         onClick={() => setShowAddExercise(true)}
-        className="w-full p-3 border-2 border-dashed border-gray-700 rounded-lg text-gray-400 hover:border-accent-primary hover:text-accent-primary transition-colors flex items-center justify-center gap-2"
+        className="w-full p-3 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
       >
         <span className="text-xl">+</span>
         <span>Add Exercise</span>
@@ -1001,10 +994,9 @@ function ActiveWorkoutView({
         {/* Complete Button */}
         <Button
           onClick={onComplete}
-          fullWidth
+          className={cn('w-full', allSetsComplete && 'animate-pulse')}
           size="lg"
           disabled={!allSetsComplete}
-          className={allSetsComplete ? 'animate-pulse' : ''}
         >
           {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
         </Button>
@@ -1013,7 +1005,7 @@ function ActiveWorkoutView({
         {!allSetsComplete && (
           <button
             onClick={onEndEarly}
-            className="w-full py-3 text-sm text-gray-400 hover:text-accent-warning transition-colors"
+            className="w-full py-3 text-sm text-muted-foreground hover:text-warning transition-colors"
           >
             End Workout Early
           </button>
@@ -1021,130 +1013,112 @@ function ActiveWorkoutView({
       </div>
 
       {/* Add Exercise Modal */}
-      <AnimatePresence>
-        {showAddExercise && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowAddExercise(false)}
+      {showAddExercise && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowAddExercise(false)}
+        >
+          <div
+            className="bg-card rounded-xl p-6 w-full max-w-md animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-bg-secondary rounded-xl p-6 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-xl font-bold mb-4">Add Exercise</h2>
+            <h2 className="text-xl font-bold mb-4">Add Exercise</h2>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs text-gray-500 block mb-1">Exercise Name</label>
-                  <input
-                    type="text"
-                    value={newExerciseForm.name}
-                    onChange={(e) => setNewExerciseForm(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="e.g., Bicep Curls"
-                    className="input-base"
-                    autoFocus
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Exercise Name</label>
+                <Input
+                  type="text"
+                  value={newExerciseForm.name}
+                  onChange={(e) => setNewExerciseForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Bicep Curls"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground block mb-1">Sets</label>
+                  <Input
+                    type="number"
+                    value={newExerciseForm.targetSets}
+                    onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetSets: e.target.value }))}
+                    className="font-digital"
+                    min={1}
+                    max={10}
                   />
                 </div>
-
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-500 block mb-1">Sets</label>
-                    <input
-                      type="number"
-                      value={newExerciseForm.targetSets}
-                      onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetSets: e.target.value }))}
-                      className="input-base font-digital"
-                      min={1}
-                      max={10}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-xs text-gray-500 block mb-1">Reps</label>
-                    <input
-                      type="text"
-                      value={newExerciseForm.targetReps}
-                      onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetReps: e.target.value }))}
-                      placeholder="e.g., 8-12"
-                      className="input-base"
-                    />
-                  </div>
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground block mb-1">Reps</label>
+                  <Input
+                    type="text"
+                    value={newExerciseForm.targetReps}
+                    onChange={(e) => setNewExerciseForm(prev => ({ ...prev, targetReps: e.target.value }))}
+                    placeholder="e.g., 8-12"
+                  />
                 </div>
               </div>
+            </div>
 
-              <div className="flex gap-3 mt-6">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
+            <div className="flex gap-3 mt-6">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setShowAddExercise(false)
+                  setNewExerciseForm({ name: '', targetSets: '2', targetReps: '8-12' })
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  if (newExerciseForm.name.trim()) {
+                    onAddExercise({
+                      name: newExerciseForm.name.trim(),
+                      targetSets: Number(newExerciseForm.targetSets) || 2,
+                      targetReps: newExerciseForm.targetReps || '8-12'
+                    })
                     setShowAddExercise(false)
                     setNewExerciseForm({ name: '', targetSets: '2', targetReps: '8-12' })
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  fullWidth
-                  onClick={() => {
-                    if (newExerciseForm.name.trim()) {
-                      onAddExercise({
-                        name: newExerciseForm.name.trim(),
-                        targetSets: Number(newExerciseForm.targetSets) || 2,
-                        targetReps: newExerciseForm.targetReps || '8-12'
-                      })
-                      setShowAddExercise(false)
-                      setNewExerciseForm({ name: '', targetSets: '2', targetReps: '8-12' })
-                    }
-                  }}
-                  disabled={!newExerciseForm.name.trim()}
-                >
-                  Add to Workout
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  }
+                }}
+                disabled={!newExerciseForm.name.trim()}
+              >
+                Add to Workout
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exercise History Modal */}
-      <AnimatePresence>
-        {showHistoryFor && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowHistoryFor(null)}
+      {showHistoryFor && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowHistoryFor(null)}
+        >
+          <div
+            className="bg-card rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-bg-secondary rounded-xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-xl font-bold">{showHistoryFor}</h2>
-                  <p className="text-sm text-gray-400">Exercise History</p>
-                </div>
-                <button
-                  onClick={() => setShowHistoryFor(null)}
-                  className="text-gray-500 hover:text-gray-300 text-xl"
-                >
-                  ✕
-                </button>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold">{showHistoryFor}</h2>
+                <p className="text-sm text-muted-foreground">Exercise History</p>
               </div>
+              <button
+                onClick={() => setShowHistoryFor(null)}
+                className="text-muted-foreground hover:text-foreground text-xl"
+              >
+                ✕
+              </button>
+            </div>
 
-              <ExerciseHistoryView exerciseName={showHistoryFor} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <ExerciseHistoryView exerciseName={showHistoryFor} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1157,8 +1131,8 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
     return (
       <div className="text-center py-8">
         <span className="text-4xl mb-4 block">📊</span>
-        <p className="text-gray-400">No history yet</p>
-        <p className="text-sm text-gray-500">Complete this exercise to start tracking progress</p>
+        <p className="text-muted-foreground">No history yet</p>
+        <p className="text-sm text-muted-foreground">Complete this exercise to start tracking progress</p>
       </div>
     )
   }
@@ -1194,9 +1168,9 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
           <div>
             <p className="text-xs text-yellow-400 font-semibold">Personal Record</p>
             <p className="text-2xl font-bold font-digital">
-              {prWeight} <span className="text-gray-400 text-sm">lbs</span> × {prReps} <span className="text-gray-400 text-sm">reps</span>
+              {prWeight} <span className="text-muted-foreground text-sm">lbs</span> × {prReps} <span className="text-muted-foreground text-sm">reps</span>
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {new Date(prDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
@@ -1206,13 +1180,13 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
       {/* Progress Summary */}
       {history.length > 1 && (
         <div className="flex gap-3">
-          <div className="flex-1 bg-bg-card rounded-lg p-3 text-center">
-            <p className="text-xs text-gray-500">Workouts</p>
+          <div className="flex-1 bg-card rounded-lg p-3 text-center">
+            <p className="text-xs text-muted-foreground">Workouts</p>
             <p className="text-xl font-bold font-digital">{history.length}</p>
           </div>
-          <div className="flex-1 bg-bg-card rounded-lg p-3 text-center">
-            <p className="text-xs text-gray-500">Progress</p>
-            <p className={`text-xl font-bold font-digital ${weightChange > 0 ? 'text-accent-success' : weightChange < 0 ? 'text-accent-warning' : 'text-gray-400'}`}>
+          <div className="flex-1 bg-card rounded-lg p-3 text-center">
+            <p className="text-xs text-muted-foreground">Progress</p>
+            <p className={`text-xl font-bold font-digital ${weightChange > 0 ? 'text-success' : weightChange < 0 ? 'text-warning' : 'text-muted-foreground'}`}>
               {weightChange > 0 ? '+' : ''}{weightChange} lbs
             </p>
           </div>
@@ -1221,7 +1195,7 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
 
       {/* History List */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-400 mb-3">RECENT SESSIONS</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3">RECENT SESSIONS</h3>
         <div className="space-y-2">
           {history.map((session) => {
             const bestSet = session.sets.reduce((best, s) =>
@@ -1232,7 +1206,7 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
             return (
               <div
                 key={session.date}
-                className={`p-3 rounded-lg ${isPR ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-bg-card'}`}
+                className={`p-3 rounded-lg ${isPR ? 'bg-yellow-500/10 border border-yellow-500/30' : 'bg-card'}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium">
@@ -1250,8 +1224,8 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
                       key={i}
                       className={`text-xs px-2 py-1 rounded ${
                         s.weight === bestSet.weight && s.reps === bestSet.reps
-                          ? 'bg-accent-primary/20 text-accent-primary'
-                          : 'bg-bg-secondary text-gray-400'
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-card text-muted-foreground'
                       }`}
                     >
                       {s.weight}×{s.reps}

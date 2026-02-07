@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'motion/react'
-import { Button } from './Button'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { FoodSearch } from './FoodSearch'
 import { MealIngredient } from '@/stores'
 
@@ -78,16 +78,13 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
   if (!isOpen) return null
 
   return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
       style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
-      className="bg-background/95 flex flex-col"
+      className="bg-background/95 flex flex-col animate-in fade-in duration-200"
     >
       {/* Header */}
-      <div className="bg-bg-secondary px-4 py-4 flex items-center justify-between border-b border-border">
-        <button onClick={onClose} aria-label="Go back" className="text-text-secondary hover:text-text-primary p-1">
+      <div className="bg-card px-4 py-4 flex items-center justify-between border-b border-border">
+        <button onClick={onClose} aria-label="Go back" className="text-muted-foreground hover:text-foreground p-1">
           <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
@@ -100,95 +97,90 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Meal Name */}
         <div>
-          <label className="text-xs text-text-secondary block mb-2">MEAL NAME</label>
-          <input
+          <label className="text-xs text-muted-foreground block mb-2">MEAL NAME</label>
+          <Input
             type="text"
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
             placeholder="e.g., Post-Workout Shake"
-            className="input-base py-3 text-lg"
+            className="py-3 text-lg h-auto"
             autoFocus
           />
         </div>
 
         {/* Food Search */}
         <div>
-          <label className="text-xs text-text-secondary block mb-2">ADD INGREDIENTS</label>
+          <label className="text-xs text-muted-foreground block mb-2">ADD INGREDIENTS</label>
           <FoodSearch onSelect={handleAddIngredient} />
         </div>
 
         {/* Ingredients List */}
         <div>
-          <label className="text-xs text-text-secondary block mb-2">
+          <label className="text-xs text-muted-foreground block mb-2">
             INGREDIENTS ({ingredients.length})
           </label>
 
           {ingredients.length === 0 ? (
-            <div className="bg-bg-card rounded-lg p-6 text-center">
+            <div className="bg-muted rounded-lg p-6 text-center">
               <span className="text-3xl block mb-2">🥗</span>
-              <p className="text-text-secondary text-sm">
+              <p className="text-muted-foreground text-sm">
                 Search and add ingredients above
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              <AnimatePresence>
-                {ingredients.map((ing) => (
-                  <motion.div
-                    key={ing.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="bg-bg-card rounded-lg p-3 flex items-center justify-between"
+              {ingredients.map((ing) => (
+                <div
+                  key={ing.id}
+                  className="bg-muted rounded-lg p-3 flex items-center justify-between animate-in fade-in slide-in-from-left-4 duration-200"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{ing.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit}
+                      {ing.brand && ` · ${ing.brand}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleRemoveIngredient(ing.id)}
+                    className="text-muted-foreground hover:text-destructive p-2 ml-2"
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{ing.name}</p>
-                      <p className="text-xs text-text-secondary">
-                        {ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit}
-                        {ing.brand && ` · ${ing.brand}`}
-                      </p>
-                      <p className="text-xs text-text-secondary mt-1">
-                        P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveIngredient(ing.id)}
-                      className="text-text-secondary hover:text-accent-danger p-2 ml-2"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                      </svg>
-                    </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
       {/* Footer with Totals and Save */}
-      <div className="bg-bg-secondary border-t border-border p-4 space-y-4">
+      <div className="bg-card border-t border-border p-4 space-y-4">
         {/* Macro Totals */}
         {ingredients.length > 0 && (
-          <div className="bg-bg-card rounded-lg p-3">
-            <p className="text-xs text-text-secondary mb-2">MEAL TOTALS</p>
+          <div className="bg-muted rounded-lg p-3">
+            <p className="text-xs text-muted-foreground mb-2">MEAL TOTALS</p>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
-                <p className="text-lg font-bold font-digital text-accent-primary">{totals.protein}</p>
-                <p className="text-xs text-text-secondary">Protein</p>
+                <p className="text-lg font-bold font-digital text-primary">{totals.protein}</p>
+                <p className="text-xs text-muted-foreground">Protein</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{totals.carbs}</p>
-                <p className="text-xs text-text-secondary">Carbs</p>
+                <p className="text-xs text-muted-foreground">Carbs</p>
               </div>
               <div>
                 <p className="text-lg font-bold font-digital">{totals.fats}</p>
-                <p className="text-xs text-text-secondary">Fats</p>
+                <p className="text-xs text-muted-foreground">Fats</p>
               </div>
               <div>
-                <p className="text-lg font-bold font-digital text-accent-secondary">{totals.calories}</p>
-                <p className="text-xs text-text-secondary">Cals</p>
+                <p className="text-lg font-bold font-digital text-secondary">{totals.calories}</p>
+                <p className="text-xs text-muted-foreground">Cals</p>
               </div>
             </div>
           </div>
@@ -197,14 +189,14 @@ export function MealBuilder({ isOpen, onClose, onSave, editMeal }: MealBuilderPr
         {/* Save Button */}
         <Button
           onClick={handleSave}
-          fullWidth
+          className="w-full"
           size="lg"
           disabled={!mealName.trim() || ingredients.length === 0}
         >
           {editMeal ? 'Update Meal' : 'Save Meal'}
         </Button>
       </div>
-    </motion.div>,
+    </div>,
     document.body
   )
 }

@@ -1,4 +1,3 @@
-import { motion, AnimatePresence } from 'motion/react'
 import { useAvatarStore, EVOLUTION_STAGES } from '@/stores'
 import { AVATAR_STAGES, LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
@@ -34,28 +33,13 @@ const CHARACTER_BASES = {
   submissive: { icon: Moon, color: 'text-info' }
 }
 
-// Mood animations (subtle, restrained for premium feel)
-const moodAnimations = {
-  happy: {
-    animate: { y: [0, -2, 0] },
-    transition: { duration: 1, repeat: Infinity, repeatDelay: 3 }
-  },
-  hyped: {
-    animate: { scale: [1, 1.05, 1] },
-    transition: { duration: 0.5, repeat: Infinity, repeatDelay: 1 }
-  },
-  sad: {
-    animate: { y: [0, 1, 0] },
-    transition: { duration: 2, repeat: Infinity }
-  },
-  neutral: {
-    animate: {},
-    transition: {}
-  },
-  neglected: {
-    animate: { opacity: [1, 0.7, 1] },
-    transition: { duration: 3, repeat: Infinity }
-  }
+// Mood CSS classes
+const moodClasses: Record<string, string> = {
+  happy: 'animate-bounce-subtle',
+  hyped: 'animate-pulse-slow',
+  sad: '',
+  neutral: '',
+  neglected: 'opacity-70'
 }
 
 export function Avatar({
@@ -69,17 +53,11 @@ export function Avatar({
   const stageName = AVATAR_STAGES[evolutionStage - 1] || AVATAR_STAGES[0]
   const stageInfo = EVOLUTION_STAGES.find(s => s.stage === evolutionStage) || EVOLUTION_STAGES[0]
 
-  const moodAnim = showMood ? moodAnimations[currentMood] : undefined
   const iconSize = sizeClasses[size].icon
 
   // Get the icon component for the current evolution stage
-  const getAvatarIcon = () => {
-    const iconName = stageInfo.emoji
-    const IconComponent = ICON_MAP[iconName] || Circle
-    return IconComponent
-  }
-
-  const AvatarIcon = getAvatarIcon()
+  const iconName = stageInfo.emoji
+  const AvatarIcon = ICON_MAP[iconName] || Circle
   const CharacterIcon = CHARACTER_BASES[baseCharacter].icon
 
   return (
@@ -95,13 +73,13 @@ export function Avatar({
       )}
 
       {/* Main avatar container */}
-      <motion.div
+      <div
         className={cn(
           sizeClasses[size].container,
-          'relative flex items-center justify-center bg-card border-2 rounded-lg',
-          evolutionStage >= 9 ? 'border-warning' : evolutionStage >= 6 ? 'border-primary' : 'border-border'
+          'relative flex items-center justify-center bg-card border-2 rounded-lg transition-transform',
+          evolutionStage >= 9 ? 'border-warning' : evolutionStage >= 6 ? 'border-primary' : 'border-border',
+          showMood && moodClasses[currentMood]
         )}
-        {...moodAnim}
       >
         {/* Avatar icon */}
         <div className="relative">
@@ -119,21 +97,14 @@ export function Avatar({
             />
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Reaction bubble */}
-      <AnimatePresence>
-        {recentReaction && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.8 }}
-            className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card px-3 py-1 text-sm whitespace-nowrap border border-border rounded"
-          >
-            {recentReaction}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {recentReaction && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card px-3 py-1 text-sm whitespace-nowrap border border-border rounded animate-in fade-in zoom-in-90 duration-200">
+          {recentReaction}
+        </div>
+      )}
 
       {/* Stage name and level */}
       {showLevel && (

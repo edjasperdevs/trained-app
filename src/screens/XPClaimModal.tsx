@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Button, BadgeUnlockModal } from '@/components'
+import { useState, useEffect, useMemo } from 'react'
+import { BadgeUnlockModal } from '@/components'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { useXPStore, useAvatarStore, useAchievementsStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
@@ -15,35 +16,26 @@ interface XPClaimModalProps {
 // Confetti particle component - muted colors for Trained theme
 const CONFETTI_COLORS = ['#8B1A1A', '#4A4A4A', '#2D5A27', '#8B6914', '#3A5A7A']
 
-function Confetti({ delay }: { delay: number }) {
-  const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]
-  const startX = Math.random() * 100
-  const endX = startX + (Math.random() - 0.5) * 50
-  const rotation = Math.random() * 720 - 360
+interface ConfettiParticle {
+  color: string
+  startX: number
+  endX: number
+  rotation: number
+  duration: number
+  delay: number
+}
 
+function Confetti({ particle }: { particle: ConfettiParticle }) {
   return (
-    <motion.div
-      initial={{
-        opacity: 0.6,
-        y: -20,
-        x: `${startX}%`,
-        rotate: 0,
-        scale: 1
-      }}
-      animate={{
-        opacity: 0,
-        y: 400,
-        x: `${endX}%`,
-        rotate: rotation,
-        scale: 0.5
-      }}
-      transition={{
-        duration: 2 + Math.random(),
-        delay,
-        ease: 'easeOut'
-      }}
+    <div
       className="absolute top-0 w-3 h-3 rounded-sm"
-      style={{ backgroundColor: color }}
+      style={{
+        backgroundColor: particle.color,
+        left: `${particle.startX}%`,
+        animation: `confetti-fall ${particle.duration}s ${particle.delay}s ease-out forwards`,
+        ['--confetti-end-x' as string]: `${particle.endX - particle.startX}vw`,
+        ['--confetti-rotation' as string]: `${particle.rotation}deg`,
+      }}
     />
   )
 }
@@ -58,10 +50,26 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
   const [xpCountUp, setXpCountUp] = useState(0)
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([])
   const [showBadgeModal, setShowBadgeModal] = useState(false)
+  const [progressWidth, setProgressWidth] = useState(0)
 
   const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
 
   const breakdown = getPendingXPBreakdown()
+
+  // Pre-generate confetti particles so they don't change on re-render
+  const confettiParticles = useMemo<ConfettiParticle[]>(() => {
+    return Array.from({ length: 25 }).map((_, i) => {
+      const startX = Math.random() * 100
+      return {
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        startX,
+        endX: startX + (Math.random() - 0.5) * 50,
+        rotation: Math.random() * 720 - 360,
+        duration: 2 + Math.random(),
+        delay: i * 0.05,
+      }
+    })
+  }, [showConfetti]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset state when modal opens
   useEffect(() => {
@@ -72,6 +80,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
       setXpCountUp(0)
       setUnlockedBadges([])
       setShowBadgeModal(false)
+      setProgressWidth(0)
     }
   }, [isOpen])
 
@@ -111,7 +120,17 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
 
       return () => clearInterval(interval)
     }
-  }, [phase, claimResult])
+  }, [phase, claimResult]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Animate progress bar after complete phase renders
+  useEffect(() => {
+    if (phase === 'complete') {
+      const timeout = setTimeout(() => {
+        setProgressWidth(getCurrentLevelProgress())
+      }, 1000)
+      return () => clearTimeout(timeout)
+    }
+  }, [phase, getCurrentLevelProgress])
 
   const handleClose = () => {
     if (unlockedBadges.length > 0 && !showBadgeModal) {
@@ -145,32 +164,51 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
+    <>
+      {/* Inject confetti keyframes */}
+      <style>{`
+        @keyframes confetti-fall {
+          0% {
+            opacity: 0.6;
+            transform: translateY(-20px) translateX(0) rotate(0deg) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(400px) translateX(var(--confetti-end-x)) rotate(var(--confetti-rotation)) scale(0.5);
+          }
+        }
+        @keyframes spin-continuous {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes pulse-scale {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        @keyframes bounce-x {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(10px); }
+        }
+      `}</style>
+
+      <div
         role="dialog"
         aria-modal="true"
         aria-label="Claim weekly XP"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center overflow-hidden"
+        className="animate-in fade-in duration-200 fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center overflow-hidden"
         onClick={phase === 'complete' || phase === 'levelup' ? handleClose : undefined}
       >
         {/* Confetti */}
         {showConfetti && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {Array.from({ length: 25 }).map((_, i) => (
-              <Confetti key={i} delay={i * 0.05} />
+            {confettiParticles.map((particle, i) => (
+              <Confetti key={i} particle={particle} />
             ))}
           </div>
         )}
 
-        <motion.div
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="w-full max-w-md bg-surface max-h-[90vh] overflow-y-auto rounded-t-lg sm:rounded-lg"
+        <div
+          className="animate-in slide-in-from-bottom duration-300 w-full max-w-md bg-card max-h-[90vh] overflow-y-auto rounded-t-lg sm:rounded-lg"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Preview Phase */}
@@ -183,7 +221,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                 <h2 className="text-2xl font-bold mb-2">
                   Weekly Reward Ritual
                 </h2>
-                <p className="text-text-secondary">
+                <p className="text-muted-foreground">
                   You've earned this. Claim your reward.
                 </p>
               </div>
@@ -191,36 +229,36 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
               {/* XP Breakdown */}
               <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
                 {breakdown.days.map((day, index) => (
-                  <motion.div
+                  <div
                     key={day.date}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center justify-between bg-surface-elevated px-4 py-2 rounded"
+                    className="animate-in fade-in slide-in-from-left duration-300 flex items-center justify-between bg-muted px-4 py-2 rounded"
+                    style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'both' }}
                   >
-                    <span className="text-sm text-text-secondary">
+                    <span className="text-sm text-muted-foreground">
                       {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                     </span>
                     <span className="font-mono text-primary">+{day.total} {LABELS.xp}</span>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
 
               {/* Total */}
-              <div className="p-4 mb-6 bg-primary-muted rounded border border-primary/30">
-                <div className="flex items-center justify-between">
-                  <span className="text-text-secondary">Ready to Claim</span>
-                  <span className="text-3xl font-bold font-mono text-primary">
-                    {pendingXP} {LABELS.xp}
-                  </span>
-                </div>
-              </div>
+              <Card className="mb-6 bg-primary/10 border-primary/30">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Ready to Claim</span>
+                    <span className="text-3xl font-bold font-mono text-primary">
+                      {pendingXP} {LABELS.xp}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="flex gap-3">
                 <Button variant="ghost" onClick={onClose}>
                   Later
                 </Button>
-                <Button onClick={handleClaim} fullWidth size="lg">
+                <Button onClick={handleClaim} className="w-full" size="lg">
                   <span className="flex items-center gap-2">
                     <Sparkles size={18} />
                     CLAIM REWARD
@@ -233,77 +271,57 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
           {/* Claiming Phase - XP Count Up */}
           {phase === 'claiming' && (
             <div className="text-center p-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring' }}
-                className="mb-8"
-              >
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              <div className="animate-in zoom-in duration-500 mb-8">
+                <div
                   className="inline-block"
+                  style={{ animation: 'spin-continuous 1s linear infinite' }}
                 >
                   <Zap size={56} className="text-primary" />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-text-secondary mb-4"
-              >
+              <p className="animate-in fade-in duration-300 text-muted-foreground mb-4">
                 Processing reward...
-              </motion.p>
+              </p>
 
-              <motion.p
-                className="text-6xl font-bold font-mono text-primary"
-              >
+              <p className="text-6xl font-bold font-mono text-primary">
                 +{xpCountUp}
-              </motion.p>
+              </p>
             </div>
           )}
 
           {/* Complete Phase */}
           {phase === 'complete' && claimResult && (
             <div className="p-6 text-center">
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: 'spring', delay: 0.2 }}
-                className="mb-6"
+              <div
+                className="animate-in zoom-in spin-in-180 duration-500 mb-6"
+                style={{ animationDelay: '200ms', animationFillMode: 'both' }}
               >
                 <Trophy size={64} className="mx-auto text-primary" />
-              </motion.div>
+              </div>
 
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-2xl font-bold mb-2"
+              <h2
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300 text-2xl font-bold mb-2"
+                style={{ animationDelay: '400ms', animationFillMode: 'both' }}
               >
                 Reward Claimed
-              </motion.h2>
+              </h2>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, type: 'spring' }}
-                className="mb-6"
+              <div
+                className="animate-in fade-in zoom-in-50 duration-500 mb-6"
+                style={{ animationDelay: '600ms', animationFillMode: 'both' }}
               >
                 <p className="text-5xl font-bold font-mono mb-2 text-primary">
                   +{claimResult.xpClaimed} {LABELS.xp}
                 </p>
-                <p className="text-text-secondary">
+                <p className="text-muted-foreground">
                   Total: {totalXP.toLocaleString()} {LABELS.xp}
                 </p>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="bg-surface-elevated p-4 mb-6 rounded"
+              <div
+                className="animate-in fade-in duration-300 bg-muted p-4 mb-6 rounded"
+                style={{ animationDelay: '800ms', animationFillMode: 'both' }}
               >
                 <div className="flex items-center justify-center gap-2">
                   <Star size={24} className="text-primary" />
@@ -311,20 +329,18 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                     {LABELS.level} {currentLevel}
                   </span>
                 </div>
-                <div className="mt-2 h-2 bg-surface overflow-hidden rounded-sm">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${getCurrentLevelProgress()}%` }}
-                    transition={{ delay: 1, duration: 1 }}
-                    className="h-full bg-primary"
+                <div className="mt-2 h-2 bg-card overflow-hidden rounded-sm">
+                  <div
+                    className="h-full bg-primary transition-all duration-1000 ease-out"
+                    style={{ width: `${progressWidth}%` }}
                   />
                 </div>
-                <p className="text-xs text-text-secondary mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {getXPForNextLevel()} {LABELS.xp} to next {LABELS.level.toLowerCase()}
                 </p>
-              </motion.div>
+              </div>
 
-              <Button onClick={handleClose} fullWidth>
+              <Button onClick={handleClose} className="w-full">
                 Continue
               </Button>
             </div>
@@ -333,76 +349,63 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
           {/* Level Up Phase */}
           {phase === 'levelup' && claimResult && (
             <div className="text-center p-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [0, 1.2, 1] }}
-                transition={{ duration: 0.5, times: [0, 0.7, 1] }}
-                className="mb-6"
+              <div
+                className="animate-in zoom-in duration-500 mb-6"
+                style={{ animationFillMode: 'both' }}
               >
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ scale: { duration: 2, repeat: Infinity } }}
+                <div
                   className="inline-block"
+                  style={{ animation: 'pulse-scale 2s ease-in-out infinite' }}
                 >
                   <Star size={72} className="text-primary" fill="currentColor" />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
 
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-3xl font-bold mb-4 text-primary"
+              <h2
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300 text-3xl font-bold mb-4 text-primary"
+                style={{ animationDelay: '300ms', animationFillMode: 'both' }}
               >
                 Rank Promoted!
-              </motion.h2>
+              </h2>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, type: 'spring' }}
-                className="mb-8"
+              <div
+                className="animate-in fade-in zoom-in-50 duration-500 mb-8"
+                style={{ animationDelay: '500ms', animationFillMode: 'both' }}
               >
                 <div className="flex items-center justify-center gap-4">
-                  <span className="text-4xl text-text-secondary">
+                  <span className="text-4xl text-muted-foreground">
                     Rank {claimResult.newLevel - 1}
                   </span>
-                  <motion.div
-                    animate={{ x: [0, 10, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.5 }}
-                  >
+                  <div style={{ animation: 'bounce-x 0.5s ease-in-out infinite' }}>
                     <ChevronRight size={24} className="text-primary" />
-                  </motion.div>
+                  </div>
                   <span className="text-5xl font-bold font-mono text-primary">
                     Rank {claimResult.newLevel}
                   </span>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="text-text-secondary mb-6"
+              <p
+                className="animate-in fade-in duration-300 text-muted-foreground mb-6"
+                style={{ animationDelay: '700ms', animationFillMode: 'both' }}
               >
                 {`You earned ${claimResult.xpClaimed} ${LABELS.xp} this week.`}
-              </motion.p>
+              </p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
+              <div
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                style={{ animationDelay: '900ms', animationFillMode: 'both' }}
               >
-                <Button onClick={handleClose} fullWidth size="lg">
+                <Button onClick={handleClose} className="w-full" size="lg">
                   <span className="flex items-center gap-2">
                     <Gamepad2 size={18} />
                     Continue
                   </span>
                 </Button>
-              </motion.div>
+              </div>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Badge Unlock Modal */}
         {showBadgeModal && unlockedBadges.length > 0 && (
@@ -411,7 +414,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
             onClose={onClose}
           />
         )}
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </>
   )
 }

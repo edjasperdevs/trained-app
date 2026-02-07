@@ -4,13 +4,13 @@ interface SkeletonProps {
 
 export function Skeleton({ className = '' }: SkeletonProps) {
   return (
-    <div className={`animate-pulse bg-surface-elevated rounded ${className}`} />
+    <div className={`animate-pulse bg-muted rounded ${className}`} />
   )
 }
 
 export function SkeletonCard() {
   return (
-    <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
+    <div className="bg-card border border-border rounded-lg p-4 space-y-3">
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-8 w-2/3" />
       <Skeleton className="h-4 w-full" />
@@ -22,7 +22,7 @@ export function HomeSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-5">
+      <div className="bg-card pt-8 pb-6 px-5">
         <div className="flex items-center justify-between mb-4">
           <div className="space-y-2">
             <Skeleton className="h-4 w-24" />
@@ -38,7 +38,7 @@ export function HomeSkeleton() {
         <SkeletonCard />
 
         {/* Avatar & XP card */}
-        <div className="bg-surface border border-border rounded-lg p-4">
+        <div className="bg-card border border-border rounded-lg p-4">
           <div className="flex items-center gap-6">
             <Skeleton className="h-16 w-16 rounded-full" />
             <div className="flex-1 space-y-2">
@@ -72,7 +72,7 @@ export function WorkoutsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-5">
+      <div className="bg-card pt-8 pb-6 px-5">
         <Skeleton className="h-8 w-32 mb-2" />
         <Skeleton className="h-4 w-24" />
       </div>
@@ -98,7 +98,7 @@ export function MacrosSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-4 px-5">
+      <div className="bg-card pt-8 pb-4 px-5">
         <Skeleton className="h-8 w-28 mb-4" />
         {/* Tabs */}
         <div className="flex gap-2">
@@ -112,18 +112,18 @@ export function MacrosSkeleton() {
       <div className="px-5 py-6 space-y-6">
         {/* Circular progress placeholder */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-surface border border-border rounded-lg p-4 flex flex-col items-center">
+          <div className="bg-card border border-border rounded-lg p-4 flex flex-col items-center">
             <Skeleton className="h-28 w-28 rounded-full" />
             <Skeleton className="h-4 w-16 mt-2" />
           </div>
-          <div className="bg-surface border border-border rounded-lg p-4 flex flex-col items-center">
+          <div className="bg-card border border-border rounded-lg p-4 flex flex-col items-center">
             <Skeleton className="h-28 w-28 rounded-full" />
             <Skeleton className="h-4 w-16 mt-2" />
           </div>
         </div>
 
         {/* Macro bars */}
-        <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-4">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-6 w-full" />
           <Skeleton className="h-6 w-full" />
@@ -141,7 +141,7 @@ export function AchievementsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-5">
+      <div className="bg-card pt-8 pb-6 px-5">
         <div className="flex items-center gap-4 mb-6">
           <Skeleton className="h-10 w-10 rounded-full" />
           <div className="space-y-2">
@@ -150,7 +150,7 @@ export function AchievementsSkeleton() {
           </div>
         </div>
         {/* Progress card */}
-        <div className="bg-surface border border-border rounded-lg p-4">
+        <div className="bg-card border border-border rounded-lg p-4">
           <div className="flex items-center gap-4">
             <Skeleton className="h-20 w-20 rounded-full" />
             <div className="flex-1 space-y-2">
@@ -195,7 +195,7 @@ export function AvatarSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-12 px-5">
+      <div className="bg-card pt-8 pb-12 px-5">
         <Skeleton className="h-8 w-32 mx-auto mb-6" />
         {/* Large avatar placeholder */}
         <div className="flex justify-center">
@@ -205,7 +205,7 @@ export function AvatarSkeleton() {
 
       <div className="px-5 space-y-6 -mt-4">
         {/* Stats card */}
-        <div className="bg-surface border border-border rounded-lg p-4">
+        <div className="bg-card border border-border rounded-lg p-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div className="space-y-2">
               <Skeleton className="h-8 w-12 mx-auto" />
@@ -236,24 +236,24 @@ export function SettingsSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="bg-surface pt-8 pb-6 px-5">
+      <div className="bg-card pt-8 pb-6 px-5">
         <Skeleton className="h-8 w-28" />
       </div>
 
       <div className="px-5 py-6 space-y-6">
         {/* Setting rows */}
-        <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-4">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-12 w-full rounded-lg" />
           <Skeleton className="h-12 w-full rounded-lg" />
           <Skeleton className="h-12 w-full rounded-lg" />
         </div>
-        <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-4">
           <Skeleton className="h-4 w-16" />
           <Skeleton className="h-12 w-full rounded-lg" />
           <Skeleton className="h-12 w-full rounded-lg" />
         </div>
-        <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
+        <div className="bg-card border border-border rounded-lg p-4 space-y-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-12 w-full rounded-lg" />
           <Skeleton className="h-12 w-full rounded-lg" />

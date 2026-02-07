@@ -1,7 +1,7 @@
-import { motion } from 'motion/react'
 import { useXPStore, useUserStore } from '@/stores'
-import { Card } from './Card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Lock } from 'lucide-react'
+import { cn } from '@/lib/cn'
 
 interface StreakDisplayProps {
   showCard?: boolean
@@ -53,7 +53,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
           </span>
         </div>
         {pendingXP > 0 && (
-          <span className="text-xs text-text-secondary">
+          <span className="text-xs text-muted-foreground">
             {daysUntilClaim === 0
               ? 'Claim today.'
               : `${daysUntilClaim}d until claim`
@@ -70,24 +70,21 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
 
           return (
             <div key={day.date} className="flex flex-col items-center gap-1">
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs text-muted-foreground">
                 {day.dayLetter}
               </span>
-              <motion.div
-                initial={isToday && hasCheckIn ? { scale: 0 } : false}
-                animate={{ scale: 1 }}
-                className={`
-                  w-8 h-8 rounded-sm
-                  flex items-center justify-center text-sm relative
-                  ${hasCheckIn
-                    ? 'bg-streak-active text-text-on-primary'
+              <div
+                className={cn(
+                  'w-8 h-8 rounded-sm flex items-center justify-center text-sm relative',
+                  isToday && hasCheckIn && 'animate-in zoom-in-50 duration-300',
+                  hasCheckIn
+                    ? 'bg-streak-active text-primary-foreground'
                     : isGraceDay
-                      ? 'bg-warning text-text-on-primary'
+                      ? 'bg-warning text-primary-foreground'
                       : isToday
-                        ? 'bg-surface border-2 border-primary border-dashed'
-                        : 'bg-streak-inactive text-text-secondary'
-                  }
-                `}
+                        ? 'bg-card border-2 border-primary border-dashed'
+                        : 'bg-streak-inactive text-muted-foreground'
+                )}
               >
                 {hasCheckIn ? (
                   '✓'
@@ -98,14 +95,14 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
                 ) : (
                   ''
                 )}
-              </motion.div>
+              </div>
             </div>
           )
         })}
       </div>
 
       {profile?.longestStreak && profile.longestStreak > (profile?.currentStreak || 0) && (
-        <p className="text-xs text-text-secondary text-center mt-3">
+        <p className="text-xs text-muted-foreground text-center mt-3">
           Record: {profile.longestStreak} days
         </p>
       )}
@@ -116,7 +113,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
     return <div>{content}</div>
   }
 
-  return <Card>{content}</Card>
+  return <Card className="py-0"><CardContent className="p-4">{content}</CardContent></Card>
 }
 
 // Compact inline streak badge
@@ -126,7 +123,7 @@ export function StreakBadge() {
   if (!profile?.currentStreak) return null
 
   return (
-    <div className="px-3 py-1.5 flex items-center gap-1.5 bg-surface border border-border rounded">
+    <div className="px-3 py-1.5 flex items-center gap-1.5 bg-card border border-border rounded">
       <Flame size={18} className="text-primary" />
       <span className="text-primary font-bold font-mono">
         {profile.currentStreak}

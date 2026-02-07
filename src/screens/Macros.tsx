@@ -1,9 +1,12 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { Button, Card, ProgressBar, MealBuilder, EmptyState } from '@/components'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { ProgressBar, MealBuilder, EmptyState } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
+import { cn } from '@/lib/cn'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -46,9 +49,9 @@ export function Macros() {
   ]
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="bg-bg-secondary pt-8 pb-4 px-5">
+      <div className="bg-card pt-8 pb-4 px-5">
         <h1 className="text-2xl font-bold mb-4">Macros</h1>
 
         {/* Tabs */}
@@ -57,12 +60,12 @@ export function Macros() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors
-                ${activeTab === tab.id
-                  ? 'bg-accent-primary text-bg-primary'
-                  : 'bg-bg-card text-text-secondary hover:text-text-primary'}
-              `}
+              className={cn(
+                'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors',
+                activeTab === tab.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-muted-foreground hover:text-foreground'
+              )}
             >
               {tab.label}
             </button>
@@ -184,144 +187,150 @@ function DailyView({
       </div>
 
       {/* Secondary Macros */}
-      <Card>
-        <h3 className="text-sm font-semibold text-text-secondary mb-4">MACRONUTRIENTS</h3>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Carbs</span>
-              <span className="font-digital">
-                {progress.carbs.current}g / {progress.carbs.target}g
-              </span>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-4">MACRONUTRIENTS</h3>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>Carbs</span>
+                <span className="font-digital">
+                  {progress.carbs.current}g / {progress.carbs.target}g
+                </span>
+              </div>
+              <ProgressBar progress={progress.carbs.percentage} color="primary" size="sm" />
             </div>
-            <ProgressBar progress={progress.carbs.percentage} color="primary" size="sm" />
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Fats</span>
-              <span className="font-digital">
-                {progress.fats.current}g / {progress.fats.target}g
-              </span>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span>Fats</span>
+                <span className="font-digital">
+                  {progress.fats.current}g / {progress.fats.target}g
+                </span>
+              </div>
+              <ProgressBar progress={progress.fats.percentage} color="secondary" size="sm" />
             </div>
-            <ProgressBar progress={progress.fats.percentage} color="secondary" size="sm" />
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       {/* Quick Log */}
-      <Card>
-        <h3 className="text-sm font-semibold text-text-secondary mb-4">QUICK LOG</h3>
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div>
-            <label className="text-xs text-text-secondary block mb-1">Protein (g)</label>
-            <input
-              type="number"
-              value={quickLog.protein}
-              onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
-              placeholder={String(targets.protein)}
-              className="input-base font-digital"
-            />
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-4">QUICK LOG</h3>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
+              <Input
+                type="number"
+                value={quickLog.protein}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
+                placeholder={String(targets.protein)}
+                className="font-digital"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Calories</label>
+              <Input
+                type="number"
+                value={quickLog.calories}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
+                placeholder={String(targets.calories)}
+                className="font-digital"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-xs text-text-secondary block mb-1">Calories</label>
-            <input
-              type="number"
-              value={quickLog.calories}
-              onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
-              placeholder={String(targets.calories)}
-              className="input-base font-digital"
-            />
-          </div>
-        </div>
-        <Button
-          onClick={handleQuickLog}
-          fullWidth
-          disabled={!quickLog.protein && !quickLog.calories}
-        >
-          Log Macros
-        </Button>
+          <Button
+            onClick={handleQuickLog}
+            className="w-full"
+            disabled={!quickLog.protein && !quickLog.calories}
+          >
+            Log Macros
+          </Button>
+        </CardContent>
       </Card>
 
       {/* XP Indicators */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className={proteinHit ? 'bg-accent-success/10 border-accent-success/30' : ''} padding="sm">
-          <div className="flex items-center gap-2">
-            {proteinHit ? (
-              <Check size={20} className="text-accent-success" />
-            ) : (
-              <Beef size={20} className="text-text-secondary" />
-            )}
-            <div>
-              <p className="text-sm font-semibold">Protein Target</p>
-              <p className="text-xs text-text-secondary">
-                {proteinHit ? '+50 XP earned' : 'Within 10g for +50 XP'}
-              </p>
+        <Card className={cn('py-0', proteinHit && 'bg-success/10 border-success/30')}>
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              {proteinHit ? (
+                <Check size={20} className="text-success" />
+              ) : (
+                <Beef size={20} className="text-muted-foreground" />
+              )}
+              <div>
+                <p className="text-sm font-semibold">Protein Target</p>
+                <p className="text-xs text-muted-foreground">
+                  {proteinHit ? '+50 XP earned' : 'Within 10g for +50 XP'}
+                </p>
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
-        <Card className={caloriesHit ? 'bg-accent-success/10 border-accent-success/30' : ''} padding="sm">
-          <div className="flex items-center gap-2">
-            {caloriesHit ? (
-              <Check size={20} className="text-accent-success" />
-            ) : (
-              <Zap size={20} className="text-text-secondary" />
-            )}
-            <div>
-              <p className="text-sm font-semibold">Calorie Target</p>
-              <p className="text-xs text-text-secondary">
-                {caloriesHit ? '+50 XP earned' : 'Within 100 for +50 XP'}
-              </p>
+        <Card className={cn('py-0', caloriesHit && 'bg-success/10 border-success/30')}>
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              {caloriesHit ? (
+                <Check size={20} className="text-success" />
+              ) : (
+                <Zap size={20} className="text-muted-foreground" />
+              )}
+              <div>
+                <p className="text-sm font-semibold">Calorie Target</p>
+                <p className="text-xs text-muted-foreground">
+                  {caloriesHit ? '+50 XP earned' : 'Within 100 for +50 XP'}
+                </p>
+              </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       </div>
 
       {/* Today's Logged Meals */}
       {todayMeals.length > 0 && (
-        <Card>
-          <button
-            onClick={() => setShowMeals(!showMeals)}
-            className="w-full flex items-center justify-between"
-          >
-            <h3 className="text-sm font-semibold text-text-secondary">
-              TODAY'S MEALS ({todayMeals.length})
-            </h3>
-            <ChevronDown
-              size={16}
-              className={`text-text-secondary transition-transform ${showMeals ? 'rotate-180' : ''}`}
-            />
-          </button>
+        <Card className="py-0">
+          <CardContent className="p-4">
+            <button
+              onClick={() => setShowMeals(!showMeals)}
+              className="w-full flex items-center justify-between"
+            >
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                TODAY'S MEALS ({todayMeals.length})
+              </h3>
+              <ChevronDown
+                size={16}
+                className={cn('text-muted-foreground transition-transform', showMeals && 'rotate-180')}
+              />
+            </button>
 
-          <AnimatePresence>
-            {showMeals && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="mt-4 space-y-2 overflow-hidden"
-              >
+            <div className={cn(
+              'overflow-hidden transition-all duration-300',
+              showMeals ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+            )}>
+              <div className="space-y-2">
                 {todayMeals.map((meal) => (
                   <div
                     key={meal.id}
-                    className="flex items-center justify-between bg-bg-secondary rounded-lg p-3"
+                    className="flex items-center justify-between bg-card rounded-lg p-3"
                   >
                     <div>
                       <p className="font-semibold text-sm">{meal.name}</p>
-                      <p className="text-xs text-text-secondary">
+                      <p className="text-xs text-muted-foreground">
                         P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
                       </p>
                     </div>
                     <button
                       onClick={() => onDeleteMeal(meal.id)}
-                      className="text-text-secondary hover:text-accent-danger p-1"
+                      className="text-muted-foreground hover:text-destructive p-1"
                     >
                       ✕
                     </button>
                   </div>
                 ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       )}
     </div>
@@ -347,43 +356,46 @@ function MacroRing({
   const circumference = 2 * Math.PI * 45
   const strokeDashoffset = circumference - (percentage / 100) * circumference
 
-  const colorClass = hit ? 'stroke-accent-success' : color === 'cyan' ? 'stroke-accent-primary' : 'stroke-accent-secondary'
+  const colorClass = hit ? 'stroke-success' : color === 'cyan' ? 'stroke-primary' : 'stroke-secondary'
 
   return (
-    <Card className="flex flex-col items-center py-4">
-      <div className="relative w-28 h-28">
-        <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-          <circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="8"
-            className="text-bg-secondary"
-          />
-          <motion.circle
-            cx="50"
-            cy="50"
-            r="45"
-            fill="none"
-            strokeWidth="8"
-            strokeLinecap="round"
-            className={colorClass}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset }}
-            style={{ strokeDasharray: circumference }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold font-digital">{current}</span>
-          <span className="text-xs text-text-secondary">{unit}</span>
+    <Card className="py-0">
+      <CardContent className="flex flex-col items-center py-4">
+        <div className="relative w-28 h-28">
+          <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="8"
+              className="text-card"
+            />
+            <circle
+              cx="50"
+              cy="50"
+              r="45"
+              fill="none"
+              strokeWidth="8"
+              strokeLinecap="round"
+              className={colorClass}
+              style={{
+                strokeDasharray: circumference,
+                strokeDashoffset,
+                transition: 'stroke-dashoffset 1s ease-out'
+              }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-bold font-digital">{current}</span>
+            <span className="text-xs text-muted-foreground">{unit}</span>
+          </div>
         </div>
-      </div>
-      <p className="mt-2 font-semibold">{label}</p>
-      <p className="text-xs text-text-secondary">of {target}{unit}</p>
-      {hit && <span className="text-xs text-accent-success mt-1">Target Hit!</span>}
+        <p className="mt-2 font-semibold">{label}</p>
+        <p className="text-xs text-muted-foreground">of {target}{unit}</p>
+        {hit && <span className="text-xs text-success mt-1">Target Hit!</span>}
+      </CardContent>
     </Card>
   )
 }
@@ -391,49 +403,52 @@ function MacroRing({
 function MealsView({ mealPlan }: { mealPlan: MealPlan[] }) {
   if (!mealPlan || mealPlan.length === 0) {
     return (
-      <Card className="text-center py-8">
-        <UtensilsCrossed size={40} className="mx-auto mb-4 text-text-secondary" />
-        <p className="text-xl font-bold mb-2">No Meal Plan</p>
-        <p className="text-text-secondary">Set your macros in Calculator to generate a meal plan</p>
+      <Card className="py-0">
+        <CardContent className="text-center py-8">
+          <UtensilsCrossed size={40} className="mx-auto mb-4 text-muted-foreground" />
+          <p className="text-xl font-bold mb-2">No Meal Plan</p>
+          <p className="text-muted-foreground">Set your macros in Calculator to generate a meal plan</p>
+        </CardContent>
       </Card>
     )
   }
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-text-secondary mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         Suggested meal breakdown based on your targets
       </p>
       {mealPlan.map((meal, index) => (
-        <motion.div
+        <div
           key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
+          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: `${index * 100}ms` }}
         >
-          <Card>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold">{meal.name}</h3>
-              <span className="text-sm text-accent-primary font-digital">
-                {meal.calories} cal
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-text-secondary">Protein</p>
-                <p className="font-digital font-semibold">{meal.protein}g</p>
+          <Card className="py-0">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">{meal.name}</h3>
+                <span className="text-sm text-primary font-digital">
+                  {meal.calories} cal
+                </span>
               </div>
-              <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-text-secondary">Carbs</p>
-                <p className="font-digital font-semibold">{meal.carbs}g</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-muted rounded-lg p-2">
+                  <p className="text-xs text-muted-foreground">Protein</p>
+                  <p className="font-digital font-semibold">{meal.protein}g</p>
+                </div>
+                <div className="bg-muted rounded-lg p-2">
+                  <p className="text-xs text-muted-foreground">Carbs</p>
+                  <p className="font-digital font-semibold">{meal.carbs}g</p>
+                </div>
+                <div className="bg-muted rounded-lg p-2">
+                  <p className="text-xs text-muted-foreground">Fats</p>
+                  <p className="font-digital font-semibold">{meal.fats}g</p>
+                </div>
               </div>
-              <div className="bg-bg-secondary rounded-lg p-2">
-                <p className="text-xs text-text-secondary">Fats</p>
-                <p className="font-digital font-semibold">{meal.fats}g</p>
-              </div>
-            </div>
+            </CardContent>
           </Card>
-        </motion.div>
+        </div>
       ))}
     </div>
   )
@@ -493,181 +508,195 @@ function CalculatorView({
   return (
     <div className="space-y-6">
       {/* Weight */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-2">
-          BODY WEIGHT (LBS)
-        </label>
-        <input
-          type="number"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
-          className="input-base text-2xl font-digital text-center py-3"
-          min={80}
-          max={400}
-        />
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-2">
+            BODY WEIGHT (LBS)
+          </label>
+          <Input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            className="text-2xl font-digital text-center py-3 h-auto"
+            min={80}
+            max={400}
+          />
+        </CardContent>
       </Card>
 
       {/* Height */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-2">
-          HEIGHT
-        </label>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={heightFeet}
-                onChange={(e) => setHeightFeet(e.target.value)}
-                className="input-base text-2xl font-digital text-center py-3"
-                min={4}
-                max={7}
-              />
-              <span className="text-text-secondary">ft</span>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-2">
+            HEIGHT
+          </label>
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={heightFeet}
+                  onChange={(e) => setHeightFeet(e.target.value)}
+                  className="text-2xl font-digital text-center py-3 h-auto"
+                  min={4}
+                  max={7}
+                />
+                <span className="text-muted-foreground">ft</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={heightInches}
+                  onChange={(e) => setHeightInches(e.target.value)}
+                  className="text-2xl font-digital text-center py-3 h-auto"
+                  min={0}
+                  max={11}
+                />
+                <span className="text-muted-foreground">in</span>
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={heightInches}
-                onChange={(e) => setHeightInches(e.target.value)}
-                className="input-base text-2xl font-digital text-center py-3"
-                min={0}
-                max={11}
-              />
-              <span className="text-text-secondary">in</span>
-            </div>
-          </div>
-        </div>
+        </CardContent>
       </Card>
 
       {/* Age */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-2">
-          AGE
-        </label>
-        <input
-          type="number"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          className="input-base text-2xl font-digital text-center py-3"
-          min={16}
-          max={80}
-        />
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-2">
+            AGE
+          </label>
+          <Input
+            type="number"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
+            className="text-2xl font-digital text-center py-3 h-auto"
+            min={16}
+            max={80}
+          />
+        </CardContent>
       </Card>
 
       {/* Gender */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-3">
-          BIOLOGICAL SEX
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setGender('male')}
-            className={`
-              p-3 rounded-lg border-2 transition-colors
-              ${gender === 'male'
-                ? 'border-accent-primary bg-accent-primary/10'
-                : 'border-border hover:border-border'}
-            `}
-          >
-            <span className="text-2xl block mb-1">♂️</span>
-            <span className="text-sm">Male</span>
-          </button>
-          <button
-            onClick={() => setGender('female')}
-            className={`
-              p-3 rounded-lg border-2 transition-colors
-              ${gender === 'female'
-                ? 'border-accent-primary bg-accent-primary/10'
-                : 'border-border hover:border-border'}
-            `}
-          >
-            <span className="text-2xl block mb-1">♀️</span>
-            <span className="text-sm">Female</span>
-          </button>
-        </div>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-3">
+            BIOLOGICAL SEX
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setGender('male')}
+              className={cn(
+                'p-3 rounded-lg border-2 transition-colors',
+                gender === 'male'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-border'
+              )}
+            >
+              <span className="text-2xl block mb-1">♂️</span>
+              <span className="text-sm">Male</span>
+            </button>
+            <button
+              onClick={() => setGender('female')}
+              className={cn(
+                'p-3 rounded-lg border-2 transition-colors',
+                gender === 'female'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-border'
+              )}
+            >
+              <span className="text-2xl block mb-1">♀️</span>
+              <span className="text-sm">Female</span>
+            </button>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Goal */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-3">
-          GOAL
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {goals.map(g => (
-            <button
-              key={g.value}
-              onClick={() => setGoal(g.value)}
-              className={`
-                p-3 rounded-lg border-2 transition-colors
-                ${goal === g.value
-                  ? 'border-accent-primary bg-accent-primary/10'
-                  : 'border-border hover:border-border'}
-              `}
-            >
-              <g.icon size={24} className={`mb-1 ${goal === g.value ? 'text-accent-primary' : 'text-text-secondary'}`} />
-              <span className="text-sm">{g.label}</span>
-            </button>
-          ))}
-        </div>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-3">
+            GOAL
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {goals.map(g => (
+              <button
+                key={g.value}
+                onClick={() => setGoal(g.value)}
+                className={cn(
+                  'p-3 rounded-lg border-2 transition-colors',
+                  goal === g.value
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-border'
+                )}
+              >
+                <g.icon size={24} className={cn('mb-1', goal === g.value ? 'text-primary' : 'text-muted-foreground')} />
+                <span className="text-sm">{g.label}</span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
       </Card>
 
       {/* Activity Level */}
-      <Card>
-        <label className="text-sm font-semibold text-text-secondary block mb-3">
-          ACTIVITY LEVEL
-        </label>
-        <div className="space-y-2">
-          {activityLevels.map(level => (
-            <button
-              key={level.value}
-              onClick={() => setActivity(level.value)}
-              className={`
-                w-full p-3 rounded-lg border-2 text-left transition-colors
-                ${activity === level.value
-                  ? 'border-accent-primary bg-accent-primary/10'
-                  : 'border-border hover:border-border'}
-              `}
-            >
-              <p className="font-semibold">{level.label}</p>
-              <p className="text-xs text-text-secondary">{level.description}</p>
-            </button>
-          ))}
-        </div>
+      <Card className="py-0">
+        <CardContent className="p-4">
+          <label className="text-sm font-semibold text-muted-foreground block mb-3">
+            ACTIVITY LEVEL
+          </label>
+          <div className="space-y-2">
+            {activityLevels.map(level => (
+              <button
+                key={level.value}
+                onClick={() => setActivity(level.value)}
+                className={cn(
+                  'w-full p-3 rounded-lg border-2 text-left transition-colors',
+                  activity === level.value
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-border'
+                )}
+              >
+                <p className="font-semibold">{level.label}</p>
+                <p className="text-xs text-muted-foreground">{level.description}</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
       </Card>
 
-      <Button onClick={handleCalculate} fullWidth size="lg" disabled={isCalculating}>
+      <Button onClick={handleCalculate} className="w-full" size="lg" disabled={isCalculating}>
         {isCalculating ? 'Calculating...' : 'Calculate Macros'}
       </Button>
 
       {/* Current Targets Display */}
       {targets && (
-        <Card className="bg-accent-primary/5 border-accent-primary/20">
-          <h3 className="text-sm font-semibold text-text-secondary mb-3">CURRENT TARGETS</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-text-secondary">Calories</p>
-              <p className="text-2xl font-bold font-digital text-accent-primary">
-                {targets.calories}
-              </p>
+        <Card className="py-0 bg-primary/5 border-primary/20">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">CURRENT TARGETS</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Calories</p>
+                <p className="text-2xl font-bold font-digital text-primary">
+                  {targets.calories}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Protein</p>
+                <p className="text-2xl font-bold font-digital text-primary">
+                  {targets.protein}g
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Carbs</p>
+                <p className="text-lg font-digital">{targets.carbs}g</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Fats</p>
+                <p className="text-lg font-digital">{targets.fats}g</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-text-secondary">Protein</p>
-              <p className="text-2xl font-bold font-digital text-accent-primary">
-                {targets.protein}g
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-text-secondary">Carbs</p>
-              <p className="text-lg font-digital">{targets.carbs}g</p>
-            </div>
-            <div>
-              <p className="text-xs text-text-secondary">Fats</p>
-              <p className="text-lg font-digital">{targets.fats}g</p>
-            </div>
-          </div>
+          </CardContent>
         </Card>
       )}
     </div>
@@ -721,7 +750,7 @@ function LogMealView({
           setEditingMeal(null)
           setShowMealBuilder(true)
         }}
-        fullWidth
+        className="w-full"
         size="lg"
       >
         <span className="mr-2">+</span> Create New Meal
@@ -730,10 +759,10 @@ function LogMealView({
       {/* Saved Meals */}
       {savedMeals.length > 0 ? (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-text-secondary">SAVED MEALS ({savedMeals.length})</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">SAVED MEALS ({savedMeals.length})</h3>
 
           {savedMeals.map((meal) => (
-            <Card key={meal.id} padding="none" className="overflow-hidden">
+            <Card key={meal.id} className="py-0 overflow-hidden">
               {/* Meal Header */}
               <div className="p-4">
                 <div className="flex items-start justify-between">
@@ -742,11 +771,11 @@ function LogMealView({
                     className="flex-1 text-left"
                   >
                     <p className="font-semibold">{meal.name}</p>
-                    <p className="text-sm text-text-secondary mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
                     </p>
                     {meal.ingredients && meal.ingredients.length > 0 && (
-                      <p className="text-xs text-text-secondary mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {meal.ingredients.length} ingredient{meal.ingredients.length !== 1 ? 's' : ''}
                         <span className="ml-2">{expandedMealId === meal.id ? '▲' : '▼'}</span>
                       </p>
@@ -767,13 +796,13 @@ function LogMealView({
                 <div className="flex gap-2 mt-3 pt-3 border-t border-border">
                   <button
                     onClick={() => handleEditMeal(meal)}
-                    className="flex-1 text-sm text-text-secondary hover:text-accent-primary py-1"
+                    className="flex-1 text-sm text-muted-foreground hover:text-primary py-1"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => onDeleteSavedMeal(meal.id)}
-                    className="flex-1 text-sm text-text-secondary hover:text-accent-danger py-1"
+                    className="flex-1 text-sm text-muted-foreground hover:text-destructive py-1"
                   >
                     Delete
                   </button>
@@ -781,45 +810,43 @@ function LogMealView({
               </div>
 
               {/* Expanded Ingredients */}
-              <AnimatePresence>
-                {expandedMealId === meal.id && meal.ingredients && meal.ingredients.length > 0 && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="bg-bg-primary px-4 py-3 border-t border-border">
-                      <p className="text-xs text-text-secondary mb-2">INGREDIENTS</p>
-                      <div className="space-y-2">
-                        {meal.ingredients.map((ing) => (
-                          <div key={ing.id} className="text-sm">
-                            <p className="text-text-primary">
-                              {ing.name}
-                              <span className="text-text-secondary ml-2">
-                                ({ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit})
-                              </span>
-                            </p>
-                            <p className="text-xs text-text-secondary">
-                              P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
-                            </p>
-                          </div>
-                        ))}
+              <div className={cn(
+                'overflow-hidden transition-all duration-300',
+                expandedMealId === meal.id && meal.ingredients && meal.ingredients.length > 0
+                  ? 'max-h-[2000px] opacity-100'
+                  : 'max-h-0 opacity-0'
+              )}>
+                <div className="px-4 py-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-2">INGREDIENTS</p>
+                  <div className="space-y-2">
+                    {meal.ingredients?.map((ing) => (
+                      <div key={ing.id} className="text-sm">
+                        <p className="text-foreground">
+                          {ing.name}
+                          <span className="text-muted-foreground ml-2">
+                            ({ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit})
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
+                        </p>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </Card>
           ))}
         </div>
       ) : (
-        <Card className="text-center py-8">
-          <UtensilsCrossed size={40} className="mx-auto mb-3 text-text-secondary" />
-          <p className="text-lg font-semibold mb-1">No Saved Meals</p>
-          <p className="text-text-secondary text-sm">
-            Create a meal with multiple ingredients to quickly log it later
-          </p>
+        <Card className="py-0">
+          <CardContent className="text-center py-8">
+            <UtensilsCrossed size={40} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-lg font-semibold mb-1">No Saved Meals</p>
+            <p className="text-muted-foreground text-sm">
+              Create a meal with multiple ingredients to quickly log it later
+            </p>
+          </CardContent>
         </Card>
       )}
 

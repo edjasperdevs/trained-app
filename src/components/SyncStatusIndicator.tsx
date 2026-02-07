@@ -12,7 +12,7 @@ export function SyncStatusIndicator() {
     syncing: {
       icon: Loader2,
       label: 'Syncing...',
-      className: 'text-text-secondary bg-surface',
+      className: 'text-muted-foreground bg-card',
       animate: true,
     },
     offline: {
@@ -24,14 +24,14 @@ export function SyncStatusIndicator() {
     error: {
       icon: AlertTriangle,
       label: 'Sync failed',
-      className: 'text-error bg-error/10',
+      className: 'text-destructive bg-destructive/10',
       animate: false,
     },
     synced: {
       // Only shown when synced but pendingChanges is true (edge case)
       icon: Cloud,
       label: 'Pending sync',
-      className: 'text-text-secondary bg-surface',
+      className: 'text-muted-foreground bg-card',
       animate: false,
     },
   }
