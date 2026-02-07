@@ -66,11 +66,11 @@ Plans:
   3. A user can add an exercise, log sets with reps/weight, and save a completed workout (E2E verified)
   4. A user can search for food, add a meal entry, and see updated macro totals (E2E verified)
   5. A user can complete daily check-in (streak maintained), claim weekly XP, and survive an offline-to-online sync cycle (E2E verified)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Auth and onboarding journey tests (E2E-05, E2E-06)
-- [ ] 02-02: Core feature journey tests -- workout, meals, check-in, XP claim, offline sync (E2E-07 through E2E-11)
+- [ ] 02-01-PLAN.md -- Auth and onboarding journey tests: chromium-auth project + Supabase mocks + access gate/signup/onboarding/signin E2E tests (E2E-05, E2E-06)
+- [ ] 02-02-PLAN.md -- Core feature journey tests: workout logging, meal logging, daily check-in, weekly XP claim, offline sync E2E tests (E2E-07 through E2E-11)
 
 ---
 
