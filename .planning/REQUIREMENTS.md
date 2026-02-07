@@ -1,18 +1,18 @@
 # Requirements: Trained v1.3 Coach Dashboard
 
 **Defined:** 2026-02-07
-**Core Value:** The coach can manage every client's training from one place — programs, macros, check-ins — and clients see their personalized plans without friction.
+**Core Value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction.
 
 ## v1.3 Requirements
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Coach route (`/coach/*`) is protected — non-coach users are redirected away
+- [ ] **INFRA-01**: Coach route (`/coach/*`) is protected -- non-coach users are redirected away
 - [ ] **INFRA-02**: Data ownership model separates client-owned data (offline-first, push to Supabase) from coach-owned data (server-authoritative, pull from Supabase)
-- [ ] **INFRA-03**: Sync system is directional — `pushClientData()` for client-owned, `pullCoachData()` for coach-owned — preventing coach-set data from being overwritten
+- [ ] **INFRA-03**: Sync system is directional -- `pushClientData()` for client-owned, `pullCoachData()` for coach-owned -- preventing coach-set data from being overwritten
 - [ ] **INFRA-04**: Existing `coach_clients` RLS policy requires `role = 'coach'` to prevent unauthorized coach escalation
 - [ ] **INFRA-05**: Client roster is paginated with server-side search and sort (handles 90K scale)
-- [ ] **INFRA-06**: Coach dashboard is lazy-loaded — zero bundle size impact on client app
+- [ ] **INFRA-06**: Coach dashboard is lazy-loaded -- zero bundle size impact on client app
 
 ### Invitations
 
@@ -77,52 +77,52 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | Feature | Reason |
 |---------|--------|
 | Full chat / messaging | Infrastructure-heavy, check-in responses cover 80% of communication needs |
-| Intake form | Deferred — coach can gather intake info through existing channels |
+| Intake form | Deferred -- coach can gather intake info through existing channels |
 | Progress photos | Requires image upload/storage infrastructure not yet built |
-| Multi-coach / team features | Single-coach app — no multi-tenancy needed |
+| Multi-coach / team features | Single-coach app -- no multi-tenancy needed |
 | Payment / subscription management | Coach uses existing Lemon Squeezy access codes |
-| AI workout generation | Coach expertise is the product — manual builder is sufficient |
+| AI workout generation | Coach expertise is the product -- manual builder is sufficient |
 | Custom check-in form builder | Single coach uses the same questions every week |
-| Push notifications | Requires service worker registration and permission flow — separate feature |
-| Exercise video library | Content project, not software — coach links external videos |
+| Push notifications | Requires service worker registration and permission flow -- separate feature |
+| Exercise video library | Content project, not software -- coach links external videos |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| INFRA-06 | TBD | Pending |
-| INVITE-01 | TBD | Pending |
-| INVITE-02 | TBD | Pending |
-| INVITE-03 | TBD | Pending |
-| ROSTER-01 | TBD | Pending |
-| ROSTER-02 | TBD | Pending |
-| ROSTER-03 | TBD | Pending |
-| PROG-01 | TBD | Pending |
-| PROG-02 | TBD | Pending |
-| PROG-03 | TBD | Pending |
-| PROG-04 | TBD | Pending |
-| PROG-05 | TBD | Pending |
-| PROG-06 | TBD | Pending |
-| MACRO-01 | TBD | Pending |
-| MACRO-02 | TBD | Pending |
-| MACRO-03 | TBD | Pending |
-| CHECK-01 | TBD | Pending |
-| CHECK-02 | TBD | Pending |
-| CHECK-03 | TBD | Pending |
-| CHECK-04 | TBD | Pending |
-| CHECK-05 | TBD | Pending |
-| CHECK-06 | TBD | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 3 | Pending |
+| INFRA-06 | Phase 1 | Pending |
+| INVITE-01 | Phase 2 | Pending |
+| INVITE-02 | Phase 2 | Pending |
+| INVITE-03 | Phase 2 | Pending |
+| ROSTER-01 | Phase 3 | Pending |
+| ROSTER-02 | Phase 3 | Pending |
+| ROSTER-03 | Phase 3 | Pending |
+| PROG-01 | Phase 5 | Pending |
+| PROG-02 | Phase 5 | Pending |
+| PROG-03 | Phase 5 | Pending |
+| PROG-04 | Phase 5 | Pending |
+| PROG-05 | Phase 5 | Pending |
+| PROG-06 | Phase 5 | Pending |
+| MACRO-01 | Phase 4 | Pending |
+| MACRO-02 | Phase 4 | Pending |
+| MACRO-03 | Phase 4 | Pending |
+| CHECK-01 | Phase 6 | Pending |
+| CHECK-02 | Phase 6 | Pending |
+| CHECK-03 | Phase 6 | Pending |
+| CHECK-04 | Phase 6 | Pending |
+| CHECK-05 | Phase 6 | Pending |
+| CHECK-06 | Phase 6 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 27 total
-- Mapped to phases: 0 (awaiting roadmap)
-- Unmapped: 27
+- Mapped to phases: 27
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-07*
-*Last updated: 2026-02-07 after initial definition*
+*Last updated: 2026-02-07 after roadmap creation*
