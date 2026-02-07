@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
-**Current focus:** Phase 3 in progress -- Analytics Enhancement. Plan 01 (convention + funnels) done, Plan 02 (event wiring) next.
+**Current focus:** Phase 3 complete -- Analytics Enhancement. All events wired, funnels defined, SPA pageviews verified.
 
 ## Current Position
 
 Phase: 3 of 4 (Analytics Enhancement)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-07 -- Completed 03-01-PLAN.md (Event convention and funnel definitions)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-07 -- Completed 03-02-PLAN.md (Wire analytics events into screens)
 
-Progress: [███████░░░] 71% (5/7 plans)
+Progress: [████████░░] 86% (6/7 plans)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [███████░░░] 71% (5/7 plans)
 - Average plan duration: 7.4min
 
 **Current Milestone:**
-- Total plans completed: 5
-- Average duration: 8.0min
-- Total execution time: 0.67 hours
+- Total plans completed: 6
+- Average duration: 8.3min
+- Total execution time: 0.83 hours
 
 *Updated after each plan completion*
 
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - logQuickMacros replaces daily totals (not additive) -- tests match actual behavior
 - Corrected event count: 7 wired methods (8 call sites), 15 missing -- research said 14 but actual is 15
 - Funnel 2 (Habit Formation) uses property filtering instead of Plausible built-in funnels (duplicate event name limitation)
+- SPA pageviews work automatically via Plausible standard script.js + BrowserRouter -- no manual fallback needed
+- useRef guards for proteinTargetHit/calorieTargetHit to fire once per session
+- Avatar evolution detection uses before/after store comparison (prevStage !== newStage)
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 03-01-PLAN.md (Event convention and funnel definitions) -- Phase 3 plan 1 of 2
+Stopped at: Completed 03-02-PLAN.md (Wire analytics events) -- Phase 3 complete (2/2 plans)
 Resume file: None
