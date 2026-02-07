@@ -100,10 +100,11 @@ Plans:
   2. Error stack traces in Sentry display readable source-mapped code (not minified bundles)
   3. Alert rules are configured to notify on error rate spikes (catches launch-day regressions)
   4. Session replay recordings mask all health/fitness PII -- body weight, meal data, and body metrics are not visible in replays
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Activate browserTracingIntegration, upload source maps, configure alerts and PII masking
+- [ ] 04-01-PLAN.md -- Configure Sentry tracing, replay integration, source map upload, ErrorBoundary wiring (MON-01, MON-02, MON-04 partial)
+- [ ] 04-02-PLAN.md -- Add PII masking to health/fitness screens, configure Sentry alert rules (MON-03, MON-04)
 
 ## Progress
 
@@ -115,8 +116,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
 | 2. E2E Critical Journeys | 2/2 | Complete | 2026-02-07 |
 | 3. Analytics Enhancement | 2/2 | Complete | 2026-02-07 |
-| 4. Monitoring Hardening | 0/1 | Not started | - |
+| 4. Monitoring Hardening | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-06*
-*Total: 4 phases, 7 plans, 21 requirements*
+*Total: 4 phases, 8 plans, 21 requirements*
