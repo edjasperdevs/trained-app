@@ -28,13 +28,13 @@ Requirements for pre-launch confidence -- E2E testing, analytics enhancement, an
 
 ### E2E Critical Journeys
 
-- [ ] **E2E-05**: E2E test covers access gate → sign up → onboarding → home screen
-- [ ] **E2E-06**: E2E test covers sign in → home screen with existing data
-- [ ] **E2E-07**: E2E test covers full workout logging flow (add exercise, log sets, save)
-- [ ] **E2E-08**: E2E test covers meal logging flow (search food, add entry, view macros)
-- [ ] **E2E-09**: E2E test covers daily check-in and streak maintenance
-- [ ] **E2E-10**: E2E test covers weekly XP claim ritual
-- [ ] **E2E-11**: E2E test covers offline → online sync cycle (service worker blocked, localStorage persists, sync triggers on reconnect)
+- [x] **E2E-05**: E2E test covers access gate → sign up → onboarding → home screen
+- [x] **E2E-06**: E2E test covers sign in → home screen with existing data
+- [x] **E2E-07**: E2E test covers full workout logging flow (add exercise, log sets, save)
+- [x] **E2E-08**: E2E test covers meal logging flow (search food, add entry, view macros)
+- [x] **E2E-09**: E2E test covers daily check-in and streak maintenance
+- [x] **E2E-10**: E2E test covers weekly XP claim ritual
+- [x] **E2E-11**: E2E test covers offline → online sync cycle (service worker blocked, localStorage persists, sync triggers on reconnect)
 
 ### Analytics Enhancement
 
@@ -92,13 +92,13 @@ Deferred to post-launch.
 | E2E-02 | Phase 1 | Complete |
 | E2E-03 | Phase 1 | Complete |
 | E2E-04 | Phase 1 | Complete |
-| E2E-05 | Phase 2 | Pending |
-| E2E-06 | Phase 2 | Pending |
-| E2E-07 | Phase 2 | Pending |
-| E2E-08 | Phase 2 | Pending |
-| E2E-09 | Phase 2 | Pending |
-| E2E-10 | Phase 2 | Pending |
-| E2E-11 | Phase 2 | Pending |
+| E2E-05 | Phase 2 | Complete |
+| E2E-06 | Phase 2 | Complete |
+| E2E-07 | Phase 2 | Complete |
+| E2E-08 | Phase 2 | Complete |
+| E2E-09 | Phase 2 | Complete |
+| E2E-10 | Phase 2 | Complete |
+| E2E-11 | Phase 2 | Complete |
 | ANLYT-01 | Phase 3 | Pending |
 | ANLYT-02 | Phase 3 | Pending |
 | ANLYT-03 | Phase 3 | Pending |
@@ -115,4 +115,4 @@ Deferred to post-launch.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-07 after Phase 1 completion*
+*Last updated: 2026-02-07 after Phase 2 completion*
