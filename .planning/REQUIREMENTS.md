@@ -16,15 +16,15 @@ Requirements for pre-launch confidence -- E2E testing, analytics enhancement, an
 
 ### Test Repair
 
-- [ ] **TEST-01**: Existing unit/component tests pass after design refresh (`vitest run` green)
-- [ ] **TEST-02**: `tsc --noEmit` passes with zero type errors
+- [x] **TEST-01**: Existing unit/component tests pass after design refresh (`vitest run` green)
+- [x] **TEST-02**: `tsc --noEmit` passes with zero type errors
 
 ### E2E Infrastructure
 
-- [ ] **E2E-01**: Playwright installed and configured with Vite dev server integration
-- [ ] **E2E-02**: `data-testid` attributes added to all interactive elements across screens
-- [ ] **E2E-03**: Auth fixture seeds localStorage with valid Zustand store state (bypasses UI login)
-- [ ] **E2E-04**: Test isolation clears localStorage between tests (no state leakage)
+- [x] **E2E-01**: Playwright installed and configured with Vite dev server integration
+- [x] **E2E-02**: `data-testid` attributes added to all interactive elements across screens
+- [x] **E2E-03**: Auth fixture seeds localStorage with valid Zustand store state (bypasses UI login)
+- [x] **E2E-04**: Test isolation clears localStorage between tests (no state leakage)
 
 ### E2E Critical Journeys
 
@@ -86,12 +86,12 @@ Deferred to post-launch.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 1 | Pending |
-| E2E-01 | Phase 1 | Pending |
-| E2E-02 | Phase 1 | Pending |
-| E2E-03 | Phase 1 | Pending |
-| E2E-04 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
+| TEST-02 | Phase 1 | Complete |
+| E2E-01 | Phase 1 | Complete |
+| E2E-02 | Phase 1 | Complete |
+| E2E-03 | Phase 1 | Complete |
+| E2E-04 | Phase 1 | Complete |
 | E2E-05 | Phase 2 | Pending |
 | E2E-06 | Phase 2 | Pending |
 | E2E-07 | Phase 2 | Pending |
@@ -115,4 +115,4 @@ Deferred to post-launch.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after roadmap creation*
+*Last updated: 2026-02-07 after Phase 1 completion*

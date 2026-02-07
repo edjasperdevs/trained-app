@@ -31,7 +31,7 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
 
 **Milestone Goal:** Nothing is broken and you can see exactly how users interact from day one
 
-- [ ] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
+- [x] **Phase 1: Test Foundation** - Repair broken tests, install Playwright, add data-testid selectors, build auth/seed fixtures
 - [ ] **Phase 2: E2E Critical Journeys** - Write Playwright tests for 7 launch-critical user flows
 - [ ] **Phase 3: Analytics Enhancement** - Design event naming convention, wire missing Plausible events, configure funnel tracking
 - [ ] **Phase 4: Monitoring Hardening** - Activate Sentry performance tracing, upload source maps, configure alerts, mask PII in replay
@@ -51,8 +51,8 @@ Pre-launch safety nets before deploying to ~90k Instagram followers with no beta
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Repair 4 failing component test assertions to match post-shadcn class names
-- [ ] 01-02-PLAN.md -- Install Playwright, configure with Vite dev server, build localStorage seeding fixtures, add data-testid attributes to all screens
+- [x] 01-01-PLAN.md -- Repair 4 failing component test assertions to match post-shadcn class names
+- [x] 01-02-PLAN.md -- Install Playwright, configure with Vite dev server, build localStorage seeding fixtures, add data-testid attributes to all screens
 
 ---
 
@@ -112,7 +112,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
-| 1. Test Foundation | 0/2 | Not started | - |
+| 1. Test Foundation | 2/2 | Complete | 2026-02-07 |
 | 2. E2E Critical Journeys | 0/2 | Not started | - |
 | 3. Analytics Enhancement | 0/2 | Not started | - |
 | 4. Monitoring Hardening | 0/1 | Not started | - |
