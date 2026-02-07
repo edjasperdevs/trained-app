@@ -13,7 +13,7 @@ Transform Trained from a client-only fitness app into a full coaching platform w
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Data ownership model, directional sync, schema, RLS security fix, coach route guard, lazy loading
-- [ ] **Phase 2: Invitations** - Email infrastructure (Edge Function + Resend) and invite lifecycle
+- [x] **Phase 2: Invitations** - Email infrastructure (Edge Function + Resend) and invite lifecycle
 - [ ] **Phase 3: Client Roster** - Paginated roster with search, client detail view, server-side performance
 - [ ] **Phase 4: Macro Management** - Coach sets client macro targets, client sees coach-set targets
 - [ ] **Phase 5: Workout Programming** - Coach builds and assigns workouts, client executes prescribed workouts
@@ -50,7 +50,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Database migration (invites table, RLS, handle_new_user trigger extension, TypeScript types)
 - [x] 02-02-PLAN.md -- Edge Function (send-invite with Resend email, CORS helper)
-- [ ] 02-03-PLAN.md -- Coach UI (invite modal refactor, invite status list)
+- [x] 02-03-PLAN.md -- Coach UI (invite modal refactor, invite status list)
 
 ### Phase 3: Client Roster
 **Goal**: Coach can browse, search, and drill into any client's details from a performant paginated roster

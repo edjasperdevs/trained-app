@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 2 (Invitations) in progress. Edge Function complete, Coach UI remaining.
+**Current focus:** Phase 2 (Invitations) complete. All invite infrastructure shipped: data layer, Edge Function, Coach UI.
 
 ## Current Position
 
 Phase: 2 of 6 (Invitations)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-07 -- Completed 02-02-PLAN.md (send-invite Edge Function)
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-07 -- Completed 02-03-PLAN.md (Coach invite UI)
 
-Progress: [████░░░░░░] 28%
+Progress: [██████░░░░] 33%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [████░░░░░░] 28%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 5
-- Average duration: 2.4min
-- Total execution time: 12min
+- Total plans completed: 6
+- Average duration: 2.7min
+- Total execution time: 16min
 
 ## Accumulated Context
 
@@ -50,6 +50,9 @@ Recent decisions affecting current work:
 - 02-02: EMAIL_FROM read from env with fallback to Resend test domain (onboarding@resend.dev)
 - 02-02: APP_URL env var with fallback to https://app.trained.com
 - 02-02: Invite link uses ?invite=token on normal signup URL (not magic link)
+- 02-03: Accepted invites excluded from invite section (appear in client list via auto-link)
+- 02-03: Dev bypass returns empty invites array (server-authoritative, no meaningful mock)
+- 02-03: Resend reuses handleInviteClient with emailOverride param
 
 ### Pending Todos
 
@@ -57,6 +60,7 @@ Recent decisions affecting current work:
 - Set SENTRY_AUTH_TOKEN/ORG/PROJECT in deploy environment
 - Verify source maps + PII masking + session replay post-deploy
 - Set up Resend API key and deploy send-invite Edge Function before invite testing
+- Apply migration 003_invitations.sql to Supabase
 
 ### Blockers/Concerns
 
@@ -65,5 +69,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 02-02-PLAN.md (send-invite Edge Function)
+Stopped at: Completed 02-03-PLAN.md (Coach invite UI) -- Phase 2 complete
 Resume file: None
