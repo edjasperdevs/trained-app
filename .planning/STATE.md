@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 2 (Invitations) complete. All invite infrastructure shipped: data layer, Edge Function, Coach UI.
+**Current focus:** Phase 2 complete. Ready for Phase 3 (Client Roster).
 
 ## Current Position
 
-Phase: 2 of 6 (Invitations)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-07 -- Completed 02-03-PLAN.md (Coach invite UI)
+Phase: 3 of 6 (Client Roster)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-02-07 -- Phase 2 (Invitations) verified and complete
 
 Progress: [██████░░░░] 33%
 
@@ -69,5 +69,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 02-03-PLAN.md (Coach invite UI) -- Phase 2 complete
+Stopped at: Phase 2 (Invitations) complete -- ready for Phase 3 (Client Roster)
 Resume file: None

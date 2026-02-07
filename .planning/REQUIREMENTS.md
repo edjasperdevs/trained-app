@@ -16,9 +16,9 @@
 
 ### Invitations
 
-- [ ] **INVITE-01**: Coach can enter a client's email and send a branded signup invite via Supabase Edge Function + Resend
-- [ ] **INVITE-02**: Invite status is tracked (pending/accepted/expired) with deduplication (one active invite per email)
-- [ ] **INVITE-03**: When an invited user signs up, the coach-client relationship is automatically created
+- [x] **INVITE-01**: Coach can enter a client's email and send a branded signup invite via Supabase Edge Function + Resend
+- [x] **INVITE-02**: Invite status is tracked (pending/accepted/expired) with deduplication (one active invite per email)
+- [x] **INVITE-03**: When an invited user signs up, the coach-client relationship is automatically created
 
 ### Client Roster
 
@@ -96,9 +96,9 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 3 | Pending |
 | INFRA-06 | Phase 1 | Complete |
-| INVITE-01 | Phase 2 | Pending |
-| INVITE-02 | Phase 2 | Pending |
-| INVITE-03 | Phase 2 | Pending |
+| INVITE-01 | Phase 2 | Complete |
+| INVITE-02 | Phase 2 | Complete |
+| INVITE-03 | Phase 2 | Complete |
 | ROSTER-01 | Phase 3 | Pending |
 | ROSTER-02 | Phase 3 | Pending |
 | ROSTER-03 | Phase 3 | Pending |
