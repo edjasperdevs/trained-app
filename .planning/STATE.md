@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** When this launches to 90k people, nothing is broken and you can see exactly how they're using it
-**Current focus:** Phase 4 in progress -- Monitoring Hardening. Sentry tracing, replay, and source maps configured. Alert rules and PII masking remaining.
+**Current focus:** All 4 milestone phases complete. E2E tests, analytics, and monitoring hardening done. Ready for animation refinement, cleanup, or deployment.
 
 ## Current Position
 
-Phase: 4 of 4 (Monitoring Hardening)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-07 -- Completed 04-01-PLAN.md (Sentry tracing, replay, source maps, ErrorBoundary wiring)
+Phase: 4 of 4 (Monitoring Hardening) -- COMPLETE
+Plan: 2 of 2 in current phase -- COMPLETE
+Status: All milestone plans complete
+Last activity: 2026-02-07 -- Completed 04-02-PLAN.md (PII masking + Sentry alert rules)
 
-Progress: [█████████░] 88% (7/8 plans)
+Progress: [██████████] 100% (8/8 plans)
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [█████████░] 88% (7/8 plans)
 - Average plan duration: 7.4min
 
 **Current Milestone:**
-- Total plans completed: 7
-- Average duration: 8.3min
-- Total execution time: 0.96 hours
+- Total plans completed: 8
+- Average duration: 7.9min
+- Total execution time: 1.01 hours
 
 *Updated after each plan completion*
 
@@ -62,6 +62,8 @@ Recent decisions affecting current work:
 - replaysSessionSampleRate: 0.1 for replay coverage beyond error sessions
 - SentryRoutes wrapper at module level (required by Sentry docs)
 - Re-export withSentryReactRouterV6Routing from sentry.ts for centralized imports
+- data-sentry-mask on nearest wrapper div for PII clusters (not individual elements)
+- Alert thresholds: 10 events/10min error spike, 5 users/15min user impact
 
 ### Pending Todos
 
@@ -74,5 +76,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 04-01-PLAN.md (Sentry tracing, replay, source maps) -- Phase 4 plan 1/2 done
+Stopped at: Completed 04-02-PLAN.md (PII masking + alert rules) -- All 8 milestone plans complete
 Resume file: None
