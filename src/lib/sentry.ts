@@ -2,6 +2,8 @@
  * Sentry Error Tracking
  *
  * Captures errors and performance data in production.
+ * Includes React Router v6 browser tracing for Core Web Vitals
+ * and session replay with PII-aware masking.
  *
  * Setup:
  * 1. Create a free account at https://sentry.io
@@ -11,7 +13,20 @@
  * The DSN looks like: https://xxx@xxx.ingest.sentry.io/xxx
  */
 
+import { useEffect } from 'react'
 import * as Sentry from '@sentry/react'
+import {
+  reactRouterV6BrowserTracingIntegration,
+  replayIntegration,
+} from '@sentry/react'
+import {
+  useLocation,
+  useNavigationType,
+  createRoutesFromChildren,
+  matchRoutes,
+} from 'react-router-dom'
+
+export { withSentryReactRouterV6Routing } from '@sentry/react'
 
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
@@ -28,11 +43,26 @@ export function initSentry() {
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
 
+    integrations: [
+      reactRouterV6BrowserTracingIntegration({
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
+      }),
+      replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+        mask: ['[data-sentry-mask]'],
+      }),
+    ],
+
     // Performance Monitoring
     tracesSampleRate: 0.1, // Capture 10% of transactions for performance
 
-    // Session Replay - captures user sessions on errors
-    replaysSessionSampleRate: 0, // Don't record normal sessions
+    // Session Replay
+    replaysSessionSampleRate: 0.1, // Record 10% of normal sessions
     replaysOnErrorSampleRate: 1.0, // Record 100% of sessions with errors
 
     // Filter out noisy errors
@@ -61,8 +91,6 @@ export function initSentry() {
       return event
     },
   })
-
-  if (import.meta.env.DEV) console.log('[Sentry] Initialized')
 }
 
 /**

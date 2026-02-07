@@ -1,10 +1,13 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
 import { AccessGate, Auth } from '@/screens'
+
+const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
 // Lazy-loaded route components
 const Onboarding = lazy(() => import('@/screens/Onboarding').then(m => ({ default: m.Onboarding })))
@@ -131,9 +134,9 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <Routes>
+        <SentryRoutes>
           <Route path="*" element={<Auth />} />
-        </Routes>
+        </SentryRoutes>
       </>
     )
   }
@@ -144,9 +147,9 @@ function AppContent() {
       <>
         <ToastContainer />
         <Suspense fallback={<OnboardingSkeleton />}>
-          <Routes>
+          <SentryRoutes>
             <Route path="*" element={<Onboarding />} />
-          </Routes>
+          </SentryRoutes>
         </Suspense>
       </>
     )
@@ -157,7 +160,7 @@ function AppContent() {
       <ToastContainer />
       <div className="relative">
         <SyncStatusIndicator />
-        <Routes>
+        <SentryRoutes>
           <Route path="/" element={<Suspense fallback={<HomeSkeleton />}><Home /></Suspense>} />
           <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
@@ -169,7 +172,7 @@ function AppContent() {
           {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
           {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
           <Route path="*" element={<NotFound />} />
-        </Routes>
+        </SentryRoutes>
         <Navigation />
       </div>
     </>

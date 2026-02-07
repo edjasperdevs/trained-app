@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
+import { captureError } from '@/lib/sentry'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -25,10 +26,8 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log error to console in development
     console.error('Error caught by boundary:', error, errorInfo)
 
-    // TODO: Log to Sentry or other error tracking service
-    // if (import.meta.env.PROD) {
-    //   Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } })
-    // }
+    // Report to Sentry (captureError handles dev/prod check internally)
+    captureError(error, { componentStack: errorInfo.componentStack ?? undefined })
   }
 
   handleRetry = () => {

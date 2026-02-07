@@ -3,6 +3,7 @@
 .env.local
 .env.production.local
 .env.vercel
+.env.sentry-build-plugin
 node_modules/
 dist/
 
