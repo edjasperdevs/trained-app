@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync } from '@/lib/sync'
+import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
 import { AccessGate, Auth } from '@/screens'
 
@@ -84,6 +85,11 @@ function AppContent() {
       window.removeEventListener('offline', handleOffline)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
+  }, [])
+
+  // Track app opened once per session
+  useEffect(() => {
+    analytics.appOpened()
   }, [])
 
   // Check for neglected avatar on app load

@@ -104,6 +104,10 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
             // Check for new badges (especially level-based ones)
             const newBadges = checkAndAwardBadges()
             if (newBadges.length > 0) {
+              newBadges.forEach(id => {
+                const b = useAchievementsStore.getState().getAllBadges().find(badge => badge.id === id)
+                if (b) analytics.badgeEarned(b.name, b.rarity)
+              })
               setUnlockedBadges(newBadges)
             }
 
@@ -158,7 +162,12 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
     }
 
     // Check for evolution
+    const prevStage = useAvatarStore.getState().evolutionStage
     updateEvolutionStage(result.newLevel)
+    const newStage = useAvatarStore.getState().evolutionStage
+    if (newStage !== prevStage) {
+      analytics.avatarEvolved(newStage)
+    }
   }
 
   if (!isOpen) return null

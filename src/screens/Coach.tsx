@@ -6,6 +6,7 @@ import { WeightChart, ClientMacroAdherence, ClientActivityFeed } from '@/compone
 import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useClientDetails } from '@/hooks/useClientDetails'
+import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockClients, getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
 
@@ -61,6 +62,16 @@ export function Coach() {
   useEffect(() => {
     fetchClients()
   }, [])
+
+  useEffect(() => {
+    analytics.coachDashboardViewed()
+  }, [])
+
+  useEffect(() => {
+    if (selectedClient) {
+      analytics.clientViewed()
+    }
+  }, [selectedClient])
 
   const fetchClients = async () => {
     try {

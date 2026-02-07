@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar } from '@/components'
 import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
+import { analytics } from '@/lib/analytics'
 import {
   useUserStore,
   useXPStore,
@@ -68,6 +69,10 @@ export function Settings() {
       checkIsCoach().then(setIsCoach)
     }
   }, [user])
+
+  useEffect(() => {
+    analytics.settingsViewed()
+  }, [])
 
   const todayWeight = getTodayWeight()
   const weightHistory = getWeightHistory(30)
@@ -182,6 +187,7 @@ export function Settings() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      analytics.dataExported()
       URL.revokeObjectURL(url)
       toast.success('Data exported')
     } catch (error) {

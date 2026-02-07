@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ProgressBar, EmptyState } from '@/components'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import {
   Trophy, Flame, Dumbbell, Beef, ArrowUp, Sparkles, Target, ChevronLeft, Check, Award,
   Zap, Star, Gem, Crown, Shield, Play, CheckCircle, LucideIcon
 } from 'lucide-react'
+import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 
 // Map icon names to Lucide components
@@ -147,6 +148,10 @@ function BadgeCard({ badge, earned, earnedAt, progress, index }: BadgeCardProps)
 export function Achievements() {
   const navigate = useNavigate()
   const [filter, setFilter] = useState<CategoryFilter>('all')
+
+  useEffect(() => {
+    analytics.achievementsViewed()
+  }, [])
 
   const getAllBadges = useAchievementsStore((state) => state.getAllBadges)
   const getEarnedBadges = useAchievementsStore((state) => state.getEarnedBadges)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -6,6 +6,7 @@ import { ProgressBar, MealBuilder, EmptyState } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
+import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
@@ -145,6 +146,24 @@ function DailyView({
   const [quickLog, setQuickLog] = useState({ protein: '', calories: '' })
   const [showMeals, setShowMeals] = useState(false)
 
+  // Track protein/calorie target hit once per session
+  const proteinTracked = useRef(false)
+  const caloriesTracked = useRef(false)
+
+  useEffect(() => {
+    if (proteinHit && !proteinTracked.current) {
+      analytics.proteinTargetHit()
+      proteinTracked.current = true
+    }
+  }, [proteinHit])
+
+  useEffect(() => {
+    if (caloriesHit && !caloriesTracked.current) {
+      analytics.calorieTargetHit()
+      caloriesTracked.current = true
+    }
+  }, [caloriesHit])
+
   if (!targets || !progress) {
     return (
       <EmptyState
@@ -161,6 +180,7 @@ function DailyView({
       protein: quickLog.protein ? Number(quickLog.protein) : undefined,
       calories: quickLog.calories ? Number(quickLog.calories) : undefined
     })
+    analytics.mealLogged('manual')
     setQuickLog({ protein: '', calories: '' })
   }
 
@@ -727,6 +747,7 @@ function LogMealView({
 
   const handleSaveMeal = (name: string, ingredients: MealIngredient[]) => {
     onSaveMeal(name, ingredients)
+    analytics.mealSaved()
     setShowMealBuilder(false)
     setEditingMeal(null)
   }
@@ -738,6 +759,7 @@ function LogMealView({
       fats: meal.fats,
       calories: meal.calories
     })
+    analytics.mealLogged('saved')
   }
 
   const handleEditMeal = (meal: SavedMeal) => {

@@ -155,6 +155,9 @@ export function Onboarding() {
 
   const goNext = () => {
     if (currentIndex < steps.length - 1) {
+      if (step === 'welcome') {
+        analytics.onboardingStarted()
+      }
       setDirection(1)
       setStep(steps[currentIndex + 1])
     }

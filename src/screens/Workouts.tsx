@@ -57,6 +57,12 @@ export function Workouts() {
   const checkBadgesWithToast = () => {
     const newBadgeIds = checkAndAwardBadges()
     if (newBadgeIds.length > 0) {
+      newBadgeIds.forEach(id => {
+        const b = allBadges.find(badge => badge.id === id)
+        if (b) {
+          analytics.badgeEarned(b.name, b.rarity)
+        }
+      })
       const badge = allBadges.find(b => b.id === newBadgeIds[0])
       if (badge) {
         toast.success(`🏆 Badge Unlocked: ${badge.name}!`, 5000)

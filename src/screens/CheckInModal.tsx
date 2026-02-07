@@ -141,6 +141,10 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     setTimeout(() => {
       const newBadges = checkAndAwardBadges()
       if (newBadges.length > 0) {
+        newBadges.forEach(id => {
+          const b = useAchievementsStore.getState().getAllBadges().find(badge => badge.id === id)
+          if (b) analytics.badgeEarned(b.name, b.rarity)
+        })
         setUnlockedBadges(newBadges)
         setShowBadgeModal(true)
       }

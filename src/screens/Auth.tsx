@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
+import { analytics } from '@/lib/analytics'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -56,6 +57,7 @@ export function Auth() {
           setNeedsEmailConfirmation(true)
           setSuccess('Account created! Check your email to confirm before signing in.')
           toast.success('Account created! Check your email to confirm.')
+          analytics.signupCompleted()
           // Switch to login mode so they can sign in after confirming
           setMode('login')
         }
@@ -76,6 +78,8 @@ export function Auth() {
           } else {
             setError(error)
           }
+        } else {
+          analytics.loginCompleted()
         }
         // Navigation happens automatically via auth state change
       } else if (mode === 'forgot') {
