@@ -83,11 +83,11 @@ Plans:
   2. All 14 previously-unwired Plausible events fire when their corresponding user actions occur
   3. Navigating between screens fires SPA pageview events (not just the initial page load)
   4. Funnel definitions are documented covering sign up through first workout through 7-day retention, with each step mapping to a trackable Plausible event
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Design event naming convention and funnel definitions (planning before code)
-- [ ] 03-02: Wire missing events, add SPA pageview tracking, verify event firing
+- [ ] 03-01-PLAN.md -- Document event naming convention and funnel definitions (ANLYT-01, ANLYT-04)
+- [ ] 03-02-PLAN.md -- Wire 14 missing events, verify SPA pageview tracking (ANLYT-02, ANLYT-03)
 
 ---
 
