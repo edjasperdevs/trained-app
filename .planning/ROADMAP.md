@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Data ownership model, directional sync, schema, RLS security fix, coach route guard, lazy loading
 - [x] **Phase 2: Invitations** - Email infrastructure (Edge Function + Resend) and invite lifecycle
-- [ ] **Phase 3: Client Roster** - Paginated roster with search, client detail view, server-side performance
+- [x] **Phase 3: Client Roster** - Paginated roster with search, client detail view, server-side performance
 - [ ] **Phase 4: Macro Management** - Coach sets client macro targets, client sees coach-set targets
 - [ ] **Phase 5: Workout Programming** - Coach builds and assigns workouts, client executes prescribed workouts
 - [ ] **Phase 6: Weekly Check-ins** - Client submits structured check-in, coach reviews and responds
@@ -63,8 +63,8 @@ Plans:
   4. Roster loads in under 2 seconds with 100+ clients (server-side pagination, no full table scan)
 **Plans**: 2 plans
 Plans:
-- [ ] 03-01-PLAN.md -- Database migration (security_invoker on view) + useClientRoster hook (pagination, search, debounce)
-- [ ] 03-02-PLAN.md -- Coach.tsx refactor (search input, pagination controls, updated client cards)
+- [x] 03-01-PLAN.md -- Database migration (security_invoker on view) + useClientRoster hook (pagination, search, debounce)
+- [x] 03-02-PLAN.md -- Coach.tsx refactor (search input, pagination controls, updated client cards)
 
 ### Phase 4: Macro Management
 **Goal**: Coach can remotely set a client's daily macro targets and the client sees the updated targets on their next app open
@@ -109,7 +109,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|---------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-02-07 |
 | 2. Invitations | 3/3 | Complete | 2026-02-07 |
-| 3. Client Roster | 0/2 | Not started | - |
+| 3. Client Roster | 2/2 | Complete | 2026-02-07 |
 | 4. Macro Management | 0/TBD | Not started | - |
 | 5. Workout Programming | 0/TBD | Not started | - |
 | 6. Weekly Check-ins | 0/TBD | Not started | - |
