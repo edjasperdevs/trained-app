@@ -77,7 +77,10 @@ CREATE TABLE macro_targets (
   calories INTEGER NOT NULL,
   carbs INTEGER NOT NULL,
   fats INTEGER NOT NULL,
-  activity_level activity_level NOT NULL
+  activity_level activity_level NOT NULL,
+  set_by TEXT NOT NULL DEFAULT 'self'
+    CHECK (set_by IN ('self', 'coach')),
+  set_by_coach_id UUID REFERENCES profiles(id) ON DELETE SET NULL
 );
 
 -- Daily macro logs (aggregate totals per day)
@@ -201,9 +204,25 @@ CREATE POLICY "Coaches can view their clients profiles"
   );
 
 -- Coach-Clients: Coaches manage their relationships, clients can see their coach
+-- Requires role = 'coach' to prevent non-coaches from inserting
 CREATE POLICY "Coaches can manage their client relationships"
   ON coach_clients FOR ALL
-  USING (coach_id = auth.uid());
+  USING (
+    coach_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+    )
+  )
+  WITH CHECK (
+    coach_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
+      AND profiles.role = 'coach'
+    )
+  );
 
 CREATE POLICY "Clients can view their coach relationship"
   ON coach_clients FOR SELECT
@@ -376,6 +395,24 @@ CREATE TRIGGER profiles_updated_at
 CREATE TRIGGER macro_targets_updated_at
   BEFORE UPDATE ON macro_targets
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- Prevent users from escalating their own role via profile UPDATE
+-- Only service_role (admin) can change roles
+CREATE OR REPLACE FUNCTION prevent_role_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF OLD.role IS DISTINCT FROM NEW.role THEN
+    IF current_setting('request.jwt.claims', true)::json->>'role' != 'service_role' THEN
+      RAISE EXCEPTION 'Cannot change role via client API';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER prevent_role_escalation
+  BEFORE UPDATE ON profiles
+  FOR EACH ROW EXECUTE FUNCTION prevent_role_change();
 
 -- ===========================================
 -- VIEWS (for coach dashboard)
