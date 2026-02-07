@@ -43,8 +43,8 @@ describe('Button', () => {
   it('should apply ghost variant styles', () => {
     render(<Button variant="ghost">Ghost</Button>)
     const button = screen.getByRole('button')
-    // Trained theme uses bg-surface for ghost
-    expect(button.className).toContain('bg-surface')
+    // Trained theme uses bg-card for ghost variant (post-shadcn)
+    expect(button.className).toContain('bg-card')
   })
 
   it('should apply danger variant styles', () => {

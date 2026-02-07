@@ -32,23 +32,23 @@ describe('Card', () => {
   it('should apply default variant styles', () => {
     render(<Card>Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    // Trained theme uses bg-surface for default variant
-    expect(card?.className).toContain('bg-surface')
+    // Trained theme uses bg-card for default variant (post-shadcn)
+    expect(card?.className).toContain('bg-card')
     expect(card?.className).toContain('border')
   })
 
   it('should apply elevated variant', () => {
     render(<Card variant="elevated">Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    // Trained theme uses bg-surface-elevated
-    expect(card?.className).toContain('bg-surface-elevated')
+    // Trained theme uses bg-muted for elevated variant (post-shadcn)
+    expect(card?.className).toContain('bg-muted')
   })
 
   it('should apply subtle variant', () => {
     render(<Card variant="subtle">Content</Card>)
     const card = screen.getByText('Content').closest('div')
-    // Trained theme uses bg-surface/50
-    expect(card?.className).toContain('bg-surface/50')
+    // Trained theme uses bg-card/50 for subtle variant (post-shadcn)
+    expect(card?.className).toContain('bg-card/50')
   })
 
   it('should apply medium padding by default', () => {
