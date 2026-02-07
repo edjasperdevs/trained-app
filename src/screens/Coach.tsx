@@ -378,7 +378,7 @@ export function Coach() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2" data-sentry-mask>
             {clients
               .sort((a, b) => {
                 // Sort by needs attention first
@@ -477,7 +477,7 @@ export function Coach() {
             </div>
 
             {/* Content */}
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4" data-sentry-mask>
               {!selectedClient.onboarding_complete ? (
                 <Card className="py-0">
                   <CardContent className="text-center py-6">

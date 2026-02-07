@@ -756,7 +756,7 @@ function GoalStep({
       </p>
 
       {/* Height */}
-      <div className="mb-4">
+      <div className="mb-4" data-sentry-mask>
         <label className="block text-sm text-muted-foreground mb-2 font-medium">
           Height
         </label>
@@ -792,7 +792,7 @@ function GoalStep({
       </div>
 
       {/* Weight and Age side by side */}
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-3 mb-4" data-sentry-mask>
         <div className="flex-1">
           <label className="block text-sm text-muted-foreground mb-2 font-medium">
             Weight (lbs)

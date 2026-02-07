@@ -418,7 +418,7 @@ export function Settings() {
         <AchievementsCard onViewAll={() => navigate('/achievements')} />
 
         {/* Weight Tracking */}
-        <Card className="py-0">
+        <Card className="py-0" data-sentry-mask>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-muted-foreground">WEIGHT TRACKING</h3>
@@ -738,7 +738,7 @@ export function Settings() {
             <h3 className="text-sm font-semibold text-muted-foreground mb-4">ACCOUNT</h3>
             {user ? (
               <div className="space-y-4">
-                <div className="bg-muted rounded-lg p-3">
+                <div className="bg-muted rounded-lg p-3" data-sentry-mask>
                   <p className="text-xs text-muted-foreground">Signed in as</p>
                   <p className="font-medium truncate">{user.email}</p>
                 </div>

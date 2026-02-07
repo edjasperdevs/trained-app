@@ -333,7 +333,7 @@ export function Home() {
         </div>
 
         {/* Macro Progress / Protocol Compliance */}
-        <div>
+        <div data-sentry-mask>
           <h2 className="text-base font-bold mb-3 uppercase tracking-wide">
             Protocol Compliance
           </h2>

@@ -74,7 +74,7 @@ export function Macros() {
         </div>
       </div>
 
-      <div className="px-5 py-6">
+      <div className="px-5 py-6" data-sentry-mask>
         {activeTab === 'daily' && (
           <DailyView
             progress={progress}
