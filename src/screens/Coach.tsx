@@ -106,12 +106,13 @@ export function Coach() {
     }
   }
 
-  const handleInviteClient = async () => {
-    if (!inviteEmail.trim()) return
+  const handleInviteClient = async (emailOverride?: string) => {
+    const emailToSend = emailOverride || inviteEmail
+    if (!emailToSend.trim()) return
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(inviteEmail)) {
+    if (!emailRegex.test(emailToSend)) {
       setInviteStatus('error')
       setInviteMessage('Please enter a valid email address.')
       return
@@ -122,35 +123,38 @@ export function Coach() {
 
     try {
       if (devBypass) {
-        // Mock flow for dev bypass
-        await new Promise(r => setTimeout(r, 500)) // Simulate delay
+        // Mock Edge Function response for dev bypass
+        await new Promise(r => setTimeout(r, 500))
 
-        const profile = getMockProfileByEmail(inviteEmail.toLowerCase())
-        if (!profile) {
-          setInviteStatus('error')
-          setInviteMessage('User not found. They need to create an account first.')
-          return
+        const profile = getMockProfileByEmail(emailToSend.toLowerCase())
+        if (profile) {
+          // Simulate 'added_directly' -- existing user
+          const existing = clients.find(c => c.client_id === profile.id)
+          if (existing) {
+            setInviteStatus('error')
+            setInviteMessage('This user is already your client.')
+            return
+          }
+
+          const added = addMockClient(profile.id)
+          if (!added) {
+            setInviteStatus('error')
+            setInviteMessage('Failed to send invite.')
+            return
+          }
+
+          setInviteStatus('success')
+          setInviteMessage('User already had an account -- added as client!')
+          toast.success('Client added!')
+          setInviteEmail('')
+          fetchClients()
+        } else {
+          // Simulate 'invite_sent' -- new user
+          setInviteStatus('success')
+          setInviteMessage('Invite sent!')
+          toast.success('Invite sent!')
+          setInviteEmail('')
         }
-
-        const existing = clients.find(c => c.client_id === profile.id)
-        if (existing) {
-          setInviteStatus('error')
-          setInviteMessage('This user is already your client.')
-          return
-        }
-
-        const added = addMockClient(profile.id)
-        if (!added) {
-          setInviteStatus('error')
-          setInviteMessage('Failed to add client.')
-          return
-        }
-
-        setInviteStatus('success')
-        setInviteMessage('Client added successfully!')
-        toast.success('Client added!')
-        setInviteEmail('')
-        fetchClients()
 
         setTimeout(() => {
           setShowAddClient(false)
@@ -162,49 +166,47 @@ export function Coach() {
 
       const client = getSupabaseClient()
 
-      // Find user by email
-      const { data: profileData, error: profileError } = await client
-        .from('profiles')
-        .select('id')
-        .eq('email', inviteEmail.toLowerCase())
-        .single()
+      const { data, error } = await client.functions.invoke('send-invite', {
+        body: { email: emailToSend.toLowerCase() },
+      })
 
-      if (profileError || !profileData) {
+      if (error) {
+        // Edge Function network/relay error
         setInviteStatus('error')
-        setInviteMessage('User not found. They need to create an account first.')
+        if (error.message?.includes('FunctionsRelayError') || error.message?.includes('non-2xx')) {
+          setInviteMessage('Invite service is unavailable. Please try again later.')
+        } else if (error.message?.includes('network') || error.message?.includes('Failed to fetch')) {
+          setInviteMessage('Network error - check your connection.')
+        } else {
+          setInviteMessage(error.message || 'Failed to send invite. Please try again.')
+        }
         return
       }
 
-      // Check if already a client
-      const existing = clients.find(c => c.client_id === profileData.id)
-      if (existing) {
+      // Parse Edge Function response
+      if (data?.error) {
         setInviteStatus('error')
-        setInviteMessage('This user is already your client.')
+        setInviteMessage(data.error)
         return
       }
 
-      // Add as client
-      if (!user?.id) {
-        setInviteStatus('error')
-        setInviteMessage('You must be logged in to add clients.')
-        return
+      if (data?.action === 'added_directly') {
+        setInviteStatus('success')
+        setInviteMessage('User already had an account -- added as client!')
+        toast.success('Client added!')
+        setInviteEmail('')
+        fetchClients()
+      } else if (data?.action === 'invite_sent') {
+        setInviteStatus('success')
+        setInviteMessage('Invite sent!')
+        toast.success('Invite sent!')
+        setInviteEmail('')
+      } else {
+        setInviteStatus('success')
+        setInviteMessage('Invite sent!')
+        toast.success('Invite sent!')
+        setInviteEmail('')
       }
-
-      const { error: insertError } = await client
-        .from('coach_clients')
-        .insert({
-          coach_id: user.id,
-          client_id: profileData.id,
-          status: 'active' as const
-        })
-
-      if (insertError) throw insertError
-
-      setInviteStatus('success')
-      setInviteMessage('Client added successfully!')
-      toast.success('Client added!')
-      setInviteEmail('')
-      fetchClients()
 
       setTimeout(() => {
         setShowAddClient(false)
@@ -213,12 +215,12 @@ export function Coach() {
       }, 1500)
 
     } catch (err) {
-      console.error('Error inviting client:', err)
+      console.error('Error sending invite:', err)
       setInviteStatus('error')
       if (err instanceof Error && err.message.includes('network')) {
         setInviteMessage('Network error - check your connection.')
       } else {
-        setInviteMessage('Failed to add client. Please try again.')
+        setInviteMessage('Failed to send invite. Please try again.')
       }
     }
   }
@@ -318,7 +320,7 @@ export function Coach() {
             <p className="text-muted-foreground">{clients.length} client{clients.length !== 1 ? 's' : ''}</p>
           </div>
           <Button onClick={() => setShowAddClient(true)}>
-            + Add Client
+            + Invite Client
           </Button>
         </div>
       </div>
@@ -373,8 +375,8 @@ export function Coach() {
             <CardContent className="text-center py-8">
               <span className="text-4xl block mb-4">👥</span>
               <p className="text-muted-foreground mb-2">No clients yet</p>
-              <p className="text-sm text-muted-foreground mb-4">Add your first client to get started</p>
-              <Button onClick={() => setShowAddClient(true)}>Add Client</Button>
+              <p className="text-sm text-muted-foreground mb-4">Invite your first client to get started</p>
+              <Button onClick={() => setShowAddClient(true)}>Invite Client</Button>
             </CardContent>
           </Card>
         ) : (
@@ -657,9 +659,9 @@ export function Coach() {
             className="bg-card rounded-xl p-6 w-full max-w-md animate-in slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-2">Add Client</h2>
+            <h2 className="text-xl font-bold mb-2">Invite Client</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Enter your client's email address. They must have an account already.
+              Enter your client's email address to send them a signup invite.
             </p>
 
             <Input
@@ -694,10 +696,10 @@ export function Coach() {
               </Button>
               <Button
                 className="flex-1"
-                onClick={handleInviteClient}
+                onClick={() => handleInviteClient()}
                 disabled={!inviteEmail.trim() || inviteStatus === 'loading'}
               >
-                {inviteStatus === 'loading' ? 'Adding...' : 'Add Client'}
+                {inviteStatus === 'loading' ? 'Sending...' : 'Send Invite'}
               </Button>
             </div>
           </div>
