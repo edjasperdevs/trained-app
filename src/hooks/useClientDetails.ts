@@ -19,6 +19,10 @@ export interface MacroLogData {
 export interface MacroTargets {
   protein: number
   calories: number
+  carbs: number
+  fats: number
+  set_by: 'self' | 'coach'
+  set_by_coach_id: string | null
 }
 
 export interface MacroAdherence {
@@ -116,7 +120,7 @@ export function useClientDetails(clientId: string | null) {
         .order('date', { ascending: true }),
       client
         .from('macro_targets')
-        .select('protein, calories')
+        .select('protein, calories, carbs, fats, set_by, set_by_coach_id')
         .eq('user_id', id)
         .single()
     ])
@@ -130,7 +134,14 @@ export function useClientDetails(clientId: string | null) {
     }))
 
     const targets: MacroTargets | null = targetsResult.data
-      ? { protein: targetsResult.data.protein, calories: targetsResult.data.calories }
+      ? {
+          protein: targetsResult.data.protein,
+          calories: targetsResult.data.calories,
+          carbs: targetsResult.data.carbs,
+          fats: targetsResult.data.fats,
+          set_by: targetsResult.data.set_by || 'self',
+          set_by_coach_id: targetsResult.data.set_by_coach_id || null,
+        }
       : null
 
     const result: MacroAdherence = { logs, targets }

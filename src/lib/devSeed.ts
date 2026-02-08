@@ -498,10 +498,10 @@ function buildMockWeightData(clientId: string) {
 }
 
 function buildMockMacroData(clientId: string) {
-  const configs: Record<string, { protein: number; calories: number; adherence: number; days: number }> = {
-    'mock-client-sarah': { protein: 130, calories: 1800, adherence: 0.85, days: 14 },
-    'mock-client-mike': { protein: 200, calories: 3000, adherence: 0.6, days: 14 },
-    'mock-client-jake': { protein: 160, calories: 2200, adherence: 0.3, days: 10 },
+  const configs: Record<string, { protein: number; calories: number; carbs: number; fats: number; adherence: number; days: number; set_by: 'self' | 'coach'; set_by_coach_id: string | null }> = {
+    'mock-client-sarah': { protein: 130, calories: 1800, carbs: 200, fats: 60, adherence: 0.85, days: 14, set_by: 'coach', set_by_coach_id: 'mock-coach-id' },
+    'mock-client-mike': { protein: 200, calories: 3000, carbs: 350, fats: 80, adherence: 0.6, days: 14, set_by: 'self', set_by_coach_id: null },
+    'mock-client-jake': { protein: 160, calories: 2200, carbs: 250, fats: 70, adherence: 0.3, days: 10, set_by: 'self', set_by_coach_id: null },
   }
   const cfg = configs[clientId]
   if (!cfg) return { logs: [], targets: null }
@@ -515,7 +515,17 @@ function buildMockMacroData(clientId: string) {
     }
   })
 
-  return { logs, targets: { protein: cfg.protein, calories: cfg.calories } }
+  return {
+    logs,
+    targets: {
+      protein: cfg.protein,
+      calories: cfg.calories,
+      carbs: cfg.carbs,
+      fats: cfg.fats,
+      set_by: cfg.set_by,
+      set_by_coach_id: cfg.set_by_coach_id,
+    }
+  }
 }
 
 function buildMockActivityData(clientId: string) {
