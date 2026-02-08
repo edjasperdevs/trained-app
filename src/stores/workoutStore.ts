@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { TrainingDays } from './userStore'
+import { PrescribedExercise } from '@/lib/database.types'
 
 export type WorkoutType = 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'rest'
 
@@ -60,13 +61,22 @@ export interface WorkoutPlan {
   }[]
 }
 
+export interface AssignedWorkoutState {
+  assignmentId: string
+  exercises: PrescribedExercise[]
+  date: string
+  coachNotes?: string
+}
+
 interface WorkoutStore {
   currentPlan: WorkoutPlan | null
   workoutLogs: WorkoutLog[]
   currentWeek: number
   customizations: WorkoutCustomization[]
+  assignedWorkout: AssignedWorkoutState | null
 
   // Actions
+  setAssignedWorkout: (workout: AssignedWorkoutState | null) => void
   setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => void
   setWorkoutDays: (days: DayOfWeek[]) => void
   getTodayWorkout: () => { type: WorkoutType; name: string; dayNumber: number } | null
@@ -347,6 +357,9 @@ export const useWorkoutStore = create<WorkoutStore>()(
       workoutLogs: [],
       currentWeek: 1,
       customizations: [],
+      assignedWorkout: null,
+
+      setAssignedWorkout: (workout) => set({ assignedWorkout: workout }),
 
       setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => {
         const days = selectedDays || getDefaultDays(trainingDays)
@@ -755,6 +768,11 @@ export const useWorkoutStore = create<WorkoutStore>()(
     }),
     {
       name: 'gamify-gains-workouts',
+      partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { assignedWorkout, ...persisted } = state
+        return persisted
+      },
     }
   )
 )

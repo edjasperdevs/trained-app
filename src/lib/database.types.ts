@@ -13,6 +13,38 @@ export type CoachClientStatus = 'pending' | 'active' | 'inactive'
 export type InviteStatus = 'pending' | 'accepted' | 'expired'
 export type MacroSetBy = 'self' | 'coach'
 
+// Prescribed exercise shape (used in workout_templates and assigned_workouts JSONB)
+export interface PrescribedExercise {
+  name: string
+  targetSets: number
+  targetReps: string
+  notes?: string
+  targetWeight?: number
+}
+
+// workout_templates row
+export interface WorkoutTemplate {
+  id: string
+  created_at: string
+  updated_at: string
+  coach_id: string
+  name: string
+  exercises: PrescribedExercise[]
+}
+
+// assigned_workouts row
+export interface AssignedWorkout {
+  id: string
+  created_at: string
+  updated_at: string
+  coach_id: string
+  client_id: string
+  template_id: string | null
+  date: string
+  exercises: PrescribedExercise[]
+  notes: string | null
+}
+
 export type Json =
   | string
   | number
@@ -335,6 +367,7 @@ export interface Database {
           duration_minutes: number | null
           exercises: Json
           xp_awarded: boolean
+          assignment_id: string | null
         }
         Insert: {
           id?: string
@@ -346,6 +379,7 @@ export interface Database {
           duration_minutes?: number | null
           exercises?: Json
           xp_awarded?: boolean
+          assignment_id?: string | null
         }
         Update: {
           id?: string
@@ -357,6 +391,7 @@ export interface Database {
           duration_minutes?: number | null
           exercises?: Json
           xp_awarded?: boolean
+          assignment_id?: string | null
         }
         Relationships: []
       }
@@ -384,6 +419,69 @@ export interface Database {
           date?: string
           source?: XPSource
           amount?: number
+        }
+        Relationships: []
+      }
+      workout_templates: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          coach_id: string
+          name: string
+          exercises: Json
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id: string
+          name: string
+          exercises?: Json
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id?: string
+          name?: string
+          exercises?: Json
+        }
+        Relationships: []
+      }
+      assigned_workouts: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          coach_id: string
+          client_id: string
+          template_id: string | null
+          date: string
+          exercises: Json
+          notes: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id: string
+          client_id: string
+          template_id?: string | null
+          date: string
+          exercises: Json
+          notes?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          coach_id?: string
+          client_id?: string
+          template_id?: string | null
+          date?: string
+          exercises?: Json
+          notes?: string | null
         }
         Relationships: []
       }

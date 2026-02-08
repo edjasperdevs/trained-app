@@ -3,6 +3,8 @@
  * Usage: import and call seedTestData() from browser console or a dev route.
  */
 
+import type { WorkoutTemplate, AssignedWorkout } from '@/lib/database.types'
+
 const today = new Date()
 const toISO = (d: Date) => d.toISOString().split('T')[0]
 const daysAgo = (n: number) => {
@@ -639,6 +641,66 @@ export function removeMockClient(clientId: string): boolean {
   }
   return false
 }
+
+// --- Mock Workout Templates & Assignments (for coach dev bypass) ---
+
+export const mockWorkoutTemplates: WorkoutTemplate[] = [
+  {
+    id: 'tmpl-001',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    coach_id: 'mock-coach-id',
+    name: 'Monday Push',
+    exercises: [
+      { name: 'Bench Press', targetSets: 4, targetReps: '8-10', targetWeight: 185 },
+      { name: 'Incline Dumbbell Press', targetSets: 3, targetReps: '10-12', notes: 'Controlled tempo' },
+      { name: 'Cable Flyes', targetSets: 3, targetReps: '12-15' },
+      { name: 'Lateral Raises', targetSets: 3, targetReps: '12-15', targetWeight: 20 },
+      { name: 'Tricep Pushdowns', targetSets: 3, targetReps: '10-12' },
+    ]
+  },
+  {
+    id: 'tmpl-002',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    coach_id: 'mock-coach-id',
+    name: 'Wednesday Pull',
+    exercises: [
+      { name: 'Barbell Rows', targetSets: 4, targetReps: '6-8', targetWeight: 185 },
+      { name: 'Lat Pulldowns', targetSets: 3, targetReps: '10-12' },
+      { name: 'Face Pulls', targetSets: 3, targetReps: '15-20', targetWeight: 30 },
+      { name: 'Barbell Curls', targetSets: 3, targetReps: '10-12' },
+    ]
+  },
+  {
+    id: 'tmpl-003',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    coach_id: 'mock-coach-id',
+    name: 'Friday Legs',
+    exercises: [
+      { name: 'Squats', targetSets: 4, targetReps: '6-8', targetWeight: 225 },
+      { name: 'Romanian Deadlifts', targetSets: 3, targetReps: '8-10', targetWeight: 185 },
+      { name: 'Leg Press', targetSets: 3, targetReps: '10-12' },
+      { name: 'Leg Curls', targetSets: 3, targetReps: '12-15' },
+      { name: 'Calf Raises', targetSets: 4, targetReps: '15-20' },
+    ]
+  }
+]
+
+export const mockAssignedWorkouts: AssignedWorkout[] = [
+  {
+    id: 'assign-001',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    coach_id: 'mock-coach-id',
+    client_id: 'mock-client-sarah',
+    template_id: 'tmpl-001',
+    date: new Date().toISOString().split('T')[0],
+    exercises: mockWorkoutTemplates[0].exercises,
+    notes: 'Focus on chest activation today'
+  }
+]
 
 export function clearTestData() {
   const keys = [
