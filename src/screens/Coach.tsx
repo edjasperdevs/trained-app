@@ -10,15 +10,28 @@ import { useClientRoster, ClientSummary } from '@/hooks/useClientRoster'
 import { useCoachTemplates } from '@/hooks/useCoachTemplates'
 import { WorkoutBuilder } from '@/components/WorkoutBuilder'
 import { WorkoutAssigner } from '@/components/WorkoutAssigner'
+import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
-import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft } from 'lucide-react'
+import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react'
 import { LABELS } from '@/design/constants'
 import type { MacroTargets } from '@/hooks/useClientDetails'
 import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout } from '@/lib/database.types'
+import type { Exercise } from '@/stores/workoutStore'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
+
+interface CompletedAssignment {
+  log: {
+    id: string
+    date: string
+    exercises: Exercise[]
+    assignment_id: string
+    completed: boolean
+  }
+  assignment: AssignedWorkout
+}
 
 type ClientDetailTab = 'overview' | 'progress' | 'activity' | 'programs'
 type DashboardView = 'clients' | 'templates'
@@ -271,6 +284,9 @@ export function Coach() {
   const [showClientAssigner, setShowClientAssigner] = useState(false)
   const [clientInlineExercises, setClientInlineExercises] = useState<PrescribedExercise[]>([])
   const [showInlineBuilder, setShowInlineBuilder] = useState(false)
+  const [completedAssignments, setCompletedAssignments] = useState<CompletedAssignment[]>([])
+  const [completedLoading, setCompletedLoading] = useState(false)
+  const [expandedCompletedId, setExpandedCompletedId] = useState<string | null>(null)
 
   const {
     templates,
@@ -298,6 +314,8 @@ export function Coach() {
       setShowClientAssigner(false)
       setShowInlineBuilder(false)
       setClientInlineExercises([])
+      setCompletedAssignments([])
+      setExpandedCompletedId(null)
     }
   }, [selectedClient?.client_id])
 
@@ -319,6 +337,126 @@ export function Coach() {
       })
     }
   }, [activeTab, selectedClient?.client_id, fetchClientAssignments])
+
+  // Load completed assigned workouts when Programs tab is active
+  useEffect(() => {
+    if (activeTab !== 'programs' || !selectedClient?.client_id) return
+
+    const fetchCompletedAssignments = async (clientId: string) => {
+      setCompletedLoading(true)
+      try {
+        if (devBypass) {
+          // Mock: simulate one completed workout matching the mock assignment
+          const mockCompleted: CompletedAssignment[] = clientAssignments
+            .filter(a => a.date <= new Date().toISOString().split('T')[0])
+            .slice(0, 1)
+            .map(a => ({
+              log: {
+                id: `log-${a.id}`,
+                date: a.date,
+                exercises: a.exercises.map((ex, i) => ({
+                  id: `ex-${i}`,
+                  name: ex.name,
+                  targetSets: ex.targetSets,
+                  targetReps: ex.targetReps,
+                  sets: Array.from({ length: ex.targetSets }, (_, si) => ({
+                    weight: ex.targetWeight || (100 + si * 5),
+                    reps: parseInt(ex.targetReps) || 10,
+                    completed: si < ex.targetSets - (i === 1 ? 1 : 0), // Skip last set of 2nd exercise
+                  })),
+                  notes: ex.notes,
+                })),
+                assignment_id: a.id,
+                completed: true,
+              },
+              assignment: a,
+            }))
+          // Add a mock "added" exercise to the first completed
+          if (mockCompleted.length > 0) {
+            mockCompleted[0].log.exercises.push({
+              id: 'ex-added',
+              name: 'Face Pulls',
+              targetSets: 3,
+              targetReps: '15-20',
+              sets: [
+                { weight: 30, reps: 20, completed: true },
+                { weight: 30, reps: 18, completed: true },
+                { weight: 30, reps: 15, completed: true },
+              ],
+            })
+          }
+          setCompletedAssignments(mockCompleted)
+          return
+        }
+
+        const client = getSupabaseClient()
+
+        // Get assigned workouts for this client
+        const { data: assignments } = await client
+          .from('assigned_workouts')
+          .select('id, date, exercises, notes, template_id, coach_id, client_id, created_at, updated_at')
+          .eq('client_id', clientId)
+          .order('date', { ascending: false })
+          .limit(20)
+
+        const assignmentIds = assignments?.map(a => a.id) || []
+        if (assignmentIds.length === 0) {
+          setCompletedAssignments([])
+          return
+        }
+
+        // Get completed workout logs linked to these assignments
+        const { data: logs } = await client
+          .from('workout_logs')
+          .select('id, date, exercises, assignment_id, completed')
+          .in('assignment_id', assignmentIds)
+          .eq('completed', true)
+
+        if (!logs || logs.length === 0) {
+          setCompletedAssignments([])
+          return
+        }
+
+        // Pair each log with its assignment
+        const paired: CompletedAssignment[] = logs
+          .map(log => {
+            const assignment = assignments?.find(a => a.id === log.assignment_id)
+            if (!assignment) return null
+            return {
+              log: {
+                id: log.id,
+                date: log.date,
+                exercises: (log.exercises as unknown as Exercise[]) || [],
+                assignment_id: log.assignment_id!,
+                completed: log.completed,
+              },
+              assignment: {
+                id: assignment.id,
+                created_at: assignment.created_at,
+                updated_at: assignment.updated_at,
+                coach_id: assignment.coach_id,
+                client_id: assignment.client_id,
+                template_id: assignment.template_id,
+                date: assignment.date,
+                exercises: (assignment.exercises as unknown as PrescribedExercise[]) || [],
+                notes: assignment.notes,
+              },
+            }
+          })
+          .filter((p): p is CompletedAssignment => p !== null)
+          .sort((a, b) => b.log.date.localeCompare(a.log.date))
+
+        setCompletedAssignments(paired)
+      } catch (err) {
+        console.error('Error fetching completed assignments:', err)
+        setCompletedAssignments([])
+      } finally {
+        setCompletedLoading(false)
+      }
+    }
+
+    fetchCompletedAssignments(selectedClient.client_id)
+  }, [activeTab, selectedClient?.client_id, clientAssignments])
 
   useEffect(() => {
     fetchInvites()
@@ -1421,6 +1559,72 @@ export function Coach() {
                                       </Card>
                                     )
                                   })}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Completed assigned workouts */}
+                          <div>
+                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                              COMPLETED WORKOUTS
+                            </h3>
+                            {completedLoading ? (
+                              <div className="text-center py-4">
+                                <span className="text-lg animate-pulse">...</span>
+                                <p className="text-xs text-muted-foreground mt-1">Loading completed workouts...</p>
+                              </div>
+                            ) : completedAssignments.length === 0 ? (
+                              <Card className="py-0">
+                                <CardContent className="text-center py-4">
+                                  <p className="text-sm text-muted-foreground">
+                                    No completed assigned workouts yet.
+                                  </p>
+                                </CardContent>
+                              </Card>
+                            ) : (
+                              <div className="space-y-2">
+                                {completedAssignments.map((pair) => {
+                                  const isExpanded = expandedCompletedId === pair.log.id
+                                  const matchedTemplate = templates.find(t => t.id === pair.assignment.template_id)
+                                  return (
+                                    <Card key={pair.log.id} className="py-0">
+                                      <CardContent className="p-0">
+                                        <button
+                                          type="button"
+                                          className="w-full p-3 flex items-center gap-3 text-left"
+                                          onClick={() => setExpandedCompletedId(isExpanded ? null : pair.log.id)}
+                                        >
+                                          {isExpanded ? (
+                                            <ChevronDown size={16} className="text-muted-foreground shrink-0" />
+                                          ) : (
+                                            <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                                          )}
+                                          <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-sm truncate">
+                                              {matchedTemplate?.name || 'Custom Workout'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                              {new Date(pair.log.date + 'T00:00:00').toLocaleDateString()}
+                                              {' '}&middot;{' '}
+                                              {pair.assignment.exercises.length} prescribed
+                                            </p>
+                                          </div>
+                                          <span className="text-xs bg-success/20 text-success px-2 py-0.5 rounded-full font-medium shrink-0">
+                                            Completed
+                                          </span>
+                                        </button>
+                                        {isExpanded && (
+                                          <div className="px-3 pb-3 border-t border-border pt-3">
+                                            <PrescribedVsActual
+                                              prescribed={pair.assignment.exercises}
+                                              actual={pair.log.exercises}
+                                            />
+                                          </div>
+                                        )}
+                                      </CardContent>
+                                    </Card>
+                                  )
+                                })}
                               </div>
                             )}
                           </div>
