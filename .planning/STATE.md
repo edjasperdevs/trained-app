@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 6 (Workout Programming)
-Plan: 1 of TBD in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 -- Completed 05-01-PLAN.md (Workout Programming Schema & Types)
+Last activity: 2026-02-08 -- Completed 05-02-PLAN.md (Coach Workout Programming UI)
 
-Progress: [███████████░] 73%
+Progress: [████████████░] 77%
 
 ## Performance Metrics
 
@@ -66,6 +66,11 @@ Recent decisions affecting current work:
 - 05-01: UNIQUE(client_id, date) on assigned_workouts -- one assignment per client per day
 - 05-01: assignedWorkout non-persisted via partialize -- server-authoritative, fetched fresh
 - 05-01: assignment_id ON DELETE SET NULL -- preserves workout history
+- 05-02: JSON.parse(JSON.stringify()) for exercise snapshot and Json type compatibility
+- 05-02: Segmented control toggle for Clients/Templates views (not sidebar tabs)
+- 05-02: Programs tab as 4th tab in client detail modal
+- 05-02: deleteAssignment added for complete assignment CRUD
+- 05-02: Mutable module-level arrays for dev bypass mock templates/assignments
 
 ### Pending Todos
 
@@ -85,5 +90,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 05-01-PLAN.md (Workout Programming Schema & Types)
+Stopped at: Completed 05-02-PLAN.md (Coach Workout Programming UI)
 Resume file: None
