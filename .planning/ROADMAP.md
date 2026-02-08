@@ -91,9 +91,9 @@ Plans:
   5. Coach can view a prescribed-vs-actual comparison showing what was assigned versus what the client did
 **Plans**: 4 plans
 Plans:
-- [ ] 05-01-PLAN.md -- Database migration (workout_templates, assigned_workouts, assignment_id FK) + TypeScript types + workoutStore state + devSeed
-- [ ] 05-02-PLAN.md -- Coach workout builder UI, template CRUD, assignment flow (PROG-01, PROG-02, PROG-03)
-- [ ] 05-03-PLAN.md -- Client-side integration: pullCoachData extension, "Assigned by Coach" UI, assignment_id logging (PROG-04, PROG-05)
+- [x] 05-01-PLAN.md -- Database migration (workout_templates, assigned_workouts, assignment_id FK) + TypeScript types + workoutStore state + devSeed
+- [x] 05-02-PLAN.md -- Coach workout builder UI, template CRUD, assignment flow (PROG-01, PROG-02, PROG-03)
+- [x] 05-03-PLAN.md -- Client-side integration: pullCoachData extension, "Assigned by Coach" UI, assignment_id logging (PROG-04, PROG-05)
 - [x] 05-04-PLAN.md -- Prescribed vs actual comparison view for coach (PROG-06)
 
 ### Phase 6: Weekly Check-ins

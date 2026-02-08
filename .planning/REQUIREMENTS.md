@@ -28,12 +28,12 @@
 
 ### Workout Programming
 
-- [ ] **PROG-01**: Coach can build a workout for a client on a specific date (select exercises, sets, reps, weight targets)
-- [ ] **PROG-02**: Coach can save workouts as reusable templates (build once, assign to many clients)
-- [ ] **PROG-03**: Coach can assign a saved template to a client on a specific date
-- [ ] **PROG-04**: Client sees coach-assigned workout on the assigned date with "Assigned by Coach" indicator
-- [ ] **PROG-05**: Client can log their actual performance against the prescribed workout
-- [ ] **PROG-06**: Coach can see prescribed vs actual comparison (what was assigned vs what the client did)
+- [x] **PROG-01**: Coach can build a workout for a client on a specific date (select exercises, sets, reps, weight targets)
+- [x] **PROG-02**: Coach can save workouts as reusable templates (build once, assign to many clients)
+- [x] **PROG-03**: Coach can assign a saved template to a client on a specific date
+- [x] **PROG-04**: Client sees coach-assigned workout on the assigned date with "Assigned by Coach" indicator
+- [x] **PROG-05**: Client can log their actual performance against the prescribed workout
+- [x] **PROG-06**: Coach can see prescribed vs actual comparison (what was assigned vs what the client did)
 
 ### Macro Management
 
@@ -102,12 +102,12 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | ROSTER-01 | Phase 3 | Complete |
 | ROSTER-02 | Phase 3 | Complete |
 | ROSTER-03 | Phase 3 | Complete |
-| PROG-01 | Phase 5 | Pending |
-| PROG-02 | Phase 5 | Pending |
-| PROG-03 | Phase 5 | Pending |
-| PROG-04 | Phase 5 | Pending |
-| PROG-05 | Phase 5 | Pending |
-| PROG-06 | Phase 5 | Pending |
+| PROG-01 | Phase 5 | Complete |
+| PROG-02 | Phase 5 | Complete |
+| PROG-03 | Phase 5 | Complete |
+| PROG-04 | Phase 5 | Complete |
+| PROG-05 | Phase 5 | Complete |
+| PROG-06 | Phase 5 | Complete |
 | MACRO-01 | Phase 4 | Complete |
 | MACRO-02 | Phase 4 | Complete |
 | MACRO-03 | Phase 4 | Complete |
