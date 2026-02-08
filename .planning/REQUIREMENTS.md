@@ -43,12 +43,12 @@
 
 ### Weekly Check-ins
 
-- [ ] **CHECK-01**: Client can fill out a structured weekly check-in form (16 fields: water/caffeine, hunger, slip-ups, refeed date, digestion, training progress, training feedback, recovery/soreness, sleep quality/hours, stress/stressors, mental health, injuries, cycle status, side effects, bloodwork date, open feedback)
-- [ ] **CHECK-02**: Check-in auto-populates app-tracked data for coach review (weight daily/weekly/change, step count, macro target hit rate, cardio from workout logs)
-- [ ] **CHECK-03**: Coach sees a list of pending check-ins to review with client name and submission date
-- [ ] **CHECK-04**: Coach can review a check-in and add coach notes/response
-- [ ] **CHECK-05**: Client can see that their check-in was reviewed and read the coach's response
-- [ ] **CHECK-06**: Check-in is surfaced prominently on client home screen when due (not buried in a menu)
+- [x] **CHECK-01**: Client can fill out a structured weekly check-in form (16 fields: water/caffeine, hunger, slip-ups, refeed date, digestion, training progress, training feedback, recovery/soreness, sleep quality/hours, stress/stressors, mental health, injuries, cycle status, side effects, bloodwork date, open feedback)
+- [x] **CHECK-02**: Check-in auto-populates app-tracked data for coach review (weight daily/weekly/change, step count, macro target hit rate, cardio from workout logs)
+- [x] **CHECK-03**: Coach sees a list of pending check-ins to review with client name and submission date
+- [x] **CHECK-04**: Coach can review a check-in and add coach notes/response
+- [x] **CHECK-05**: Client can see that their check-in was reviewed and read the coach's response
+- [x] **CHECK-06**: Check-in is surfaced prominently on client home screen when due (not buried in a menu)
 
 ## v2 Requirements
 
@@ -111,12 +111,12 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | MACRO-01 | Phase 4 | Complete |
 | MACRO-02 | Phase 4 | Complete |
 | MACRO-03 | Phase 4 | Complete |
-| CHECK-01 | Phase 6 | Pending |
-| CHECK-02 | Phase 6 | Pending |
-| CHECK-03 | Phase 6 | Pending |
-| CHECK-04 | Phase 6 | Pending |
-| CHECK-05 | Phase 6 | Pending |
-| CHECK-06 | Phase 6 | Pending |
+| CHECK-01 | Phase 6 | Complete |
+| CHECK-02 | Phase 6 | Complete |
+| CHECK-03 | Phase 6 | Complete |
+| CHECK-04 | Phase 6 | Complete |
+| CHECK-05 | Phase 6 | Complete |
+| CHECK-06 | Phase 6 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 27 total

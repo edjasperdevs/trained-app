@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Client Roster** - Paginated roster with search, client detail view, server-side performance
 - [x] **Phase 4: Macro Management** - Coach sets client macro targets, client sees coach-set targets
 - [x] **Phase 5: Workout Programming** - Coach builds and assigns workouts, client executes prescribed workouts
-- [ ] **Phase 6: Weekly Check-ins** - Client submits structured check-in, coach reviews and responds
+- [x] **Phase 6: Weekly Check-ins** - Client submits structured check-in, coach reviews and responds
 
 ## Phase Details
 
@@ -108,10 +108,10 @@ Plans:
   5. Check-in prompt is surfaced prominently on the client home screen when due (not buried in navigation)
 **Plans**: 4 plans
 Plans:
-- [ ] 06-01-PLAN.md -- Database migration, TypeScript types, useWeeklyCheckins hook, devSeed mock data
-- [ ] 06-02-PLAN.md -- Client check-in form (16 fields, 5 sections), auto-populated data, Home screen due banner
-- [ ] 06-03-PLAN.md -- Coach pending check-ins list, review flow, client detail check-ins tab
-- [ ] 06-04-PLAN.md -- pullCoachData extension, client response viewing on Home screen
+- [x] 06-01-PLAN.md -- Database migration, TypeScript types, useWeeklyCheckins hook, devSeed mock data
+- [x] 06-02-PLAN.md -- Client check-in form (16 fields, 5 sections), auto-populated data, Home screen due banner
+- [x] 06-03-PLAN.md -- Coach pending check-ins list, review flow, client detail check-ins tab
+- [x] 06-04-PLAN.md -- pullCoachData extension, client response viewing on Home screen
 
 ## Progress
 
@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
 | 4. Macro Management | 2/2 | Complete | 2026-02-07 |
 | 5. Workout Programming | 4/4 | Complete | 2026-02-08 |
-| 6. Weekly Check-ins | 0/4 | Planned | - |
+| 6. Weekly Check-ins | 4/4 | Complete | 2026-02-08 |
 
 ---
 *Roadmap created: 2026-02-07*
