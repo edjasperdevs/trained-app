@@ -34,6 +34,7 @@ export interface WorkoutLog {
   endTime?: number
   isMinimal?: boolean // Minimum viable workout
   notes?: string // What they did for minimal workout
+  assignmentId?: string // Links to coach-assigned workout
 }
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6 // Sun=0, Mon=1, ..., Sat=6
@@ -253,6 +254,23 @@ const getTemplateForDay = (trainingDays: TrainingDays, dayNumber: number): Omit<
 }
 
 const generateExercises = (type: WorkoutType, customizations: WorkoutCustomization[], trainingDays?: TrainingDays, dayNumber?: number): Exercise[] => {
+  // Priority 0: Coach-assigned workout for today
+  const state = useWorkoutStore.getState()
+  if (state.assignedWorkout && state.assignedWorkout.date === new Date().toISOString().split('T')[0]) {
+    return state.assignedWorkout.exercises.map((ex, i) => ({
+      id: `assigned-${i}-${Date.now()}`,
+      name: ex.name,
+      targetSets: ex.targetSets,
+      targetReps: ex.targetReps,
+      sets: Array.from({ length: ex.targetSets }, () => ({
+        weight: ex.targetWeight || 0,
+        reps: 0,
+        completed: false,
+      })),
+      notes: ex.notes,
+    }))
+  }
+
   // First check for customizations
   const customization = customizations.find(c => c.workoutType === type)
 
@@ -413,6 +431,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         const today = new Date().toISOString().split('T')[0]
         const plan = get().currentPlan
         const trainingDays = plan?.trainingDays
+        const assigned = get().assignedWorkout
 
         const newWorkout: WorkoutLog = {
           id,
@@ -423,7 +442,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
           exercises: generateExercises(type, get().customizations, trainingDays, dayNumber),
           completed: false,
           xpAwarded: false,
-          startTime: Date.now()
+          startTime: Date.now(),
+          ...(assigned && assigned.date === today ? { assignmentId: assigned.assignmentId } : {}),
         }
 
         set((state) => ({
@@ -532,24 +552,30 @@ export const useWorkoutStore = create<WorkoutStore>()(
       },
 
       completeWorkout: (workoutId) => {
+        const workout = get().workoutLogs.find(w => w.id === workoutId)
         set((state) => ({
-          workoutLogs: state.workoutLogs.map(workout =>
-            workout.id === workoutId
-              ? { ...workout, completed: true, endTime: Date.now() }
-              : workout
-          )
+          workoutLogs: state.workoutLogs.map(w =>
+            w.id === workoutId
+              ? { ...w, completed: true, endTime: Date.now() }
+              : w
+          ),
+          // Clear assigned workout when completing a coach-assigned workout
+          ...(workout?.assignmentId ? { assignedWorkout: null } : {}),
         }))
       },
 
       endWorkoutEarly: (workoutId) => {
         // Mark workout as completed even if not all sets are done
         // This allows users to end early while still getting credit
+        const workout = get().workoutLogs.find(w => w.id === workoutId)
         set((state) => ({
-          workoutLogs: state.workoutLogs.map(workout =>
-            workout.id === workoutId
-              ? { ...workout, completed: true, endTime: Date.now() }
-              : workout
-          )
+          workoutLogs: state.workoutLogs.map(w =>
+            w.id === workoutId
+              ? { ...w, completed: true, endTime: Date.now() }
+              : w
+          ),
+          // Clear assigned workout when ending a coach-assigned workout early
+          ...(workout?.assignmentId ? { assignedWorkout: null } : {}),
         }))
       },
 

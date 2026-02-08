@@ -80,7 +80,7 @@ import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useXPStore } from '@/stores/xpStore'
 // import { useAvatarStore } from '@/stores/avatarStore' // Disabled until table created
-import type { Json } from './database.types'
+import type { Json, PrescribedExercise } from './database.types'
 
 // ==========================================
 // Profile Sync
@@ -360,7 +360,8 @@ export async function syncWorkoutLogToCloud(workoutId: string) {
       completed: workout.completed,
       duration_minutes: durationMinutes,
       exercises: workout.exercises as unknown as Json,
-      xp_awarded: workout.xpAwarded
+      xp_awarded: workout.xpAwarded,
+      assignment_id: workout.assignmentId || null
     })
 
   return { error: error?.message || null }
@@ -485,6 +486,33 @@ export async function pullCoachData() {
       // Coach reverted ownership — reset local store
       useMacroStore.setState({ setBy: 'self', setByCoachId: null })
     }
+  }
+
+  // --- Pull assigned workouts for today and upcoming ---
+  const today = new Date().toISOString().split('T')[0]
+  const { data: assignments } = await client
+    .from('assigned_workouts')
+    .select('id, date, exercises, notes, template_id')
+    .eq('client_id', user.id)
+    .gte('date', today)
+    .order('date', { ascending: true })
+    .limit(7)
+
+  if (assignments && assignments.length > 0) {
+    const todayAssignment = assignments.find(a => a.date === today)
+    if (todayAssignment) {
+      useWorkoutStore.getState().setAssignedWorkout({
+        assignmentId: todayAssignment.id,
+        exercises: todayAssignment.exercises as unknown as PrescribedExercise[],
+        date: todayAssignment.date,
+        coachNotes: todayAssignment.notes || undefined,
+      })
+    } else {
+      // No assignment for today -- clear any stale state
+      useWorkoutStore.getState().setAssignedWorkout(null)
+    }
+  } else {
+    useWorkoutStore.getState().setAssignedWorkout(null)
   }
 
   if (import.meta.env.DEV) console.log('[Sync] Pull coach data complete')
