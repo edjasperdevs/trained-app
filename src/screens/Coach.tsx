@@ -7,16 +7,22 @@ import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useClientDetails } from '@/hooks/useClientDetails'
 import { useClientRoster, ClientSummary } from '@/hooks/useClientRoster'
+import { useCoachTemplates } from '@/hooks/useCoachTemplates'
+import { WorkoutBuilder } from '@/components/WorkoutBuilder'
+import { WorkoutAssigner } from '@/components/WorkoutAssigner'
 import { analytics, trackEvent } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
-import { Search, ShieldCheck } from 'lucide-react'
+import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft } from 'lucide-react'
 import { LABELS } from '@/design/constants'
 import type { MacroTargets } from '@/hooks/useClientDetails'
+import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout } from '@/lib/database.types'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
-type ClientDetailTab = 'overview' | 'progress' | 'activity'
+type ClientDetailTab = 'overview' | 'progress' | 'activity' | 'programs'
+type DashboardView = 'clients' | 'templates'
+type TemplateMode = 'list' | 'create' | 'edit' | 'assign'
 
 interface InviteRow {
   id: string
@@ -253,6 +259,29 @@ export function Coach() {
   const [inviteMessage, setInviteMessage] = useState('')
   const [invites, setInvites] = useState<InviteRow[]>([])
 
+  // Templates / Programs state
+  const [dashboardView, setDashboardView] = useState<DashboardView>('clients')
+  const [templateMode, setTemplateMode] = useState<TemplateMode>('list')
+  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null)
+  const [builderExercises, setBuilderExercises] = useState<PrescribedExercise[]>([])
+  const [builderName, setBuilderName] = useState('')
+  const [assigningTemplate, setAssigningTemplate] = useState<WorkoutTemplate | null>(null)
+  // Client detail programs state
+  const [clientAssignments, setClientAssignments] = useState<AssignedWorkout[]>([])
+  const [showClientAssigner, setShowClientAssigner] = useState(false)
+  const [clientInlineExercises, setClientInlineExercises] = useState<PrescribedExercise[]>([])
+  const [showInlineBuilder, setShowInlineBuilder] = useState(false)
+
+  const {
+    templates,
+    isLoading: isTemplatesLoading,
+    createTemplate,
+    updateTemplate,
+    deleteTemplate,
+    fetchClientAssignments,
+    deleteAssignment,
+  } = useCoachTemplates()
+
   const {
     weightData: clientWeightData,
     macroData: clientMacroData,
@@ -266,8 +295,30 @@ export function Coach() {
   useEffect(() => {
     if (selectedClient) {
       setActiveTab('overview')
+      setShowClientAssigner(false)
+      setShowInlineBuilder(false)
+      setClientInlineExercises([])
     }
   }, [selectedClient?.client_id])
+
+  // Load client assignments when Programs tab is active
+  useEffect(() => {
+    if (activeTab === 'programs' && selectedClient?.client_id) {
+      const today = new Date()
+      const past30 = new Date(today)
+      past30.setDate(past30.getDate() - 30)
+      const future30 = new Date(today)
+      future30.setDate(future30.getDate() + 30)
+
+      fetchClientAssignments(
+        selectedClient.client_id,
+        past30.toISOString().split('T')[0],
+        future30.toISOString().split('T')[0]
+      ).then(assignments => {
+        setClientAssignments(assignments)
+      })
+    }
+  }, [activeTab, selectedClient?.client_id, fetchClientAssignments])
 
   useEffect(() => {
     fetchInvites()
@@ -511,6 +562,77 @@ export function Coach() {
     return `${days} days ago`
   }
 
+  // Template management helpers
+  const handleNewTemplate = () => {
+    setBuilderName('')
+    setBuilderExercises([])
+    setEditingTemplate(null)
+    setTemplateMode('create')
+  }
+
+  const handleEditTemplate = (template: WorkoutTemplate) => {
+    setBuilderName(template.name)
+    setBuilderExercises([...template.exercises])
+    setEditingTemplate(template)
+    setTemplateMode('edit')
+  }
+
+  const handleSaveTemplate = async () => {
+    if (!builderName.trim()) {
+      toast.error('Please enter a template name')
+      return
+    }
+    if (builderExercises.length === 0) {
+      toast.error('Please add at least one exercise')
+      return
+    }
+
+    if (editingTemplate) {
+      await updateTemplate(editingTemplate.id, {
+        name: builderName,
+        exercises: builderExercises,
+      })
+      toast.success('Template updated')
+    } else {
+      await createTemplate(builderName, builderExercises)
+      toast.success('Template created')
+    }
+
+    setTemplateMode('list')
+    setEditingTemplate(null)
+  }
+
+  const handleDeleteTemplate = async (id: string) => {
+    if (!window.confirm('Delete this template? This cannot be undone.')) return
+    await deleteTemplate(id)
+    toast.success('Template deleted')
+  }
+
+  const handleQuickAssign = (template: WorkoutTemplate) => {
+    setAssigningTemplate(template)
+    setTemplateMode('assign')
+  }
+
+  const handleDeleteAssignment = async (id: string) => {
+    if (!window.confirm('Remove this assigned workout?')) return
+    await deleteAssignment(id)
+    // Refresh assignments
+    if (selectedClient?.client_id) {
+      const today = new Date()
+      const past30 = new Date(today)
+      past30.setDate(past30.getDate() - 30)
+      const future30 = new Date(today)
+      future30.setDate(future30.getDate() + 30)
+      const updated = await fetchClientAssignments(
+        selectedClient.client_id,
+        past30.toISOString().split('T')[0],
+        future30.toISOString().split('T')[0]
+      )
+      setClientAssignments(updated)
+    }
+    toast.success('Assignment removed')
+  }
+
   // Filter invites to show only non-accepted (pending + expired)
   const visibleInvites = invites.filter(inv => inv.status !== 'accepted')
 
@@ -546,15 +668,54 @@ export function Coach() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Coach Dashboard</h1>
-            <p className="text-muted-foreground">{totalCount} client{totalCount !== 1 ? 's' : ''}</p>
+            <p className="text-muted-foreground">
+              {dashboardView === 'clients'
+                ? `${totalCount} client${totalCount !== 1 ? 's' : ''}`
+                : `${templates.length} template${templates.length !== 1 ? 's' : ''}`
+              }
+            </p>
           </div>
-          <Button onClick={() => setShowAddClient(true)}>
-            + Invite Client
-          </Button>
+          {dashboardView === 'clients' ? (
+            <Button onClick={() => setShowAddClient(true)}>
+              + Invite Client
+            </Button>
+          ) : templateMode === 'list' ? (
+            <Button onClick={handleNewTemplate}>
+              <Plus size={16} className="mr-1" />
+              New Template
+            </Button>
+          ) : null}
         </div>
 
-        {/* Search Input */}
-        {(totalCount > 0 || search.trim()) && (
+        {/* View Toggle */}
+        <div className="flex mt-4 bg-background rounded-lg p-1">
+          <button
+            onClick={() => { setDashboardView('clients'); setTemplateMode('list') }}
+            className={cn(
+              'flex-1 py-2 text-sm font-medium rounded-md transition-colors',
+              dashboardView === 'clients'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            Clients
+          </button>
+          <button
+            onClick={() => setDashboardView('templates')}
+            className={cn(
+              'flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1',
+              dashboardView === 'templates'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <Dumbbell size={14} />
+            Templates
+          </button>
+        </div>
+
+        {/* Search Input (clients view only) */}
+        {dashboardView === 'clients' && (totalCount > 0 || search.trim()) && (
           <div className="relative mt-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -568,6 +729,154 @@ export function Coach() {
       </div>
 
       <div className="px-5 py-6 space-y-4">
+        {/* Templates View */}
+        {dashboardView === 'templates' && (
+          <>
+            {templateMode === 'list' && (
+              <>
+                {isTemplatesLoading ? (
+                  <div className="text-center py-8">
+                    <span className="text-2xl animate-pulse">...</span>
+                    <p className="text-sm text-muted-foreground mt-1">Loading templates...</p>
+                  </div>
+                ) : templates.length === 0 ? (
+                  <Card className="py-0">
+                    <CardContent className="text-center py-8">
+                      <Dumbbell size={40} className="mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-2">No templates yet</p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Create workout templates to quickly assign to clients
+                      </p>
+                      <Button onClick={handleNewTemplate}>
+                        <Plus size={16} className="mr-1" />
+                        Create Template
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-2">
+                    {templates.map((template) => (
+                      <Card key={template.id} className="py-0">
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold truncate">{template.name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {template.exercises.length} exercise{template.exercises.length !== 1 ? 's' : ''}
+                                {' '}&middot;{' '}
+                                Updated {new Date(template.updated_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleQuickAssign(template)}
+                                title="Quick Assign"
+                              >
+                                <Send size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleEditTemplate(template)}
+                                title="Edit"
+                              >
+                                <Pencil size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteTemplate(template.id)}
+                                className="text-destructive hover:text-destructive"
+                                title="Delete"
+                              >
+                                <Trash2 size={14} />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {(templateMode === 'create' || templateMode === 'edit') && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setTemplateMode('list'); setEditingTemplate(null) }}
+                  >
+                    <ArrowLeft size={16} className="mr-1" />
+                    Back
+                  </Button>
+                  <h2 className="text-sm font-semibold text-muted-foreground">
+                    {templateMode === 'create' ? 'NEW TEMPLATE' : 'EDIT TEMPLATE'}
+                  </h2>
+                </div>
+
+                <WorkoutBuilder
+                  exercises={builderExercises}
+                  onChange={setBuilderExercises}
+                  templateName={builderName}
+                  onNameChange={setBuilderName}
+                  showNameField
+                />
+
+                <Button
+                  className="w-full"
+                  onClick={handleSaveTemplate}
+                  disabled={!builderName.trim() || builderExercises.length === 0}
+                >
+                  {templateMode === 'create' ? 'Save Template' : 'Update Template'}
+                </Button>
+              </div>
+            )}
+
+            {templateMode === 'assign' && assigningTemplate && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setTemplateMode('list'); setAssigningTemplate(null) }}
+                  >
+                    <ArrowLeft size={16} className="mr-1" />
+                    Back
+                  </Button>
+                </div>
+
+                <WorkoutAssigner
+                  exercises={assigningTemplate.exercises}
+                  templateId={assigningTemplate.id}
+                  templateName={assigningTemplate.name}
+                  clients={clients
+                    .filter(c => c.client_id && c.onboarding_complete)
+                    .map(c => ({
+                      id: c.client_id!,
+                      name: c.username || c.email?.split('@')[0] || 'Unknown',
+                    }))}
+                  onAssigned={() => {
+                    setTemplateMode('list')
+                    setAssigningTemplate(null)
+                    toast.success('Workout assigned!')
+                  }}
+                  onCancel={() => {
+                    setTemplateMode('list')
+                    setAssigningTemplate(null)
+                  }}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Clients View */}
+        {dashboardView === 'clients' && (<>
         {/* Quick Stats -- only show when all clients fit on one page */}
         {totalPages <= 1 && clients.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
@@ -744,6 +1053,7 @@ export function Coach() {
             </Button>
           </div>
         )}
+        </>)}
       </div>
 
       {/* Client Detail Modal */}
@@ -778,7 +1088,7 @@ export function Coach() {
               {/* Tab Navigation */}
               {selectedClient.onboarding_complete && (
                 <div className="flex border-b border-border">
-                  {(['overview', 'progress', 'activity'] as const).map((tab) => (
+                  {(['overview', 'progress', 'activity', 'programs'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
@@ -953,6 +1263,170 @@ export function Coach() {
                   {/* Activity Tab */}
                   {activeTab === 'activity' && (
                     <ClientActivityFeed activities={clientActivityData} />
+                  )}
+
+                  {/* Programs Tab */}
+                  {activeTab === 'programs' && (
+                    <>
+                      {showClientAssigner ? (
+                        <WorkoutAssigner
+                          exercises={showInlineBuilder ? clientInlineExercises : (assigningTemplate?.exercises || [])}
+                          templateId={assigningTemplate?.id}
+                          templateName={assigningTemplate?.name || (showInlineBuilder ? 'Custom Workout' : undefined)}
+                          clientId={selectedClient.client_id || undefined}
+                          clientName={selectedClient.username || selectedClient.email?.split('@')[0] || undefined}
+                          onAssigned={() => {
+                            setShowClientAssigner(false)
+                            setAssigningTemplate(null)
+                            setShowInlineBuilder(false)
+                            setClientInlineExercises([])
+                            // Refresh assignments
+                            if (selectedClient.client_id) {
+                              const today = new Date()
+                              const past30 = new Date(today)
+                              past30.setDate(past30.getDate() - 30)
+                              const future30 = new Date(today)
+                              future30.setDate(future30.getDate() + 30)
+                              fetchClientAssignments(
+                                selectedClient.client_id,
+                                past30.toISOString().split('T')[0],
+                                future30.toISOString().split('T')[0]
+                              ).then(setClientAssignments)
+                            }
+                          }}
+                          onCancel={() => {
+                            setShowClientAssigner(false)
+                            setAssigningTemplate(null)
+                            setShowInlineBuilder(false)
+                            setClientInlineExercises([])
+                          }}
+                        />
+                      ) : showInlineBuilder ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => { setShowInlineBuilder(false); setClientInlineExercises([]) }}
+                            >
+                              <ArrowLeft size={16} className="mr-1" />
+                              Back
+                            </Button>
+                            <h3 className="text-sm font-semibold text-muted-foreground">BUILD CUSTOM WORKOUT</h3>
+                          </div>
+                          <WorkoutBuilder
+                            exercises={clientInlineExercises}
+                            onChange={setClientInlineExercises}
+                          />
+                          <Button
+                            className="w-full"
+                            disabled={clientInlineExercises.length === 0 || clientInlineExercises.every(e => !e.name.trim())}
+                            onClick={() => setShowClientAssigner(true)}
+                          >
+                            <Send size={16} className="mr-1" />
+                            Assign This Workout
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Action buttons */}
+                          <div className="flex gap-2">
+                            <Button
+                              className="flex-1"
+                              variant="ghost"
+                              onClick={() => setShowInlineBuilder(true)}
+                            >
+                              <Plus size={16} className="mr-1" />
+                              Custom Workout
+                            </Button>
+                            {templates.length > 0 && (
+                              <div className="flex-1">
+                                <select
+                                  className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  value=""
+                                  onChange={(e) => {
+                                    const tmpl = templates.find(t => t.id === e.target.value)
+                                    if (tmpl) {
+                                      setAssigningTemplate(tmpl)
+                                      setShowClientAssigner(true)
+                                    }
+                                  }}
+                                >
+                                  <option value="">Assign Template...</option>
+                                  {templates.map(t => (
+                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Assigned workouts list */}
+                          <div>
+                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                              ASSIGNED WORKOUTS
+                            </h3>
+                            {clientAssignments.length === 0 ? (
+                              <Card className="py-0">
+                                <CardContent className="text-center py-6">
+                                  <Dumbbell size={32} className="mx-auto mb-2 text-muted-foreground" />
+                                  <p className="text-sm text-muted-foreground">
+                                    No workouts assigned yet
+                                  </p>
+                                </CardContent>
+                              </Card>
+                            ) : (
+                              <div className="space-y-2">
+                                {clientAssignments
+                                  .sort((a, b) => b.date.localeCompare(a.date))
+                                  .map((assignment) => {
+                                    const isUpcoming = assignment.date >= new Date().toISOString().split('T')[0]
+                                    const matchedTemplate = templates.find(t => t.id === assignment.template_id)
+                                    return (
+                                      <Card key={assignment.id} className="py-0">
+                                        <CardContent className="p-3">
+                                          <div className="flex items-center gap-3">
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2">
+                                                <p className="font-medium truncate">
+                                                  {matchedTemplate?.name || 'Custom Workout'}
+                                                </p>
+                                                {isUpcoming && (
+                                                  <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
+                                                    Upcoming
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <p className="text-xs text-muted-foreground">
+                                                {new Date(assignment.date + 'T00:00:00').toLocaleDateString()}
+                                                {' '}&middot;{' '}
+                                                {assignment.exercises.length} exercise{assignment.exercises.length !== 1 ? 's' : ''}
+                                              </p>
+                                              {assignment.notes && (
+                                                <p className="text-xs text-muted-foreground mt-1 italic truncate">
+                                                  {assignment.notes}
+                                                </p>
+                                              )}
+                                            </div>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => handleDeleteAssignment(assignment.id)}
+                                              className="text-destructive hover:text-destructive"
+                                            >
+                                              <Trash2 size={14} />
+                                            </Button>
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+                                    )
+                                  })}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </>
                   )}
                 </>
               )}
