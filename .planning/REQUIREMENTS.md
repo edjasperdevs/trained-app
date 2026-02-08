@@ -37,9 +37,9 @@
 
 ### Macro Management
 
-- [ ] **MACRO-01**: Coach can set a client's daily macro targets (calories, protein, carbs, fat)
-- [ ] **MACRO-02**: Coach-set targets override client self-calculated targets with a "Set by Coach" indicator
-- [ ] **MACRO-03**: Client sees updated macro targets after coach changes them (on next app open)
+- [x] **MACRO-01**: Coach can set a client's daily macro targets (calories, protein, carbs, fat)
+- [x] **MACRO-02**: Coach-set targets override client self-calculated targets with a "Set by Coach" indicator
+- [x] **MACRO-03**: Client sees updated macro targets after coach changes them (on next app open)
 
 ### Weekly Check-ins
 
@@ -108,9 +108,9 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | PROG-04 | Phase 5 | Pending |
 | PROG-05 | Phase 5 | Pending |
 | PROG-06 | Phase 5 | Pending |
-| MACRO-01 | Phase 4 | Pending |
-| MACRO-02 | Phase 4 | Pending |
-| MACRO-03 | Phase 4 | Pending |
+| MACRO-01 | Phase 4 | Complete |
+| MACRO-02 | Phase 4 | Complete |
+| MACRO-03 | Phase 4 | Complete |
 | CHECK-01 | Phase 6 | Pending |
 | CHECK-02 | Phase 6 | Pending |
 | CHECK-03 | Phase 6 | Pending |

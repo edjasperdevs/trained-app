@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 4 (Macro Management) complete. All v1.3 Coach Dashboard phases done (10/10 plans).
+**Current focus:** Phase 4 (Macro Management) complete. Phase 5 (Workout Programming) next.
 
 ## Current Position
 
-Phase: 4 of 4 (Macro Management)
-Plan: 2 of 2 in current phase
-Status: Phase complete -- v1.3 milestone complete
-Last activity: 2026-02-07 -- Completed 04-02-PLAN.md (Coach Macro Editor UI & Client Indicator)
+Phase: 5 of 6 (Workout Programming)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-02-07 -- Phase 4 (Macro Management) verified and complete
 
-Progress: [████████████] 100%
+Progress: [██████████░░] 67%
 
 ## Performance Metrics
 

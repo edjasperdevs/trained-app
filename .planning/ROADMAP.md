@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Data ownership model, directional sync, schema, RLS security fix, coach route guard, lazy loading
 - [x] **Phase 2: Invitations** - Email infrastructure (Edge Function + Resend) and invite lifecycle
 - [x] **Phase 3: Client Roster** - Paginated roster with search, client detail view, server-side performance
-- [ ] **Phase 4: Macro Management** - Coach sets client macro targets, client sees coach-set targets
+- [x] **Phase 4: Macro Management** - Coach sets client macro targets, client sees coach-set targets
 - [ ] **Phase 5: Workout Programming** - Coach builds and assigns workouts, client executes prescribed workouts
 - [ ] **Phase 6: Weekly Check-ins** - Client submits structured check-in, coach reviews and responds
 
@@ -76,8 +76,8 @@ Plans:
   3. Client sees updated macro targets on next app open after coach changes them (no manual refresh needed)
 **Plans**: 2 plans
 Plans:
-- [ ] 04-01-PLAN.md -- RLS INSERT migration, useClientDetails expansion, devSeed update
-- [ ] 04-02-PLAN.md -- Coach macro editor UI, client "Set by Coach" badge, calculator lock
+- [x] 04-01-PLAN.md -- RLS INSERT migration, useClientDetails expansion, devSeed update
+- [x] 04-02-PLAN.md -- Coach macro editor UI, client "Set by Coach" badge, calculator lock
 
 ### Phase 5: Workout Programming
 **Goal**: Coach can build workouts, save them as templates, assign them to client calendars, and see how clients performed against the prescription
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete | 2026-02-07 |
 | 2. Invitations | 3/3 | Complete | 2026-02-07 |
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
-| 4. Macro Management | 0/2 | Not started | - |
+| 4. Macro Management | 2/2 | Complete | 2026-02-07 |
 | 5. Workout Programming | 0/TBD | Not started | - |
 | 6. Weekly Check-ins | 0/TBD | Not started | - |
 
