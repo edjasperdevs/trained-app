@@ -125,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
 | 4. Macro Management | 2/2 | Complete | 2026-02-07 |
 | 5. Workout Programming | 4/4 | Complete | 2026-02-08 |
-| 6. Weekly Check-ins | 0/4 | Not started | - |
+| 6. Weekly Check-ins | 0/4 | Planned | - |
 
 ---
 *Roadmap created: 2026-02-07*
