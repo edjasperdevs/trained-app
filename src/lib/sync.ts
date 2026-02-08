@@ -515,6 +515,25 @@ export async function pullCoachData() {
     useWorkoutStore.getState().setAssignedWorkout(null)
   }
 
+  // --- Pull latest check-in response ---
+  const { data: latestCheckin } = await client
+    .from('weekly_checkins')
+    .select('id, week_of, status, coach_response, reviewed_at')
+    .eq('client_id', user.id)
+    .order('week_of', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (latestCheckin) {
+    localStorage.setItem('trained-latest-checkin', JSON.stringify({
+      id: latestCheckin.id,
+      week_of: latestCheckin.week_of,
+      status: latestCheckin.status,
+      coach_response: latestCheckin.coach_response,
+      reviewed_at: latestCheckin.reviewed_at,
+    }))
+  }
+
   if (import.meta.env.DEV) console.log('[Sync] Pull coach data complete')
   return { error: null }
 }
