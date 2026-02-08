@@ -7,10 +7,12 @@ import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useClientDetails } from '@/hooks/useClientDetails'
 import { useClientRoster, ClientSummary } from '@/hooks/useClientRoster'
-import { analytics } from '@/lib/analytics'
+import { analytics, trackEvent } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
-import { Search } from 'lucide-react'
+import { Search, ShieldCheck } from 'lucide-react'
+import { LABELS } from '@/design/constants'
+import type { MacroTargets } from '@/hooks/useClientDetails'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
@@ -23,6 +25,209 @@ interface InviteRow {
   created_at: string
   expires_at: string
   accepted_at: string | null
+}
+
+function MacroEditor({
+  clientId,
+  currentTargets,
+  coachId,
+  onSaved
+}: {
+  clientId: string
+  currentTargets: MacroTargets | null
+  coachId: string
+  onSaved: () => void
+}) {
+  const [calories, setCalories] = useState(currentTargets?.calories?.toString() || '')
+  const [protein, setProtein] = useState(currentTargets?.protein?.toString() || '')
+  const [carbs, setCarbs] = useState(currentTargets?.carbs?.toString() || '')
+  const [fats, setFats] = useState(currentTargets?.fats?.toString() || '')
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Sync fields when currentTargets changes (e.g. after refresh)
+  useEffect(() => {
+    setCalories(currentTargets?.calories?.toString() || '')
+    setProtein(currentTargets?.protein?.toString() || '')
+    setCarbs(currentTargets?.carbs?.toString() || '')
+    setFats(currentTargets?.fats?.toString() || '')
+  }, [currentTargets?.calories, currentTargets?.protein, currentTargets?.carbs, currentTargets?.fats])
+
+  const handleSave = async () => {
+    // Validate all 4 fields are non-empty and valid positive numbers
+    const cals = Number(calories)
+    const prot = Number(protein)
+    const carb = Number(carbs)
+    const fat = Number(fats)
+
+    if (!calories || !protein || !carbs || !fats || isNaN(cals) || isNaN(prot) || isNaN(carb) || isNaN(fat)) {
+      toast.error('Please fill in all macro fields with valid numbers')
+      return
+    }
+
+    if (cals <= 0 || prot <= 0 || carb < 0 || fat <= 0) {
+      toast.error('Macro values must be positive numbers')
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      if (devBypass) {
+        toast.success('Macros updated (dev mode)')
+        onSaved()
+        return
+      }
+
+      const client = getSupabaseClient()
+      const { error } = await client
+        .from('macro_targets')
+        .upsert({
+          user_id: clientId,
+          calories: cals,
+          protein: prot,
+          carbs: carb,
+          fats: fat,
+          set_by: 'coach',
+          set_by_coach_id: coachId,
+          activity_level: 'moderate',
+        }, { onConflict: 'user_id' })
+
+      if (error) {
+        toast.error('Failed to set macros')
+        return
+      }
+
+      toast.success('Macros updated')
+      trackEvent('Coach Set Macros', { clientId })
+      onSaved()
+    } catch (err) {
+      console.error('Error setting macros:', err)
+      toast.error('Failed to set macros')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleRevert = async () => {
+    if (!window.confirm('Release macro targets back to the client? They will be able to recalculate their own macros.')) {
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      if (devBypass) {
+        toast.success('Macros released (dev mode)')
+        onSaved()
+        return
+      }
+
+      const client = getSupabaseClient()
+      const { error } = await client
+        .from('macro_targets')
+        .update({ set_by: 'self', set_by_coach_id: null })
+        .eq('user_id', clientId)
+
+      if (error) {
+        toast.error('Failed to release macros')
+        return
+      }
+
+      toast.success('Client can now manage their own macros')
+      onSaved()
+    } catch (err) {
+      console.error('Error releasing macros:', err)
+      toast.error('Failed to release macros')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <Card className="py-0">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <h3 className="text-sm font-semibold text-muted-foreground">SET MACRO TARGETS</h3>
+          {currentTargets?.set_by === 'coach' && (
+            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <ShieldCheck size={12} />
+              Currently set by {LABELS.coach.toLowerCase()}
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Calories</label>
+            <Input
+              type="number"
+              value={calories}
+              onChange={(e) => setCalories(e.target.value)}
+              placeholder="2000"
+              min={800}
+              max={8000}
+              className="font-digital"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
+            <Input
+              type="number"
+              value={protein}
+              onChange={(e) => setProtein(e.target.value)}
+              placeholder="150"
+              min={50}
+              max={500}
+              className="font-digital"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Carbs (g)</label>
+            <Input
+              type="number"
+              value={carbs}
+              onChange={(e) => setCarbs(e.target.value)}
+              placeholder="200"
+              min={0}
+              max={1000}
+              className="font-digital"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">Fats (g)</label>
+            <Input
+              type="number"
+              value={fats}
+              onChange={(e) => setFats(e.target.value)}
+              placeholder="65"
+              min={20}
+              max={300}
+              className="font-digital"
+            />
+          </div>
+        </div>
+
+        <Button
+          onClick={handleSave}
+          className="w-full"
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Set Macros'}
+        </Button>
+
+        {currentTargets?.set_by === 'coach' && (
+          <Button
+            variant="ghost"
+            onClick={handleRevert}
+            className="w-full mt-2"
+            disabled={isSaving}
+          >
+            Release to Client
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  )
 }
 
 export function Coach() {
@@ -672,6 +877,16 @@ export function Coach() {
                           </div>
                         </CardContent>
                       </Card>
+
+                      {/* Macro Targets */}
+                      {selectedClient.client_id && user?.id && (
+                        <MacroEditor
+                          clientId={selectedClient.client_id}
+                          currentTargets={clientMacroData.targets}
+                          coachId={user.id}
+                          onSaved={refreshClientDetails}
+                        />
+                      )}
 
                       {/* Mini Weight Chart */}
                       {clientWeightData.length > 0 && (
