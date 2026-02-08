@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 6 (Workout Programming)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 -- Completed 05-02-PLAN.md (Coach Workout Programming UI)
+Last activity: 2026-02-08 -- Completed 05-03-PLAN.md (Client Workout Integration)
 
-Progress: [████████████░] 77%
+Progress: [█████████████░] 82%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [████████████░] 77%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: 2.7min
-- Total execution time: 31min
+- Total execution time: 35min
 
 ## Accumulated Context
 
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
 - 05-02: Programs tab as 4th tab in client detail modal
 - 05-02: deleteAssignment added for complete assignment CRUD
 - 05-02: Mutable module-level arrays for dev bypass mock templates/assignments
+- 05-03: Coach workout on rest day uses fallback type push/dayNumber 1 (generateExercises overrides with prescribed)
+- 05-03: Self-directed fallback sets assignedWorkout to null for current session only
+- 05-03: Priority 0 in generateExercises: coach-assigned exercises bypass all other generation logic
 
 ### Pending Todos
 
@@ -90,5 +93,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 05-02-PLAN.md (Coach Workout Programming UI)
+Stopped at: Completed 05-03-PLAN.md (Client Workout Integration)
 Resume file: None
