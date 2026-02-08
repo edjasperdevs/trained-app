@@ -7,7 +7,7 @@
 -- ===========================================
 
 CREATE TABLE workout_templates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -48,7 +48,7 @@ CREATE TRIGGER workout_templates_updated_at
 -- ===========================================
 
 CREATE TABLE assigned_workouts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,

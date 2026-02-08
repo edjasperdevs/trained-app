@@ -13,7 +13,7 @@ CREATE TYPE checkin_status AS ENUM ('submitted', 'reviewed');
 -- ===========================================
 
 CREATE TABLE weekly_checkins (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
 

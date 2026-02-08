@@ -9,13 +9,13 @@
 CREATE TYPE invite_status AS ENUM ('pending', 'accepted', 'expired');
 
 CREATE TABLE invites (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   status invite_status DEFAULT 'pending' NOT NULL,
-  token UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
+  token UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE,
   expires_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
   accepted_at TIMESTAMPTZ,
   accepted_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
