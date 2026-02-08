@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 3 (Client Roster) complete. Phase 4 (Macro Management) next.
+**Current focus:** Phase 4 (Macro Management) in progress. Plan 1 complete, Plan 2 next.
 
 ## Current Position
 
 Phase: 4 of 6 (Macro Management)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-07 -- Phase 3 (Client Roster) verified and complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-07 -- Completed 04-01-PLAN.md (Coach Macro Insert Policy & Expanded Hook)
 
-Progress: [█████████░] 50%
+Progress: [█████████░░░] 69%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [█████████░] 50%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2.6min
-- Total execution time: 21min
+- Total execution time: 23min
 
 ## Accumulated Context
 
@@ -59,6 +59,7 @@ Recent decisions affecting current work:
 - 03-01: Dev bypass filters mock data client-side matching server behavior shape
 - 03-02: Quick stats hidden for multi-page rosters (only current page data available)
 - 03-02: Client card shows workouts (7d) instead of level for at-a-glance activity
+- 04-01: set_by defaults to 'self' when null from database (fallback in mapping)
 
 ### Pending Todos
 
@@ -68,6 +69,7 @@ Recent decisions affecting current work:
 - Set up Resend API key and deploy send-invite Edge Function before invite testing
 - Apply migration 003_invitations.sql to Supabase
 - Apply migration 004_roster_enhancements.sql to Supabase
+- Apply migration 005_coach_macro_insert.sql to Supabase
 
 ### Blockers/Concerns
 
@@ -76,5 +78,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 03-02-PLAN.md (Paginated Roster UI) -- Phase 3 complete
+Stopped at: Completed 04-01-PLAN.md (Coach Macro Insert Policy & Expanded Hook)
 Resume file: None
