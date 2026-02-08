@@ -10,7 +10,7 @@ import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
 import { scheduleSync } from '@/lib/sync'
 import { cn } from '@/lib/cn'
-import { Clock, Dumbbell } from 'lucide-react'
+import { Clock, Dumbbell, ShieldCheck } from 'lucide-react'
 
 export function Workouts() {
   const {
@@ -32,7 +32,9 @@ export function Workouts() {
     updateExercise,
     removeExercise,
     reorderExercise,
-    resetToDefaults
+    resetToDefaults,
+    assignedWorkout,
+    setAssignedWorkout
   } = useWorkoutStore()
 
   const { logDailyXP, XP_VALUES, getTodayLog } = useXPStore()
@@ -52,6 +54,8 @@ export function Workouts() {
   const isCompleted = isWorkoutCompletedToday()
   const workoutHistory = getWorkoutHistory(10)
   const allBadges = getAllBadges()
+  const today = new Date().toISOString().split('T')[0]
+  const hasAssignment = assignedWorkout && assignedWorkout.date === today
 
   // Check for badges and show toast notifications
   const checkBadgesWithToast = () => {
@@ -71,10 +75,13 @@ export function Workouts() {
   }
 
   const handleStartWorkout = () => {
-    if (!todayWorkout) return
-    startWorkout(todayWorkout.type, todayWorkout.dayNumber)
+    // Coach-assigned workout can override rest days
+    const type = todayWorkout?.type || 'push'
+    const dayNumber = todayWorkout?.dayNumber || 1
+    if (!todayWorkout && !hasAssignment) return
+    startWorkout(type, dayNumber)
     setActiveWorkout(getCurrentWorkout())
-    analytics.workoutStarted(todayWorkout.type)
+    analytics.workoutStarted(type)
   }
 
   const handleMinimalWorkout = () => {
@@ -261,14 +268,26 @@ export function Workouts() {
             {/* Today's Workout */}
             <div>
               <h2 className="text-lg font-bold mb-3">Today</h2>
-              {todayWorkout ? (
+              {todayWorkout || hasAssignment ? (
                 <Card className="py-0">
                   <CardContent className="p-4">
+                    {hasAssignment && (
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <ShieldCheck size={14} className="text-primary" />
+                        <span className="text-xs text-primary font-medium">
+                          Assigned by Coach
+                        </span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xl font-bold">{todayWorkout.name}</p>
+                        <p className="text-xl font-bold">
+                          {hasAssignment ? 'Coach Workout' : todayWorkout!.name}
+                        </p>
                         <p className="text-sm text-muted-foreground">
-                          Day {todayWorkout.dayNumber} of your week
+                          {hasAssignment
+                            ? `${assignedWorkout!.exercises.length} exercises prescribed`
+                            : `Day ${todayWorkout!.dayNumber} of your week`}
                         </p>
                       </div>
                       {isCompleted ? (
@@ -284,8 +303,45 @@ export function Workouts() {
                         </div>
                       )}
                     </div>
+                    {/* Prescribed exercises preview */}
+                    {hasAssignment && !isCompleted && (
+                      <div className="mt-3 pt-3 border-t border-border space-y-1.5">
+                        {assignedWorkout!.exercises.map((ex, i) => (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className="text-foreground">{ex.name}</span>
+                            <span className="text-muted-foreground text-xs">
+                              {ex.targetSets} x {ex.targetReps}
+                              {ex.targetWeight ? ` @ ${ex.targetWeight} lbs` : ''}
+                            </span>
+                          </div>
+                        ))}
+                        {assignedWorkout!.coachNotes && (
+                          <div className="mt-2 p-2.5 bg-primary/10 rounded-lg">
+                            <p className="text-xs text-primary">
+                              <span className="font-semibold">Coach notes:</span> {assignedWorkout!.coachNotes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {!isCompleted && (
-                      <div className="mt-4 pt-4 border-t border-border">
+                      <div className="mt-4 pt-4 border-t border-border space-y-2">
+                        {hasAssignment && todayWorkout && (
+                          <button
+                            onClick={() => {
+                              setAssignedWorkout(null)
+                            }}
+                            className="
+                              w-full flex items-center justify-center gap-2 py-2.5 px-4
+                              text-sm font-medium transition-all
+                              border border-border text-muted-foreground hover:border-primary hover:text-primary
+                              rounded-lg
+                            "
+                          >
+                            <Dumbbell size={16} />
+                            Do your own workout instead
+                          </button>
+                        )}
                         <button
                           onClick={() => setShowMinimalModal(true)}
                           className="
@@ -367,6 +423,7 @@ export function Workouts() {
                   const workout = currentPlan?.schedule.find(s => s.day === index)
                   const isToday = new Date().getDay() === index
                   const isPast = new Date().getDay() > index
+                  const isCoachDay = isToday && hasAssignment
 
                   return (
                     <div
@@ -378,9 +435,13 @@ export function Workouts() {
                       )}
                     >
                       <span className="text-muted-foreground mb-1">{day}</span>
-                      <span className="text-lg">
-                        {workout?.type === 'rest' ? '😴' : getWorkoutEmoji(workout?.type || 'rest')}
-                      </span>
+                      {isCoachDay ? (
+                        <ShieldCheck size={18} className="text-primary" />
+                      ) : (
+                        <span className="text-lg">
+                          {workout?.type === 'rest' ? '😴' : getWorkoutEmoji(workout?.type || 'rest')}
+                        </span>
+                      )}
                     </div>
                   )
                 })}
@@ -784,9 +845,19 @@ function ActiveWorkoutView({
       {/* Progress Header */}
       <Card className="py-0">
         <CardContent className="p-4">
+          {workout.assignmentId && (
+            <div className="flex items-center gap-1.5 mb-2">
+              <ShieldCheck size={14} className="text-primary" />
+              <span className="text-xs text-primary font-medium">
+                Prescribed by Coach
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-xl font-bold capitalize">{workout.workoutType} Day</p>
+              <p className="text-xl font-bold capitalize">
+                {workout.assignmentId ? 'Coach Workout' : `${workout.workoutType} Day`}
+              </p>
               <p className="text-sm text-muted-foreground">Week {workout.weekNumber}, Day {workout.dayNumber}</p>
             </div>
             <div className="text-right">
