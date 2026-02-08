@@ -11,7 +11,7 @@
 - [x] **INFRA-02**: Data ownership model separates client-owned data (offline-first, push to Supabase) from coach-owned data (server-authoritative, pull from Supabase)
 - [x] **INFRA-03**: Sync system is directional -- `pushClientData()` for client-owned, `pullCoachData()` for coach-owned -- preventing coach-set data from being overwritten
 - [x] **INFRA-04**: Existing `coach_clients` RLS policy requires `role = 'coach'` to prevent unauthorized coach escalation
-- [ ] **INFRA-05**: Client roster is paginated with server-side search and sort (handles 90K scale)
+- [x] **INFRA-05**: Client roster is paginated with server-side search and sort (handles 90K scale)
 - [x] **INFRA-06**: Coach dashboard is lazy-loaded -- zero bundle size impact on client app
 
 ### Invitations
@@ -22,9 +22,9 @@
 
 ### Client Roster
 
-- [ ] **ROSTER-01**: Coach sees a list of all enrolled clients with at-a-glance activity summaries (last workout, streak, macro adherence)
-- [ ] **ROSTER-02**: Coach can drill into a client detail view showing weight history, macro adherence, and activity feed
-- [ ] **ROSTER-03**: Coach can search clients by name or email
+- [x] **ROSTER-01**: Coach sees a list of all enrolled clients with at-a-glance activity summaries (last workout, streak, macro adherence)
+- [x] **ROSTER-02**: Coach can drill into a client detail view showing weight history, macro adherence, and activity feed
+- [x] **ROSTER-03**: Coach can search clients by name or email
 
 ### Workout Programming
 
@@ -94,14 +94,14 @@ Deferred to future milestones. Tracked but not in current roadmap.
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-03 | Phase 1 | Complete |
 | INFRA-04 | Phase 1 | Complete |
-| INFRA-05 | Phase 3 | Pending |
+| INFRA-05 | Phase 3 | Complete |
 | INFRA-06 | Phase 1 | Complete |
 | INVITE-01 | Phase 2 | Complete |
 | INVITE-02 | Phase 2 | Complete |
 | INVITE-03 | Phase 2 | Complete |
-| ROSTER-01 | Phase 3 | Pending |
-| ROSTER-02 | Phase 3 | Pending |
-| ROSTER-03 | Phase 3 | Pending |
+| ROSTER-01 | Phase 3 | Complete |
+| ROSTER-02 | Phase 3 | Complete |
+| ROSTER-03 | Phase 3 | Complete |
 | PROG-01 | Phase 5 | Pending |
 | PROG-02 | Phase 5 | Pending |
 | PROG-03 | Phase 5 | Pending |
