@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 6 (Weekly Check-ins) in progress. Plan 03 complete, 1 remaining.
+**Current focus:** Phase 6 (Weekly Check-ins) complete. All 4 plans executed. v1.3 Coach Dashboard milestone complete.
 
 ## Current Position
 
 Phase: 6 of 6 (Weekly Check-ins)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-08 -- Completed 06-03-PLAN.md (Coach Check-in Review UI)
+Plan: 4 of 4 in current phase
+Status: Phase complete -- v1.3 milestone complete
+Last activity: 2026-02-08 -- Completed 06-04-PLAN.md (Coach Response Viewing)
 
-Progress: [█████████████████░] 94%
+Progress: [██████████████████] 100%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [█████████████████░] 94%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 17
-- Average duration: 3.3min
-- Total execution time: 58min
+- Total plans completed: 18
+- Average duration: 3.4min
+- Total execution time: 61min
 
 ## Accumulated Context
 
@@ -89,6 +89,9 @@ Recent decisions affecting current work:
 - 06-03: Scale fields displayed as "{value}/5", sleep as "{value} hours"
 - 06-03: Empty/null fields hidden from coach review (research pitfall #5)
 - 06-03: Expandable card accordion pattern for client check-in history
+- 06-04: localStorage for latest check-in (not Zustand) -- single read-only value, no reactive state needed
+- 06-04: getTimeAgo duplicated from Coach.tsx -- small function, not worth shared util extraction
+- 06-04: Coach reviewed banner takes priority over check-in due banner
 
 ### Pending Todos
 
@@ -109,5 +112,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 06-03-PLAN.md (Coach Check-in Review UI)
+Stopped at: Completed 06-04-PLAN.md (Coach Response Viewing) -- Phase 6 complete, v1.3 milestone complete
 Resume file: None
