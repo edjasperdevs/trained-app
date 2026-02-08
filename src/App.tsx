@@ -19,6 +19,7 @@ const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ de
 const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
 const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
+const WeeklyCheckIn = lazy(() => import('@/screens/WeeklyCheckIn').then(m => ({ default: m.WeeklyCheckIn })))
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -170,6 +171,7 @@ function AppContent() {
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
           <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+          <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           {devBypass && <Route path="/auth" element={<Auth />} />}
           {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
           {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}

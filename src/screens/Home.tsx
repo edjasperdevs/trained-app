@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, XPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
-import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check } from 'lucide-react'
+import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
 import {
   useUserStore,
   useXPStore,
@@ -17,6 +17,7 @@ import { haptics } from '@/lib/haptics'
 import { cn } from '@/lib/cn'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
+import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 
 export function Home() {
   const navigate = useNavigate()
@@ -33,6 +34,15 @@ export function Home() {
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
+  const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
+
+  // Check if weekly check-in is due
+  const { hasCheckinForCurrentWeek } = useWeeklyCheckins()
+  useEffect(() => {
+    hasCheckinForCurrentWeek().then(hasCheckin => {
+      setWeeklyCheckinDue(!hasCheckin)
+    })
+  }, [hasCheckinForCurrentWeek])
 
   // Check if user has already checked in today
   const todayLog = getTodayLog()
@@ -137,6 +147,31 @@ export function Home() {
         {/* Active Reminders */}
         {activeReminders.length > 0 && !hasCheckedInToday && (
           <ReminderList maxReminders={2} />
+        )}
+
+        {/* Weekly Check-in Due Banner */}
+        {weeklyCheckinDue === true && (
+          <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+            <Card
+              className="py-0 cursor-pointer border-l-[3px] border-l-secondary"
+              onClick={() => navigate('/checkin')}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <ClipboardCheck size={28} className="text-secondary" />
+                  <div className="flex-1">
+                    <p className="font-bold text-base">
+                      Weekly Check-in Due
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Submit your weekly check-in for your coach
+                    </p>
+                  </div>
+                  <ChevronRight size={20} className="text-secondary" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Check-In Reminder Banner */}
