@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 4 (Macro Management) complete. Phase 5 (Workout Programming) next.
+**Current focus:** Phase 5 (Workout Programming) in progress.
 
 ## Current Position
 
 Phase: 5 of 6 (Workout Programming)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-07 -- Phase 4 (Macro Management) verified and complete
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-08 -- Completed 05-01-PLAN.md (Workout Programming Schema & Types)
 
-Progress: [██████████░░] 67%
+Progress: [███████████░] 73%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [██████████░░] 67%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 2.7min
-- Total execution time: 28min
+- Total execution time: 31min
 
 ## Accumulated Context
 
@@ -63,6 +63,9 @@ Recent decisions affecting current work:
 - 04-02: Used trackEvent() directly instead of analytics.track() (typed object has no generic track)
 - 04-02: Null guards for clientId and coachId props (both nullable types)
 - 04-02: useEffect syncs form fields with currentTargets after cache refresh
+- 05-01: UNIQUE(client_id, date) on assigned_workouts -- one assignment per client per day
+- 05-01: assignedWorkout non-persisted via partialize -- server-authoritative, fetched fresh
+- 05-01: assignment_id ON DELETE SET NULL -- preserves workout history
 
 ### Pending Todos
 
@@ -73,6 +76,7 @@ Recent decisions affecting current work:
 - Apply migration 003_invitations.sql to Supabase
 - Apply migration 004_roster_enhancements.sql to Supabase
 - Apply migration 005_coach_macro_insert.sql to Supabase
+- Apply migration 006_workout_programming.sql to Supabase
 
 ### Blockers/Concerns
 
@@ -80,6 +84,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: Completed 04-02-PLAN.md (Coach Macro Editor UI & Client Indicator) -- v1.3 milestone complete
+Last session: 2026-02-08
+Stopped at: Completed 05-01-PLAN.md (Workout Programming Schema & Types)
 Resume file: None
