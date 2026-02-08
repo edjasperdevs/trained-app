@@ -106,7 +106,12 @@ Plans:
   3. Coach sees a list of pending check-ins to review, sorted by submission date
   4. Coach can review a check-in and add notes/response that the client can read
   5. Check-in prompt is surfaced prominently on the client home screen when due (not buried in navigation)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 06-01-PLAN.md -- Database migration, TypeScript types, useWeeklyCheckins hook, devSeed mock data
+- [ ] 06-02-PLAN.md -- Client check-in form (16 fields, 5 sections), auto-populated data, Home screen due banner
+- [ ] 06-03-PLAN.md -- Coach pending check-ins list, review flow, client detail check-ins tab
+- [ ] 06-04-PLAN.md -- pullCoachData extension, client response viewing on Home screen
 
 ## Progress
 
@@ -120,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
 | 4. Macro Management | 2/2 | Complete | 2026-02-07 |
 | 5. Workout Programming | 4/4 | Complete | 2026-02-08 |
-| 6. Weekly Check-ins | 0/TBD | Not started | - |
+| 6. Weekly Check-ins | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
