@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 6 (Weekly Check-ins) in progress. Plan 01 complete, 3 remaining.
+**Current focus:** Phase 6 (Weekly Check-ins) in progress. Plan 02 complete, 2 remaining.
 
 ## Current Position
 
 Phase: 6 of 6 (Weekly Check-ins)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 -- Completed 06-01-PLAN.md (Weekly Check-ins Foundation)
+Last activity: 2026-02-08 -- Completed 06-02-PLAN.md (Client Check-in Form & Home Banner)
 
-Progress: [███████████████░░] 83%
+Progress: [████████████████░] 88%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [███████████████░░] 83%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 15
-- Average duration: 2.7min
-- Total execution time: 48min
+- Total plans completed: 16
+- Average duration: 3.4min
+- Total execution time: 55min
 
 ## Accumulated Context
 
@@ -81,6 +81,10 @@ Recent decisions affecting current work:
 - 06-01: Client UPDATE restricted to status='submitted' (prevents editing after coach reviews)
 - 06-01: getCurrentMonday() uses local timezone via getLocalDateString for week_of
 - 06-01: PendingCheckin interface extends WeeklyCheckin with client_username/email for coach list
+- 06-02: Button groups (not Select) for 1-5 scale fields -- more mobile-friendly
+- 06-02: All sections expanded by default -- user collapses as they go
+- 06-02: Weekly banner uses secondary color, Daily Report uses primary -- visual distinction
+- 06-02: hasCheckinForCurrentWeek() on Home mount, null = loading state
 
 ### Pending Todos
 
@@ -101,5 +105,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 06-01-PLAN.md (Weekly Check-ins Foundation)
+Stopped at: Completed 06-02-PLAN.md (Client Check-in Form & Home Banner)
 Resume file: None
