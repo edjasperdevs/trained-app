@@ -89,7 +89,12 @@ Plans:
   3. Client sees the coach-assigned workout on the assigned date with an "Assigned by Coach" indicator
   4. Client can log their actual sets/reps/weight against the prescribed workout
   5. Coach can view a prescribed-vs-actual comparison showing what was assigned versus what the client did
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 05-01-PLAN.md -- Database migration (workout_templates, assigned_workouts, assignment_id FK) + TypeScript types + workoutStore state + devSeed
+- [ ] 05-02-PLAN.md -- Coach workout builder UI, template CRUD, assignment flow (PROG-01, PROG-02, PROG-03)
+- [ ] 05-03-PLAN.md -- Client-side integration: pullCoachData extension, "Assigned by Coach" UI, assignment_id logging (PROG-04, PROG-05)
+- [ ] 05-04-PLAN.md -- Prescribed vs actual comparison view for coach (PROG-06)
 
 ### Phase 6: Weekly Check-ins
 **Goal**: Clients submit structured weekly check-ins and the coach reviews and responds to them from the dashboard
@@ -114,7 +119,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Invitations | 3/3 | Complete | 2026-02-07 |
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
 | 4. Macro Management | 2/2 | Complete | 2026-02-07 |
-| 5. Workout Programming | 0/TBD | Not started | - |
+| 5. Workout Programming | 0/4 | Planning complete | - |
 | 6. Weekly Check-ins | 0/TBD | Not started | - |
 
 ---
