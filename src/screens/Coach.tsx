@@ -2,22 +2,24 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ClientMacroAdherence, ClientActivityFeed } from '@/components'
 import { useAuthStore, toast } from '@/stores'
 import { getSupabaseClient } from '@/lib/supabase'
 import { useClientDetails } from '@/hooks/useClientDetails'
 import { useClientRoster, ClientSummary } from '@/hooks/useClientRoster'
 import { useCoachTemplates } from '@/hooks/useCoachTemplates'
+import { useWeeklyCheckins, PendingCheckin } from '@/hooks/useWeeklyCheckins'
 import { WorkoutBuilder } from '@/components/WorkoutBuilder'
 import { WorkoutAssigner } from '@/components/WorkoutAssigner'
 import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
-import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react'
+import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck } from 'lucide-react'
 import { LABELS } from '@/design/constants'
 import type { MacroTargets } from '@/hooks/useClientDetails'
-import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout } from '@/lib/database.types'
+import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout, WeeklyCheckin } from '@/lib/database.types'
 import type { Exercise } from '@/stores/workoutStore'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
@@ -33,8 +35,8 @@ interface CompletedAssignment {
   assignment: AssignedWorkout
 }
 
-type ClientDetailTab = 'overview' | 'progress' | 'activity' | 'programs'
-type DashboardView = 'clients' | 'templates'
+type ClientDetailTab = 'overview' | 'progress' | 'activity' | 'programs' | 'checkins'
+type DashboardView = 'clients' | 'templates' | 'checkins'
 type TemplateMode = 'list' | 'create' | 'edit' | 'assign'
 
 interface InviteRow {
@@ -272,6 +274,22 @@ export function Coach() {
   const [inviteMessage, setInviteMessage] = useState('')
   const [invites, setInvites] = useState<InviteRow[]>([])
 
+  // Check-ins state
+  const [selectedCheckin, setSelectedCheckin] = useState<PendingCheckin | null>(null)
+  const [reviewResponse, setReviewResponse] = useState('')
+  const [isReviewing, setIsReviewing] = useState(false)
+  const [clientCheckinsList, setClientCheckinsList] = useState<WeeklyCheckin[]>([])
+  const [clientCheckinsLoading, setClientCheckinsLoading] = useState(false)
+  const [expandedCheckinId, setExpandedCheckinId] = useState<string | null>(null)
+
+  const {
+    pendingCheckins,
+    fetchPendingCheckins,
+    fetchClientCheckins,
+    submitReview,
+    isLoading: isCheckinsLoading,
+  } = useWeeklyCheckins()
+
   // Templates / Programs state
   const [dashboardView, setDashboardView] = useState<DashboardView>('clients')
   const [templateMode, setTemplateMode] = useState<TemplateMode>('list')
@@ -318,6 +336,25 @@ export function Coach() {
       setExpandedCompletedId(null)
     }
   }, [selectedClient?.client_id])
+
+  // Fetch pending check-ins when switching to checkins dashboard view
+  useEffect(() => {
+    if (dashboardView === 'checkins') {
+      fetchPendingCheckins()
+    }
+  }, [dashboardView, fetchPendingCheckins])
+
+  // Fetch client check-ins when Check-ins tab is active in client detail
+  useEffect(() => {
+    if (activeTab === 'checkins' && selectedClient?.client_id) {
+      setClientCheckinsLoading(true)
+      fetchClientCheckins(selectedClient.client_id)
+        .then(checkins => {
+          setClientCheckinsList(checkins)
+        })
+        .finally(() => setClientCheckinsLoading(false))
+    }
+  }, [activeTab, selectedClient?.client_id, fetchClientCheckins])
 
   // Load client assignments when Programs tab is active
   useEffect(() => {
@@ -771,6 +808,90 @@ export function Coach() {
     toast.success('Assignment removed')
   }
 
+  // Check-in review handler
+  const handleSubmitReview = async () => {
+    if (!selectedCheckin || !reviewResponse.trim()) {
+      toast.error('Please write a response before submitting')
+      return
+    }
+
+    setIsReviewing(true)
+    try {
+      const { error: reviewError } = await submitReview(selectedCheckin.id, reviewResponse.trim())
+      if (reviewError) {
+        toast.error(reviewError)
+        return
+      }
+      toast.success('Review submitted')
+      setSelectedCheckin(null)
+      setReviewResponse('')
+      fetchPendingCheckins()
+    } catch (err) {
+      console.error('Error submitting review:', err)
+      toast.error('Failed to submit review')
+    } finally {
+      setIsReviewing(false)
+    }
+  }
+
+  // Check-in field sections for display
+  const getCheckinSections = (checkin: WeeklyCheckin | PendingCheckin) => {
+    const sections = [
+      {
+        title: 'Nutrition',
+        fields: [
+          { label: 'Water Intake', value: checkin.water_intake },
+          { label: 'Caffeine Intake', value: checkin.caffeine_intake },
+          { label: 'Hunger Level', value: checkin.hunger_level !== null ? `${checkin.hunger_level}/5` : null },
+          { label: 'Slip-ups', value: checkin.slip_ups },
+          { label: 'Last Refeed', value: checkin.refeed_date },
+          { label: 'Digestion', value: checkin.digestion },
+        ],
+      },
+      {
+        title: 'Training',
+        fields: [
+          { label: 'Progress', value: checkin.training_progress },
+          { label: 'Feedback', value: checkin.training_feedback },
+          { label: 'Recovery / Soreness', value: checkin.recovery_soreness },
+        ],
+      },
+      {
+        title: 'Lifestyle',
+        fields: [
+          { label: 'Sleep Quality', value: checkin.sleep_quality !== null ? `${checkin.sleep_quality}/5` : null },
+          { label: 'Sleep Hours', value: checkin.sleep_hours !== null ? `${checkin.sleep_hours} hours` : null },
+          { label: 'Stress Level', value: checkin.stress_level !== null ? `${checkin.stress_level}/5` : null },
+          { label: 'Stressors', value: checkin.stressors },
+          { label: 'Mental Health', value: checkin.mental_health },
+        ],
+      },
+      {
+        title: 'Health',
+        fields: [
+          { label: 'Injuries', value: checkin.injuries },
+          { label: 'Cycle Status', value: checkin.cycle_status },
+          { label: 'Side Effects', value: checkin.side_effects },
+          { label: 'Last Bloodwork', value: checkin.bloodwork_date },
+        ],
+      },
+      {
+        title: 'Open Feedback',
+        fields: [
+          { label: 'Additional Notes', value: checkin.open_feedback },
+        ],
+      },
+    ]
+
+    // Filter out sections where all fields are empty
+    return sections
+      .map(section => ({
+        ...section,
+        fields: section.fields.filter(f => f.value !== null && f.value !== undefined && f.value !== ''),
+      }))
+      .filter(section => section.fields.length > 0)
+  }
+
   // Filter invites to show only non-accepted (pending + expired)
   const visibleInvites = invites.filter(inv => inv.status !== 'accepted')
 
@@ -809,7 +930,9 @@ export function Coach() {
             <p className="text-muted-foreground">
               {dashboardView === 'clients'
                 ? `${totalCount} client${totalCount !== 1 ? 's' : ''}`
-                : `${templates.length} template${templates.length !== 1 ? 's' : ''}`
+                : dashboardView === 'templates'
+                ? `${templates.length} template${templates.length !== 1 ? 's' : ''}`
+                : `${pendingCheckins.length} pending`
               }
             </p>
           </div>
@@ -817,7 +940,7 @@ export function Coach() {
             <Button onClick={() => setShowAddClient(true)}>
               + Invite Client
             </Button>
-          ) : templateMode === 'list' ? (
+          ) : dashboardView === 'templates' && templateMode === 'list' ? (
             <Button onClick={handleNewTemplate}>
               <Plus size={16} className="mr-1" />
               New Template
@@ -849,6 +972,18 @@ export function Coach() {
           >
             <Dumbbell size={14} />
             Templates
+          </button>
+          <button
+            onClick={() => { setDashboardView('checkins'); setSelectedCheckin(null) }}
+            className={cn(
+              'flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1',
+              dashboardView === 'checkins'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <ClipboardCheck size={14} />
+            Check-ins
           </button>
         </div>
 
@@ -1009,6 +1144,194 @@ export function Coach() {
                   }}
                 />
               </div>
+            )}
+          </>
+        )}
+
+        {/* Check-ins View */}
+        {dashboardView === 'checkins' && (
+          <>
+            {selectedCheckin ? (
+              /* Review view for a single check-in */
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setSelectedCheckin(null); setReviewResponse('') }}
+                  >
+                    <ArrowLeft size={16} className="mr-1" />
+                    Back
+                  </Button>
+                  <h2 className="text-sm font-semibold text-muted-foreground">REVIEW CHECK-IN</h2>
+                </div>
+
+                {/* Client name + week header */}
+                <Card className="py-0">
+                  <CardContent className="p-4">
+                    <h3 className="text-lg font-bold">
+                      {selectedCheckin.client_username || selectedCheckin.client_email?.split('@')[0] || 'Unknown'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Week of {new Date(selectedCheckin.week_of + 'T00:00:00').toLocaleDateString()}
+                      {' '}&middot;{' '}
+                      Submitted {getTimeAgo(selectedCheckin.created_at)}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Auto-populated data summary */}
+                <Card className="py-0">
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">APP DATA (AUTO)</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Current Weight</p>
+                        <p className="font-digital text-lg">
+                          {selectedCheckin.auto_weight_current !== null
+                            ? `${selectedCheckin.auto_weight_current} lbs`
+                            : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Weekly Avg</p>
+                        <p className="font-digital text-lg">
+                          {selectedCheckin.auto_weight_weekly_avg !== null
+                            ? `${selectedCheckin.auto_weight_weekly_avg} lbs`
+                            : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Weight Change</p>
+                        <p className={cn(
+                          'font-digital text-lg',
+                          selectedCheckin.auto_weight_change !== null && selectedCheckin.auto_weight_change < 0
+                            ? 'text-success'
+                            : selectedCheckin.auto_weight_change !== null && selectedCheckin.auto_weight_change > 0
+                            ? 'text-destructive'
+                            : ''
+                        )}>
+                          {selectedCheckin.auto_weight_change !== null
+                            ? `${selectedCheckin.auto_weight_change > 0 ? '+' : ''}${selectedCheckin.auto_weight_change} lbs`
+                            : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Macro Hit Rate</p>
+                        <p className="font-digital text-lg">
+                          {selectedCheckin.auto_macro_hit_rate !== null
+                            ? `${selectedCheckin.auto_macro_hit_rate}%`
+                            : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Workouts</p>
+                        <p className="font-digital text-lg">
+                          {selectedCheckin.auto_workouts_completed !== null
+                            ? selectedCheckin.auto_workouts_completed
+                            : '--'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Steps (avg)</p>
+                        <p className="font-digital text-lg text-muted-foreground">
+                          {selectedCheckin.auto_step_avg !== null
+                            ? selectedCheckin.auto_step_avg.toLocaleString()
+                            : 'Not tracked'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Client-submitted fields by section */}
+                {getCheckinSections(selectedCheckin).map((section) => (
+                  <Card key={section.title} className="py-0">
+                    <CardContent className="p-4">
+                      <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                        {section.title.toUpperCase()}
+                      </h3>
+                      <div className="space-y-3">
+                        {section.fields.map((field) => (
+                          <div key={field.label}>
+                            <p className="text-xs text-muted-foreground mb-0.5">{field.label}</p>
+                            <p className="text-sm">{field.value}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Coach response textarea */}
+                <Card className="py-0">
+                  <CardContent className="p-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">YOUR RESPONSE</h3>
+                    <Textarea
+                      value={reviewResponse}
+                      onChange={(e) => setReviewResponse(e.target.value)}
+                      placeholder="Write your feedback, adjustments, and encouragement..."
+                      className="mb-3 min-h-[120px]"
+                    />
+                    <Button
+                      className="w-full"
+                      onClick={handleSubmitReview}
+                      disabled={isReviewing || !reviewResponse.trim()}
+                    >
+                      {isReviewing ? 'Submitting...' : 'Submit Review'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              /* Pending check-ins list */
+              <>
+                {isCheckinsLoading ? (
+                  <div className="text-center py-8">
+                    <span className="text-2xl animate-pulse">...</span>
+                    <p className="text-sm text-muted-foreground mt-1">Loading check-ins...</p>
+                  </div>
+                ) : pendingCheckins.length === 0 ? (
+                  <Card className="py-0">
+                    <CardContent className="text-center py-8">
+                      <ClipboardCheck size={40} className="mx-auto mb-3 text-muted-foreground" />
+                      <p className="text-muted-foreground mb-2">No pending check-ins</p>
+                      <p className="text-sm text-muted-foreground">
+                        You're all caught up! Check-ins will appear here when clients submit them.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-2">
+                    {pendingCheckins.map((checkin) => (
+                      <Card
+                        key={checkin.id}
+                        className="py-0 cursor-pointer hover:bg-card/80 transition-colors"
+                        onClick={() => { setSelectedCheckin(checkin); setReviewResponse('') }}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-3">
+                            <ClipboardCheck size={20} className="text-secondary shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold truncate">
+                                {checkin.client_username || checkin.client_email?.split('@')[0] || 'Unknown'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Week of {new Date(checkin.week_of + 'T00:00:00').toLocaleDateString()}
+                                {' '}&middot;{' '}
+                                {getTimeAgo(checkin.created_at)}
+                              </p>
+                            </div>
+                            <span className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full font-medium shrink-0">
+                              Pending
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
@@ -1226,18 +1549,18 @@ export function Coach() {
               {/* Tab Navigation */}
               {selectedClient.onboarding_complete && (
                 <div className="flex border-b border-border">
-                  {(['overview', 'progress', 'activity', 'programs'] as const).map((tab) => (
+                  {(['overview', 'progress', 'activity', 'programs', 'checkins'] as const).map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
                       className={cn(
-                        'flex-1 py-3 text-sm font-medium transition-colors',
+                        'flex-1 py-3 text-xs font-medium transition-colors',
                         activeTab === tab
                           ? 'text-primary border-b-2 border-primary'
                           : 'text-muted-foreground hover:text-foreground'
                       )}
                     >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      {tab === 'checkins' ? 'Check-ins' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -1631,6 +1954,83 @@ export function Coach() {
                         </>
                       )}
                     </>
+                  )}
+
+                  {/* Check-ins Tab */}
+                  {activeTab === 'checkins' && (
+                    <div className="space-y-3">
+                      {clientCheckinsLoading ? (
+                        <div className="text-center py-4">
+                          <span className="text-2xl animate-pulse">...</span>
+                          <p className="text-sm text-muted-foreground mt-1">Loading check-ins...</p>
+                        </div>
+                      ) : clientCheckinsList.length === 0 ? (
+                        <Card className="py-0">
+                          <CardContent className="text-center py-6">
+                            <ClipboardCheck size={32} className="mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">No check-ins yet</p>
+                          </CardContent>
+                        </Card>
+                      ) : (
+                        clientCheckinsList.map((checkin) => {
+                          const isExpanded = expandedCheckinId === checkin.id
+                          return (
+                            <Card key={checkin.id} className="py-0">
+                              <CardContent className="p-0">
+                                <button
+                                  type="button"
+                                  className="w-full p-3 flex items-center gap-3 text-left"
+                                  onClick={() => setExpandedCheckinId(isExpanded ? null : checkin.id)}
+                                >
+                                  {isExpanded ? (
+                                    <ChevronDown size={16} className="text-muted-foreground shrink-0" />
+                                  ) : (
+                                    <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm">
+                                      Week of {new Date(checkin.week_of + 'T00:00:00').toLocaleDateString()}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {getTimeAgo(checkin.created_at)}
+                                    </p>
+                                  </div>
+                                  <span className={cn(
+                                    'text-xs px-2 py-0.5 rounded-full font-medium shrink-0',
+                                    checkin.status === 'reviewed'
+                                      ? 'bg-success/20 text-success'
+                                      : 'bg-warning/20 text-warning'
+                                  )}>
+                                    {checkin.status === 'reviewed' ? 'Reviewed' : 'Submitted'}
+                                  </span>
+                                </button>
+                                {isExpanded && (
+                                  <div className="px-3 pb-3 border-t border-border pt-3 space-y-3">
+                                    {getCheckinSections(checkin).map((section) => (
+                                      <div key={section.title}>
+                                        <h4 className="text-xs font-semibold text-muted-foreground mb-1">{section.title.toUpperCase()}</h4>
+                                        {section.fields.map((field) => (
+                                          <div key={field.label} className="mb-1.5">
+                                            <span className="text-xs text-muted-foreground">{field.label}: </span>
+                                            <span className="text-sm">{field.value}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ))}
+                                    {checkin.status === 'reviewed' && checkin.coach_response && (
+                                      <div className="bg-background rounded-lg p-3 mt-2">
+                                        <p className="text-xs font-semibold text-muted-foreground mb-1">COACH RESPONSE</p>
+                                        <p className="text-sm whitespace-pre-wrap">{checkin.coach_response}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          )
+                        })
+                      )}
+                    </div>
                   )}
                 </>
               )}
