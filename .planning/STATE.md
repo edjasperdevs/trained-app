@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 6 (Weekly Check-ins) in progress. Plan 02 complete, 2 remaining.
+**Current focus:** Phase 6 (Weekly Check-ins) in progress. Plan 03 complete, 1 remaining.
 
 ## Current Position
 
 Phase: 6 of 6 (Weekly Check-ins)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 -- Completed 06-02-PLAN.md (Client Check-in Form & Home Banner)
+Last activity: 2026-02-08 -- Completed 06-03-PLAN.md (Coach Check-in Review UI)
 
-Progress: [████████████████░] 88%
+Progress: [█████████████████░] 94%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [████████████████░] 88%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 16
-- Average duration: 3.4min
-- Total execution time: 55min
+- Total plans completed: 17
+- Average duration: 3.3min
+- Total execution time: 58min
 
 ## Accumulated Context
 
@@ -85,6 +85,10 @@ Recent decisions affecting current work:
 - 06-02: All sections expanded by default -- user collapses as they go
 - 06-02: Weekly banner uses secondary color, Daily Report uses primary -- visual distinction
 - 06-02: hasCheckinForCurrentWeek() on Home mount, null = loading state
+- 06-03: getCheckinSections() helper shared between review view and client detail tab
+- 06-03: Scale fields displayed as "{value}/5", sleep as "{value} hours"
+- 06-03: Empty/null fields hidden from coach review (research pitfall #5)
+- 06-03: Expandable card accordion pattern for client check-in history
 
 ### Pending Todos
 
@@ -105,5 +109,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 06-02-PLAN.md (Client Check-in Form & Home Banner)
+Stopped at: Completed 06-03-PLAN.md (Coach Check-in Review UI)
 Resume file: None
