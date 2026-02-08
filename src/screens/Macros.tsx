@@ -4,10 +4,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ProgressBar, MealBuilder, EmptyState } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
-import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw } from 'lucide-react'
+import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
+import { LABELS } from '@/design/constants'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -34,7 +35,8 @@ export function Macros() {
     isProteinTargetHit,
     isCalorieTargetHit,
     calculateMacros,
-    activityLevel
+    activityLevel,
+    setBy,
   } = useMacroStore()
 
   const profile = useUserStore((state) => state.profile)
@@ -53,7 +55,15 @@ export function Macros() {
     <div data-testid="macros-screen" className="min-h-screen pb-20">
       {/* Header */}
       <div className="bg-card pt-8 pb-4 px-5">
-        <h1 className="text-2xl font-bold mb-4">Macros</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-2xl font-bold">Macros</h1>
+          {setBy === 'coach' && (
+            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              <ShieldCheck size={12} />
+              Set by {LABELS.coach}
+            </span>
+          )}
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-2">
@@ -108,16 +118,48 @@ export function Macros() {
         )}
 
         {activeTab === 'calculator' && (
-          <CalculatorView
-            currentWeight={profile?.weight || 150}
-            currentHeight={profile?.height || 70}
-            currentAge={profile?.age || 30}
-            currentGender={profile?.gender || 'male'}
-            currentGoal={profile?.goal || 'maintain'}
-            currentActivity={activityLevel}
-            targets={targets}
-            onCalculate={calculateMacros}
-          />
+          setBy === 'coach' ? (
+            <Card className="py-0 border-primary/20">
+              <CardContent className="text-center py-8">
+                <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
+                <p className="text-lg font-bold mb-2">Macros Set by {LABELS.coach}</p>
+                <p className="text-muted-foreground text-sm mb-6">
+                  Your macro targets are managed by your {LABELS.coach.toLowerCase()}. Contact them to request changes.
+                </p>
+                {targets && (
+                  <div className="grid grid-cols-2 gap-4 text-left max-w-xs mx-auto">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Calories</p>
+                      <p className="text-2xl font-bold font-digital text-primary">{targets.calories}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Protein</p>
+                      <p className="text-2xl font-bold font-digital text-primary">{targets.protein}g</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Carbs</p>
+                      <p className="text-lg font-digital">{targets.carbs}g</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Fats</p>
+                      <p className="text-lg font-digital">{targets.fats}g</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <CalculatorView
+              currentWeight={profile?.weight || 150}
+              currentHeight={profile?.height || 70}
+              currentAge={profile?.age || 30}
+              currentGender={profile?.gender || 'male'}
+              currentGoal={profile?.goal || 'maintain'}
+              currentActivity={activityLevel}
+              targets={targets}
+              onCalculate={calculateMacros}
+            />
+          )
         )}
       </div>
     </div>
