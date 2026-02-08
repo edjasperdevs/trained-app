@@ -3,7 +3,7 @@
  * Usage: import and call seedTestData() from browser console or a dev route.
  */
 
-import type { WorkoutTemplate, AssignedWorkout } from '@/lib/database.types'
+import type { WorkoutTemplate, AssignedWorkout, WeeklyCheckin } from '@/lib/database.types'
 
 const today = new Date()
 const toISO = (d: Date) => d.toISOString().split('T')[0]
@@ -701,6 +701,144 @@ export const mockAssignedWorkouts: AssignedWorkout[] = [
     notes: 'Focus on chest activation today'
   }
 ]
+
+// --- Mock Weekly Check-ins (for dev bypass) ---
+
+function getCurrentMondayStr(): string {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now)
+  monday.setDate(monday.getDate() + diff)
+  return toISO(monday)
+}
+
+function getMondayWeeksAgo(weeks: number): string {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now)
+  monday.setDate(monday.getDate() + diff - weeks * 7)
+  return toISO(monday)
+}
+
+export const mockWeeklyCheckins: WeeklyCheckin[] = [
+  {
+    id: 'checkin-001',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    client_id: 'mock-client-sarah',
+    coach_id: 'mock-coach-id',
+    week_of: getCurrentMondayStr(),
+    status: 'submitted',
+    water_intake: '1 gallon daily',
+    caffeine_intake: '2 cups coffee, 1 pre-workout',
+    hunger_level: 3,
+    slip_ups: 'Had pizza on Friday night, otherwise clean',
+    refeed_date: null,
+    digestion: 'Good overall, slight bloating after dairy',
+    training_progress: 'Hit a PR on bench press - 135x6!',
+    training_feedback: 'Feeling strong on push days, pull days are dragging',
+    recovery_soreness: 'Glutes still sore from Wednesday leg day',
+    sleep_quality: 4,
+    sleep_hours: 7.5,
+    stress_level: 2,
+    stressors: 'Work deadline next week but manageable',
+    mental_health: 'Feeling motivated, good energy levels',
+    injuries: null,
+    cycle_status: 'Normal, day 14',
+    side_effects: null,
+    bloodwork_date: null,
+    open_feedback: 'Can we add more hamstring work?',
+    auto_weight_current: 142.3,
+    auto_weight_weekly_avg: 142.8,
+    auto_weight_change: -0.5,
+    auto_step_avg: null,
+    auto_macro_hit_rate: 85,
+    auto_cardio_sessions: null,
+    auto_workouts_completed: 5,
+    coach_response: null,
+    reviewed_at: null,
+  },
+  {
+    id: 'checkin-002',
+    created_at: daysAgo(7).toISOString(),
+    updated_at: daysAgo(5).toISOString(),
+    client_id: 'mock-client-mike',
+    coach_id: 'mock-coach-id',
+    week_of: getMondayWeeksAgo(1),
+    status: 'reviewed',
+    water_intake: 'About half a gallon',
+    caffeine_intake: '3 energy drinks',
+    hunger_level: 4,
+    slip_ups: 'Missed two meals on Tuesday, made up calories with junk',
+    refeed_date: null,
+    digestion: 'No issues',
+    training_progress: 'Squats felt heavy, deloaded to 185',
+    training_feedback: 'Low energy this week, might be the sleep',
+    recovery_soreness: 'Lower back tight after deadlifts',
+    sleep_quality: 2,
+    sleep_hours: 5.5,
+    stress_level: 4,
+    stressors: 'Moving apartments, very chaotic schedule',
+    mental_health: 'Stressed but pushing through',
+    injuries: 'Minor lower back tightness, monitoring',
+    cycle_status: null,
+    side_effects: null,
+    bloodwork_date: null,
+    open_feedback: null,
+    auto_weight_current: 198.5,
+    auto_weight_weekly_avg: 198.2,
+    auto_weight_change: 0.8,
+    auto_step_avg: null,
+    auto_macro_hit_rate: 45,
+    auto_cardio_sessions: null,
+    auto_workouts_completed: 2,
+    coach_response: 'Good progress on the bulk. Keep protein high. Let\'s address that sleep -- try cutting energy drinks after 2pm. For the lower back, add some bird-dogs before deadlifts.',
+    reviewed_at: daysAgo(5).toISOString(),
+  },
+  {
+    id: 'checkin-003',
+    created_at: daysAgo(14).toISOString(),
+    updated_at: daysAgo(12).toISOString(),
+    client_id: 'mock-client-jake',
+    coach_id: 'mock-coach-id',
+    week_of: getMondayWeeksAgo(2),
+    status: 'reviewed',
+    water_intake: 'Barely any, maybe 3 glasses',
+    caffeine_intake: '1 coffee',
+    hunger_level: 2,
+    slip_ups: 'Ate out most days, didn\'t track',
+    refeed_date: null,
+    digestion: 'Fine',
+    training_progress: 'Didn\'t make it to the gym',
+    training_feedback: 'No training this week',
+    recovery_soreness: 'N/A',
+    sleep_quality: 3,
+    sleep_hours: 6.0,
+    stress_level: 4,
+    stressors: 'Family stuff, lost motivation',
+    mental_health: 'Struggling to stay consistent, feeling guilty',
+    injuries: null,
+    cycle_status: null,
+    side_effects: null,
+    bloodwork_date: null,
+    open_feedback: 'I know I need to do better. Just hard to find the groove.',
+    auto_weight_current: 175.0,
+    auto_weight_weekly_avg: 175.4,
+    auto_weight_change: 1.2,
+    auto_step_avg: null,
+    auto_macro_hit_rate: 15,
+    auto_cardio_sessions: null,
+    auto_workouts_completed: 0,
+    coach_response: 'Let\'s talk about getting back on track. No guilt -- we all have off weeks. Here\'s what I want you to focus on this week: just 2 workouts, drink more water, and log at least 3 meals. Small wins.',
+    reviewed_at: daysAgo(12).toISOString(),
+  },
+]
+
+export function getMockWeeklyCheckins(): WeeklyCheckin[] {
+  return [...mockWeeklyCheckins]
+}
 
 export function clearTestData() {
   const keys = [
