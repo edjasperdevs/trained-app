@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 4 (Macro Management) in progress. Plan 1 complete, Plan 2 next.
+**Current focus:** Phase 4 (Macro Management) complete. All v1.3 Coach Dashboard phases done (10/10 plans).
 
 ## Current Position
 
-Phase: 4 of 6 (Macro Management)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-02-07 -- Completed 04-01-PLAN.md (Coach Macro Insert Policy & Expanded Hook)
+Phase: 4 of 4 (Macro Management)
+Plan: 2 of 2 in current phase
+Status: Phase complete -- v1.3 milestone complete
+Last activity: 2026-02-07 -- Completed 04-02-PLAN.md (Coach Macro Editor UI & Client Indicator)
 
-Progress: [█████████░░░] 69%
+Progress: [████████████] 100%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [█████████░░░] 69%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 9
-- Average duration: 2.6min
-- Total execution time: 23min
+- Total plans completed: 10
+- Average duration: 2.7min
+- Total execution time: 28min
 
 ## Accumulated Context
 
@@ -60,6 +60,9 @@ Recent decisions affecting current work:
 - 03-02: Quick stats hidden for multi-page rosters (only current page data available)
 - 03-02: Client card shows workouts (7d) instead of level for at-a-glance activity
 - 04-01: set_by defaults to 'self' when null from database (fallback in mapping)
+- 04-02: Used trackEvent() directly instead of analytics.track() (typed object has no generic track)
+- 04-02: Null guards for clientId and coachId props (both nullable types)
+- 04-02: useEffect syncs form fields with currentTargets after cache refresh
 
 ### Pending Todos
 
@@ -78,5 +81,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 04-01-PLAN.md (Coach Macro Insert Policy & Expanded Hook)
+Stopped at: Completed 04-02-PLAN.md (Coach Macro Editor UI & Client Indicator) -- v1.3 milestone complete
 Resume file: None
