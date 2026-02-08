@@ -74,7 +74,10 @@ Plans:
   1. Coach can set calories, protein, carbs, and fat targets for any client from the dashboard
   2. Client sees "Set by Coach" indicator on their macro targets and cannot recalculate/override them
   3. Client sees updated macro targets on next app open after coach changes them (no manual refresh needed)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 04-01-PLAN.md -- RLS INSERT migration, useClientDetails expansion, devSeed update
+- [ ] 04-02-PLAN.md -- Coach macro editor UI, client "Set by Coach" badge, calculator lock
 
 ### Phase 5: Workout Programming
 **Goal**: Coach can build workouts, save them as templates, assign them to client calendars, and see how clients performed against the prescription
@@ -110,7 +113,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 1. Foundation | 3/3 | Complete | 2026-02-07 |
 | 2. Invitations | 3/3 | Complete | 2026-02-07 |
 | 3. Client Roster | 2/2 | Complete | 2026-02-07 |
-| 4. Macro Management | 0/TBD | Not started | - |
+| 4. Macro Management | 0/2 | Not started | - |
 | 5. Workout Programming | 0/TBD | Not started | - |
 | 6. Weekly Check-ins | 0/TBD | Not started | - |
 
