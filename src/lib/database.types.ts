@@ -12,6 +12,7 @@ export type XPSource = 'workout' | 'protein' | 'calories' | 'checkin' | 'claim'
 export type CoachClientStatus = 'pending' | 'active' | 'inactive'
 export type InviteStatus = 'pending' | 'accepted' | 'expired'
 export type MacroSetBy = 'self' | 'coach'
+export type CheckinStatus = 'submitted' | 'reviewed'
 
 // Prescribed exercise shape (used in workout_templates and assigned_workouts JSONB)
 export interface PrescribedExercise {
@@ -43,6 +44,45 @@ export interface AssignedWorkout {
   date: string
   exercises: PrescribedExercise[]
   notes: string | null
+}
+
+// weekly_checkins row
+export interface WeeklyCheckin {
+  id: string
+  created_at: string
+  updated_at: string
+  client_id: string
+  coach_id: string | null
+  week_of: string
+  status: CheckinStatus
+  water_intake: string | null
+  caffeine_intake: string | null
+  hunger_level: number | null
+  slip_ups: string | null
+  refeed_date: string | null
+  digestion: string | null
+  training_progress: string | null
+  training_feedback: string | null
+  recovery_soreness: string | null
+  sleep_quality: number | null
+  sleep_hours: number | null
+  stress_level: number | null
+  stressors: string | null
+  mental_health: string | null
+  injuries: string | null
+  cycle_status: string | null
+  side_effects: string | null
+  bloodwork_date: string | null
+  open_feedback: string | null
+  auto_weight_current: number | null
+  auto_weight_weekly_avg: number | null
+  auto_weight_change: number | null
+  auto_step_avg: number | null
+  auto_macro_hit_rate: number | null
+  auto_cardio_sessions: number | null
+  auto_workouts_completed: number | null
+  coach_response: string | null
+  reviewed_at: string | null
 }
 
 export type Json =
@@ -485,6 +525,120 @@ export interface Database {
         }
         Relationships: []
       }
+      weekly_checkins: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          client_id: string
+          coach_id: string | null
+          week_of: string
+          status: CheckinStatus
+          water_intake: string | null
+          caffeine_intake: string | null
+          hunger_level: number | null
+          slip_ups: string | null
+          refeed_date: string | null
+          digestion: string | null
+          training_progress: string | null
+          training_feedback: string | null
+          recovery_soreness: string | null
+          sleep_quality: number | null
+          sleep_hours: number | null
+          stress_level: number | null
+          stressors: string | null
+          mental_health: string | null
+          injuries: string | null
+          cycle_status: string | null
+          side_effects: string | null
+          bloodwork_date: string | null
+          open_feedback: string | null
+          auto_weight_current: number | null
+          auto_weight_weekly_avg: number | null
+          auto_weight_change: number | null
+          auto_step_avg: number | null
+          auto_macro_hit_rate: number | null
+          auto_cardio_sessions: number | null
+          auto_workouts_completed: number | null
+          coach_response: string | null
+          reviewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          client_id: string
+          coach_id?: string | null
+          week_of: string
+          status?: CheckinStatus
+          water_intake?: string | null
+          caffeine_intake?: string | null
+          hunger_level?: number | null
+          slip_ups?: string | null
+          refeed_date?: string | null
+          digestion?: string | null
+          training_progress?: string | null
+          training_feedback?: string | null
+          recovery_soreness?: string | null
+          sleep_quality?: number | null
+          sleep_hours?: number | null
+          stress_level?: number | null
+          stressors?: string | null
+          mental_health?: string | null
+          injuries?: string | null
+          cycle_status?: string | null
+          side_effects?: string | null
+          bloodwork_date?: string | null
+          open_feedback?: string | null
+          auto_weight_current?: number | null
+          auto_weight_weekly_avg?: number | null
+          auto_weight_change?: number | null
+          auto_step_avg?: number | null
+          auto_macro_hit_rate?: number | null
+          auto_cardio_sessions?: number | null
+          auto_workouts_completed?: number | null
+          coach_response?: string | null
+          reviewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          client_id?: string
+          coach_id?: string | null
+          week_of?: string
+          status?: CheckinStatus
+          water_intake?: string | null
+          caffeine_intake?: string | null
+          hunger_level?: number | null
+          slip_ups?: string | null
+          refeed_date?: string | null
+          digestion?: string | null
+          training_progress?: string | null
+          training_feedback?: string | null
+          recovery_soreness?: string | null
+          sleep_quality?: number | null
+          sleep_hours?: number | null
+          stress_level?: number | null
+          stressors?: string | null
+          mental_health?: string | null
+          injuries?: string | null
+          cycle_status?: string | null
+          side_effects?: string | null
+          bloodwork_date?: string | null
+          open_feedback?: string | null
+          auto_weight_current?: number | null
+          auto_weight_weekly_avg?: number | null
+          auto_weight_change?: number | null
+          auto_step_avg?: number | null
+          auto_macro_hit_rate?: number | null
+          auto_cardio_sessions?: number | null
+          auto_workouts_completed?: number | null
+          coach_response?: string | null
+          reviewed_at?: string | null
+        }
+        Relationships: []
+      }
       user_xp: {
         Row: {
           id: string
@@ -550,6 +704,7 @@ export interface Database {
       coach_client_status: CoachClientStatus
       invite_status: InviteStatus
       macro_set_by: MacroSetBy
+      checkin_status: CheckinStatus
     }
     CompositeTypes: {
       [_ in never]: never
