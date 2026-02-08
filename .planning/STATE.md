@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** Phase 5 (Workout Programming) in progress.
+**Current focus:** Phase 5 (Workout Programming) complete. Phase 6 (Weekly Check-ins) next.
 
 ## Current Position
 
 Phase: 5 of 6 (Workout Programming)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-08 -- Completed 05-03-PLAN.md (Client Workout Integration)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-02-08 -- Completed 05-04-PLAN.md (Prescribed vs Actual Comparison)
 
-Progress: [█████████████░] 82%
+Progress: [██████████████░] 88%
 
 ## Performance Metrics
 
@@ -24,9 +24,9 @@ Progress: [█████████████░] 82%
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 
 **v1.3 Coach Dashboard:**
-- Total plans completed: 12
-- Average duration: 2.7min
-- Total execution time: 35min
+- Total plans completed: 14
+- Average duration: 2.6min
+- Total execution time: 38min
 
 ## Accumulated Context
 
@@ -74,6 +74,9 @@ Recent decisions affecting current work:
 - 05-03: Coach workout on rest day uses fallback type push/dayNumber 1 (generateExercises overrides with prescribed)
 - 05-03: Self-directed fallback sets assignedWorkout to null for current session only
 - 05-03: Priority 0 in generateExercises: coach-assigned exercises bypass all other generation logic
+- 05-04: Case-insensitive name matching for exercise pairing in prescribed-vs-actual comparison
+- 05-04: Expandable card accordion pattern for completed workout comparison views
+- 05-04: Mock completed data synthesized from existing mock assignments
 
 ### Pending Todos
 
@@ -93,5 +96,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 05-03-PLAN.md (Client Workout Integration)
+Stopped at: Completed 05-04-PLAN.md (Prescribed vs Actual Comparison) -- Phase 5 complete
 Resume file: None
