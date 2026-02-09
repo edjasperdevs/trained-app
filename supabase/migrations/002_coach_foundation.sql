@@ -14,7 +14,16 @@ ALTER TABLE macro_targets
 -- 2. Fix coach_clients RLS policy
 -- Old policy allows any authenticated user to insert into coach_clients
 -- by setting coach_id = their own user ID. New policy requires coach role.
+-- Uses SECURITY DEFINER function to avoid circular RLS dependency
+-- (coach_clients policy -> profiles -> profiles "coaches can view clients" policy -> coach_clients)
 -- ===========================================
+
+CREATE OR REPLACE FUNCTION public.is_coach_role(user_id UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles WHERE id = user_id AND role = 'coach'
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
 
 DROP POLICY "Coaches can manage their client relationships" ON coach_clients;
 
@@ -22,19 +31,11 @@ CREATE POLICY "Coaches can manage their client relationships"
   ON coach_clients FOR ALL
   USING (
     coach_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'coach'
-    )
+    AND public.is_coach_role(auth.uid())
   )
   WITH CHECK (
     coach_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'coach'
-    )
+    AND public.is_coach_role(auth.uid())
   );
 
 -- ===========================================

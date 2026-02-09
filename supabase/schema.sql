@@ -224,25 +224,25 @@ CREATE POLICY "Coaches can view their clients profiles"
     )
   );
 
+-- Helper: check coach role without triggering RLS on profiles (avoids circular dependency)
+CREATE OR REPLACE FUNCTION public.is_coach_role(user_id UUID)
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM profiles WHERE id = user_id AND role = 'coach'
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
+
 -- Coach-Clients: Coaches manage their relationships, clients can see their coach
--- Requires role = 'coach' to prevent non-coaches from inserting
+-- Uses is_coach_role() to avoid circular RLS between coach_clients <-> profiles
 CREATE POLICY "Coaches can manage their client relationships"
   ON coach_clients FOR ALL
   USING (
     coach_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'coach'
-    )
+    AND public.is_coach_role(auth.uid())
   )
   WITH CHECK (
     coach_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'coach'
-    )
+    AND public.is_coach_role(auth.uid())
   );
 
 CREATE POLICY "Clients can view their coach relationship"
