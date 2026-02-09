@@ -125,7 +125,7 @@ export function Auth() {
       <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold tracking-wide">TRAINED</h1>
+          <h1 className="text-3xl font-heading font-bold tracking-wide"><span className="text-white">WELL</span><span className="text-primary">TRAINED</span></h1>
           <p className="text-muted-foreground mt-2">
             {mode === 'login' && 'Welcome back'}
             {mode === 'signup' && 'Build discipline through fitness'}

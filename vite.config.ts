@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'icon.svg'],
       manifest: {
-        name: 'Trained',
-        short_name: 'Trained',
+        name: 'WellTrained',
+        short_name: 'WellTrained',
         description: 'The protocol for building discipline through fitness.',
         theme_color: '#0a0a0a',
         background_color: '#0a0a0a',

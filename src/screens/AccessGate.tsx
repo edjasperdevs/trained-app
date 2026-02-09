@@ -67,7 +67,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
           <Shield size={72} className="mx-auto text-primary" />
         </div>
         <h1 className="text-3xl font-bold">
-          Trained
+          <span className="text-white">Well</span><span className="text-primary">Trained</span>
         </h1>
         <p className="text-muted-foreground mt-2">
           The protocol for building discipline
@@ -190,7 +190,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
 
       {/* Footer */}
       <p className="text-muted-foreground/50 text-xs mt-8 text-center animate-in fade-in duration-500 delay-500">
-        © {new Date().getFullYear()} Trained. All rights reserved.
+        © {new Date().getFullYear()} WellTrained. All rights reserved.
       </p>
 
       {/* Success Modal */}

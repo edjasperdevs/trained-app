@@ -782,8 +782,8 @@ export function Settings() {
         <Card className="py-0">
           <CardContent className="p-3">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground font-heading font-semibold">
-                Trained
+              <p className="text-sm font-heading font-semibold">
+                <span className="text-white">Well</span><span className="text-primary">Trained</span>
               </p>
               <p className="text-xs text-muted-foreground">Version 1.0.0</p>
               <p className="text-xs text-muted-foreground/60 mt-2">
