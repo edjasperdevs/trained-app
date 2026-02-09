@@ -50,7 +50,17 @@ Previous milestones delivered:
 
 ### Active
 
-No active requirements. Next milestone not yet planned.
+**Current Milestone: v1.4 Intake Dashboard**
+
+**Goal:** Integrate the archived intake submissions dashboard into the coach section — a 4th "Intake" segment for viewing/managing all submissions, plus a client detail tab for linked submissions, with manual client-submission linking.
+
+**Target features:**
+- 4th "Intake" segment in Coach dashboard with status filtering and submission list
+- Submission detail view with collapsible data sections, photo gallery (signed URLs), coach notes, status management
+- "Intake" tab in client detail modal showing linked submission
+- Manual linking: coach can associate a submission with a client
+- Design system adaptation: restyle archive components to match shadcn/ui + CVA patterns
+- API layer: use existing Supabase client and CoachGuard auth (no separate AuthContext)
 
 ### Out of Scope
 
@@ -66,7 +76,7 @@ No active requirements. Next milestone not yet planned.
 ## Context
 
 **Current State:**
-- Four milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence, v1.3 coach dashboard)
+- Four milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence, v1.3 coach dashboard), v1.4 in progress
 - 139 unit tests + 10 E2E tests passing
 - Full coaching platform: invitations, roster, macro management, workout programming, weekly check-ins
 - Directional sync separates client-owned vs coach-owned data
@@ -115,5 +125,9 @@ No active requirements. Next milestone not yet planned.
 | Non-persisted assignedWorkout | Server-authoritative data fetched fresh each session | ✓ Good — no stale workout assignments |
 | localStorage for check-in status | Single read-only value doesn't need Zustand reactive state | ✓ Good — lightweight sync pattern |
 
+| Adapt archive code, not new AuthContext | trained-app has Zustand authStore + CoachGuard, archive's AuthContext/useAuth not needed | — Pending |
+| Manual client-submission linking | Coach manually associates submissions vs auto-match by email | — Pending |
+| intake_submissions/intake_photos tables pre-exist | Tables already in Supabase from marketing site — no migration needed | — Pending |
+
 ---
-*Last updated: 2026-02-08 after v1.3 milestone complete*
+*Last updated: 2026-02-08 — v1.4 Intake Dashboard started*

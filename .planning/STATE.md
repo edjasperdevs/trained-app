@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.3 milestone complete. Planning next milestone.
+**Current focus:** v1.4 Intake Dashboard — integrating archived intake submissions dashboard into coach section
 
 ## Current Position
 
-Phase: Milestone complete
-Plan: N/A
-Status: v1.3 Coach Dashboard shipped
-Last activity: 2026-02-08 -- v1.3 milestone archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-08 — Milestone v1.4 started
 
-Progress: [██████████████████] 100%
+Progress: [░░░░░░░░░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -28,7 +28,10 @@ Progress: [██████████████████] 100%
 
 ### Decisions
 
-All prior decisions logged in PROJECT.md Key Decisions table and milestone archives.
+- Adapt archive code into existing Coach.tsx patterns (no separate AuthContext)
+- Manual client-submission linking (not auto-match by email)
+- intake_submissions + intake_photos tables already exist in Supabase
+- 4th "Intake" segment + client detail "Intake" tab (both placements)
 
 ### Pending Todos
 
@@ -46,5 +49,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: v1.3 milestone complete and archived
+Stopped at: Defining v1.4 requirements
 Resume file: None
