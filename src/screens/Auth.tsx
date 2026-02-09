@@ -11,10 +11,10 @@ import { Separator } from '@/components/ui/separator'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
-export function Auth() {
+export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
   const { signIn, signUp, resetPassword, isConfigured } = useAuthStore()
 
-  const [mode, setMode] = useState<AuthMode>('signup')
+  const [mode, setMode] = useState<AuthMode>(defaultMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')

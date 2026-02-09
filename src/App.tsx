@@ -1,11 +1,10 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
-import { CoachGuard } from '@/components/CoachGuard'
 import { AccessGate, Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
@@ -32,6 +31,7 @@ function AppContent() {
   const hasAccess = useAccessStore((state) => state.hasAccess)
   const revokeAccess = useAccessStore((state) => state.revokeAccess)
   const [accessGranted, setAccessGranted] = useState(hasAccess)
+  const location = useLocation()
 
   // Check for ?reset=true URL parameter to clear all data
   useEffect(() => {
@@ -122,8 +122,10 @@ function AppContent() {
     )
   }
 
-  // Check access code first (before auth)
-  if (!devBypass && !hasAccess && !accessGranted) {
+  const isCoachRoute = location.pathname === '/coach'
+
+  // Check access code first (before auth) — coach route bypasses
+  if (!devBypass && !hasAccess && !accessGranted && !isCoachRoute) {
     return (
       <>
         <ToastContainer />
@@ -138,14 +140,15 @@ function AppContent() {
       <>
         <ToastContainer />
         <SentryRoutes>
+          <Route path="/coach" element={<Auth defaultMode="login" />} />
           <Route path="*" element={<Auth />} />
         </SentryRoutes>
       </>
     )
   }
 
-  // If authenticated but onboarding not complete, show onboarding
-  if (!devBypass && (!profile || !profile.onboardingComplete)) {
+  // If authenticated but onboarding not complete, show onboarding (coach route bypasses)
+  if (!devBypass && (!profile || !profile.onboardingComplete) && !isCoachRoute) {
     return (
       <>
         <ToastContainer />
@@ -169,7 +172,7 @@ function AppContent() {
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
+          <Route path="/coach" element={<Suspense fallback={<HomeSkeleton />}><Coach /></Suspense>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           {devBypass && <Route path="/auth" element={<Auth />} />}
