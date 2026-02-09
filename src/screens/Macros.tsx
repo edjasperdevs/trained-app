@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ProgressBar, MealBuilder, EmptyState } from '@/components'
-import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient } from '@/stores'
+import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient, toast } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
@@ -217,6 +217,8 @@ function DailyView({
     )
   }
 
+  const [quickLogSuccess, setQuickLogSuccess] = useState(false)
+
   const handleQuickLog = () => {
     onLogMacros({
       protein: quickLog.protein ? Number(quickLog.protein) : undefined,
@@ -224,6 +226,9 @@ function DailyView({
     })
     analytics.mealLogged('manual')
     setQuickLog({ protein: '', calories: '' })
+    toast.success('Macros logged')
+    setQuickLogSuccess(true)
+    setTimeout(() => setQuickLogSuccess(false), 2000)
   }
 
   return (
@@ -308,11 +313,15 @@ function DailyView({
           </div>
           <Button
             onClick={handleQuickLog}
-            className="w-full"
-            disabled={!quickLog.protein && !quickLog.calories}
+            className={cn('w-full', quickLogSuccess && 'bg-success hover:bg-success')}
+            disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories)}
             data-testid="macros-add-meal-button"
           >
-            Log Macros
+            {quickLogSuccess ? (
+              <span className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Logged!</span>
+            ) : (
+              'Log Macros'
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -794,6 +803,8 @@ function LogMealView({
     setEditingMeal(null)
   }
 
+  const [loggedMealId, setLoggedMealId] = useState<string | null>(null)
+
   const handleLogSavedMeal = (meal: SavedMeal) => {
     onLogMeal(meal.name, {
       protein: meal.protein,
@@ -802,6 +813,9 @@ function LogMealView({
       calories: meal.calories
     })
     analytics.mealLogged('saved')
+    toast.success(`${meal.name} logged`)
+    setLoggedMealId(meal.id)
+    setTimeout(() => setLoggedMealId(null), 2000)
   }
 
   const handleEditMeal = (meal: SavedMeal) => {
@@ -857,8 +871,10 @@ function LogMealView({
                     <Button
                       size="sm"
                       onClick={() => handleLogSavedMeal(meal)}
+                      disabled={loggedMealId === meal.id}
+                      className={cn(loggedMealId === meal.id && 'bg-success hover:bg-success')}
                     >
-                      Log
+                      {loggedMealId === meal.id ? <Check className="h-4 w-4" /> : 'Log'}
                     </Button>
                   </div>
                 </div>
