@@ -8,6 +8,41 @@ interface FoodSearchProps {
   onSelect: (food: FoodSearchResult & { quantity: number; unit: 'g' | 'oz' | 'serving' }) => void
 }
 
+function ScrollingText({ text, className }: { text: string; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const container = containerRef.current
+    const textEl = textRef.current
+    if (!container || !textEl) return
+
+    const overflow = textEl.scrollWidth - container.offsetWidth
+    if (overflow <= 0) return
+
+    const duration = Math.max(3000, overflow * 40)
+    const animation = textEl.animate(
+      [
+        { transform: 'translateX(0)', offset: 0 },
+        { transform: 'translateX(0)', offset: 0.2 },
+        { transform: `translateX(-${overflow}px)`, offset: 0.8 },
+        { transform: `translateX(-${overflow}px)`, offset: 1 },
+      ],
+      { duration, iterations: Infinity, direction: 'alternate', easing: 'ease-in-out' }
+    )
+
+    return () => animation.cancel()
+  }, [text])
+
+  return (
+    <div ref={containerRef} className="overflow-hidden">
+      <span ref={textRef} className={`inline-block whitespace-nowrap ${className || ''}`}>
+        {text}
+      </span>
+    </div>
+  )
+}
+
 type Unit = 'g' | 'oz' | 'serving'
 
 const selectClasses = 'h-9 w-auto rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]'
@@ -124,7 +159,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
           className="w-full p-3 text-left hover:bg-muted active:bg-muted transition-colors border-b border-border last:border-b-0"
         >
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm truncate">{food.name}</p>
+            <ScrollingText text={food.name} className="font-semibold text-sm" />
             {food.brand && <p className="text-xs text-muted-foreground truncate">{food.brand}</p>}
             <p className="text-xs text-muted-foreground mt-1">
               Per 100g: P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
@@ -151,7 +186,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
         className="bg-card rounded-xl p-5 w-full max-w-sm shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="font-bold text-lg mb-1 truncate">{selectedFood.name}</h3>
+        <ScrollingText text={selectedFood.name} className="font-bold text-lg mb-1" />
         {selectedFood.brand && (
           <p className="text-sm text-muted-foreground mb-4 truncate">{selectedFood.brand}</p>
         )}
