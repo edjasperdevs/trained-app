@@ -16,7 +16,8 @@ import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
-import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck } from 'lucide-react'
+import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck, FileText } from 'lucide-react'
+import { IntakeView } from '@/components/IntakeView'
 import { LABELS } from '@/design/constants'
 import type { MacroTargets } from '@/hooks/useClientDetails'
 import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout, WeeklyCheckin } from '@/lib/database.types'
@@ -36,7 +37,7 @@ interface CompletedAssignment {
 }
 
 type ClientDetailTab = 'overview' | 'progress' | 'activity' | 'programs' | 'checkins'
-type DashboardView = 'clients' | 'templates' | 'checkins'
+type DashboardView = 'clients' | 'templates' | 'checkins' | 'intake'
 type TemplateMode = 'list' | 'create' | 'edit' | 'assign'
 
 interface InviteRow {
@@ -932,6 +933,8 @@ export function Coach() {
                 ? `${totalCount} client${totalCount !== 1 ? 's' : ''}`
                 : dashboardView === 'templates'
                 ? `${templates.length} template${templates.length !== 1 ? 's' : ''}`
+                : dashboardView === 'intake'
+                ? 'Intake submissions'
                 : `${pendingCheckins.length} pending`
               }
             </p>
@@ -984,6 +987,18 @@ export function Coach() {
           >
             <ClipboardCheck size={14} />
             Check-ins
+          </button>
+          <button
+            onClick={() => setDashboardView('intake')}
+            className={cn(
+              'flex-1 py-2 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-1',
+              dashboardView === 'intake'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <FileText size={14} />
+            Intake
           </button>
         </div>
 
@@ -1334,6 +1349,11 @@ export function Coach() {
               </>
             )}
           </>
+        )}
+
+        {/* Intake View */}
+        {dashboardView === 'intake' && (
+          <IntakeView />
         )}
 
         {/* Clients View */}

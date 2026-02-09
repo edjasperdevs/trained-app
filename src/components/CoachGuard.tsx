@@ -7,10 +7,15 @@ interface CoachGuardProps {
   children: React.ReactNode
 }
 
+const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
+
 export function CoachGuard({ children }: CoachGuardProps) {
-  const [status, setStatus] = useState<'loading' | 'authorized' | 'unauthorized'>('loading')
+  const [status, setStatus] = useState<'loading' | 'authorized' | 'unauthorized'>(
+    devBypass ? 'authorized' : 'loading'
+  )
 
   useEffect(() => {
+    if (devBypass) return
     isCoach()
       .then(result => setStatus(result ? 'authorized' : 'unauthorized'))
       .catch(() => {
