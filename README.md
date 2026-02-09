@@ -1,6 +1,8 @@
-# TRAINED
+# WellTrained
 
-A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evolution, and achievements. Built for discipline-focused athletes who want accountability and progress tracking in a premium mobile experience.
+A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evolution, and achievements. Built for discipline-focused athletes who want accountability and progress tracking in a premium mobile experience. Includes a full coaching platform for client management, workout programming, and macro oversight.
+
+**Domain:** app.welltrained.fitness
 
 ## Tech Stack
 
@@ -9,13 +11,13 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Styling:** Tailwind CSS v4 + shadcn/ui
 - **UI Components:** shadcn/ui (Radix primitives + CVA)
 - **State Management:** Zustand (persisted to localStorage)
-- **Backend:** Supabase (auth, cloud sync, profiles)
+- **Backend:** Supabase (auth, cloud sync, profiles, coaching)
 - **Animations:** tw-animate-css
 - **Icons:** Lucide React
 - **PWA:** vite-plugin-pwa (prompt-based updates, offline support)
 - **Error Monitoring:** Sentry
 - **Analytics:** Plausible (privacy-friendly, 22 custom events)
-- **Testing:** Vitest
+- **Testing:** Vitest (unit) + Playwright (E2E)
 
 ## Features
 
@@ -29,6 +31,14 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Workout Logging** — Standard tracking (exercises, sets, reps, weights) or Quick Compliance mode. Workout history and PR tracking.
 - **Macro Tracking** — Daily calorie and protein targets with food search (USDA + Open Food Facts fallback). Meal builder and adherence visualization.
 - **Daily Assignments** — Three daily tasks (Workout, Protein, Calories) plus check-in bonus and perfect day multiplier.
+- **Weekly Check-ins** — 16-field structured form with auto-populated data (weight, macros, workouts, cardio, steps). Coach review and response.
+
+### Coaching Platform
+- **Client Management** — Invite clients via email, roster with status indicators (active, needs attention, falling off, pending).
+- **Workout Programming** — Create workout templates and assign them to clients. Clients see assigned workouts each session.
+- **Macro Management** — Set client macro targets with "Set by Coach" indicator. Data ownership via `set_by` column.
+- **Check-in Review** — Review client weekly check-ins and send responses. Activity feed per client.
+- **Client Detail Modal** — 5 tabs: overview, weight chart, macro adherence, workout history, activity feed.
 
 ### Infrastructure
 - **Offline-First** — All data persisted to localStorage via Zustand. Full functionality without network.
@@ -41,7 +51,6 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 
 ### Additional
 - **Onboarding** — 10-step wizard with progress indicator ("Step X of Y")
-- **Coach Dashboard** — Client list, progress tracking, weight charts, macro adherence, activity feed
 - **Data Export/Import** — Full profile backup and restore
 - **Access Code Gating** — Required at app entry
 
@@ -50,12 +59,17 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 ```
 src/
 ├── components/ui/       # shadcn/ui primitives (Button, Card, Dialog, Input, Tabs, Badge...)
-├── components/          # Domain components (Avatar, EmptyState, SyncStatusIndicator...)
-├── screens/             # Route components (Home, Workouts, Macros, Achievements, Settings...)
+├── components/          # Domain components (Avatar, EmptyState, IntakeView, SyncStatusIndicator...)
+├── screens/             # Route components (Home, Workouts, Macros, Coach, WeeklyCheckIn, Settings...)
 ├── stores/              # Zustand stores (user, xp, workout, macro, avatar, achievements, sync...)
-├── lib/                 # Utilities (sync, sentry, analytics, haptics, errors, foodApi, devSeed...)
+├── lib/                 # Utilities (sync, sentry, analytics, haptics, errors, foodApi, intakeApi...)
+├── themes/              # Theme tokens (trained.ts — synced with :root CSS vars)
 ├── App.tsx              # Router with per-route Suspense boundaries
 └── main.tsx             # Entry point with Sentry ErrorBoundary
+e2e/
+├── tests/               # Playwright E2E specs (smoke, auth-onboarding, core-journeys)
+├── fixtures/            # Test fixtures
+└── helpers/             # Storage and Supabase mock helpers
 ```
 
 ## Getting Started
@@ -73,8 +87,11 @@ npm run dev
 # Build for production
 npm run build
 
-# Run tests
+# Run unit tests
 npm run test:run
+
+# Run E2E tests
+npm run test:e2e
 ```
 
 ### Environment Variables
@@ -85,8 +102,11 @@ npm run test:run
 | `VITE_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
 | `VITE_SENTRY_DSN` | Production | Sentry DSN for error monitoring |
 | `VITE_USDA_API_KEY` | Recommended | USDA FoodData Central API key |
-| `VITE_ACCESS_CODES` | Yes | Comma-separated access codes |
-| `VITE_DEV_BYPASS` | No | Set to `true` to skip auth/access/onboarding gates for UI testing |
+| `VITE_MASTER_ACCESS_CODE` | No | Universal bypass access code |
+| `VITE_LEMONSQUEEZY_API_URL` | No | LemonSqueezy license validation URL |
+| `SENTRY_AUTH_TOKEN` | Build | Sentry auth token for source map upload |
+| `SENTRY_ORG` | Build | Sentry organization slug |
+| `SENTRY_PROJECT` | Build | Sentry project slug |
 
 ## Dev Testing
 
@@ -143,6 +163,7 @@ All routes are available in dev bypass mode:
 | `/achievements` | Badge collection |
 | `/settings` | Profile, data export/import |
 | `/coach` | Coach dashboard (mock data in dev bypass) |
+| `/checkin` | Weekly check-in form |
 | `/auth` | Auth screen (accessible directly in dev bypass) |
 | `/access` | Access gate screen (accessible directly in dev bypass) |
 | `/onboarding` | Onboarding wizard (accessible directly in dev bypass) |
