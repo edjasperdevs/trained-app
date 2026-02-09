@@ -49,7 +49,7 @@ function buildWorkoutLogs() {
   const logs = []
   const workoutTypes = ['push', 'pull', 'legs', 'upper'] as const
 
-  for (let i = 20; i >= 0; i--) {
+  for (let i = 20; i >= 1; i--) {
     // Skip some days for realism (rest days)
     if (i % 3 === 2) continue
 

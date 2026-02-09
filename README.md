@@ -28,7 +28,7 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Achievements** — 20+ badges across 5 categories with rarity levels (Common, Rare, Epic, Legendary).
 
 ### Training
-- **Workout Logging** — Standard tracking (exercises, sets, reps, weights) or Quick Compliance mode. Workout history and PR tracking.
+- **Workout Logging** — Standard tracking (exercises, sets, reps, weights) or Quick Compliance mode. Workout history and PR tracking. Labeled weight/reps inputs, auto warmup sets (50% weight placeholder), placeholder carry-forward between sets, and mid-workout exercise reordering.
 - **Macro Tracking** — Daily calorie and protein targets with food search (USDA + Open Food Facts fallback). Meal builder and adherence visualization.
 - **Daily Assignments** — Three daily tasks (Workout, Protein, Calories) plus check-in bonus and perfect day multiplier.
 - **Weekly Check-ins** — 16-field structured form with auto-populated data (weight, macros, workouts, cardio, steps). Coach review and response.
@@ -67,7 +67,7 @@ src/
 ├── App.tsx              # Router with per-route Suspense boundaries
 └── main.tsx             # Entry point with Sentry ErrorBoundary
 e2e/
-├── tests/               # Playwright E2E specs (smoke, auth-onboarding, core-journeys)
+├── tests/               # Playwright E2E specs (smoke, auth-onboarding, core-journeys, workout-features)
 ├── fixtures/            # Test fixtures
 └── helpers/             # Storage and Supabase mock helpers
 ```

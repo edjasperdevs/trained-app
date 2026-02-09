@@ -10,6 +10,7 @@ export interface ExerciseSet {
   reps: number
   completed: boolean
   skipped?: boolean
+  warmup?: boolean
 }
 
 export interface Exercise {
@@ -87,6 +88,7 @@ interface WorkoutStore {
   updateWorkoutNotes: (workoutId: string, notes: string) => void
   logSet: (workoutId: string, exerciseId: string, setIndex: number, data: Partial<ExerciseSet>) => void
   addExerciseToWorkout: (workoutId: string, exercise: { name: string; targetSets: number; targetReps: string }) => void
+  reorderWorkoutExercise: (workoutId: string, fromIndex: number, toIndex: number) => void
   completeWorkout: (workoutId: string) => void
   endWorkoutEarly: (workoutId: string) => void
   markXPAwarded: (workoutId: string) => void
@@ -262,11 +264,14 @@ const generateExercises = (type: WorkoutType, customizations: WorkoutCustomizati
       name: ex.name,
       targetSets: ex.targetSets,
       targetReps: ex.targetReps,
-      sets: Array.from({ length: ex.targetSets }, () => ({
-        weight: ex.targetWeight || 0,
-        reps: 0,
-        completed: false,
-      })),
+      sets: [
+        { weight: 0, reps: 0, completed: false, warmup: true },
+        ...Array.from({ length: ex.targetSets }, () => ({
+          weight: ex.targetWeight || 0,
+          reps: 0,
+          completed: false,
+        })),
+      ],
       notes: ex.notes,
     }))
   }
@@ -292,11 +297,14 @@ const generateExercises = (type: WorkoutType, customizations: WorkoutCustomizati
     targetReps: ex.targetReps,
     notes: ex.notes,
     id: `${type}-${index}-${Date.now()}`,
-    sets: Array.from({ length: ex.targetSets }, () => ({
-      weight: 0,
-      reps: 0,
-      completed: false
-    }))
+    sets: [
+      { weight: 0, reps: 0, completed: false, warmup: true },
+      ...Array.from({ length: ex.targetSets }, () => ({
+        weight: 0,
+        reps: 0,
+        completed: false
+      })),
+    ]
   }))
 }
 
@@ -535,11 +543,14 @@ export const useWorkoutStore = create<WorkoutStore>()(
           name: exercise.name,
           targetSets: exercise.targetSets,
           targetReps: exercise.targetReps,
-          sets: Array.from({ length: exercise.targetSets }, () => ({
-            weight: 0,
-            reps: 0,
-            completed: false
-          }))
+          sets: [
+            { weight: 0, reps: 0, completed: false, warmup: true },
+            ...Array.from({ length: exercise.targetSets }, () => ({
+              weight: 0,
+              reps: 0,
+              completed: false
+            })),
+          ]
         }
 
         set((state) => ({
@@ -548,6 +559,18 @@ export const useWorkoutStore = create<WorkoutStore>()(
               ? { ...workout, exercises: [...workout.exercises, newExercise] }
               : workout
           )
+        }))
+      },
+
+      reorderWorkoutExercise: (workoutId, fromIndex, toIndex) => {
+        set((state) => ({
+          workoutLogs: state.workoutLogs.map(workout => {
+            if (workout.id !== workoutId) return workout
+            const exercises = [...workout.exercises]
+            const [moved] = exercises.splice(fromIndex, 1)
+            exercises.splice(toIndex, 0, moved)
+            return { ...workout, exercises }
+          })
         }))
       },
 

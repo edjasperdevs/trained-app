@@ -23,6 +23,7 @@ export function Workouts() {
     completeWorkout,
     endWorkoutEarly,
     addExerciseToWorkout,
+    reorderWorkoutExercise,
     markXPAwarded,
     getWorkoutHistory,
     isWorkoutCompletedToday,
@@ -186,6 +187,12 @@ export function Workouts() {
     setActiveWorkout(null)
   }
 
+  const handleReorderExercise = (fromIndex: number, toIndex: number) => {
+    if (!activeWorkout) return
+    reorderWorkoutExercise(activeWorkout.id, fromIndex, toIndex)
+    setActiveWorkout(getCurrentWorkout())
+  }
+
   const handleAddExerciseToWorkout = (exercise: { name: string; targetSets: number; targetReps: string }) => {
     if (!activeWorkout) return
     addExerciseToWorkout(activeWorkout.id, exercise)
@@ -262,6 +269,7 @@ export function Workouts() {
             onComplete={handleCompleteWorkout}
             onEndEarly={handleEndWorkoutEarly}
             onAddExercise={handleAddExerciseToWorkout}
+            onReorderExercise={handleReorderExercise}
           />
         ) : (
           <>
@@ -795,7 +803,8 @@ function ActiveWorkoutView({
   onUncompleteSet,
   onComplete,
   onEndEarly,
-  onAddExercise
+  onAddExercise,
+  onReorderExercise
 }: {
   workout: WorkoutLog
   progress: number
@@ -806,6 +815,7 @@ function ActiveWorkoutView({
   onComplete: () => void
   onEndEarly: () => void
   onAddExercise: (exercise: { name: string; targetSets: number; targetReps: string }) => void
+  onReorderExercise: (fromIndex: number, toIndex: number) => void
 }) {
   const getExerciseHistory = useWorkoutStore((state) => state.getExerciseHistory)
   const [expandedExercise, setExpandedExercise] = useState<string | null>(
@@ -885,9 +895,27 @@ function ActiveWorkoutView({
                 className="w-full p-4 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
-                  <span className={`text-lg ${isComplete ? 'text-success' : 'text-muted-foreground'}`}>
-                    {isComplete ? '✓' : exIndex + 1}
-                  </span>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onReorderExercise(exIndex, exIndex - 1) }}
+                      className={`text-xs leading-none px-1 ${exIndex === 0 ? 'text-muted-foreground/30 pointer-events-none' : 'text-muted-foreground hover:text-primary'}`}
+                      disabled={exIndex === 0}
+                      data-testid="workouts-move-up"
+                    >
+                      ▲
+                    </button>
+                    <span className={`text-sm ${isComplete ? 'text-success' : 'text-muted-foreground'}`}>
+                      {isComplete ? '✓' : exIndex + 1}
+                    </span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onReorderExercise(exIndex, exIndex + 1) }}
+                      className={`text-xs leading-none px-1 ${exIndex === workout.exercises.length - 1 ? 'text-muted-foreground/30 pointer-events-none' : 'text-muted-foreground hover:text-primary'}`}
+                      disabled={exIndex === workout.exercises.length - 1}
+                      data-testid="workouts-move-down"
+                    >
+                      ▼
+                    </button>
+                  </div>
                   <div className="text-left">
                     <p className={`font-semibold ${isComplete ? 'text-success' : ''}`}>
                       {exercise.name}
@@ -969,9 +997,30 @@ function ActiveWorkoutView({
                   {/* Current Sets */}
                   <div className="space-y-3">
                     {exercise.sets.map((set, setIndex) => {
-                      const lastSet = lastWorkout?.sets[setIndex]
+                      const workingSets = exercise.sets.filter(s => !s.warmup)
+                      const workingSetIndex = set.warmup ? -1 : exercise.sets.slice(0, setIndex).filter(s => !s.warmup).length
+                      const lastSet = set.warmup ? undefined : lastWorkout?.sets[workingSetIndex]
+                      const prevSet = setIndex > 0 ? exercise.sets[setIndex - 1] : null
+                      const firstWorkingSet = workingSets[0]
                       const isImprovement = lastSet && set.completed &&
                         (set.weight > lastSet.weight || (set.weight === lastSet.weight && set.reps > lastSet.reps))
+
+                      // Warmup weight placeholder: 50% of first working set's weight (or last workout)
+                      const warmupWeightHint = (() => {
+                        if (!set.warmup) return undefined
+                        if (firstWorkingSet?.weight) return String(Math.round(firstWorkingSet.weight * 0.5))
+                        const lastFirstSet = lastWorkout?.sets[0]
+                        if (lastFirstSet?.weight) return String(Math.round(lastFirstSet.weight * 0.5))
+                        return '0'
+                      })()
+
+                      const weightPlaceholder = set.warmup
+                        ? warmupWeightHint!
+                        : prevSet?.weight ? String(prevSet.weight) : lastSet ? String(lastSet.weight) : '0'
+
+                      const repsPlaceholder = set.warmup
+                        ? '10'
+                        : prevSet?.reps ? String(prevSet.reps) : lastSet ? String(lastSet.reps) : '0'
 
                       return (
                         <div
@@ -985,28 +1034,32 @@ function ActiveWorkoutView({
                             </div>
                           )}
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground w-10">
-                              Set {setIndex + 1}
+                            <span className={`text-sm w-14 ${set.warmup ? 'text-warning italic' : 'text-muted-foreground'}`}>
+                              {set.warmup ? 'Warmup' : `Set ${workingSetIndex + 1}`}
                             </span>
-                            <div className="relative">
+                            <div className="flex flex-col items-center">
+                              <label className="text-[10px] text-muted-foreground mb-0.5">lbs</label>
                               <Input
                                 type="number"
-                                placeholder={lastSet ? String(lastSet.weight) : '0'}
+                                placeholder={weightPlaceholder}
                                 value={set.weight || ''}
                                 onChange={(e) => onUpdateSet(exercise.id, setIndex, 'weight', Number(e.target.value))}
                                 className="w-16 text-center font-digital text-sm"
                                 data-testid="workouts-set-weight-input"
                               />
                             </div>
-                            <span className="text-muted-foreground text-sm">×</span>
-                            <Input
-                              type="number"
-                              placeholder={lastSet ? String(lastSet.reps) : '0'}
-                              value={set.reps || ''}
-                              onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
-                              className="w-14 text-center font-digital text-sm"
-                              data-testid="workouts-set-reps-input"
-                            />
+                            <span className="text-muted-foreground text-sm mt-3">×</span>
+                            <div className="flex flex-col items-center">
+                              <label className="text-[10px] text-muted-foreground mb-0.5">reps</label>
+                              <Input
+                                type="number"
+                                placeholder={repsPlaceholder}
+                                value={set.reps || ''}
+                                onChange={(e) => onUpdateSet(exercise.id, setIndex, 'reps', Number(e.target.value))}
+                                className="w-14 text-center font-digital text-sm"
+                                data-testid="workouts-set-reps-input"
+                              />
+                            </div>
                           {set.completed ? (
                             <div className="flex items-center gap-1">
                               <button

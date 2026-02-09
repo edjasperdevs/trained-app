@@ -175,7 +175,10 @@ describe('workoutStore', () => {
       expect(newExercise.name).toBe('Bicep Curls')
       expect(newExercise.targetSets).toBe(3)
       expect(newExercise.targetReps).toBe('10-12')
-      expect(newExercise.sets).toHaveLength(3)
+      // 3 working sets + 1 warmup set
+      expect(newExercise.sets).toHaveLength(4)
+      expect(newExercise.sets[0].warmup).toBe(true)
+      expect(newExercise.sets.filter(s => !s.warmup)).toHaveLength(3)
     })
   })
 
@@ -357,6 +360,128 @@ describe('workoutStore', () => {
 
       const pushCustomization = useWorkoutStore.getState().customizations.find(c => c.workoutType === 'push')
       expect(pushCustomization).toBeUndefined()
+    })
+  })
+
+  describe('warmup sets', () => {
+    beforeEach(() => {
+      useWorkoutStore.getState().setPlan(5)
+    })
+
+    it('should generate a warmup set as the first set of each exercise', () => {
+      useWorkoutStore.getState().startWorkout('push', 1)
+      const workout = useWorkoutStore.getState().workoutLogs[0]
+
+      workout.exercises.forEach(exercise => {
+        expect(exercise.sets[0].warmup).toBe(true)
+        expect(exercise.sets[0].weight).toBe(0)
+        expect(exercise.sets[0].reps).toBe(0)
+        expect(exercise.sets[0].completed).toBe(false)
+      })
+    })
+
+    it('should have working sets after the warmup set', () => {
+      useWorkoutStore.getState().startWorkout('push', 1)
+      const workout = useWorkoutStore.getState().workoutLogs[0]
+
+      workout.exercises.forEach(exercise => {
+        const workingSets = exercise.sets.filter(s => !s.warmup)
+        expect(workingSets.length).toBe(exercise.targetSets)
+        workingSets.forEach(set => {
+          expect(set.warmup).toBeFalsy()
+        })
+      })
+    })
+
+    it('should include warmup set in added exercises', () => {
+      const workoutId = useWorkoutStore.getState().startWorkout('push', 1)
+      useWorkoutStore.getState().addExerciseToWorkout(workoutId, {
+        name: 'New Exercise',
+        targetSets: 3,
+        targetReps: '8-12'
+      })
+
+      const workout = useWorkoutStore.getState().workoutLogs[0]
+      const added = workout.exercises[workout.exercises.length - 1]
+      expect(added.sets[0].warmup).toBe(true)
+      expect(added.sets.filter(s => !s.warmup)).toHaveLength(3)
+    })
+  })
+
+  describe('reorderWorkoutExercise', () => {
+    let workoutId: string
+
+    beforeEach(() => {
+      useWorkoutStore.getState().setPlan(5)
+      workoutId = useWorkoutStore.getState().startWorkout('push', 1)
+    })
+
+    it('should move an exercise down', () => {
+      const before = useWorkoutStore.getState().workoutLogs[0].exercises
+      const firstName = before[0].name
+      const secondName = before[1].name
+
+      useWorkoutStore.getState().reorderWorkoutExercise(workoutId, 0, 1)
+
+      const after = useWorkoutStore.getState().workoutLogs[0].exercises
+      expect(after[0].name).toBe(secondName)
+      expect(after[1].name).toBe(firstName)
+    })
+
+    it('should move an exercise up', () => {
+      const before = useWorkoutStore.getState().workoutLogs[0].exercises
+      const firstName = before[0].name
+      const secondName = before[1].name
+
+      useWorkoutStore.getState().reorderWorkoutExercise(workoutId, 1, 0)
+
+      const after = useWorkoutStore.getState().workoutLogs[0].exercises
+      expect(after[0].name).toBe(secondName)
+      expect(after[1].name).toBe(firstName)
+    })
+
+    it('should preserve all exercises after reorder', () => {
+      const before = useWorkoutStore.getState().workoutLogs[0].exercises
+      const originalNames = before.map(e => e.name).sort()
+
+      useWorkoutStore.getState().reorderWorkoutExercise(workoutId, 0, 2)
+
+      const after = useWorkoutStore.getState().workoutLogs[0].exercises
+      const afterNames = after.map(e => e.name).sort()
+      expect(afterNames).toEqual(originalNames)
+    })
+
+    it('should not affect other workouts', () => {
+      // Manually add a second workout with a distinct ID
+      useWorkoutStore.setState((state) => ({
+        workoutLogs: [
+          ...state.workoutLogs,
+          {
+            id: 'other-workout',
+            date: '2025-01-01',
+            workoutType: 'pull' as const,
+            dayNumber: 2,
+            weekNumber: 1,
+            exercises: [
+              { id: 'ex-a', name: 'Exercise A', targetSets: 2, targetReps: '8', sets: [] },
+              { id: 'ex-b', name: 'Exercise B', targetSets: 2, targetReps: '8', sets: [] },
+            ],
+            completed: false,
+            xpAwarded: false,
+          },
+        ],
+      }))
+
+      const pullBefore = useWorkoutStore.getState().workoutLogs
+        .find(w => w.id === 'other-workout')!.exercises.map(e => e.name)
+
+      // Reorder the first (push) workout
+      useWorkoutStore.getState().reorderWorkoutExercise(workoutId, 0, 1)
+
+      // Other workout should be unchanged
+      const pullAfter = useWorkoutStore.getState().workoutLogs
+        .find(w => w.id === 'other-workout')!.exercises.map(e => e.name)
+      expect(pullAfter).toEqual(pullBefore)
     })
   })
 
