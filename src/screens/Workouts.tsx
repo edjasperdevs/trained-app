@@ -279,8 +279,8 @@ export function Workouts() {
                         </span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between">
-                      <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
                         <p className="text-xl font-bold">
                           {hasAssignment ? 'Coach Workout' : todayWorkout!.name}
                         </p>
@@ -291,12 +291,12 @@ export function Workouts() {
                         </p>
                       </div>
                       {isCompleted ? (
-                        <div className="flex items-center gap-2 text-success">
+                        <div className="flex items-center gap-2 text-success flex-shrink-0">
                           <span className="text-2xl">✓</span>
                           <span className="font-semibold">Done!</span>
                         </div>
                       ) : (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 flex-shrink-0">
                           <Button onClick={handleStartWorkout} data-testid="workouts-start-button">
                             Start Workout
                           </Button>

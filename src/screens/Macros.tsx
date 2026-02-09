@@ -46,7 +46,7 @@ export function Macros() {
 
   const tabs: { id: TabType; label: string }[] = [
     { id: 'daily', label: 'Daily' },
-    { id: 'log', label: 'Log' },
+    { id: 'log', label: 'Meals' },
     { id: 'meals', label: 'Plan' },
     { id: 'calculator', label: 'Calc' }
   ]

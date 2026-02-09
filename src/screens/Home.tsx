@@ -180,9 +180,9 @@ export function Home() {
       </div>
 
       <div className="px-5 space-y-6">
-        {/* Active Reminders */}
-        {activeReminders.length > 0 && !hasCheckedInToday && (
-          <ReminderList maxReminders={2} />
+        {/* Active Reminders (exclude checkIn — Home has its own check-in prompt) */}
+        {activeReminders.filter(r => r.type !== 'checkIn').length > 0 && !hasCheckedInToday && (
+          <ReminderList maxReminders={2} excludeTypes={['checkIn']} />
         )}
 
         {/* Coach Reviewed Check-in Banner (priority 1) */}

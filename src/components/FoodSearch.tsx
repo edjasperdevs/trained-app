@@ -18,7 +18,6 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
 
   // Quantity selection state
   const [selectedFood, setSelectedFood] = useState<FoodSearchResult | null>(null)
@@ -102,72 +101,44 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
     setSelectedFood(null)
   }
 
-  // Update dropdown position when showing results
-  useEffect(() => {
-    if (showResults && inputRef.current) {
-      const rect = inputRef.current.getBoundingClientRect()
-      setDropdownPosition({
-        top: rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
-      })
-    }
-  }, [showResults])
-
   // Calculate preview macros
   const previewMacros = selectedFood
     ? calculateMacrosForQuantity(selectedFood, Number(quantity) || 0, unit)
     : null
 
-  const dropdown =
-    showResults &&
-    createPortal(
-      <>
-        {/* Click outside to close */}
-        <div className="fixed inset-0 z-[10000]" onClick={() => setShowResults(false)} />
-        <div
-          style={{
-            position: 'fixed',
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
-            zIndex: 10001,
+  const dropdown = showResults && (
+    <div className="mt-2 max-h-60 overflow-y-auto bg-card rounded-lg border border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+      {error && <div className="p-4 text-center text-destructive text-sm">{error}</div>}
+
+      {!error && results.length === 0 && !isLoading && query && (
+        <div className="p-4 text-center text-muted-foreground text-sm">No foods found for "{query}"</div>
+      )}
+
+      {results.map((food) => (
+        <button
+          key={food.id}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleFoodClick(food)
           }}
-          className="max-h-60 overflow-y-auto bg-card rounded-lg border border-border shadow-xl animate-in fade-in slide-in-from-top-2 duration-200"
+          className="w-full p-3 text-left hover:bg-muted active:bg-muted transition-colors border-b border-border last:border-b-0"
         >
-          {error && <div className="p-4 text-center text-destructive text-sm">{error}</div>}
-
-          {!error && results.length === 0 && !isLoading && query && (
-            <div className="p-4 text-center text-muted-foreground text-sm">No foods found for "{query}"</div>
-          )}
-
-          {results.map((food) => (
-            <button
-              key={food.id}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleFoodClick(food)
-              }}
-              className="w-full p-3 text-left hover:bg-muted active:bg-muted transition-colors border-b border-border last:border-b-0"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{food.name}</p>
-                {food.brand && <p className="text-xs text-muted-foreground truncate">{food.brand}</p>}
-                <p className="text-xs text-muted-foreground mt-1">
-                  Per 100g: P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
-                </p>
-                {food.servingDescription && food.servingDescription !== '100g' && (
-                  <p className="text-xs text-primary mt-0.5">
-                    Serving: {food.servingDescription}
-                  </p>
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
-      </>,
-      document.body
-    )
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm truncate">{food.name}</p>
+            {food.brand && <p className="text-xs text-muted-foreground truncate">{food.brand}</p>}
+            <p className="text-xs text-muted-foreground mt-1">
+              Per 100g: P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+            </p>
+            {food.servingDescription && food.servingDescription !== '100g' && (
+              <p className="text-xs text-primary mt-0.5">
+                Serving: {food.servingDescription}
+              </p>
+            )}
+          </div>
+        </button>
+      ))}
+    </div>
+  )
 
   // Quantity selection modal - rendered via portal to escape any stacking contexts
   const quantityModal = selectedFood && createPortal(

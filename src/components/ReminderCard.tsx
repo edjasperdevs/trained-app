@@ -77,11 +77,15 @@ export function ReminderCard({ reminder, onDismiss }: ReminderCardProps) {
 
 interface ReminderListProps {
   maxReminders?: number
+  excludeTypes?: ReminderType[]
 }
 
-export function ReminderList({ maxReminders = 3 }: ReminderListProps) {
+export function ReminderList({ maxReminders = 3, excludeTypes }: ReminderListProps) {
   const activeReminders = useRemindersStore((state) => state.getActiveReminders())
-  const displayReminders = activeReminders.slice(0, maxReminders)
+  const filtered = excludeTypes
+    ? activeReminders.filter(r => !excludeTypes.includes(r.type))
+    : activeReminders
+  const displayReminders = filtered.slice(0, maxReminders)
 
   if (displayReminders.length === 0) return null
 
