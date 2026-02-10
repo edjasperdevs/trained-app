@@ -18,6 +18,7 @@ import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
 import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck, FileText } from 'lucide-react'
 import { IntakeView } from '@/components/IntakeView'
+import { countNewSubmissions } from '@/lib/intakeApi'
 import { LABELS } from '@/design/constants'
 import type { MacroTargets } from '@/hooks/useClientDetails'
 import type { PrescribedExercise, WorkoutTemplate, AssignedWorkout, WeeklyCheckin } from '@/lib/database.types'
@@ -306,6 +307,19 @@ export function Coach() {
   const [completedAssignments, setCompletedAssignments] = useState<CompletedAssignment[]>([])
   const [completedLoading, setCompletedLoading] = useState(false)
   const [expandedCompletedId, setExpandedCompletedId] = useState<string | null>(null)
+
+  // Intake badge count
+  const [newIntakeCount, setNewIntakeCount] = useState(0)
+
+  useEffect(() => {
+    countNewSubmissions().then(setNewIntakeCount)
+  }, [])
+
+  useEffect(() => {
+    if (dashboardView !== 'intake') return
+    // Re-fetch when leaving intake tab (submission may have been reviewed)
+    return () => { countNewSubmissions().then(setNewIntakeCount) }
+  }, [dashboardView])
 
   const {
     templates,
@@ -934,7 +948,9 @@ export function Coach() {
                 : dashboardView === 'templates'
                 ? `${templates.length} template${templates.length !== 1 ? 's' : ''}`
                 : dashboardView === 'intake'
-                ? 'Intake submissions'
+                ? newIntakeCount > 0
+                  ? `${newIntakeCount} new submission${newIntakeCount !== 1 ? 's' : ''}`
+                  : 'Intake submissions'
                 : `${pendingCheckins.length} pending`
               }
             </p>
@@ -999,6 +1015,11 @@ export function Coach() {
           >
             <FileText size={14} />
             Intake
+            {newIntakeCount > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[11px] font-semibold text-white bg-red-500 rounded-full">
+                {newIntakeCount}
+              </span>
+            )}
           </button>
         </div>
 

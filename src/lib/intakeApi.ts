@@ -93,6 +93,20 @@ export async function updateSubmission(
   return data as Submission
 }
 
+export async function countNewSubmissions(): Promise<number> {
+  const { count, error } = await db()
+    .from('intake_submissions')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'new')
+
+  if (error) {
+    console.error('Failed to count new submissions:', error.message)
+    return 0
+  }
+
+  return count ?? 0
+}
+
 export async function getPhotoUrl(storagePath: string): Promise<string> {
   const supabase = getSupabaseClient()
 

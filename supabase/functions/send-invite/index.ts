@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     if (!RESEND_API_KEY) throw new Error('Email service not configured')
 
     const APP_URL = Deno.env.get('APP_URL') || 'https://app.welltrained.fitness'
-    const EMAIL_FROM = Deno.env.get('EMAIL_FROM') || 'Trained <onboarding@resend.dev>'
+    const EMAIL_FROM = Deno.env.get('EMAIL_FROM') || 'Trained <noreply@contact.welltrained.fitness>'
     const inviteLink = `${APP_URL}?invite=${invite.token}`
 
     const emailHtml = `
