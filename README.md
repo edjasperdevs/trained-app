@@ -38,6 +38,7 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Workout Programming** — Create workout templates and assign them to clients. Clients see assigned workouts each session.
 - **Macro Management** — Set client macro targets with "Set by Coach" indicator. Data ownership via `set_by` column.
 - **Check-in Review** — Review client weekly check-ins and send responses. Activity feed per client.
+- **Intake Pipeline** — New client intake submissions with badge count on Intake tab. Automatic email notification to coach via Resend when an intake is completed.
 - **Client Detail Modal** — 5 tabs: overview, weight chart, macro adherence, workout history, activity feed.
 
 ### Infrastructure
@@ -107,6 +108,8 @@ npm run test:e2e
 | `SENTRY_AUTH_TOKEN` | Build | Sentry auth token for source map upload |
 | `SENTRY_ORG` | Build | Sentry organization slug |
 | `SENTRY_PROJECT` | Build | Sentry project slug |
+| `RESEND_API_KEY` | Edge Functions | Resend API key for transactional emails |
+| `EMAIL_FROM` | Edge Functions | Sender address (default: `noreply@contact.welltrained.fitness`) |
 
 ## Dev Testing
 

@@ -162,120 +162,124 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       onClick={() => onClose(false)}
     >
       <div
-        className="w-full max-w-md bg-card p-6 max-h-[90vh] overflow-y-auto rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
+        className="w-full max-w-md bg-card max-h-[90vh] flex flex-col rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
         data-testid="checkin-modal"
       >
         {!submitted ? (
           <>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">
-                {LABELS.checkIn}
-              </h2>
-              <button
-                onClick={() => onClose(false)}
-                aria-label="Close check-in"
-                className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-1"
-              >
-                <X size={20} />
-              </button>
-            </div>
+            <div className="overflow-y-auto flex-1 p-6 pb-0">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">
+                  {LABELS.checkIn}
+                </h2>
+                <button
+                  onClick={() => onClose(false)}
+                  aria-label="Close check-in"
+                  className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-            <div className="space-y-3 mb-6">
-              {/* Workout */}
-              {todayWorkout ? (
+              <div className="space-y-3 mb-6">
+                {/* Workout */}
+                {todayWorkout ? (
+                  <QuestCheckbox
+                    label={`Completed ${todayWorkout.name}`}
+                    xp={XP_VALUES.WORKOUT}
+                    checked={data.workout}
+                    onChange={(v) => setData(d => ({ ...d, workout: v }))}
+                    icon={Dumbbell}
+                    disabled={workoutCompleted}
+                    xpLabel={LABELS.xp}
+                  />
+                ) : (
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted text-muted-foreground opacity-60">
+                    <Moon size={20} />
+                    <span>Recovery Day - No training scheduled</span>
+                  </div>
+                )}
+
+                {/* Protein */}
                 <QuestCheckbox
-                  label={`Completed ${todayWorkout.name}`}
-                  xp={XP_VALUES.WORKOUT}
-                  checked={data.workout}
-                  onChange={(v) => setData(d => ({ ...d, workout: v }))}
-                  icon={Dumbbell}
-                  disabled={workoutCompleted}
+                  label="Hit Protein Target"
+                  xp={XP_VALUES.PROTEIN}
+                  checked={data.protein}
+                  onChange={(v) => setData(d => ({ ...d, protein: v }))}
+                  icon={Beef}
                   xpLabel={LABELS.xp}
                 />
-              ) : (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted text-muted-foreground opacity-60">
-                  <Moon size={20} />
-                  <span>Recovery Day - No training scheduled</span>
-                </div>
-              )}
 
-              {/* Protein */}
-              <QuestCheckbox
-                label="Hit Protein Target"
-                xp={XP_VALUES.PROTEIN}
-                checked={data.protein}
-                onChange={(v) => setData(d => ({ ...d, protein: v }))}
-                icon={Beef}
-                xpLabel={LABELS.xp}
-              />
+                {/* Calories */}
+                <QuestCheckbox
+                  label="Hit Calorie Target"
+                  xp={XP_VALUES.CALORIES}
+                  checked={data.calories}
+                  onChange={(v) => setData(d => ({ ...d, calories: v }))}
+                  icon={Zap}
+                  xpLabel={LABELS.xp}
+                />
 
-              {/* Calories */}
-              <QuestCheckbox
-                label="Hit Calorie Target"
-                xp={XP_VALUES.CALORIES}
-                checked={data.calories}
-                onChange={(v) => setData(d => ({ ...d, calories: v }))}
-                icon={Zap}
-                xpLabel={LABELS.xp}
-              />
+                {/* Check-in (always checked) */}
+                <QuestCheckbox
+                  label={LABELS.checkIn}
+                  xp={XP_VALUES.CHECK_IN}
+                  checked={data.checkIn}
+                  onChange={() => {}}
+                  icon={CheckCircle2}
+                  disabled
+                  xpLabel={LABELS.xp}
+                />
 
-              {/* Check-in (always checked) */}
-              <QuestCheckbox
-                label={LABELS.checkIn}
-                xp={XP_VALUES.CHECK_IN}
-                checked={data.checkIn}
-                onChange={() => {}}
-                icon={CheckCircle2}
-                disabled
-                xpLabel={LABELS.xp}
-              />
-
-              {/* Perfect Day Bonus */}
-              {perfectDay && (
-                <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/30 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="flex items-center gap-3">
-                    <Star size={20} className="text-success" />
-                    <span className="text-success font-semibold text-sm">
-                      Full Compliance Bonus!
+                {/* Perfect Day Bonus */}
+                {perfectDay && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/30 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center gap-3">
+                      <Star size={20} className="text-success" />
+                      <span className="text-success font-semibold text-sm">
+                        Full Compliance Bonus!
+                      </span>
+                    </div>
+                    <span className="text-success font-mono font-bold">
+                      +{XP_VALUES.PERFECT_DAY} {LABELS.xp}
                     </span>
                   </div>
-                  <span className="text-success font-mono font-bold">
-                    +{XP_VALUES.PERFECT_DAY} {LABELS.xp}
-                  </span>
-                </div>
-              )}
+                )}
 
-              {/* Streak Bonus */}
-              {profile?.currentStreak !== undefined && (
-                <div data-testid="checkin-streak-display" className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
-                  <div className="flex items-center gap-3">
-                    <Flame size={20} className="text-warning" />
-                    <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
+                {/* Streak Bonus */}
+                {profile?.currentStreak !== undefined && (
+                  <div data-testid="checkin-streak-display" className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
+                    <div className="flex items-center gap-3">
+                      <Flame size={20} className="text-warning" />
+                      <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
+                    </div>
+                    <span className="text-warning font-mono font-bold">
+                      +{streakBonus} {LABELS.xp}
+                    </span>
                   </div>
-                  <span className="text-warning font-mono font-bold">
-                    +{streakBonus} {LABELS.xp}
+                )}
+              </div>
+
+              {/* Total XP Preview */}
+              <div className="bg-muted p-4 mb-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Total {LABELS.xp}</span>
+                  <span className="text-2xl font-bold font-mono text-primary">
+                    +{calculateXP()} {LABELS.xp}
                   </span>
                 </div>
-              )}
-            </div>
-
-            {/* Total XP Preview */}
-            <div className="bg-muted p-4 mb-6 rounded-lg">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total {LABELS.xp}</span>
-                <span className="text-2xl font-bold font-mono text-primary">
-                  +{calculateXP()} {LABELS.xp}
-                </span>
               </div>
             </div>
 
-            <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button">
-              Submit Report
-            </Button>
+            <div className="p-6 pt-3 border-t border-border">
+              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button">
+                Submit Report
+              </Button>
+            </div>
           </>
         ) : (
-          <div className="text-center py-8">
+          <div className="text-center py-8 p-6">
             {/* Success */}
             <div className="mb-4 animate-in zoom-in-0 duration-500">
               <PartyPopper size={56} className="mx-auto text-primary" />
