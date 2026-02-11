@@ -25,6 +25,7 @@ interface AuthStore {
   signIn: (email: string, password: string) => Promise<AuthResult>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<AuthResult>
+  resendConfirmation: (email: string) => Promise<AuthResult>
   syncData: () => Promise<void>
 }
 
@@ -142,6 +143,30 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     await supabase.auth.signOut()
     set({ user: null, session: null })
     sentryClearUser()
+  },
+
+  resendConfirmation: async (email: string) => {
+    if (!supabase) {
+      return { error: 'Backend not configured' }
+    }
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email
+      })
+
+      if (error) {
+        return { error: error.message }
+      }
+
+      return { error: null }
+    } catch (error) {
+      if (error instanceof Error) {
+        captureError(error, { context: 'auth.resendConfirmation' })
+      }
+      return { error: 'An unexpected error occurred' }
+    }
   },
 
   resetPassword: async (email: string) => {

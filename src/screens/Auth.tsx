@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator'
 type AuthMode = 'login' | 'signup' | 'forgot'
 
 export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
-  const { signIn, signUp, resetPassword, isConfigured } = useAuthStore()
+  const { signIn, signUp, resetPassword, resendConfirmation, isConfigured } = useAuthStore()
 
   const [mode, setMode] = useState<AuthMode>(defaultMode)
   const [email, setEmail] = useState('')
@@ -22,6 +22,7 @@ export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false)
+  const [isResending, setIsResending] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,6 +105,20 @@ export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
     }
   }
 
+  const handleResendConfirmation = async () => {
+    if (!email || isResending) return
+    setIsResending(true)
+    const { error } = await resendConfirmation(email)
+    setIsResending(false)
+    if (error) {
+      toast.error('Failed to resend confirmation email')
+    } else {
+      toast.success('Confirmation email sent! Check your inbox.')
+      setSuccess('Confirmation email resent. Check your inbox (and spam folder).')
+      setError('')
+    }
+  }
+
   if (!isConfigured) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-5">
@@ -142,9 +157,13 @@ export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
               <AlertDescription>
                 We sent a confirmation link to <span className="text-foreground font-medium">{email || 'your email'}</span>.
                 Click the link to activate your account, then come back here to sign in.
-                <p className="text-xs mt-2 text-muted-foreground">
-                  Don't see it? Check your spam folder.
-                </p>
+                <button
+                  onClick={handleResendConfirmation}
+                  disabled={isResending || !email}
+                  className="block text-xs mt-2 text-primary hover:underline disabled:opacity-50"
+                >
+                  {isResending ? 'Sending...' : "Didn't get it? Resend confirmation email"}
+                </button>
               </AlertDescription>
             </Alert>
           </div>
