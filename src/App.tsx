@@ -123,13 +123,16 @@ function AppContent() {
   }
 
   const isCoachRoute = location.pathname === '/coach'
+  const isAuthRoute = location.pathname === '/auth'
 
-  // Check access code first (before auth) — coach route bypasses
-  if (!devBypass && !hasAccess && !accessGranted && !isCoachRoute) {
+  // Check access code first (before auth) — coach route, auth route, and authenticated users bypass
+  if (!devBypass && !hasAccess && !accessGranted && !user && !isCoachRoute && !isAuthRoute) {
     return (
       <>
         <ToastContainer />
-        <AccessGate onAccessGranted={() => setAccessGranted(true)} />
+        <SentryRoutes>
+          <Route path="*" element={<AccessGate onAccessGranted={() => setAccessGranted(true)} />} />
+        </SentryRoutes>
       </>
     )
   }
@@ -141,6 +144,7 @@ function AppContent() {
         <ToastContainer />
         <SentryRoutes>
           <Route path="/coach" element={<Auth defaultMode="login" />} />
+          <Route path="/auth" element={<Auth defaultMode="login" />} />
           <Route path="*" element={<Auth />} />
         </SentryRoutes>
       </>

@@ -176,3 +176,102 @@ export async function mockSupabaseSignIn(page: Page) {
     })
   })
 }
+
+/**
+ * Mock Supabase auth for the full cycle: sign-up -> sign-out -> re-sign-in.
+ *
+ * Tracks session state through signup, logout, and password login.
+ * Must be called BEFORE page.goto().
+ */
+export async function mockSupabaseFullCycle(page: Page) {
+  let signedIn = false
+
+  await page.route('**/auth/v1/**', async (route) => {
+    const url = route.request().url()
+    const method = route.request().method()
+
+    // POST /auth/v1/signup
+    if (url.includes('/auth/v1/signup') && method === 'POST') {
+      signedIn = true
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ user: FAKE_USER, session: FAKE_SESSION }),
+      })
+      return
+    }
+
+    // POST /auth/v1/logout
+    if (url.includes('/auth/v1/logout') && method === 'POST') {
+      signedIn = false
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: '{}',
+      })
+      return
+    }
+
+    // POST /auth/v1/token
+    if (url.includes('/auth/v1/token') && method === 'POST') {
+      if (url.includes('grant_type=password')) {
+        signedIn = true
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_SESSION),
+        })
+        return
+      }
+
+      if (signedIn) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_SESSION),
+        })
+        return
+      }
+
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'invalid_grant', error_description: 'No session found' }),
+      })
+      return
+    }
+
+    // GET /auth/v1/user
+    if (url.includes('/auth/v1/user') && method === 'GET') {
+      if (signedIn) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(FAKE_USER),
+        })
+      } else {
+        await route.fulfill({
+          status: 401,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'not_authenticated' }),
+        })
+      }
+      return
+    }
+
+    // Fallback
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{}',
+    })
+  })
+
+  await page.route('**/rest/v1/**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '[]',
+    })
+  })
+}

@@ -8,9 +8,10 @@
  *
  * E2E-05: New user -- access gate -> sign up -> onboarding -> home
  * E2E-06: Existing user -- sign in -> home with seeded data
+ * E2E-07: Full cycle -- sign up -> onboarding -> home -> sign out -> sign back in -> home
  */
 import { test, expect } from '@playwright/test'
-import { mockSupabaseSignUp, mockSupabaseSignIn } from '../helpers/supabase-mocks'
+import { mockSupabaseSignUp, mockSupabaseSignIn, mockSupabaseFullCycle } from '../helpers/supabase-mocks'
 import { seedAllStores } from '../helpers/storage'
 
 test.describe('Auth and Onboarding Journeys', () => {
@@ -198,5 +199,248 @@ test.describe('Auth and Onboarding Journeys', () => {
 
     // Verify streak display is visible
     await expect(page.locator('[data-testid="home-streak-display"]')).toBeVisible()
+  })
+
+  test('E2E-07: full cycle -- sign up -> onboarding -> sign out -> sign back in', async ({ page }) => {
+    // Set up Supabase mocks that track session state through signup/signout/signin
+    await mockSupabaseFullCycle(page)
+
+    // Navigate to app -- no seeded data
+    await page.goto('/')
+
+    // --- ACCESS GATE ---
+    await expect(page.locator('[data-testid="access-gate"]')).toBeVisible({ timeout: 15000 })
+
+    // Enter a valid access code
+    await page.locator('[data-testid="access-code-input"]').fill('TESTCODE1234')
+    await page.locator('[data-testid="access-submit-button"]').click()
+
+    // Handle success modal or direct transition to auth
+    const successModal = page.getByText('Access Granted')
+    const authScreen = page.locator('[data-testid="auth-screen"]')
+    await expect(successModal.or(authScreen)).toBeVisible({ timeout: 10000 })
+    if (await successModal.isVisible()) {
+      await page.getByRole('button', { name: /begin/i }).click()
+    }
+
+    // --- SIGN UP ---
+    await expect(authScreen).toBeVisible({ timeout: 10000 })
+    await page.locator('[data-testid="auth-email-input"]').fill('e2e@test.com')
+    await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
+    await page.getByLabel(/confirm password/i).fill('TestPassword123!')
+    await page.locator('[data-testid="auth-submit-button"]').click()
+
+    // --- ONBOARDING (fast-forward through all steps) ---
+    await expect(page.locator('[data-testid="onboarding-screen"]')).toBeVisible({ timeout: 15000 })
+
+    // Step 1: Welcome
+    await page.getByRole('button', { name: /start/i }).click()
+
+    // Step 2: Name
+    await expect(page.locator('[data-testid="onboarding-username-input"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-username-input"]').fill('E2ECycleUser')
+    await page.locator('[data-testid="onboarding-next-button"]').click()
+
+    // Step 3: Gender
+    await expect(page.locator('[data-testid="onboarding-gender-male"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-gender-male"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 4: Fitness level
+    await expect(page.getByText('Training experience')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /uninitiated/i }).click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 5: Training days
+    await expect(page.locator('[data-testid="onboarding-training-days-3"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-training-days-3"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 6: Schedule
+    await expect(page.getByText('Select your training days')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 7: Goal + stats
+    await expect(page.locator('[data-testid="onboarding-weight-input"]')).toBeVisible({ timeout: 5000 })
+    const goalStep = page.locator('[data-testid="onboarding-step-7"]')
+    await goalStep.locator('[data-testid="onboarding-height-input"]').fill('5')
+    await goalStep.locator('input[type="number"]').nth(1).fill('10')
+    await page.locator('[data-testid="onboarding-weight-input"]').fill('180')
+    await page.locator('[data-testid="onboarding-age-input"]').fill('28')
+    await page.locator('[data-testid="onboarding-goal-recomp"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 8: Avatar
+    await expect(page.getByText('Choose your persona')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /dom\/me/i }).click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 9: Features
+    await expect(page.getByText('How the protocol works')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 10: Tutorial
+    await expect(page.getByText('Protocol initialized')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /begin/i }).click()
+
+    // Handle evolution step or direct home
+    const evolutionBeginButton = page.getByRole('button', { name: /begin/i })
+    const homeScreen = page.locator('[data-testid="home-screen"]')
+    await expect(evolutionBeginButton.or(homeScreen)).toBeVisible({ timeout: 15000 })
+    if (await evolutionBeginButton.isVisible()) {
+      await evolutionBeginButton.click()
+    }
+
+    // --- HOME SCREEN (first time) ---
+    await expect(homeScreen).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('E2ECycleUser')).toBeVisible()
+
+    // --- NAVIGATE TO SETTINGS AND SIGN OUT ---
+    await page.locator('nav[aria-label="Main navigation"] a[href="/settings"]').click()
+    await expect(page.locator('[data-testid="settings-signout-button"]')).toBeVisible({ timeout: 10000 })
+    await page.locator('[data-testid="settings-signout-button"]').click()
+
+    // --- AUTH SCREEN (after sign out) ---
+    await expect(authScreen).toBeVisible({ timeout: 10000 })
+
+    // Switch to login mode
+    await page.locator('[data-testid="auth-toggle-mode"]').click()
+    await expect(page.getByText('Sign In', { exact: true }).first()).toBeVisible()
+
+    // --- SIGN BACK IN ---
+    await page.locator('[data-testid="auth-email-input"]').fill('e2e@test.com')
+    await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
+    await page.locator('[data-testid="auth-submit-button"]').click()
+
+    // --- HOME SCREEN (after re-login) ---
+    await expect(homeScreen).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('E2ECycleUser')).toBeVisible()
+    await expect(page.locator('nav[aria-label="Main navigation"]')).toBeVisible()
+  })
+
+  test('E2E-08: coach cycle -- sign up -> home -> coach dashboard -> sign out -> sign back in', async ({ page }) => {
+    await mockSupabaseFullCycle(page)
+    await page.goto('/')
+
+    // --- ACCESS GATE ---
+    await expect(page.locator('[data-testid="access-gate"]')).toBeVisible({ timeout: 15000 })
+    await page.locator('[data-testid="access-code-input"]').fill('TESTCODE1234')
+    await page.locator('[data-testid="access-submit-button"]').click()
+
+    const successModal = page.getByText('Access Granted')
+    const authScreen = page.locator('[data-testid="auth-screen"]')
+    await expect(successModal.or(authScreen)).toBeVisible({ timeout: 10000 })
+    if (await successModal.isVisible()) {
+      await page.getByRole('button', { name: /begin/i }).click()
+    }
+
+    // --- SIGN UP ---
+    await expect(authScreen).toBeVisible({ timeout: 10000 })
+    await page.locator('[data-testid="auth-email-input"]').fill('coach@test.com')
+    await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
+    await page.getByLabel(/confirm password/i).fill('TestPassword123!')
+    await page.locator('[data-testid="auth-submit-button"]').click()
+
+    // --- ONBOARDING (fast-forward all steps) ---
+    await expect(page.locator('[data-testid="onboarding-screen"]')).toBeVisible({ timeout: 15000 })
+
+    // Step 1: Welcome
+    await page.getByRole('button', { name: /start/i }).click()
+
+    // Step 2: Name
+    await expect(page.locator('[data-testid="onboarding-username-input"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-username-input"]').fill('CoachUser')
+    await page.locator('[data-testid="onboarding-next-button"]').click()
+
+    // Step 3: Gender
+    await expect(page.locator('[data-testid="onboarding-gender-male"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-gender-male"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 4: Fitness level
+    await expect(page.getByText('Training experience')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /uninitiated/i }).click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 5: Training days
+    await expect(page.locator('[data-testid="onboarding-training-days-3"]')).toBeVisible({ timeout: 5000 })
+    await page.locator('[data-testid="onboarding-training-days-3"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 6: Schedule
+    await expect(page.getByText('Select your training days')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 7: Goal + stats
+    await expect(page.locator('[data-testid="onboarding-weight-input"]')).toBeVisible({ timeout: 5000 })
+    const goalStep = page.locator('[data-testid="onboarding-step-7"]')
+    await goalStep.locator('[data-testid="onboarding-height-input"]').fill('5')
+    await goalStep.locator('input[type="number"]').nth(1).fill('10')
+    await page.locator('[data-testid="onboarding-weight-input"]').fill('180')
+    await page.locator('[data-testid="onboarding-age-input"]').fill('28')
+    await page.locator('[data-testid="onboarding-goal-recomp"]').click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 8: Avatar
+    await expect(page.getByText('Choose your persona')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /dom\/me/i }).click()
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 9: Features
+    await expect(page.getByText('How the protocol works')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /continue/i }).click()
+
+    // Step 10: Tutorial
+    await expect(page.getByText('Protocol initialized')).toBeVisible({ timeout: 5000 })
+    await page.getByRole('button', { name: /begin/i }).click()
+
+    // Handle evolution step
+    const evolutionBeginButton = page.getByRole('button', { name: /begin/i })
+    const homeScreen = page.locator('[data-testid="home-screen"]')
+    await expect(evolutionBeginButton.or(homeScreen)).toBeVisible({ timeout: 15000 })
+    if (await evolutionBeginButton.isVisible()) {
+      await evolutionBeginButton.click()
+    }
+
+    // --- HOME SCREEN ---
+    await expect(homeScreen).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('CoachUser')).toBeVisible()
+
+    // --- COACH DASHBOARD (SPA navigate to avoid full reload losing mock session) ---
+    await page.evaluate(() => window.history.pushState({}, '', '/coach'))
+    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
+    await expect(page.getByText('Coach Dashboard')).toBeVisible({ timeout: 15000 })
+    // Verify segment controls are present
+    await expect(page.getByRole('button', { name: 'Clients' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Templates' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Check-ins' })).toBeVisible()
+
+    // --- SIGN OUT (navigate to settings via nav bar) ---
+    await page.locator('nav[aria-label="Main navigation"] a[href="/settings"]').click()
+    await expect(page.locator('[data-testid="settings-signout-button"]')).toBeVisible({ timeout: 10000 })
+    await page.locator('[data-testid="settings-signout-button"]').click()
+
+    // --- AUTH SCREEN (after sign out) ---
+    await expect(authScreen).toBeVisible({ timeout: 10000 })
+
+    // Switch to login mode and sign back in
+    await page.locator('[data-testid="auth-toggle-mode"]').click()
+    await expect(page.getByText('Sign In', { exact: true }).first()).toBeVisible()
+    await page.locator('[data-testid="auth-email-input"]').fill('coach@test.com')
+    await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
+    await page.locator('[data-testid="auth-submit-button"]').click()
+
+    // --- VERIFY HOME SCREEN (after re-login) ---
+    // After sign-in, app renders authenticated routes; navigate to / via SPA
+    await page.evaluate(() => window.history.pushState({}, '', '/'))
+    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
+    await expect(homeScreen).toBeVisible({ timeout: 15000 })
+    await expect(page.getByText('CoachUser')).toBeVisible()
+
+    // --- VERIFY COACH DASHBOARD (after re-login) ---
+    await page.evaluate(() => window.history.pushState({}, '', '/coach'))
+    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
+    await expect(page.getByText('Coach Dashboard')).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'Clients' })).toBeVisible()
   })
 })

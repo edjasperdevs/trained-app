@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAccessStore } from '@/stores/accessStore'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ interface AccessGateProps {
 }
 
 export function AccessGate({ onAccessGranted }: AccessGateProps) {
+  const navigate = useNavigate()
   const validateCode = useAccessStore((state) => state.validateCode)
   const email = useAccessStore((state) => state.email)
 
@@ -186,6 +188,13 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
             </div>
           </CardContent>
         </Card>
+
+        <button
+          onClick={() => navigate('/auth')}
+          className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
+        >
+          Already have an account? <span className="text-primary">Sign in</span>
+        </button>
       </div>
 
       {/* Footer */}
