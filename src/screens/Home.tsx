@@ -27,8 +27,8 @@ export function Home() {
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
   const { targets, isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore()
   // Avatar mood is used indirectly by the Avatar component via its own store subscription
-  const canClaimXP = useXPStore((state) => state.canClaimXP())
-  const activeReminders = useRemindersStore((state) => state.getActiveReminders())
+  const canClaimXP = useXPStore((state) => state.canClaimXP)()
+  const activeReminders = useRemindersStore((state) => state.getActiveReminders)()
 
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)
@@ -47,14 +47,18 @@ export function Home() {
   // Check if user is a coaching client and if weekly check-in is due
   const { hasCheckinForCurrentWeek, isCoachingClient } = useWeeklyCheckins()
   useEffect(() => {
+    let cancelled = false
     isCoachingClient().then(isClient => {
+      if (cancelled) return
       setHasCoach(isClient)
       if (isClient) {
         hasCheckinForCurrentWeek().then(hasCheckin => {
+          if (cancelled) return
           setWeeklyCheckinDue(!hasCheckin)
         }).catch(() => { /* offline — leave banner hidden */ })
       }
     }).catch(() => { /* offline — leave coach features hidden */ })
+    return () => { cancelled = true }
   }, [hasCheckinForCurrentWeek, isCoachingClient])
 
   // Read latest check-in info from localStorage (populated by pullCoachData)

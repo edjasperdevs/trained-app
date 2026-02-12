@@ -195,17 +195,19 @@ export async function syncWeightLogsToCloud() {
 
   const weightHistory = useUserStore.getState().weightHistory
 
-  // Upsert all weight logs
-  for (const entry of weightHistory) {
-    await client
+  // Batch upsert all weight logs
+  if (weightHistory.length > 0) {
+    const { error } = await client
       .from('weight_logs')
-      .upsert({
-        user_id: user.id,
-        date: entry.date,
-        weight: entry.weight
-      }, {
-        onConflict: 'user_id,date'
-      })
+      .upsert(
+        weightHistory.map(entry => ({
+          user_id: user.id,
+          date: entry.date,
+          weight: entry.weight
+        })),
+        { onConflict: 'user_id,date' }
+      )
+    if (error) return { error: error.message }
   }
 
   return { error: null }
@@ -327,19 +329,23 @@ export async function syncSavedMealsToCloud() {
 
   const savedMeals = useMacroStore.getState().savedMeals
 
-  for (const meal of savedMeals) {
-    await client
+  // Batch upsert all saved meals
+  if (savedMeals.length > 0) {
+    const { error } = await client
       .from('saved_meals')
-      .upsert({
-        id: meal.id,
-        user_id: user.id,
-        name: meal.name,
-        protein: meal.protein,
-        carbs: meal.carbs,
-        fats: meal.fats,
-        calories: meal.calories,
-        usage_count: meal.usageCount
-      })
+      .upsert(
+        savedMeals.map(meal => ({
+          id: meal.id,
+          user_id: user.id,
+          name: meal.name,
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fats: meal.fats,
+          calories: meal.calories,
+          usage_count: meal.usageCount
+        }))
+      )
+    if (error) return { error: error.message }
   }
 
   return { error: null }

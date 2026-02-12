@@ -62,6 +62,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const requestIdRef = useRef(0)
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -85,19 +86,25 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
       return
     }
 
+    const currentRequestId = ++requestIdRef.current
     debounceRef.current = setTimeout(async () => {
       setIsLoading(true)
       setError(null)
 
       try {
         const foods = await searchFoods(query)
+        // Discard stale results if a newer search was initiated
+        if (currentRequestId !== requestIdRef.current) return
         setResults(foods)
         setShowResults(true)
       } catch {
+        if (currentRequestId !== requestIdRef.current) return
         setError('Failed to search foods. Please try again.')
         setResults([])
       } finally {
-        setIsLoading(false)
+        if (currentRequestId === requestIdRef.current) {
+          setIsLoading(false)
+        }
       }
     }, 400)
 

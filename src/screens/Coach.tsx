@@ -363,18 +363,21 @@ export function Coach() {
   // Fetch client check-ins when Check-ins tab is active in client detail
   useEffect(() => {
     if (activeTab === 'checkins' && selectedClient?.client_id) {
+      let cancelled = false
       setClientCheckinsLoading(true)
       fetchClientCheckins(selectedClient.client_id)
         .then(checkins => {
-          setClientCheckinsList(checkins)
+          if (!cancelled) setClientCheckinsList(checkins)
         })
-        .finally(() => setClientCheckinsLoading(false))
+        .finally(() => { if (!cancelled) setClientCheckinsLoading(false) })
+      return () => { cancelled = true }
     }
   }, [activeTab, selectedClient?.client_id, fetchClientCheckins])
 
   // Load client assignments when Programs tab is active
   useEffect(() => {
     if (activeTab === 'programs' && selectedClient?.client_id) {
+      let cancelled = false
       const today = new Date()
       const past30 = new Date(today)
       past30.setDate(past30.getDate() - 30)
@@ -386,14 +389,16 @@ export function Coach() {
         past30.toISOString().split('T')[0],
         future30.toISOString().split('T')[0]
       ).then(assignments => {
-        setClientAssignments(assignments)
+        if (!cancelled) setClientAssignments(assignments)
       })
+      return () => { cancelled = true }
     }
   }, [activeTab, selectedClient?.client_id, fetchClientAssignments])
 
   // Load completed assigned workouts when Programs tab is active
   useEffect(() => {
     if (activeTab !== 'programs' || !selectedClient?.client_id) return
+    let cancelled = false
 
     const fetchCompletedAssignments = async (clientId: string) => {
       setCompletedLoading(true)
@@ -438,7 +443,7 @@ export function Coach() {
               ],
             })
           }
-          setCompletedAssignments(mockCompleted)
+          if (!cancelled) setCompletedAssignments(mockCompleted)
           return
         }
 
@@ -452,9 +457,11 @@ export function Coach() {
           .order('date', { ascending: false })
           .limit(20)
 
+        if (cancelled) return
+
         const assignmentIds = assignments?.map(a => a.id) || []
         if (assignmentIds.length === 0) {
-          setCompletedAssignments([])
+          if (!cancelled) setCompletedAssignments([])
           return
         }
 
@@ -464,6 +471,8 @@ export function Coach() {
           .select('id, date, exercises, assignment_id, completed')
           .in('assignment_id', assignmentIds)
           .eq('completed', true)
+
+        if (cancelled) return
 
         if (!logs || logs.length === 0) {
           setCompletedAssignments([])
@@ -499,16 +508,17 @@ export function Coach() {
           .filter((p): p is CompletedAssignment => p !== null)
           .sort((a, b) => b.log.date.localeCompare(a.log.date))
 
-        setCompletedAssignments(paired)
+        if (!cancelled) setCompletedAssignments(paired)
       } catch (err) {
         console.error('Error fetching completed assignments:', err)
-        setCompletedAssignments([])
+        if (!cancelled) setCompletedAssignments([])
       } finally {
-        setCompletedLoading(false)
+        if (!cancelled) setCompletedLoading(false)
       }
     }
 
     fetchCompletedAssignments(selectedClient.client_id)
+    return () => { cancelled = true }
   }, [activeTab, selectedClient?.client_id, clientAssignments])
 
   useEffect(() => {

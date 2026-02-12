@@ -797,7 +797,7 @@ function CalculatorView({
           <label className="text-sm font-semibold text-muted-foreground block mb-3">
             GOAL
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {goals.map(g => (
               <button
                 key={g.value}

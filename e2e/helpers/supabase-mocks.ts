@@ -26,6 +26,19 @@ const FAKE_SESSION = {
   user: FAKE_USER,
 }
 
+// Supabase stores its auth session under this key (sb-{hostname.split('.')[0]}-auth-token)
+const SUPABASE_STORAGE_KEY = 'sb-fake-supabase-auth-token'
+
+/**
+ * Seed the Supabase auth session in localStorage so full-page navigations
+ * (page.goto) preserve the authenticated state across reloads.
+ */
+export async function seedSupabaseSession(page: Page) {
+  await page.evaluate(({ key, session }) => {
+    localStorage.setItem(key, JSON.stringify(session))
+  }, { key: SUPABASE_STORAGE_KEY, session: FAKE_SESSION })
+}
+
 /**
  * Mock Supabase auth for the sign-up flow.
  *
@@ -39,14 +52,12 @@ export async function mockSupabaseSignUp(page: Page) {
     const method = route.request().method()
 
     // POST /auth/v1/signup -- sign-up request
+    // Return flat session (GoTrueClient's _sessionResponse checks top-level access_token)
     if (url.includes('/auth/v1/signup') && method === 'POST') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          user: FAKE_USER,
-          session: FAKE_SESSION,
-        }),
+        body: JSON.stringify(FAKE_SESSION),
       })
       return
     }
@@ -181,22 +192,28 @@ export async function mockSupabaseSignIn(page: Page) {
  * Mock Supabase auth for the full cycle: sign-up -> sign-out -> re-sign-in.
  *
  * Tracks session state through signup, logout, and password login.
+ * REST mock is stateful: stores profile on upsert (POST) and returns it on
+ * GET, so that loadProfileFromCloud() restores the profile after re-login
+ * (sign-out clears all local stores).
+ *
  * Must be called BEFORE page.goto().
  */
-export async function mockSupabaseFullCycle(page: Page) {
+export async function mockSupabaseFullCycle(page: Page, options: { role?: string } = {}) {
   let signedIn = false
+  const profileRole = options.role || 'client'
 
   await page.route('**/auth/v1/**', async (route) => {
     const url = route.request().url()
     const method = route.request().method()
 
     // POST /auth/v1/signup
+    // Return flat session (GoTrueClient's _sessionResponse checks top-level access_token)
     if (url.includes('/auth/v1/signup') && method === 'POST') {
       signedIn = true
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ user: FAKE_USER, session: FAKE_SESSION }),
+        body: JSON.stringify(FAKE_SESSION),
       })
       return
     }
@@ -268,6 +285,18 @@ export async function mockSupabaseFullCycle(page: Page) {
   })
 
   await page.route('**/rest/v1/**', async (route) => {
+    const url = route.request().url()
+
+    // Profile queries (isCoach checks select=role, loadProfileFromCloud checks select=*)
+    if (url.includes('/rest/v1/profiles') && url.includes('select=')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ role: profileRole }),
+      })
+      return
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',

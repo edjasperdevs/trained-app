@@ -303,12 +303,12 @@ export function Workouts() {
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="text-xl font-bold">
-                          {hasAssignment ? 'Coach Workout' : todayWorkout!.name}
+                          {hasAssignment ? 'Coach Workout' : todayWorkout?.name}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {hasAssignment
-                            ? `${assignedWorkout!.exercises.length} exercises prescribed`
-                            : `Day ${todayWorkout!.dayNumber} of your week`}
+                            ? `${assignedWorkout?.exercises.length} exercises prescribed`
+                            : `Day ${todayWorkout?.dayNumber} of your week`}
                         </p>
                       </div>
                       {isCompleted ? (
@@ -327,7 +327,7 @@ export function Workouts() {
                     {/* Prescribed exercises preview */}
                     {hasAssignment && !isCompleted && (
                       <div className="mt-3 pt-3 border-t border-border space-y-1.5">
-                        {assignedWorkout!.exercises.map((ex, i) => (
+                        {assignedWorkout?.exercises.map((ex, i) => (
                           <div key={i} className="flex items-center justify-between text-sm">
                             <span className="text-foreground">{ex.name}</span>
                             <span className="text-muted-foreground text-xs">
@@ -336,7 +336,7 @@ export function Workouts() {
                             </span>
                           </div>
                         ))}
-                        {assignedWorkout!.coachNotes && (
+                        {assignedWorkout?.coachNotes && (
                           <div className="mt-2 p-2.5 bg-primary/10 rounded-lg">
                             <p className="text-xs text-primary">
                               <span className="font-semibold">Coach notes:</span> {assignedWorkout!.coachNotes}
@@ -440,7 +440,7 @@ export function Workouts() {
                 <Card className="py-0">
                   <CardContent className="p-4">
                     <div className="text-center py-4">
-                      <span className="text-4xl mb-3 block">😴</span>
+                      <span className="text-4xl mb-3 block" role="img" aria-label="Rest day">😴</span>
                       <p className="text-xl font-bold">
                         Recovery Day
                       </p>
@@ -473,8 +473,8 @@ export function Workouts() {
                             {isCustomized ? 'Customized' : 'Default'}
                           </p>
                         </div>
-                        <span className="text-muted-foreground">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <span className="text-muted-foreground" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                           </svg>
@@ -492,8 +492,9 @@ export function Workouts() {
               <div className="grid grid-cols-7 gap-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                   const workout = currentPlan?.schedule.find(s => s.day === index)
-                  const isToday = new Date().getDay() === index
-                  const isPast = new Date().getDay() > index
+                  const todayDOW = new Date().getDay()
+                  const isToday = todayDOW === index
+                  const isPast = !isToday && (todayDOW === 0 ? index !== 0 : index < todayDOW)
                   const isCoachDay = isToday && hasAssignment
 
                   return (
@@ -541,7 +542,7 @@ export function Workouts() {
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl">{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
+                          <span className="text-2xl" role="img" aria-label={log.isMinimal ? 'Minimal workout' : log.workoutType}>{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
                           <div>
                             <p className="font-semibold capitalize text-sm">
                               {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
@@ -745,6 +746,7 @@ export function Workouts() {
                           <button
                             onClick={() => index > 0 && reorderExercise(editingWorkoutType, index, index - 1)}
                             disabled={index === 0}
+                            aria-label={`Move ${exercise.name} up`}
                             className={`text-xs px-1 ${index === 0 ? 'text-muted-foreground/30' : 'text-muted-foreground hover:text-foreground'}`}
                           >
                             ▲
@@ -752,6 +754,7 @@ export function Workouts() {
                           <button
                             onClick={() => index < arr.length - 1 && reorderExercise(editingWorkoutType, index, index + 1)}
                             disabled={index === arr.length - 1}
+                            aria-label={`Move ${exercise.name} down`}
                             className={`text-xs px-1 ${index === arr.length - 1 ? 'text-muted-foreground/30' : 'text-muted-foreground hover:text-foreground'}`}
                           >
                             ▼
@@ -774,9 +777,9 @@ export function Workouts() {
                             })
                           }}
                           className="text-muted-foreground hover:text-primary p-1"
-                          title="Edit exercise"
+                          aria-label={`Edit ${exercise.name}`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                           </svg>
@@ -785,7 +788,7 @@ export function Workouts() {
                         <button
                           onClick={() => removeExercise(editingWorkoutType, exerciseId)}
                           className="text-muted-foreground hover:text-destructive p-1"
-                          title="Remove exercise"
+                          aria-label={`Remove ${exercise.name}`}
                         >
                           ✕
                         </button>
@@ -1145,7 +1148,7 @@ function ActiveWorkoutView({
                                 ✓
                               </button>
                               {isImprovement && (
-                                <span className="text-xs text-warning" title="Personal Record!">
+                                <span className="text-xs text-warning" role="img" aria-label="Personal record">
                                   🔥
                                 </span>
                               )}
@@ -1346,7 +1349,7 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
   if (history.length === 0) {
     return (
       <div className="text-center py-8">
-        <span className="text-4xl mb-4 block">📊</span>
+        <span className="text-4xl mb-4 block" role="img" aria-hidden="true">📊</span>
         <p className="text-muted-foreground">No history yet</p>
         <p className="text-sm text-muted-foreground">Complete this exercise to start tracking progress</p>
       </div>
@@ -1380,7 +1383,7 @@ function ExerciseHistoryView({ exerciseName }: { exerciseName: string }) {
       {/* PR Card */}
       <div className="bg-gradient-to-r from-yellow-500/20 to-amber-600/20 border border-yellow-500/30 rounded-lg p-4">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">🏆</span>
+          <span className="text-3xl" role="img" aria-label="Trophy">🏆</span>
           <div>
             <p className="text-xs text-yellow-400 font-semibold">Personal Record</p>
             <p className="text-2xl font-bold font-digital">

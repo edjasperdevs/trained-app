@@ -40,6 +40,7 @@ import {
   UnitSystem,
   DayOfWeek
 } from '@/stores'
+import { getDefaultDays } from '@/stores/workoutStore'
 import { EVOLUTION_STAGES } from '@/stores/avatarStore'
 import { analytics } from '@/lib/analytics'
 import { LABELS, AVATAR_STAGES } from '@/design/constants'
@@ -66,20 +67,6 @@ interface OnboardingData {
   goal: Goal
   avatarBase: AvatarBase
   units: UnitSystem
-}
-
-// Default workout days for each training frequency
-const getDefaultDays = (trainingDays: TrainingDays): DayOfWeek[] => {
-  switch (trainingDays) {
-    case 3:
-      return [1, 3, 5] // Mon, Wed, Fri
-    case 4:
-      return [1, 2, 4, 5] // Mon, Tue, Thu, Fri
-    case 5:
-      return [1, 2, 3, 4, 5] // Mon-Fri
-    default:
-      return [1, 3, 5]
-  }
 }
 
 // Load saved progress from localStorage

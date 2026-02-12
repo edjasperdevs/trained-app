@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       if (error) {
-        return { error: error.message }
+        return { error: 'Could not create account. Please try again.' }
       }
 
       if (data.user) {
@@ -116,16 +116,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       if (error) {
-        // Supabase error codes for better UX
-        // 'email_not_confirmed' - user hasn't confirmed email
-        // 'invalid_credentials' - wrong email/password
         const errorCode = error.message.toLowerCase().includes('email not confirmed')
           ? 'email_not_confirmed'
           : error.message.toLowerCase().includes('invalid login credentials')
           ? 'invalid_credentials'
           : 'unknown'
 
-        return { error: error.message, code: errorCode }
+        // Map to user-friendly messages instead of raw Supabase errors
+        const userMessage = errorCode === 'email_not_confirmed'
+          ? 'Please confirm your email before signing in.'
+          : errorCode === 'invalid_credentials'
+          ? 'Invalid email or password.'
+          : 'Something went wrong. Please try again.'
+
+        return { error: userMessage, code: errorCode }
       }
 
       set({ user: data.user, session: data.session })

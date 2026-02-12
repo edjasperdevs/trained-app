@@ -9,7 +9,7 @@ export function UpdatePrompt() {
   if (!needRefresh) return null
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom">
+    <div className="fixed bottom-32 left-4 right-4 z-50 animate-in slide-in-from-bottom">
       <div className="bg-card border border-border rounded-lg p-4 shadow-lg">
         <div className="flex flex-col gap-3">
           <div>

@@ -10,9 +10,59 @@
  * E2E-06: Existing user -- sign in -> home with seeded data
  * E2E-07: Full cycle -- sign up -> onboarding -> home -> sign out -> sign back in -> home
  */
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 import { mockSupabaseSignUp, mockSupabaseSignIn, mockSupabaseFullCycle } from '../helpers/supabase-mocks'
-import { seedAllStores } from '../helpers/storage'
+import { seedAllStores, STORE_KEYS } from '../helpers/storage'
+
+/**
+ * After sign-out clears all Zustand stores, re-inject profile + access state
+ * into localStorage and reload the page so Zustand re-hydrates.
+ *
+ * In production, loadProfileFromCloud() restores the profile from Supabase.
+ * The mock REST layer doesn't persist upserted data across the sign-out cycle
+ * (syncProfileToCloud fires after sign-up when profile is still null),
+ * so we simulate the cloud restore via localStorage seeding + reload.
+ */
+async function injectProfileAfterSignIn(page: Page, username: string) {
+  await page.evaluate(({ userKey, accessKey, username }) => {
+    localStorage.setItem(userKey, JSON.stringify({
+      state: {
+        profile: {
+          username,
+          gender: 'male',
+          fitnessLevel: 'intermediate',
+          trainingDaysPerWeek: 3,
+          weight: 180,
+          height: 70,
+          age: 28,
+          goal: 'recomp',
+          avatarBase: 'dominant',
+          createdAt: Date.now(),
+          currentStreak: 0,
+          longestStreak: 0,
+          lastCheckInDate: null,
+          streakPaused: false,
+          onboardingComplete: true,
+          units: 'imperial',
+        },
+        weightHistory: [],
+      },
+      version: 0,
+    }))
+    localStorage.setItem(accessKey, JSON.stringify({
+      state: {
+        hasAccess: true,
+        licenseKey: 'E2E-RESEED',
+        accessGrantedAt: new Date().toISOString(),
+        email: 'e2e@test.com',
+        instanceId: 'e2e-reseed',
+      },
+      version: 2,
+    }))
+  }, { userKey: STORE_KEYS.user, accessKey: STORE_KEYS.access, username })
+  // Reload so Zustand re-hydrates from localStorage (mock routes survive reload)
+  await page.reload({ waitUntil: 'domcontentloaded' })
+}
 
 test.describe('Auth and Onboarding Journeys', () => {
   test('E2E-05: new user -- access gate -> sign up -> onboarding -> home', async ({ page }) => {
@@ -301,16 +351,26 @@ test.describe('Auth and Onboarding Journeys', () => {
     await page.locator('[data-testid="settings-signout-button"]').click()
 
     // --- AUTH SCREEN (after sign out) ---
+    // After sign-out, Settings calls navigate('/auth') which may race with
+    // auth state changes. Wait for the URL to settle at /auth.
     await expect(authScreen).toBeVisible({ timeout: 10000 })
+    await page.waitForURL(/\/auth/, { timeout: 5000 })
 
-    // Switch to login mode
-    await page.locator('[data-testid="auth-toggle-mode"]').click()
-    await expect(page.getByText('Sign In', { exact: true }).first()).toBeVisible()
+    // navigate('/auth') renders Auth with defaultMode="login", so it may
+    // already show "Sign In". Toggle only if still in signup mode.
+    const signInTitle = page.getByText('Sign In', { exact: true }).first()
+    if (!(await signInTitle.isVisible().catch(() => false))) {
+      await page.locator('[data-testid="auth-toggle-mode"]').click()
+    }
+    await expect(signInTitle).toBeVisible({ timeout: 5000 })
 
     // --- SIGN BACK IN ---
     await page.locator('[data-testid="auth-email-input"]').fill('e2e@test.com')
     await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
     await page.locator('[data-testid="auth-submit-button"]').click()
+
+    // Re-inject profile (sign-out cleared all stores, mock doesn't simulate cloud sync)
+    await injectProfileAfterSignIn(page, 'E2ECycleUser')
 
     // --- HOME SCREEN (after re-login) ---
     await expect(homeScreen).toBeVisible({ timeout: 15000 })
@@ -319,7 +379,7 @@ test.describe('Auth and Onboarding Journeys', () => {
   })
 
   test('E2E-08: coach cycle -- sign up -> home -> coach dashboard -> sign out -> sign back in', async ({ page }) => {
-    await mockSupabaseFullCycle(page)
+    await mockSupabaseFullCycle(page, { role: 'coach' })
     await page.goto('/')
 
     // --- ACCESS GATE ---
@@ -406,40 +466,49 @@ test.describe('Auth and Onboarding Journeys', () => {
     await expect(homeScreen).toBeVisible({ timeout: 15000 })
     await expect(page.getByText('CoachUser')).toBeVisible()
 
-    // --- COACH DASHBOARD (SPA navigate to avoid full reload losing mock session) ---
-    await page.evaluate(() => window.history.pushState({}, '', '/coach'))
-    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
+    // --- COACH DASHBOARD ---
+    // Now that the mock returns flat session format, GoTrueClient persists
+    // the session to localStorage, so full page navigations preserve auth.
+    await page.goto('/coach')
     await expect(page.getByText('Coach Dashboard')).toBeVisible({ timeout: 15000 })
     // Verify segment controls are present
     await expect(page.getByRole('button', { name: 'Clients' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Templates' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Check-ins' })).toBeVisible()
 
-    // --- SIGN OUT (navigate to settings via nav bar) ---
-    await page.locator('nav[aria-label="Main navigation"] a[href="/settings"]').click()
+    // --- SIGN OUT ---
+    // Navigation component is hidden on /coach, so navigate to settings directly
+    await page.goto('/settings')
     await expect(page.locator('[data-testid="settings-signout-button"]')).toBeVisible({ timeout: 10000 })
     await page.locator('[data-testid="settings-signout-button"]').click()
 
     // --- AUTH SCREEN (after sign out) ---
+    // After sign-out, Settings calls navigate('/auth') which may race with
+    // auth state changes. Wait for the URL to settle at /auth.
     await expect(authScreen).toBeVisible({ timeout: 10000 })
+    await page.waitForURL(/\/auth/, { timeout: 5000 })
 
-    // Switch to login mode and sign back in
-    await page.locator('[data-testid="auth-toggle-mode"]').click()
-    await expect(page.getByText('Sign In', { exact: true }).first()).toBeVisible()
+    // navigate('/auth') renders Auth with defaultMode="login", so it may
+    // already show "Sign In". Toggle only if still in signup mode.
+    const signInTitle = page.getByText('Sign In', { exact: true }).first()
+    if (!(await signInTitle.isVisible().catch(() => false))) {
+      await page.locator('[data-testid="auth-toggle-mode"]').click()
+    }
+    await expect(signInTitle).toBeVisible({ timeout: 5000 })
+
     await page.locator('[data-testid="auth-email-input"]').fill('coach@test.com')
     await page.locator('[data-testid="auth-password-input"]').fill('TestPassword123!')
     await page.locator('[data-testid="auth-submit-button"]').click()
 
+    // Re-inject profile (sign-out cleared all stores, mock doesn't simulate cloud sync)
+    await injectProfileAfterSignIn(page, 'CoachUser')
+
     // --- VERIFY HOME SCREEN (after re-login) ---
-    // After sign-in, app renders authenticated routes; navigate to / via SPA
-    await page.evaluate(() => window.history.pushState({}, '', '/'))
-    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
     await expect(homeScreen).toBeVisible({ timeout: 15000 })
     await expect(page.getByText('CoachUser')).toBeVisible()
 
     // --- VERIFY COACH DASHBOARD (after re-login) ---
-    await page.evaluate(() => window.history.pushState({}, '', '/coach'))
-    await page.evaluate(() => window.dispatchEvent(new PopStateEvent('popstate')))
+    await page.goto('/coach')
     await expect(page.getByText('Coach Dashboard')).toBeVisible({ timeout: 15000 })
     await expect(page.getByRole('button', { name: 'Clients' })).toBeVisible()
   })

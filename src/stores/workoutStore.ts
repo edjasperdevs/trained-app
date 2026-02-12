@@ -362,7 +362,7 @@ const buildSchedule = (trainingDays: TrainingDays, selectedDays: DayOfWeek[]): W
 }
 
 // Default workout days for each training frequency
-const getDefaultDays = (trainingDays: TrainingDays): DayOfWeek[] => {
+export const getDefaultDays = (trainingDays: TrainingDays): DayOfWeek[] => {
   switch (trainingDays) {
     case 3:
       return [1, 3, 5] // Mon, Wed, Fri
@@ -646,8 +646,8 @@ export const useWorkoutStore = create<WorkoutStore>()(
         const weekStart = new Date(now)
         weekStart.setDate(now.getDate() - todayDOW)
         weekStart.setHours(0, 0, 0, 0)
-        const weekStartStr = weekStart.toISOString().split('T')[0]
-        const todayStr = now.toISOString().split('T')[0]
+        const weekStartStr = getLocalDateString(weekStart)
+        const todayStr = getLocalDateString(now)
 
         // Get all completed logs this week
         const weekLogs = get().workoutLogs.filter(

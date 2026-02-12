@@ -319,12 +319,14 @@ export function Achievements() {
         )}
 
         {/* Category Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-5 px-5" role="radiogroup" aria-label="Filter badges by category">
           {categories.map(cat => {
             const Icon = cat.icon
             return (
               <button
                 key={cat.id}
+                role="radio"
+                aria-checked={filter === cat.id}
                 onClick={() => setFilter(cat.id)}
                 className={cn(
                   'flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
