@@ -26,6 +26,7 @@ import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '
 import { friendlyError } from '@/lib/errors'
 import { isCoach as checkIsCoach } from '@/lib/supabase'
 import { getLocalDateString } from '@/lib/dateUtils'
+import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidXPState, isValidDailyLog, isArray } from '@/lib/validation'
 import { cn } from '@/lib/cn'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
@@ -201,8 +202,36 @@ export function Settings() {
       const parsed = JSON.parse(importData)
 
       // Validate the import has expected structure
-      if (!parsed.version && !parsed.user && !parsed.xp) {
+      if (!isObject(parsed) || (!parsed.version && !parsed.user && !parsed.xp)) {
         toast.error('This doesn\'t look like a Trained backup file. Make sure you\'re importing a file exported from Trained.')
+        setImportStatus('error')
+        return
+      }
+
+      // Validate individual sections before importing
+      const errors: string[] = []
+
+      if (parsed.xp && !isValidXPState(parsed.xp)) {
+        errors.push('XP data')
+      }
+      if (parsed.macros && isObject(parsed.macros)) {
+        if (parsed.macros.targets && !isValidMacroTargets(parsed.macros.targets)) {
+          errors.push('macro targets')
+        }
+        if (parsed.macros.dailyLogs && isArray(parsed.macros.dailyLogs)) {
+          const invalidLogs = (parsed.macros.dailyLogs as unknown[]).filter(l => !isValidDailyLog(l))
+          if (invalidLogs.length > 0) errors.push('macro daily logs')
+        }
+      }
+      if (parsed.workouts && isObject(parsed.workouts)) {
+        if (parsed.workouts.workoutLogs && isArray(parsed.workouts.workoutLogs)) {
+          const invalidLogs = (parsed.workouts.workoutLogs as unknown[]).filter(l => !isValidWorkoutLog(l))
+          if (invalidLogs.length > 0) errors.push('workout logs')
+        }
+      }
+
+      if (errors.length > 0) {
+        toast.error(`Invalid data in: ${errors.join(', ')}. Import cancelled.`)
         setImportStatus('error')
         return
       }

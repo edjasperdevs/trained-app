@@ -51,7 +51,9 @@ async function fetchRosterPage(
 
   const trimmed = search.trim()
   if (trimmed) {
-    query = query.or(`username.ilike.%${trimmed}%,email.ilike.%${trimmed}%`)
+    // Escape PostgREST special characters to prevent filter injection
+    const escaped = trimmed.replace(/[%_\\,.*()]/g, (ch) => `\\${ch}`)
+    query = query.or(`username.ilike.%${escaped}%,email.ilike.%${escaped}%`)
   }
 
   query = query.range(from, to)

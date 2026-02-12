@@ -106,19 +106,21 @@ export const useAccessStore = create<AccessState>()(
         const apiUrl = import.meta.env.VITE_LEMONSQUEEZY_API_URL
 
         if (!apiUrl) {
-          // Fallback: In development or if not configured, accept any 8+ char code
-          if (import.meta.env.DEV) console.log('[Access] Lemon Squeezy not configured, using fallback validation')
-          if (trimmedCode.length >= 8) {
-            set({
-              hasAccess: true,
-              licenseKey: trimmedCode,
-              accessGrantedAt: new Date().toISOString(),
-              email: null,
-              instanceId: 'dev-instance'
-            })
-            return { success: true }
+          if (import.meta.env.DEV) {
+            // DEV only: accept any 8+ char code when Lemon Squeezy not configured
+            console.log('[Access] Lemon Squeezy not configured, using dev fallback')
+            if (trimmedCode.length >= 8) {
+              set({
+                hasAccess: true,
+                licenseKey: trimmedCode,
+                accessGrantedAt: new Date().toISOString(),
+                email: null,
+                instanceId: 'dev-instance'
+              })
+              return { success: true }
+            }
           }
-          return { success: false, error: 'Invalid license key' }
+          return { success: false, error: 'License validation unavailable. Please try again later.' }
         }
 
         try {

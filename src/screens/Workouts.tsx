@@ -590,6 +590,9 @@ export function Workouts() {
       {/* Minimal Workout Modal */}
       {showMinimalModal && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Log minimal workout"
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowMinimalModal(false)}
         >
@@ -637,6 +640,9 @@ export function Workouts() {
       {/* Exercise Editor Modal */}
       {editingWorkoutType && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit workout exercises"
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => {
             setEditingWorkoutType(null)
@@ -1215,6 +1221,9 @@ function ActiveWorkoutView({
       {/* Add Exercise Modal */}
       {showAddExercise && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add exercise"
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowAddExercise(false)}
         >
@@ -1295,6 +1304,9 @@ function ActiveWorkoutView({
       {/* Exercise History Modal */}
       {showHistoryFor && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Exercise history"
           className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setShowHistoryFor(null)}
         >

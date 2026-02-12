@@ -158,7 +158,7 @@ export function Home() {
       id: 'checkin',
       label: LABELS.checkIn,
       xp: XP_VALUES.CHECK_IN,
-      completed: false,
+      completed: hasCheckedInToday,
       icon: CheckCircle2
     }
   ]
@@ -558,7 +558,7 @@ export function Home() {
 
       {/* Coach Response Modal */}
       {showCoachResponse && latestCheckinInfo?.coach_response && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
+        <div role="dialog" aria-modal="true" aria-label="Coach response" className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
           <div className="bg-card rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[85vh] overflow-auto p-6 animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Coach Response</h2>
