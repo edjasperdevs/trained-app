@@ -700,6 +700,7 @@ export function Workouts() {
                             value={editExercise.targetSets}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetSets: e.target.value }))}
                             className="w-16 text-sm text-center"
+                            aria-label="Sets"
                             placeholder="Sets"
                           />
                           <span className="text-muted-foreground self-center">×</span>
@@ -708,6 +709,7 @@ export function Workouts() {
                             value={editExercise.targetReps}
                             onChange={(e) => setEditExercise(prev => ({ ...prev, targetReps: e.target.value }))}
                             className="flex-1 text-sm"
+                            aria-label="Reps"
                             placeholder="Reps"
                           />
                         </div>

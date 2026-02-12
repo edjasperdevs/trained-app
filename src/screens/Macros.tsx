@@ -68,10 +68,13 @@ export function Macros() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2">
+        <div className="flex gap-2" role="tablist" aria-label="Macro views">
           {tabs.map(tab => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`tabpanel-${tab.id}`}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
                 'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors',
@@ -568,7 +571,7 @@ function MacroRing({
           </div>
         </div>
         <p className="mt-2 font-semibold">{label}</p>
-        <p className="text-xs text-muted-foreground">of {target}{unit}</p>
+        <p className="text-xs text-muted-foreground">{target > 0 ? `of ${target}${unit}` : 'No target set'}</p>
         {hit && <span className="text-xs text-success mt-1">Target Hit!</span>}
       </CardContent>
     </Card>

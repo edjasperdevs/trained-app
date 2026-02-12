@@ -14,6 +14,7 @@ import {
 import { getStandingOrder, LABELS } from '@/design/constants'
 import { haptics } from '@/lib/haptics'
 import { cn } from '@/lib/cn'
+import { getTimeAgo } from '@/lib/dateUtils'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
@@ -67,19 +68,6 @@ export function Home() {
       // Ignore parse errors
     }
   }, [])
-
-  const getTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const minutes = Math.floor(diff / (1000 * 60))
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days === 1) return '1 day ago'
-    return `${days} days ago`
-  }
 
   // Determine if coach has reviewed latest check-in
   const hasCoachResponse = latestCheckinInfo?.status === 'reviewed' && latestCheckinInfo.coach_response !== null

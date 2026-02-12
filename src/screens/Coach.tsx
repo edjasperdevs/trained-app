@@ -14,7 +14,7 @@ import { WorkoutBuilder } from '@/components/WorkoutBuilder'
 import { WorkoutAssigner } from '@/components/WorkoutAssigner'
 import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
-import { getLocalDateString } from '@/lib/dateUtils'
+import { getLocalDateString, getTimeAgo } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
 import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck, FileText } from 'lucide-react'
@@ -740,18 +740,7 @@ export function Coach() {
     return '🔴'
   }
 
-  const getTimeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime()
-    const minutes = Math.floor(diff / (1000 * 60))
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days === 1) return '1 day ago'
-    return `${days} days ago`
-  }
+  // getTimeAgo imported from @/lib/dateUtils
 
   // Template management helpers
   const handleNewTemplate = () => {

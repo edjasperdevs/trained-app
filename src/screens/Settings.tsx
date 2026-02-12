@@ -486,8 +486,8 @@ export function Settings() {
                   onChange={(e) => setWeightInput(e.target.value)}
                   placeholder={String(toDisplayWeight(todayWeight?.weight || profile?.weight || 150, units))}
                   className="pr-12 font-digital"
-                  min={units === 'metric' ? 35 : 80}
-                  max={units === 'metric' ? 180 : 400}
+                  min={units === 'metric' ? 20 : 50}
+                  max={units === 'metric' ? 225 : 500}
                   step={0.1}
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">

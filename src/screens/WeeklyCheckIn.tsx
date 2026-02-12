@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -217,8 +217,16 @@ interface FeedbackFields {
 
 export function WeeklyCheckIn() {
   const navigate = useNavigate()
-  const { submitCheckin } = useWeeklyCheckins()
+  const { submitCheckin, hasCheckinForCurrentWeek } = useWeeklyCheckins()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false)
+
+  // Guard against duplicate submissions via direct navigation
+  useEffect(() => {
+    hasCheckinForCurrentWeek().then(has => {
+      if (has) setAlreadySubmitted(true)
+    }).catch(() => { /* offline — allow form to render */ })
+  }, [hasCheckinForCurrentWeek])
 
   // Section expansion state (all expanded by default)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -342,6 +350,27 @@ export function WeeklyCheckIn() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (alreadySubmitted) {
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="bg-card pt-8 pb-6 px-5">
+          <div className="flex items-center gap-3 mb-2">
+            <button onClick={() => navigate('/')} className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors" aria-label="Go back">
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-xl font-bold">Weekly Check-in</h1>
+          </div>
+        </div>
+        <div className="px-5 mt-8 text-center space-y-4">
+          <ClipboardCheck size={48} className="text-success mx-auto" />
+          <h2 className="text-lg font-bold">Already Submitted</h2>
+          <p className="text-muted-foreground text-sm">You've already submitted your check-in for the week of {weekDisplay}.</p>
+          <Button onClick={() => navigate('/')}>Back to Home</Button>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -106,3 +106,19 @@ export function isLocalSunday(date: Date = new Date()): boolean {
 export function getDaysSince(dateStr: string): number {
   return getLocalDaysDifference(dateStr, getLocalDateString())
 }
+
+/**
+ * Human-readable relative time string (e.g., "5m ago", "2h ago", "3 days ago").
+ */
+export function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return '1 day ago'
+  return `${days} days ago`
+}
