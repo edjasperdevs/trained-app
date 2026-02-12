@@ -146,22 +146,36 @@ export async function loadProfileFromCloud() {
 
   // Only load if cloud data exists and is more complete
   if (data.onboarding_complete) {
-    useUserStore.getState().setProfile({
+    const cloudProfile = {
       username: data.username || '',
-      gender: data.gender || 'male',
-      fitnessLevel: data.fitness_level || 'beginner',
+      gender: (data.gender || 'male') as 'male' | 'female',
+      fitnessLevel: (data.fitness_level || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
       trainingDaysPerWeek: (data.training_days_per_week as 3 | 4 | 5) || 3,
       weight: data.weight || 150,
       height: data.height || 68,
       age: data.age || 25,
-      goal: data.goal || 'maintain',
-      avatarBase: data.avatar_base || 'dominant',
+      goal: (data.goal || 'maintain') as 'cut' | 'recomp' | 'maintain' | 'bulk',
+      avatarBase: (data.avatar_base || 'dominant') as 'dominant' | 'switch' | 'submissive',
       currentStreak: data.current_streak || 0,
       longestStreak: data.longest_streak || 0,
       lastCheckInDate: data.last_check_in_date,
       streakPaused: data.streak_paused || false,
-      onboardingComplete: data.onboarding_complete
-    })
+      onboardingComplete: data.onboarding_complete,
+    }
+    const localProfile = useUserStore.getState().profile
+    if (localProfile) {
+      // Merge into existing local profile
+      useUserStore.getState().setProfile(cloudProfile)
+    } else {
+      // No local profile — set full profile from cloud (setProfile would no-op on null)
+      useUserStore.setState({
+        profile: {
+          ...cloudProfile,
+          createdAt: new Date(data.created_at || Date.now()).getTime(),
+          units: 'imperial',
+        }
+      })
+    }
   }
 
   return { error: null }
