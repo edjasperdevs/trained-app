@@ -104,11 +104,9 @@ interface MacroStore {
   addRecentFood: (food: RecentFood) => void
   calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => void
   generateMealPlan: () => void
-  logMeal: (mealNumber: number, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   logQuickMacros: (macros: Partial<MacroTargets>) => void
   saveMeal: (name: string, ingredients: MealIngredient[]) => void
-  editSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt'>>) => void
   deleteSavedMeal: (id: string) => void
   getSavedMeals: () => SavedMeal[]
   getTodayMeals: () => LoggedMeal[]
@@ -248,55 +246,6 @@ export const useMacroStore = create<MacroStore>()(
         set({ mealPlan })
       },
 
-      logMeal: (mealNumber, macros) => {
-        const today = getLocalDateString()
-        const existingLog = get().dailyLogs.find(log => log.date === today)
-
-        if (existingLog) {
-          const updatedMeals = existingLog.meals.map(meal =>
-            meal.mealNumber === mealNumber
-              ? { ...meal, ...macros, logged: true }
-              : meal
-          )
-
-          // Check if meal exists, if not add it
-          if (!updatedMeals.find(m => m.mealNumber === mealNumber)) {
-            updatedMeals.push({ mealNumber, ...macros, logged: true })
-          }
-
-          const totals = updatedMeals.reduce(
-            (acc, meal) => ({
-              protein: acc.protein + meal.protein,
-              carbs: acc.carbs + meal.carbs,
-              fats: acc.fats + meal.fats,
-              calories: acc.calories + meal.calories
-            }),
-            { protein: 0, carbs: 0, fats: 0, calories: 0 }
-          )
-
-          set((state) => ({
-            dailyLogs: state.dailyLogs.map(log =>
-              log.date === today
-                ? { ...log, ...totals, meals: updatedMeals }
-                : log
-            )
-          }))
-        } else {
-          // Capture target snapshot for the day when first meal is logged
-          const targets = get().targets
-          const newLog: DailyMacroLog = {
-            date: today,
-            ...macros,
-            meals: [{ mealNumber, ...macros, logged: true }],
-            loggedMeals: [],
-            targetSnapshot: targets ? { ...targets } : undefined
-          }
-          set((state) => ({
-            dailyLogs: [...state.dailyLogs, newLog]
-          }))
-        }
-      },
-
       logNamedMeal: (name, macros) => {
         const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
@@ -421,14 +370,6 @@ export const useMacroStore = create<MacroStore>()(
         }
         set((state) => ({
           savedMeals: [...state.savedMeals, newSavedMeal]
-        }))
-      },
-
-      editSavedMeal: (id, updates) => {
-        set((state) => ({
-          savedMeals: state.savedMeals.map(meal =>
-            meal.id === id ? { ...meal, ...updates } : meal
-          )
         }))
       },
 

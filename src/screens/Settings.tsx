@@ -314,7 +314,11 @@ export function Settings() {
                 <Input
                   type="text"
                   value={profile?.username || ''}
-                  onChange={(e) => setProfile({ username: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    if (val.length <= 30) setProfile({ username: val })
+                  }}
+                  maxLength={30}
                 />
               </div>
 

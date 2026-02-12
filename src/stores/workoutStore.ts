@@ -83,10 +83,8 @@ interface WorkoutStore {
   setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => void
   setWorkoutDays: (days: DayOfWeek[]) => void
   getTodayWorkout: () => { type: WorkoutType; name: string; dayNumber: number } | null
-  getWorkoutForDay: (dayOfWeek: number) => { type: WorkoutType; name: string } | null
   startWorkout: (type: WorkoutType, dayNumber: number) => string
   startMinimalWorkout: (notes: string) => string
-  updateWorkoutNotes: (workoutId: string, notes: string) => void
   logSet: (workoutId: string, exerciseId: string, setIndex: number, data: Partial<ExerciseSet>) => void
   addExerciseToWorkout: (workoutId: string, exercise: { name: string; targetSets: number; targetReps: string }) => void
   reorderWorkoutExercise: (workoutId: string, fromIndex: number, toIndex: number) => void
@@ -104,7 +102,6 @@ interface WorkoutStore {
 
   // Customization actions
   getExercisesForType: (type: WorkoutType) => Omit<Exercise, 'id' | 'sets'>[]
-  setCustomExercises: (type: WorkoutType, exercises: CustomExercise[]) => void
   addExercise: (type: WorkoutType, exercise: Omit<CustomExercise, 'id'>) => void
   updateExercise: (type: WorkoutType, id: string, updates: Partial<Omit<CustomExercise, 'id'>>) => void
   removeExercise: (type: WorkoutType, id: string) => void
@@ -426,16 +423,6 @@ export const useWorkoutStore = create<WorkoutStore>()(
         }
       },
 
-      getWorkoutForDay: (dayOfWeek: number) => {
-        const plan = get().currentPlan
-        if (!plan) return null
-
-        const scheduled = plan.schedule.find(s => s.day === dayOfWeek)
-        if (!scheduled) return null
-
-        return { type: scheduled.type, name: scheduled.name }
-      },
-
       startWorkout: (type: WorkoutType, dayNumber: number) => {
         const id = `workout-${Date.now()}`
         const today = getLocalDateString()
@@ -488,16 +475,6 @@ export const useWorkoutStore = create<WorkoutStore>()(
         }))
 
         return id
-      },
-
-      updateWorkoutNotes: (workoutId: string, notes: string) => {
-        set((state) => ({
-          workoutLogs: state.workoutLogs.map(workout =>
-            workout.id === workoutId
-              ? { ...workout, notes }
-              : workout
-          )
-        }))
       },
 
       logSet: (workoutId, exerciseId, setIndex, data) => {
@@ -747,20 +724,6 @@ export const useWorkoutStore = create<WorkoutStore>()(
           }))
         }
         return WORKOUT_TEMPLATES[type]
-      },
-
-      setCustomExercises: (type: WorkoutType, exercises: CustomExercise[]) => {
-        set((state) => {
-          const existing = state.customizations.findIndex(c => c.workoutType === type)
-          if (existing >= 0) {
-            const updated = [...state.customizations]
-            updated[existing] = { workoutType: type, exercises }
-            return { customizations: updated }
-          }
-          return {
-            customizations: [...state.customizations, { workoutType: type, exercises }]
-          }
-        })
       },
 
       addExercise: (type: WorkoutType, exercise: Omit<CustomExercise, 'id'>) => {

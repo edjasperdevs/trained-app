@@ -491,7 +491,12 @@ function DailyView({
                       </p>
                     </div>
                     <button
-                      onClick={() => onDeleteMeal(meal.id)}
+                      onClick={() => {
+                        if (window.confirm('Delete this meal entry?')) {
+                          onDeleteMeal(meal.id)
+                        }
+                      }}
+                      aria-label={`Delete ${meal.name}`}
                       className="text-muted-foreground hover:text-destructive p-1"
                     >
                       ✕
@@ -980,7 +985,11 @@ function LogMealView({
                     Edit
                   </button>
                   <button
-                    onClick={() => onDeleteSavedMeal(meal.id)}
+                    onClick={() => {
+                      if (window.confirm(`Delete saved meal "${meal.name}"?`)) {
+                        onDeleteSavedMeal(meal.id)
+                      }
+                    }}
                     className="flex-1 text-sm text-muted-foreground hover:text-destructive py-1"
                   >
                     Delete

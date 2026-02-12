@@ -94,43 +94,6 @@ describe('macroStore', () => {
     })
   })
 
-  describe('logMeal', () => {
-    it('should create a new daily log when logging first meal', () => {
-      const { logMeal, getTodayLog } = useMacroStore.getState()
-
-      logMeal(1, { protein: 40, carbs: 50, fats: 15, calories: 500 })
-
-      const todayLog = useMacroStore.getState().getTodayLog()
-      expect(todayLog).not.toBeNull()
-      expect(todayLog?.protein).toBe(40)
-      expect(todayLog?.meals).toHaveLength(1)
-      expect(todayLog?.meals[0].logged).toBe(true)
-    })
-
-    it('should update existing log when logging another meal', () => {
-      const { logMeal } = useMacroStore.getState()
-
-      logMeal(1, { protein: 40, carbs: 50, fats: 15, calories: 500 })
-      logMeal(2, { protein: 30, carbs: 40, fats: 10, calories: 400 })
-
-      const todayLog = useMacroStore.getState().getTodayLog()
-      expect(todayLog?.protein).toBe(70)
-      expect(todayLog?.calories).toBe(900)
-      expect(todayLog?.meals).toHaveLength(2)
-    })
-
-    it('should update same meal number if logged again', () => {
-      const { logMeal } = useMacroStore.getState()
-
-      logMeal(1, { protein: 40, carbs: 50, fats: 15, calories: 500 })
-      logMeal(1, { protein: 50, carbs: 60, fats: 20, calories: 600 })
-
-      const todayLog = useMacroStore.getState().getTodayLog()
-      expect(todayLog?.protein).toBe(50) // Updated, not summed
-      expect(todayLog?.meals).toHaveLength(1)
-    })
-  })
-
   describe('logNamedMeal', () => {
     it('should log a named meal with timestamp', () => {
       const { logNamedMeal } = useMacroStore.getState()
@@ -198,35 +161,6 @@ describe('macroStore', () => {
     })
   })
 
-  describe('editSavedMeal', () => {
-    beforeEach(() => {
-      useMacroStore.getState().saveMeal('Test Meal', [
-        { id: '1', name: 'Test Ingredient', quantity: 100, unit: 'g', protein: 20, carbs: 10, fats: 5, calories: 165 }
-      ])
-    })
-
-    it('should edit a saved meal name', () => {
-      const mealId = useMacroStore.getState().savedMeals[0].id
-      const { editSavedMeal } = useMacroStore.getState()
-
-      editSavedMeal(mealId, { name: 'Updated Meal Name' })
-
-      const savedMeals = useMacroStore.getState().getSavedMeals()
-      expect(savedMeals[0].name).toBe('Updated Meal Name')
-    })
-
-    it('should edit saved meal macros', () => {
-      const mealId = useMacroStore.getState().savedMeals[0].id
-      const { editSavedMeal } = useMacroStore.getState()
-
-      editSavedMeal(mealId, { protein: 30, calories: 200 })
-
-      const savedMeals = useMacroStore.getState().getSavedMeals()
-      expect(savedMeals[0].protein).toBe(30)
-      expect(savedMeals[0].calories).toBe(200)
-    })
-  })
-
   describe('deleteSavedMeal', () => {
     it('should delete a saved meal', () => {
       useMacroStore.getState().saveMeal('To Delete', [
@@ -250,9 +184,13 @@ describe('macroStore', () => {
         { id: '2', name: 'Ing', quantity: 100, unit: 'g', protein: 10, carbs: 10, fats: 5, calories: 125 }
       ])
 
-      // Update usage count for Meal B
+      // Update usage count for Meal B via setState (editSavedMeal was removed as dead code)
       const mealBId = useMacroStore.getState().savedMeals[1].id
-      useMacroStore.getState().editSavedMeal(mealBId, { usageCount: 5 })
+      useMacroStore.setState((state) => ({
+        savedMeals: state.savedMeals.map(m =>
+          m.id === mealBId ? { ...m, usageCount: 5 } : m
+        )
+      }))
 
       const sorted = useMacroStore.getState().getSavedMeals()
       expect(sorted[0].name).toBe('Meal B') // Higher usage count first

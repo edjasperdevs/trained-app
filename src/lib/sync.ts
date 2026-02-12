@@ -476,15 +476,34 @@ export async function pullCoachData() {
   const { data: { user } } = await client.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  // Pull macro targets — check if coach-set
-  const { data: macroData, error: macroError } = await client
-    .from('macro_targets')
-    .select('protein, calories, carbs, fats, activity_level, set_by, set_by_coach_id')
-    .eq('user_id', user.id)
-    .single()
+  // Pull all coach data in parallel (3 independent queries)
+  const today = getLocalDateString()
 
+  const [macroResult, assignmentResult, checkinResult] = await Promise.all([
+    client
+      .from('macro_targets')
+      .select('protein, calories, carbs, fats, activity_level, set_by, set_by_coach_id')
+      .eq('user_id', user.id)
+      .single(),
+    client
+      .from('assigned_workouts')
+      .select('id, date, exercises, notes, template_id')
+      .eq('client_id', user.id)
+      .gte('date', today)
+      .order('date', { ascending: true })
+      .limit(7),
+    client
+      .from('weekly_checkins')
+      .select('id, week_of, status, coach_response, reviewed_at')
+      .eq('client_id', user.id)
+      .order('week_of', { ascending: false })
+      .limit(1)
+      .single(),
+  ])
+
+  // Process macro targets
+  const { data: macroData, error: macroError } = macroResult
   if (!macroError && macroData && macroData.set_by === 'coach') {
-    // Coach has set these targets — update local store
     useMacroStore.getState().setCoachTargets(
       {
         protein: macroData.protein,
@@ -498,21 +517,12 @@ export async function pullCoachData() {
   } else if (!macroError && macroData && macroData.set_by === 'self') {
     const store = useMacroStore.getState()
     if (store.setBy === 'coach') {
-      // Coach reverted ownership — reset local store
       useMacroStore.setState({ setBy: 'self', setByCoachId: null })
     }
   }
 
-  // --- Pull assigned workouts for today and upcoming ---
-  const today = getLocalDateString()
-  const { data: assignments } = await client
-    .from('assigned_workouts')
-    .select('id, date, exercises, notes, template_id')
-    .eq('client_id', user.id)
-    .gte('date', today)
-    .order('date', { ascending: true })
-    .limit(7)
-
+  // Process assigned workouts
+  const { data: assignments } = assignmentResult
   if (assignments && assignments.length > 0) {
     const todayAssignment = assignments.find(a => a.date === today)
     if (todayAssignment) {
@@ -523,22 +533,14 @@ export async function pullCoachData() {
         coachNotes: todayAssignment.notes || undefined,
       })
     } else {
-      // No assignment for today -- clear any stale state
       useWorkoutStore.getState().setAssignedWorkout(null)
     }
   } else {
     useWorkoutStore.getState().setAssignedWorkout(null)
   }
 
-  // --- Pull latest check-in response ---
-  const { data: latestCheckin } = await client
-    .from('weekly_checkins')
-    .select('id, week_of, status, coach_response, reviewed_at')
-    .eq('client_id', user.id)
-    .order('week_of', { ascending: false })
-    .limit(1)
-    .single()
-
+  // Process latest check-in
+  const { data: latestCheckin } = checkinResult
   if (latestCheckin) {
     localStorage.setItem('trained-latest-checkin', JSON.stringify({
       id: latestCheckin.id,

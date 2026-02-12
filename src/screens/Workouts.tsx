@@ -720,13 +720,15 @@ export function Workouts() {
                           </button>
                           <button
                             onClick={() => {
+                              if (!editExercise.name.trim()) return
                               updateExercise(editingWorkoutType, exerciseId, {
-                                name: editExercise.name,
+                                name: editExercise.name.trim(),
                                 targetSets: Number(editExercise.targetSets) || 3,
                                 targetReps: editExercise.targetReps || '8-12'
                               })
                               setEditingExerciseId(null)
                             }}
+                            disabled={!editExercise.name.trim()}
                             className="flex-1 text-sm text-primary py-1 font-semibold"
                           >
                             Save
