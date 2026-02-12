@@ -35,6 +35,7 @@ export function Home() {
   const [showClaimModal, setShowClaimModal] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
   const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
+  const [hasCoach, setHasCoach] = useState(false)
   const [showCoachResponse, setShowCoachResponse] = useState(false)
   const [latestCheckinInfo, setLatestCheckinInfo] = useState<{
     id: string
@@ -44,13 +45,18 @@ export function Home() {
     reviewed_at: string | null
   } | null>(null)
 
-  // Check if weekly check-in is due
-  const { hasCheckinForCurrentWeek } = useWeeklyCheckins()
+  // Check if user is a coaching client and if weekly check-in is due
+  const { hasCheckinForCurrentWeek, isCoachingClient } = useWeeklyCheckins()
   useEffect(() => {
-    hasCheckinForCurrentWeek().then(hasCheckin => {
-      setWeeklyCheckinDue(!hasCheckin)
+    isCoachingClient().then(isClient => {
+      setHasCoach(isClient)
+      if (isClient) {
+        hasCheckinForCurrentWeek().then(hasCheckin => {
+          setWeeklyCheckinDue(!hasCheckin)
+        })
+      }
     })
-  }, [hasCheckinForCurrentWeek])
+  }, [hasCheckinForCurrentWeek, isCoachingClient])
 
   // Read latest check-in info from localStorage (populated by pullCoachData)
   useEffect(() => {
@@ -185,8 +191,8 @@ export function Home() {
           <ReminderList maxReminders={2} excludeTypes={['checkIn']} />
         )}
 
-        {/* Coach Reviewed Check-in Banner (priority 1) */}
-        {hasCoachResponse && (
+        {/* Coach Reviewed Check-in Banner (priority 1 - coaching clients only) */}
+        {hasCoach && hasCoachResponse && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
             <Card
               className="py-0 cursor-pointer border-l-[3px] border-l-success"
@@ -210,8 +216,8 @@ export function Home() {
           </div>
         )}
 
-        {/* Weekly Check-in Due Banner (priority 2 - only when no coach response) */}
-        {!hasCoachResponse && weeklyCheckinDue === true && (
+        {/* Weekly Check-in Due Banner (priority 2 - coaching clients only, when no coach response) */}
+        {hasCoach && !hasCoachResponse && weeklyCheckinDue === true && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
             <Card
               className="py-0 cursor-pointer border-l-[3px] border-l-secondary"

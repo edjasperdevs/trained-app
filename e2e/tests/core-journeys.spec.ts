@@ -299,6 +299,13 @@ baseTest('E2E-09: check-in -- complete daily check-in, maintain streak', async (
   // Wait for success state ("Report Accepted")
   await baseExpect(page.getByText('Report Accepted.')).toBeVisible({ timeout: 5000 })
 
+  // Dismiss badge unlock modal if it appears (overlays at z-100, blocks clicks)
+  const badgeModal = page.getByRole('dialog', { name: 'Badge unlocked' })
+  if (await badgeModal.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await badgeModal.getByRole('button').click()
+    await baseExpect(badgeModal).not.toBeVisible({ timeout: 3000 })
+  }
+
   // Click Continue to close modal
   await page.getByRole('button', { name: /continue/i }).click()
 

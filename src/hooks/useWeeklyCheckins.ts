@@ -243,6 +243,28 @@ export function useWeeklyCheckins() {
     }
   }, [])
 
+  /** Check if current user has an active coach relationship */
+  const isCoachingClient = useCallback(async (): Promise<boolean> => {
+    try {
+      if (devBypass) return true
+
+      const client = getSupabaseClient()
+      const { data: { user } } = await client.auth.getUser()
+      if (!user) return false
+
+      const { data } = await client
+        .from('coach_clients')
+        .select('id')
+        .eq('client_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      return data !== null
+    } catch {
+      return false
+    }
+  }, [])
+
   // ==========================================
   // Coach functions
   // ==========================================
@@ -420,6 +442,7 @@ export function useWeeklyCheckins() {
     submitCheckin,
     fetchMyCheckins,
     hasCheckinForCurrentWeek,
+    isCoachingClient,
     fetchPendingCheckins,
     fetchClientCheckins,
     submitReview,
