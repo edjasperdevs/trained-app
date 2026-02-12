@@ -96,6 +96,7 @@ interface WorkoutStore {
   getWorkoutHistory: (limit?: number) => WorkoutLog[]
   getExerciseHistory: (exerciseName: string, limit?: number) => { date: string; sets: ExerciseSet[] }[]
   isWorkoutCompletedToday: () => boolean
+  getWeekWorkouts: () => { type: WorkoutType; name: string; dayNumber: number; day: number; completed: boolean; isToday: boolean }[]
   resetWorkouts: () => void
   exportData: () => string
   importData: (data: string) => boolean
@@ -654,6 +655,47 @@ export const useWorkoutStore = create<WorkoutStore>()(
         return get().workoutLogs.some(
           log => log.date === today && log.completed
         )
+      },
+
+      getWeekWorkouts: () => {
+        const plan = get().currentPlan
+        if (!plan) return []
+
+        const now = new Date()
+        const todayDOW = now.getDay()
+
+        // Get start of current week (Sunday)
+        const weekStart = new Date(now)
+        weekStart.setDate(now.getDate() - todayDOW)
+        weekStart.setHours(0, 0, 0, 0)
+        const weekStartStr = weekStart.toISOString().split('T')[0]
+        const todayStr = now.toISOString().split('T')[0]
+
+        // Get all completed logs this week
+        const weekLogs = get().workoutLogs.filter(
+          log => log.date >= weekStartStr && log.date <= todayStr && log.completed
+        )
+
+        // Get non-rest workouts from schedule
+        const workouts = plan.schedule
+          .filter(s => s.type !== 'rest')
+          .map(s => ({
+            type: s.type,
+            name: s.name,
+            dayNumber: s.dayNumber,
+            day: s.day,
+            completed: weekLogs.some(log => log.dayNumber === s.dayNumber),
+            isToday: s.day === todayDOW,
+          }))
+
+        // Sort: today first, then incomplete, then completed
+        workouts.sort((a, b) => {
+          if (a.isToday !== b.isToday) return a.isToday ? -1 : 1
+          if (a.completed !== b.completed) return a.completed ? 1 : -1
+          return a.dayNumber - b.dayNumber
+        })
+
+        return workouts
       },
 
       resetWorkouts: () => set({

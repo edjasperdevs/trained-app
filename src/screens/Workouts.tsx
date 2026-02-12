@@ -35,7 +35,8 @@ export function Workouts() {
     reorderExercise,
     resetToDefaults,
     assignedWorkout,
-    setAssignedWorkout
+    setAssignedWorkout,
+    getWeekWorkouts
   } = useWorkoutStore()
 
   const { logDailyXP, XP_VALUES, getTodayLog } = useXPStore()
@@ -48,6 +49,7 @@ export function Workouts() {
   const [minimalNotes, setMinimalNotes] = useState('')
   const [editingWorkoutType, setEditingWorkoutType] = useState<WorkoutType | null>(null)
   const [newExercise, setNewExercise] = useState({ name: '', targetSets: '3', targetReps: '8-12' })
+  const [showWorkoutPicker, setShowWorkoutPicker] = useState(false)
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editExercise, setEditExercise] = useState({ name: '', targetSets: '', targetReps: '' })
 
@@ -57,6 +59,8 @@ export function Workouts() {
   const allBadges = getAllBadges()
   const today = new Date().toISOString().split('T')[0]
   const hasAssignment = assignedWorkout && assignedWorkout.date === today
+  const weekWorkouts = getWeekWorkouts()
+  const otherWorkouts = weekWorkouts.filter(w => !w.isToday && !w.completed)
 
   // Check for badges and show toast notifications
   const checkBadgesWithToast = () => {
@@ -75,11 +79,10 @@ export function Workouts() {
     }
   }
 
-  const handleStartWorkout = () => {
-    // Coach-assigned workout can override rest days
-    const type = todayWorkout?.type || 'push'
-    const dayNumber = todayWorkout?.dayNumber || 1
-    if (!todayWorkout && !hasAssignment) return
+  const handleStartWorkout = (overrideType?: WorkoutType, overrideDayNumber?: number) => {
+    const type = overrideType || todayWorkout?.type || 'push'
+    const dayNumber = overrideDayNumber || todayWorkout?.dayNumber || 1
+    if (!overrideType && !todayWorkout && !hasAssignment) return
     startWorkout(type, dayNumber)
     setActiveWorkout(getCurrentWorkout())
     analytics.workoutStarted(type)
@@ -277,6 +280,7 @@ export function Workouts() {
             <div>
               <h2 className="text-lg font-bold mb-3">Today</h2>
               {todayWorkout || hasAssignment ? (
+                <>
                 <Card className="py-0">
                   <CardContent className="p-4">
                     {hasAssignment && (
@@ -305,7 +309,7 @@ export function Workouts() {
                         </div>
                       ) : (
                         <div className="flex flex-col gap-2 flex-shrink-0">
-                          <Button onClick={handleStartWorkout} data-testid="workouts-start-button">
+                          <Button onClick={() => handleStartWorkout()} data-testid="workouts-start-button">
                             Start Workout
                           </Button>
                         </div>
@@ -373,6 +377,56 @@ export function Workouts() {
                     )}
                   </CardContent>
                 </Card>
+                {!isCompleted && otherWorkouts.length > 0 && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => setShowWorkoutPicker(!showWorkoutPicker)}
+                      className="w-full flex items-center justify-between py-2.5 px-4 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-lg border border-border"
+                      data-testid="workout-picker-toggle"
+                    >
+                      <span>Choose a different workout</span>
+                      <span className={`transition-transform duration-200 ${showWorkoutPicker ? 'rotate-180' : ''}`}>▼</span>
+                    </button>
+                    {showWorkoutPicker && (
+                      <div className="mt-2 space-y-2" data-testid="workout-picker-list">
+                        {otherWorkouts.map(w => (
+                          <Card key={w.day} className="py-0">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-sm">{w.name}</p>
+                                  <p className="text-xs text-muted-foreground">Day {w.dayNumber}</p>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleStartWorkout(w.type, w.dayNumber)}
+                                  data-testid="workout-picker-start"
+                                >
+                                  Start
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        {weekWorkouts.filter(w => !w.isToday && w.completed).map(w => (
+                          <Card key={w.day} className="py-0 opacity-50">
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-sm">{w.name}</p>
+                                  <p className="text-xs text-muted-foreground">Day {w.dayNumber}</p>
+                                </div>
+                                <span className="text-sm text-success" data-testid="workout-picker-done">✓ Done</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                </>
               ) : (
                 <Card className="py-0">
                   <CardContent className="p-4">
