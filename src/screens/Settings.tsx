@@ -654,6 +654,8 @@ export function Settings() {
               ]).map(({ key, label, description, icon: Icon }) => (
                 <button
                   key={key}
+                  role="switch"
+                  aria-checked={reminderPreferences[key]}
                   onClick={() => setReminderPreference(key, !reminderPreferences[key])}
                   className="w-full flex items-center justify-between p-3 transition-all duration-150 rounded bg-muted hover:bg-muted/80"
                 >

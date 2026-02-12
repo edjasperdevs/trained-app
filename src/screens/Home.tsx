@@ -9,7 +9,6 @@ import {
   useXPStore,
   useWorkoutStore,
   useMacroStore,
-  useAvatarStore,
   useRemindersStore
 } from '@/stores'
 import { getStandingOrder, LABELS } from '@/design/constants'
@@ -26,8 +25,7 @@ export function Home() {
   const { currentLevel, pendingXP, XP_VALUES, getTodayLog } = useXPStore()
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
   const { targets, isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore()
-  // triggerReaction is handled in XPClaimModal
-  useAvatarStore()
+  // Avatar mood is used indirectly by the Avatar component via its own store subscription
   const canClaimXP = useXPStore((state) => state.canClaimXP())
   const activeReminders = useRemindersStore((state) => state.getActiveReminders())
 
@@ -53,9 +51,9 @@ export function Home() {
       if (isClient) {
         hasCheckinForCurrentWeek().then(hasCheckin => {
           setWeeklyCheckinDue(!hasCheckin)
-        })
+        }).catch(() => { /* offline — leave banner hidden */ })
       }
-    })
+    }).catch(() => { /* offline — leave coach features hidden */ })
   }, [hasCheckinForCurrentWeek, isCoachingClient])
 
   // Read latest check-in info from localStorage (populated by pullCoachData)
@@ -169,7 +167,7 @@ export function Home() {
       <div className="bg-card pt-8 pb-6 px-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-muted-foreground text-sm text-xs">
+            <p className="text-muted-foreground text-xs">
               Welcome back,
             </p>
             <h1 className="text-2xl font-bold">
@@ -564,6 +562,7 @@ export function Home() {
               <h2 className="text-xl font-bold">Coach Response</h2>
               <button
                 onClick={() => setShowCoachResponse(false)}
+                aria-label="Close coach response"
                 className="text-muted-foreground hover:text-foreground text-2xl leading-none"
               >
                 &times;

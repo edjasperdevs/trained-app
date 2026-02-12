@@ -235,9 +235,18 @@ function DailyView({
   }
 
   const handleQuickLog = () => {
+    const proteinVal = Number(quickLog.protein)
+    const caloriesVal = Number(quickLog.calories)
+
+    if ((quickLog.protein && (proteinVal <= 0 || !isFinite(proteinVal))) ||
+        (quickLog.calories && (caloriesVal <= 0 || !isFinite(caloriesVal)))) {
+      toast.warning('Please enter positive values')
+      return
+    }
+
     onLogMacros({
-      protein: quickLog.protein ? Number(quickLog.protein) : undefined,
-      calories: quickLog.calories ? Number(quickLog.calories) : undefined
+      protein: quickLog.protein ? proteinVal : undefined,
+      calories: quickLog.calories ? caloriesVal : undefined
     })
     analytics.mealLogged('manual')
     setQuickLog({ protein: '', calories: '' })
