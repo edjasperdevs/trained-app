@@ -53,20 +53,46 @@ const USDA_API_BASE = 'https://api.nal.usda.gov/fdc/v1'
 let usdaCooldownUntil = 0
 const USDA_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
 
+// Score a food result by how well it matches the query terms (any order)
+function scoreResult(food: FoodSearchResult, terms: string[]): number {
+  const name = food.name.toLowerCase()
+  const brand = (food.brand || '').toLowerCase()
+  let score = 0
+  for (const term of terms) {
+    if (name.includes(term)) score += 2    // name match worth more
+    else if (brand.includes(term)) score += 1
+  }
+
+  // Bonus for exact phrase match in name
+  if (name.includes(terms.join(' '))) score += 3
+
+  // Prefer shorter names (more specific foods)
+  score += Math.max(0, 1 - name.length / 100)
+
+  return score
+}
+
+export function rankResults(results: FoodSearchResult[], query: string): FoodSearchResult[] {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  if (terms.length <= 1) return results
+
+  return [...results].sort((a, b) => scoreResult(b, terms) - scoreResult(a, terms))
+}
+
 export async function searchFoods(query: string): Promise<FoodSearchResult[]> {
   if (!query.trim()) return []
 
   // Skip USDA if in cooldown from rate limiting
   if (Date.now() < usdaCooldownUntil) {
     if (import.meta.env.DEV) console.log('[Food] USDA in cooldown, using Open Food Facts directly')
-    return searchOpenFoodFacts(query)
+    return rankResults(await searchOpenFoodFacts(query), query)
   }
 
   // Try USDA first, fall back to Open Food Facts
   try {
     const usdaResults = await searchUSDA(query)
     if (usdaResults.length > 0) {
-      return usdaResults
+      return rankResults(usdaResults, query)
     }
   } catch (error) {
     console.warn('USDA API failed, falling back to Open Food Facts:', error)
@@ -76,7 +102,7 @@ export async function searchFoods(query: string): Promise<FoodSearchResult[]> {
   }
 
   // Fallback to Open Food Facts
-  return searchOpenFoodFacts(query)
+  return rankResults(await searchOpenFoodFacts(query), query)
 }
 
 async function searchUSDA(query: string): Promise<FoodSearchResult[]> {

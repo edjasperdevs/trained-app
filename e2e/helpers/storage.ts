@@ -172,8 +172,9 @@ export async function seedAllStores(page: Page) {
         ],
       },
     ],
+    recentFoods: [],
     activityLevel: 'moderate',
-  }, 2)
+  }, 3)
 
   // XP store -- some accumulated XP
   await seedStore(page, STORE_KEYS.xp, {

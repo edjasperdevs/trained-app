@@ -28,6 +28,21 @@ export interface LoggedMeal {
   timestamp: number
 }
 
+export interface RecentFood {
+  id: string
+  name: string
+  brand?: string
+  protein: number
+  carbs: number
+  fats: number
+  calories: number
+  servingSize: number
+  servingDescription: string
+  quantity: number
+  unit: 'g' | 'oz' | 'serving'
+  loggedAt: number
+}
+
 export interface MealIngredient {
   id: string
   name: string
@@ -79,11 +94,13 @@ interface MacroStore {
   mealPlan: MealPlan[]
   dailyLogs: DailyMacroLog[]
   savedMeals: SavedMeal[]
+  recentFoods: RecentFood[]
   activityLevel: ActivityLevel
   setBy: 'self' | 'coach'
   setByCoachId: string | null
 
   // Actions
+  addRecentFood: (food: RecentFood) => void
   calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => void
   generateMealPlan: () => void
   logMeal: (mealNumber: number, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
@@ -133,9 +150,22 @@ export const useMacroStore = create<MacroStore>()(
       mealPlan: [],
       dailyLogs: [],
       savedMeals: [],
+      recentFoods: [],
       activityLevel: 'moderate',
       setBy: 'self',
       setByCoachId: null,
+
+      addRecentFood: (food) => {
+        set((state) => {
+          // Deduplicate by name+brand (case-insensitive)
+          const key = `${food.name.toLowerCase()}|${(food.brand || '').toLowerCase()}`
+          const filtered = state.recentFoods.filter((f) => {
+            const fKey = `${f.name.toLowerCase()}|${(f.brand || '').toLowerCase()}`
+            return fKey !== key
+          })
+          return { recentFoods: [food, ...filtered].slice(0, 5) }
+        })
+      },
 
       calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => {
         // Mifflin-St Jeor Equation for BMR
@@ -602,10 +632,17 @@ export const useMacroStore = create<MacroStore>()(
     }),
     {
       name: 'gamify-gains-macros',
-      version: 2, // Bump version when schema changes (BUG-008 fix)
+      version: 3, // Bump version when schema changes (BUG-008 fix)
       // Validate and migrate data on load
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Record<string, unknown>
+
+        // v2 → v3: add recentFoods
+        if (version < 3) {
+          if (!isArray(state.recentFoods)) {
+            state.recentFoods = []
+          }
+        }
 
         // If coming from version 0 or 1, validate the data structure
         if (version < 2) {

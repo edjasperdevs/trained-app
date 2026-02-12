@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { ProgressBar, MealBuilder, EmptyState } from '@/components'
-import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient, toast } from '@/stores'
+import { ProgressBar, MealBuilder, EmptyState, FoodSearch } from '@/components'
+import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
@@ -27,6 +27,8 @@ export function Macros() {
     getTodayProgress,
     logQuickMacros,
     logNamedMeal,
+    addRecentFood,
+    recentFoods,
     saveMeal,
     deleteSavedMeal,
     getSavedMeals,
@@ -95,6 +97,12 @@ export function Macros() {
               logQuickMacros(macros)
               scheduleSync()
             }}
+            onLogNamedMeal={(name, macros) => {
+              logNamedMeal(name, macros)
+              scheduleSync()
+            }}
+            onAddRecentFood={addRecentFood}
+            recentFoods={recentFoods}
             todayMeals={todayMeals}
             onDeleteMeal={deleteLoggedMeal}
             onSetupTargets={() => setActiveTab('calculator')}
@@ -172,6 +180,9 @@ function DailyView({
   proteinHit,
   caloriesHit,
   onLogMacros,
+  onLogNamedMeal,
+  onAddRecentFood,
+  recentFoods,
   todayMeals,
   onDeleteMeal,
   onSetupTargets
@@ -181,12 +192,16 @@ function DailyView({
   proteinHit: boolean
   caloriesHit: boolean
   onLogMacros: (macros: { protein?: number; calories?: number; carbs?: number; fats?: number }) => void
+  onLogNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  onAddRecentFood: (food: RecentFood) => void
+  recentFoods: RecentFood[]
   todayMeals: LoggedMeal[]
   onDeleteMeal: (id: string) => void
   onSetupTargets: () => void
 }) {
   const [quickLog, setQuickLog] = useState({ protein: '', calories: '' })
   const [showMeals, setShowMeals] = useState(false)
+  const [loggedRecentId, setLoggedRecentId] = useState<string | null>(null)
 
   // Track protein/calorie target hit once per session
   const proteinTracked = useRef(false)
@@ -288,41 +303,109 @@ function DailyView({
       <Card className="py-0">
         <CardContent className="p-4">
           <h3 className="text-sm font-semibold text-muted-foreground mb-4">QUICK LOG</h3>
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
-              <Input
-                type="number"
-                value={quickLog.protein}
-                onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
-                placeholder={String(targets.protein)}
-                className="font-digital"
-                data-testid="macros-food-search-input"
-              />
+
+          {/* Food Search */}
+          <FoodSearch
+            onSelect={(food) => {
+              const macros = { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories }
+              onLogNamedMeal(food.name, macros)
+              onAddRecentFood({
+                id: food.id,
+                name: food.name,
+                brand: food.brand,
+                protein: food.protein,
+                carbs: food.carbs,
+                fats: food.fats,
+                calories: food.calories,
+                servingSize: food.servingSize,
+                servingDescription: food.servingDescription,
+                quantity: food.quantity,
+                unit: food.unit,
+                loggedAt: Date.now(),
+              })
+              analytics.mealLogged('search')
+              toast.success(`${food.name} logged`)
+            }}
+          />
+
+          {/* Recent Foods */}
+          {recentFoods.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs text-muted-foreground mb-2">RECENT</p>
+              <div className="space-y-2">
+                {recentFoods.map((food) => (
+                  <div
+                    key={`${food.id}-${food.loggedAt}`}
+                    className="flex items-center justify-between bg-muted rounded-lg p-2.5"
+                  >
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="text-sm font-medium truncate">{food.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className={cn('shrink-0 text-xs h-7 px-2', loggedRecentId === food.id && 'text-success')}
+                      disabled={loggedRecentId === food.id}
+                      onClick={() => {
+                        const macros = { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories }
+                        onLogNamedMeal(food.name, macros)
+                        onAddRecentFood({ ...food, loggedAt: Date.now() })
+                        analytics.mealLogged('saved')
+                        toast.success(`${food.name} logged`)
+                        setLoggedRecentId(food.id)
+                        setTimeout(() => setLoggedRecentId(null), 2000)
+                      }}
+                    >
+                      {loggedRecentId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground block mb-1">Calories</label>
-              <Input
-                type="number"
-                value={quickLog.calories}
-                onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
-                placeholder={String(targets.calories)}
-                className="font-digital"
-              />
+          )}
+
+          {/* Manual Entry */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-3">MANUAL ENTRY</p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
+                <Input
+                  type="number"
+                  value={quickLog.protein}
+                  onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
+                  placeholder={String(targets.protein)}
+                  className="font-digital"
+                  data-testid="macros-food-search-input"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Calories</label>
+                <Input
+                  type="number"
+                  value={quickLog.calories}
+                  onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
+                  placeholder={String(targets.calories)}
+                  className="font-digital"
+                />
+              </div>
             </div>
+            <Button
+              onClick={handleQuickLog}
+              className={cn('w-full', quickLogSuccess && 'bg-success hover:bg-success')}
+              disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories)}
+              data-testid="macros-add-meal-button"
+            >
+              {quickLogSuccess ? (
+                <span className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Logged!</span>
+              ) : (
+                'Log Macros'
+              )}
+            </Button>
           </div>
-          <Button
-            onClick={handleQuickLog}
-            className={cn('w-full', quickLogSuccess && 'bg-success hover:bg-success')}
-            disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories)}
-            data-testid="macros-add-meal-button"
-          >
-            {quickLogSuccess ? (
-              <span className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Logged!</span>
-            ) : (
-              'Log Macros'
-            )}
-          </Button>
         </CardContent>
       </Card>
 

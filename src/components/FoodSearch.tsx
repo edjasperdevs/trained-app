@@ -60,7 +60,19 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
   const [unit, setUnit] = useState<Unit>('g')
 
   const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleMouseDown = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [])
 
   useEffect(() => {
     if (debounceRef.current) {
@@ -348,7 +360,7 @@ export function FoodSearch({ onSelect }: FoodSearchProps) {
   )
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <div className="relative">
         <Input
           ref={inputRef}
