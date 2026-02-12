@@ -25,6 +25,7 @@ import { LABELS } from '@/design/constants'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { friendlyError } from '@/lib/errors'
 import { isCoach as checkIsCoach } from '@/lib/supabase'
+import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
@@ -183,7 +184,7 @@ export function Settings() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `trained-backup-${new Date().toISOString().split('T')[0]}.json`
+      link.download = `trained-backup-${getLocalDateString()}.json`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

@@ -1,4 +1,5 @@
 import type { ActivityItem } from '@/hooks/useClientDetails'
+import { getLocalDateString } from '@/lib/dateUtils'
 
 interface ClientActivityFeedProps {
   activities: ActivityItem[]
@@ -22,7 +23,7 @@ export function ClientActivityFeed({ activities }: ClientActivityFeedProps) {
 
   // Group activities by date
   const grouped: GroupedActivities[] = []
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
 
   for (const activity of activities) {

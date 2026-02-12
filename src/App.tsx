@@ -3,11 +3,25 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
+import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
 import { AccessGate, Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
+
+// Coach route guard — eagerly imported, checks role before loading Coach chunk
+function CoachGuard({ children }: { children: React.ReactNode }) {
+  const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading')
+
+  useEffect(() => {
+    isCoach().then(result => setStatus(result ? 'authorized' : 'denied'))
+  }, [])
+
+  if (status === 'loading') return <HomeSkeleton />
+  if (status === 'denied') return <Navigate to="/" replace />
+  return <>{children}</>
+}
 
 // Lazy-loaded route components
 const Onboarding = lazy(() => import('@/screens/Onboarding').then(m => ({ default: m.Onboarding })))
@@ -22,31 +36,13 @@ const WeeklyCheckIn = lazy(() => import('@/screens/WeeklyCheckIn').then(m => ({ 
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
-  const resetProgress = useUserStore((state) => state.resetProgress)
   const checkNeglected = useAvatarStore((state) => state.checkNeglected)
   const initializeAuth = useAuthStore((state) => state.initialize)
-  const signOut = useAuthStore((state) => state.signOut)
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
   const hasAccess = useAccessStore((state) => state.hasAccess)
-  const revokeAccess = useAccessStore((state) => state.revokeAccess)
   const [accessGranted, setAccessGranted] = useState(hasAccess)
   const location = useLocation()
-
-  // Check for ?reset=true URL parameter to clear all data
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('reset') === 'true') {
-      // Clear all app data
-      resetProgress()
-      revokeAccess()
-      signOut()
-      // Remove the ?reset=true from URL
-      window.history.replaceState({}, '', window.location.pathname)
-      // Force page reload to ensure clean state
-      window.location.reload()
-    }
-  }, [resetProgress, revokeAccess, signOut])
 
   // Initialize auth on app load
   useEffect(() => {
@@ -176,7 +172,7 @@ function AppContent() {
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/coach" element={<Suspense fallback={<HomeSkeleton />}><Coach /></Suspense>} />
+          <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />

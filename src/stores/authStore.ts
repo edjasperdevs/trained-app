@@ -4,6 +4,12 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { pushClientData, pullCoachData, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
 import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
+import { useUserStore } from './userStore'
+import { useXPStore } from './xpStore'
+import { useMacroStore } from './macroStore'
+import { useWorkoutStore } from './workoutStore'
+import { useAvatarStore } from './avatarStore'
+import { useAccessStore } from './accessStore'
 
 type AuthErrorCode = 'email_not_confirmed' | 'invalid_credentials' | 'not_configured' | 'unknown' | null
 
@@ -143,6 +149,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     await supabase.auth.signOut()
     set({ user: null, session: null })
     sentryClearUser()
+
+    // Clear all persisted stores to prevent data leakage on shared devices
+    useUserStore.getState().resetProgress()
+    useXPStore.getState().resetXP()
+    useMacroStore.getState().resetMacros()
+    useWorkoutStore.getState().resetWorkouts()
+    useAvatarStore.getState().resetAvatar()
+    useAccessStore.getState().revokeAccess()
   },
 
   resendConfirmation: async (email: string) => {

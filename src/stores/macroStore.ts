@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { Goal, Gender } from './userStore'
 import { isValidMacroTargets, isValidActivityLevel, isValidDailyLog, isArray } from '@/lib/validation'
+import { getLocalDateString } from '../lib/dateUtils'
 
 export interface MacroTargets {
   protein: number
@@ -248,7 +249,7 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       logMeal: (mealNumber, macros) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
 
         if (existingLog) {
@@ -297,7 +298,7 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       logNamedMeal: (name, macros) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
         const newMeal: LoggedMeal = {
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -360,7 +361,7 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       logQuickMacros: (macros) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
 
         if (existingLog) {
@@ -448,7 +449,7 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       deleteLoggedMeal: (id) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
         if (!existingLog) return
 
@@ -491,7 +492,7 @@ export const useMacroStore = create<MacroStore>()(
       },
 
       getTodayLog: () => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         return get().dailyLogs.find(log => log.date === today) || null
       },
 

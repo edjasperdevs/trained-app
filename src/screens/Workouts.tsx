@@ -9,6 +9,7 @@ import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
 import { scheduleSync } from '@/lib/sync'
+import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { Clock, Dumbbell, ShieldCheck } from 'lucide-react'
 
@@ -52,12 +53,13 @@ export function Workouts() {
   const [showWorkoutPicker, setShowWorkoutPicker] = useState(false)
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editExercise, setEditExercise] = useState({ name: '', targetSets: '', targetReps: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const todayWorkout = getTodayWorkout()
   const isCompleted = isWorkoutCompletedToday()
   const workoutHistory = getWorkoutHistory(10)
   const allBadges = getAllBadges()
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
   const hasAssignment = assignedWorkout && assignedWorkout.date === today
   const weekWorkouts = getWeekWorkouts()
   const otherWorkouts = weekWorkouts.filter(w => !w.isToday && !w.completed)
@@ -89,7 +91,9 @@ export function Workouts() {
   }
 
   const handleMinimalWorkout = () => {
+    if (isSubmitting) return
     if (!minimalNotes.trim()) return
+    setIsSubmitting(true)
 
     const workoutId = startMinimalWorkout(minimalNotes)
     markXPAwarded(workoutId)
@@ -97,7 +101,7 @@ export function Workouts() {
     // Log XP for workout
     const todayLog = getTodayLog()
     logDailyXP({
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDateString(),
       workout: true,
       protein: todayLog?.protein || false,
       calories: todayLog?.calories || false,
@@ -114,7 +118,9 @@ export function Workouts() {
   }
 
   const handleCompleteWorkout = () => {
+    if (isSubmitting) return
     if (!activeWorkout) return
+    setIsSubmitting(true)
 
     completeWorkout(activeWorkout.id)
     markXPAwarded(activeWorkout.id)
@@ -122,7 +128,7 @@ export function Workouts() {
     // Log XP for workout
     const todayLog = getTodayLog()
     logDailyXP({
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDateString(),
       workout: true,
       protein: todayLog?.protein || false,
       calories: todayLog?.calories || false,
@@ -147,7 +153,9 @@ export function Workouts() {
   }
 
   const handleEndWorkoutEarly = () => {
+    if (isSubmitting) return
     if (!activeWorkout) return
+    setIsSubmitting(true)
 
     // Check if at least one set was completed
     const completedSets = activeWorkout.exercises.reduce(
@@ -167,7 +175,7 @@ export function Workouts() {
     // Still award XP for showing up
     const todayLog = getTodayLog()
     logDailyXP({
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDateString(),
       workout: true,
       protein: todayLog?.protein || false,
       calories: todayLog?.calories || false,
@@ -273,6 +281,7 @@ export function Workouts() {
             onEndEarly={handleEndWorkoutEarly}
             onAddExercise={handleAddExerciseToWorkout}
             onReorderExercise={handleReorderExercise}
+            isSubmitting={isSubmitting}
           />
         ) : (
           <>
@@ -616,7 +625,7 @@ export function Workouts() {
               <Button
                 className="flex-1"
                 onClick={handleMinimalWorkout}
-                disabled={!minimalNotes.trim()}
+                disabled={!minimalNotes.trim() || isSubmitting}
               >
                 Log {LABELS.minimalWorkout} (+{XP_VALUES.WORKOUT} {LABELS.xp})
               </Button>
@@ -858,7 +867,8 @@ function ActiveWorkoutView({
   onComplete,
   onEndEarly,
   onAddExercise,
-  onReorderExercise
+  onReorderExercise,
+  isSubmitting
 }: {
   workout: WorkoutLog
   progress: number
@@ -870,6 +880,7 @@ function ActiveWorkoutView({
   onEndEarly: () => void
   onAddExercise: (exercise: { name: string; targetSets: number; targetReps: string }) => void
   onReorderExercise: (fromIndex: number, toIndex: number) => void
+  isSubmitting: boolean
 }) {
   const getExerciseHistory = useWorkoutStore((state) => state.getExerciseHistory)
   const [expandedExercise, setExpandedExercise] = useState<string | null>(
@@ -1183,7 +1194,7 @@ function ActiveWorkoutView({
           onClick={onComplete}
           className={cn('w-full', allSetsComplete && 'animate-pulse')}
           size="lg"
-          disabled={!allSetsComplete}
+          disabled={!allSetsComplete || isSubmitting}
           data-testid="workouts-complete-button"
         >
           {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
@@ -1193,6 +1204,7 @@ function ActiveWorkoutView({
         {!allSetsComplete && (
           <button
             onClick={onEndEarly}
+            disabled={isSubmitting}
             className="w-full py-3 text-sm text-muted-foreground hover:text-warning transition-colors"
           >
             End Workout Early

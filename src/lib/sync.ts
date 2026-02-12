@@ -10,6 +10,7 @@ import { supabase, getSupabaseClient } from './supabase'
 import { useSyncStore } from '@/stores/syncStore'
 import { toast } from '@/stores/toastStore'
 import { captureError } from './sentry'
+import { getLocalDateString } from './dateUtils'
 
 // ==========================================
 // Retry Logic with Exponential Backoff
@@ -450,7 +451,7 @@ export async function pushClientData() {
   }
 
   // Sync today's macro log (daily logs are always client-owned)
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
   await withRetryResult(() => syncDailyMacroLogToCloud(today))
 
   // Sync recent workouts with retry
@@ -503,7 +504,7 @@ export async function pullCoachData() {
   }
 
   // --- Pull assigned workouts for today and upcoming ---
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
   const { data: assignments } = await client
     .from('assigned_workouts')
     .select('id, date, exercises, notes, template_id')
@@ -569,7 +570,7 @@ export async function syncAllToCloud() {
   }
 
   // Sync today's macro log
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
   results.macroTargets = await withRetryResult(() => syncDailyMacroLogToCloud(today))
 
   // Sync recent workouts with retry

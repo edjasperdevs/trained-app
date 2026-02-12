@@ -14,6 +14,7 @@ import { WorkoutBuilder } from '@/components/WorkoutBuilder'
 import { WorkoutAssigner } from '@/components/WorkoutAssigner'
 import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
+import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
 import { Search, ShieldCheck, Dumbbell, Plus, Pencil, Trash2, Send, ArrowLeft, ChevronDown, ChevronRight, ClipboardCheck, FileText } from 'lucide-react'
@@ -400,7 +401,7 @@ export function Coach() {
         if (devBypass) {
           // Mock: simulate one completed workout matching the mock assignment
           const mockCompleted: CompletedAssignment[] = clientAssignments
-            .filter(a => a.date <= new Date().toISOString().split('T')[0])
+            .filter(a => a.date <= getLocalDateString())
             .slice(0, 1)
             .map(a => ({
               log: {
@@ -1882,7 +1883,7 @@ export function Coach() {
                                 {clientAssignments
                                   .sort((a, b) => b.date.localeCompare(a.date))
                                   .map((assignment) => {
-                                    const isUpcoming = assignment.date >= new Date().toISOString().split('T')[0]
+                                    const isUpcoming = assignment.date >= getLocalDateString()
                                     const matchedTemplate = templates.find(t => t.id === assignment.template_id)
                                     return (
                                       <Card key={assignment.id} className="py-0">

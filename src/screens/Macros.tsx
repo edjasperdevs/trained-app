@@ -221,6 +221,8 @@ function DailyView({
     }
   }, [caloriesHit])
 
+  const [quickLogSuccess, setQuickLogSuccess] = useState(false)
+
   if (!targets || !progress) {
     return (
       <EmptyState
@@ -231,8 +233,6 @@ function DailyView({
       />
     )
   }
-
-  const [quickLogSuccess, setQuickLogSuccess] = useState(false)
 
   const handleQuickLog = () => {
     onLogMacros({

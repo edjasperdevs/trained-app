@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { TrainingDays } from './userStore'
 import { PrescribedExercise } from '@/lib/database.types'
+import { getLocalDateString } from '../lib/dateUtils'
 
 export type WorkoutType = 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'rest'
 
@@ -259,7 +260,7 @@ const getTemplateForDay = (trainingDays: TrainingDays, dayNumber: number): Omit<
 const generateExercises = (type: WorkoutType, customizations: WorkoutCustomization[], trainingDays?: TrainingDays, dayNumber?: number): Exercise[] => {
   // Priority 0: Coach-assigned workout for today
   const state = useWorkoutStore.getState()
-  if (state.assignedWorkout && state.assignedWorkout.date === new Date().toISOString().split('T')[0]) {
+  if (state.assignedWorkout && state.assignedWorkout.date === getLocalDateString()) {
     return state.assignedWorkout.exercises.map((ex, i) => ({
       id: `assigned-${i}-${Date.now()}`,
       name: ex.name,
@@ -437,7 +438,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
 
       startWorkout: (type: WorkoutType, dayNumber: number) => {
         const id = `workout-${Date.now()}`
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const plan = get().currentPlan
         const trainingDays = plan?.trainingDays
         const assigned = get().assignedWorkout
@@ -464,7 +465,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
 
       startMinimalWorkout: (notes: string) => {
         const id = `workout-${Date.now()}`
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         const todayWorkout = get().getTodayWorkout()
 
         const newWorkout: WorkoutLog = {
@@ -614,7 +615,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
       },
 
       getCurrentWorkout: () => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         return get().workoutLogs.find(
           log => log.date === today && !log.completed
         ) || null
@@ -651,7 +652,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
       },
 
       isWorkoutCompletedToday: () => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         return get().workoutLogs.some(
           log => log.date === today && log.completed
         )

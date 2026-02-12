@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { useMacroStore } from './macroStore'
 import { useWorkoutStore } from './workoutStore'
 import { useXPStore } from './xpStore'
+import { getLocalDateString } from '../lib/dateUtils'
 
 export type ReminderType = 'logMacros' | 'checkIn' | 'claimXP' | 'workout'
 
@@ -91,7 +92,7 @@ export const useRemindersStore = create<RemindersStore>()(
       },
 
       dismissReminder: (type) => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         set((state) => {
           // Reset dismissals if it's a new day
           if (state.lastDismissDate !== today) {
@@ -111,7 +112,7 @@ export const useRemindersStore = create<RemindersStore>()(
         const { preferences, dismissedToday, lastDismissDate } = get()
         if (!preferences.logMacros) return false
 
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('logMacros')) return false
 
         const todayLog = useMacroStore.getState().getTodayLog()
@@ -123,7 +124,7 @@ export const useRemindersStore = create<RemindersStore>()(
         const { preferences, dismissedToday, lastDismissDate } = get()
         if (!preferences.checkIn) return false
 
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('checkIn')) return false
 
         const todayLog = useXPStore.getState().getTodayLog()
@@ -134,7 +135,7 @@ export const useRemindersStore = create<RemindersStore>()(
         const { preferences, dismissedToday, lastDismissDate } = get()
         if (!preferences.claimXP) return false
 
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('claimXP')) return false
 
         // Check if it's Sunday
@@ -150,7 +151,7 @@ export const useRemindersStore = create<RemindersStore>()(
         const { preferences, dismissedToday, lastDismissDate } = get()
         if (!preferences.workout) return false
 
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('workout')) return false
 
         const todayWorkout = useWorkoutStore.getState().getTodayWorkout()

@@ -10,6 +10,7 @@ import {
 } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
+import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
 import { Dumbbell, Beef, Zap, CheckCircle2, Star, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
@@ -42,6 +43,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     checkIn: true
   })
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [earnedXP, setEarnedXP] = useState(0)
   const [xpAnimations, setXpAnimations] = useState<{ id: number; amount: number; label: string }[]>([])
@@ -85,6 +87,8 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   }
 
   const handleSubmit = () => {
+    if (isSubmitting) return
+    setIsSubmitting(true)
     const totalXP = calculateXP()
     const animations: { id: number; amount: number; label: string }[] = []
 
@@ -111,7 +115,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
     // Log the XP
     logDailyXP({
-      date: new Date().toISOString().split('T')[0],
+      date: getLocalDateString(),
       workout: todayWorkout ? data.workout : false,
       protein: data.protein,
       calories: data.calories,
@@ -273,7 +277,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
             </div>
 
             <div className="p-6 pt-3 border-t border-border">
-              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button">
+              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button" disabled={isSubmitting}>
                 Submit Report
               </Button>
             </div>
