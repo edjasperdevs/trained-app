@@ -145,6 +145,15 @@ const GOAL_CALORIE_ADJUSTMENTS: Record<Goal, number> = {
   bulk: 300
 }
 
+// PERF-01: Prune logs older than 90 days to prevent unbounded localStorage growth
+const PRUNE_DAYS = 90
+const pruneOldLogs = (logs: DailyMacroLog[]): DailyMacroLog[] => {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - PRUNE_DAYS)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+  return logs.filter(log => log.date >= cutoffStr)
+}
+
 export const useMacroStore = create<MacroStore>()(
   persist(
     (set, get) => ({
@@ -318,7 +327,7 @@ export const useMacroStore = create<MacroStore>()(
             targetSnapshot: targets ? { ...targets } : undefined
           }
           set((state) => ({
-            dailyLogs: [...state.dailyLogs, newLog]
+            dailyLogs: pruneOldLogs([...state.dailyLogs, newLog])
           }))
         }
       },
@@ -345,7 +354,7 @@ export const useMacroStore = create<MacroStore>()(
           // Capture target snapshot for the day when first macro is logged
           const targets = get().targets
           set((state) => ({
-            dailyLogs: [
+            dailyLogs: pruneOldLogs([
               ...state.dailyLogs,
               {
                 date: today,
@@ -357,7 +366,7 @@ export const useMacroStore = create<MacroStore>()(
                 loggedMeals: [],
                 targetSnapshot: targets ? { ...targets } : undefined
               }
-            ]
+            ])
           }))
         }
       },

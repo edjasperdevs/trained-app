@@ -14,8 +14,13 @@ import { cn } from '@/lib/cn'
 import { Clock, Dumbbell, ShieldCheck } from 'lucide-react'
 
 export function Workouts() {
+  // PERF-02: Use granular selectors for reactive state only
+  const currentPlan = useWorkoutStore((s) => s.currentPlan)
+  const customizations = useWorkoutStore((s) => s.customizations)
+  const assignedWorkout = useWorkoutStore((s) => s.assignedWorkout)
+
+  // PERF-02: Access non-reactive functions via getState() to avoid re-renders
   const {
-    currentPlan,
     getTodayWorkout,
     getCurrentWorkout,
     startWorkout,
@@ -29,20 +34,19 @@ export function Workouts() {
     getWorkoutHistory,
     isWorkoutCompletedToday,
     getExercisesForType,
-    customizations,
     addExercise,
     updateExercise,
     removeExercise,
     reorderExercise,
     resetToDefaults,
-    assignedWorkout,
     setAssignedWorkout,
     getWeekWorkouts
-  } = useWorkoutStore()
+  } = useWorkoutStore.getState()
 
-  const { logDailyXP, XP_VALUES, getTodayLog } = useXPStore()
-  const { triggerReaction } = useAvatarStore()
-  const { checkAndAwardBadges, getAllBadges } = useAchievementsStore()
+  const XP_VALUES = useXPStore((s) => s.XP_VALUES)
+  const { logDailyXP, getTodayLog } = useXPStore.getState()
+  const { triggerReaction } = useAvatarStore.getState()
+  const { checkAndAwardBadges, getAllBadges } = useAchievementsStore.getState()
 
   const [activeWorkout, setActiveWorkout] = useState<WorkoutLog | null>(getCurrentWorkout())
   const [showHistory, setShowHistory] = useState(false)

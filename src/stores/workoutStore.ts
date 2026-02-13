@@ -375,6 +375,15 @@ export const getDefaultDays = (trainingDays: TrainingDays): DayOfWeek[] => {
   }
 }
 
+// PERF-01: Prune workouts older than 90 days to prevent unbounded localStorage growth
+const PRUNE_DAYS = 90
+const pruneOldWorkouts = (logs: WorkoutLog[]): WorkoutLog[] => {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - PRUNE_DAYS)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+  return logs.filter(log => log.date >= cutoffStr)
+}
+
 export const useWorkoutStore = create<WorkoutStore>()(
   persist(
     (set, get) => ({
@@ -444,7 +453,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         }
 
         set((state) => ({
-          workoutLogs: [...state.workoutLogs, newWorkout]
+          workoutLogs: pruneOldWorkouts([...state.workoutLogs, newWorkout])
         }))
 
         return id
@@ -471,7 +480,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         }
 
         set((state) => ({
-          workoutLogs: [...state.workoutLogs, newWorkout]
+          workoutLogs: pruneOldWorkouts([...state.workoutLogs, newWorkout])
         }))
 
         return id

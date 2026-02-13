@@ -121,6 +121,22 @@ const calculateDailyTotal = (data: Omit<DailyXP, 'total' | 'claimed'>): number =
   return total
 }
 
+// PERF-01: Prune logs older than 90 days to prevent unbounded localStorage growth
+const PRUNE_DAYS = 90
+const pruneOldDailyLogs = (logs: DailyXP[]): DailyXP[] => {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - PRUNE_DAYS)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+  return logs.filter(log => log.date >= cutoffStr)
+}
+
+const pruneOldWeeklyHistory = (history: WeeklyHistory[]): WeeklyHistory[] => {
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - PRUNE_DAYS)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+  return history.filter(h => h.weekOf >= cutoffStr)
+}
+
 export const useXPStore = create<XPStore>()(
   persist(
     (set, get) => ({
@@ -151,15 +167,15 @@ export const useXPStore = create<XPStore>()(
           // Update existing log
           const oldTotal = existingLog.total
           set((state) => ({
-            dailyLogs: state.dailyLogs.map(log =>
+            dailyLogs: pruneOldDailyLogs(state.dailyLogs.map(log =>
               log.date === today ? newLog : log
-            ),
+            )),
             pendingXP: state.pendingXP - oldTotal + total
           }))
         } else {
           // Add new log
           set((state) => ({
-            dailyLogs: [...state.dailyLogs, newLog],
+            dailyLogs: pruneOldDailyLogs([...state.dailyLogs, newLog]),
             pendingXP: state.pendingXP + total
           }))
         }
@@ -184,11 +200,11 @@ export const useXPStore = create<XPStore>()(
           currentLevel: newLevel,
           pendingXP: 0,
           lastClaimDate: today,
-          dailyLogs: state.dailyLogs.map(log => ({ ...log, claimed: true })),
-          weeklyHistory: [
+          dailyLogs: pruneOldDailyLogs(state.dailyLogs.map(log => ({ ...log, claimed: true }))),
+          weeklyHistory: pruneOldWeeklyHistory([
             ...state.weeklyHistory,
             { weekOf, xpEarned: xpToClaim, levelReached: newLevel }
-          ]
+          ])
         }))
 
         return { xpClaimed: xpToClaim, leveledUp, newLevel }

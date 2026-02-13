@@ -22,13 +22,21 @@ import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 export function Home() {
   const navigate = useNavigate()
 
+  // PERF-02: Use granular selectors for reactive state
   const profile = useUserStore((state) => state.profile)
-  const { currentLevel, pendingXP, XP_VALUES, getTodayLog } = useXPStore()
-  const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
-  const { targets, isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore()
-  // Avatar mood is used indirectly by the Avatar component via its own store subscription
+  const currentLevel = useXPStore((state) => state.currentLevel)
+  const pendingXP = useXPStore((state) => state.pendingXP)
+  const XP_VALUES = useXPStore((state) => state.XP_VALUES)
+  const targets = useMacroStore((state) => state.targets)
+
+  // PERF-02: Selectors for computed values that depend on state
   const canClaimXP = useXPStore((state) => state.canClaimXP)()
   const activeReminders = useRemindersStore((state) => state.getActiveReminders)()
+
+  // PERF-02: Access non-reactive functions via getState()
+  const { getTodayLog } = useXPStore.getState()
+  const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore.getState()
+  const { isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore.getState()
 
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showClaimModal, setShowClaimModal] = useState(false)

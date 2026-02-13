@@ -45,19 +45,8 @@ export const useAccessStore = create<AccessState>()(
           return { success: false, error: 'Invalid access code format' }
         }
 
-        // Check for master code (set via environment variable)
-        const masterCode = import.meta.env.VITE_MASTER_ACCESS_CODE
-        if (masterCode && trimmedCode === masterCode.toUpperCase()) {
-          if (import.meta.env.DEV) console.log('[Access] Master code used')
-          set({
-            hasAccess: true,
-            licenseKey: 'MASTER',
-            accessGrantedAt: new Date().toISOString(),
-            email: null,
-            instanceId: 'master-access'
-          })
-          return { success: true }
-        }
+        // SEC-02: Master code check removed from client - now validated server-side only
+        // via the validate_access_code RPC which checks Supabase Vault
 
         // Validate against Supabase access_codes table
         if (!supabase) {

@@ -82,6 +82,27 @@ import { useWorkoutStore } from '@/stores/workoutStore'
 import { useXPStore } from '@/stores/xpStore'
 // import { useAvatarStore } from '@/stores/avatarStore' // Disabled until table created
 import type { Json, PrescribedExercise } from './database.types'
+import type { User } from '@supabase/supabase-js'
+
+// PERF-03: Sync context to cache user and reduce redundant getUser() calls
+interface SyncContext {
+  user: User
+  client: ReturnType<typeof getSupabaseClient>
+}
+
+/**
+ * Get sync context (user + client) for use across multiple sync operations.
+ * Caches the user to avoid redundant auth calls.
+ */
+async function getSyncContext(): Promise<SyncContext | null> {
+  if (!supabase) return null
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return null
+
+  return { user, client }
+}
 
 // ==========================================
 // Profile Sync
@@ -275,12 +296,13 @@ export async function syncMacroTargetsToCloud() {
   return { error: error?.message || null }
 }
 
-export async function syncDailyMacroLogToCloud(date: string) {
+export async function syncDailyMacroLogToCloud(date: string, ctx?: SyncContext) {
   if (!supabase) return { error: 'Not configured' }
 
-  const client = getSupabaseClient()
-  const { data: { user } } = await client.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  // PERF-03: Use provided context or fetch fresh
+  const context = ctx || await getSyncContext()
+  if (!context) return { error: 'Not authenticated' }
+  const { user, client } = context
 
   const dailyLogs = useMacroStore.getState().dailyLogs
   const todayLog = dailyLogs.find(log => log.date === date)
@@ -301,20 +323,23 @@ export async function syncDailyMacroLogToCloud(date: string) {
       onConflict: 'user_id,date'
     })
 
-  // Sync individual meals
-  for (const meal of todayLog.loggedMeals || []) {
+  // PERF-03: Batch upsert all meals instead of sequential upserts
+  const meals = todayLog.loggedMeals || []
+  if (meals.length > 0) {
     await client
       .from('logged_meals')
-      .upsert({
-        id: meal.id,
-        user_id: user.id,
-        date: todayLog.date,
-        name: meal.name,
-        protein: meal.protein,
-        carbs: meal.carbs,
-        fats: meal.fats,
-        calories: meal.calories
-      })
+      .upsert(
+        meals.map(meal => ({
+          id: meal.id,
+          user_id: user.id,
+          date: todayLog.date,
+          name: meal.name,
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fats: meal.fats,
+          calories: meal.calories
+        }))
+      )
   }
 
   return { error: null }
@@ -503,12 +528,13 @@ export async function loadUserFoodsFromCloud() {
 // Workout Sync
 // ==========================================
 
-export async function syncWorkoutLogToCloud(workoutId: string) {
+export async function syncWorkoutLogToCloud(workoutId: string, ctx?: SyncContext) {
   if (!supabase) return { error: 'Not configured' }
 
-  const client = getSupabaseClient()
-  const { data: { user } } = await client.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  // PERF-03: Use provided context or fetch fresh
+  const context = ctx || await getSyncContext()
+  if (!context) return { error: 'Not authenticated' }
+  const { user, client } = context
 
   const workoutLogs = useWorkoutStore.getState().workoutLogs
   const workout = workoutLogs.find(w => w.id === workoutId)
@@ -589,14 +615,30 @@ export async function loadAvatarFromCloud() {
 /**
  * Push client-owned data to Supabase.
  * Skips macro targets when set_by = 'coach' to prevent overwriting coach-set values.
+ * PERF-03: Uses cached context, parallel operations, and batch upserts.
  */
 export async function pushClientData() {
+  if (!supabase) return { error: 'Not configured' }
+
+  // PERF-03: Get context once, reuse for all operations
+  const ctx = await getSyncContext()
+  if (!ctx) return { error: 'Not authenticated' }
+
+  // PERF-03: Run independent operations in parallel
+  const [profileResult, weightLogsResult, savedMealsResult, userFoodsResult, xpResult] = await Promise.all([
+    withRetryResult(syncProfileToCloud),
+    withRetryResult(syncWeightLogsToCloud),
+    withRetryResult(syncSavedMealsToCloud),
+    withRetryResult(syncUserFoodsToCloud),
+    withRetryResult(syncXPToCloud),
+  ])
+
   const results: Record<string, { error: string | null }> = {
-    profile: await withRetryResult(syncProfileToCloud),
-    weightLogs: await withRetryResult(syncWeightLogsToCloud),
-    savedMeals: await withRetryResult(syncSavedMealsToCloud),
-    userFoods: await withRetryResult(syncUserFoodsToCloud),
-    xp: await withRetryResult(syncXPToCloud),
+    profile: profileResult,
+    weightLogs: weightLogsResult,
+    savedMeals: savedMealsResult,
+    userFoods: userFoodsResult,
+    xp: xpResult,
   }
 
   // Only push macro targets if client-owned
@@ -605,14 +647,36 @@ export async function pushClientData() {
     results.macroTargets = await withRetryResult(syncMacroTargetsToCloud)
   }
 
-  // Sync today's macro log (daily logs are always client-owned)
+  // Sync today's macro log with context (daily logs are always client-owned)
   const today = getLocalDateString()
-  await withRetryResult(() => syncDailyMacroLogToCloud(today))
+  await withRetryResult(() => syncDailyMacroLogToCloud(today, ctx))
 
-  // Sync recent workouts with retry
+  // PERF-03: Batch upsert recent workouts instead of sequential calls
   const recentWorkouts = useWorkoutStore.getState().workoutLogs.slice(-10)
-  for (const workout of recentWorkouts) {
-    await withRetryResult(() => syncWorkoutLogToCloud(workout.id))
+  if (recentWorkouts.length > 0) {
+    const workoutRows = recentWorkouts.map(workout => {
+      const durationMinutes = workout.startTime && workout.endTime
+        ? Math.round((workout.endTime - workout.startTime) / 60000)
+        : null
+      return {
+        id: workout.id,
+        user_id: ctx.user.id,
+        date: workout.date,
+        workout_type: workout.workoutType,
+        completed: workout.completed,
+        duration_minutes: durationMinutes,
+        exercises: workout.exercises as unknown as Json,
+        xp_awarded: workout.xpAwarded,
+        assignment_id: workout.assignmentId || null
+      }
+    })
+
+    await withRetryResult(async () => {
+      const { error } = await ctx.client
+        .from('workout_logs')
+        .upsert(workoutRows)
+      return { error: error?.message || null }
+    })
   }
 
   if (import.meta.env.DEV) console.log('[Sync] Push client data results:', results)
