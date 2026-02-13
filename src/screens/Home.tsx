@@ -160,7 +160,7 @@ export function Home() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-muted-foreground text-xs">
-              Welcome back,
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
             <h1 className="text-2xl font-bold">
               {profile?.username || 'Trainee'}
@@ -175,7 +175,7 @@ export function Home() {
         <p className="text-muted-foreground text-sm">{message}</p>
       </div>
 
-      <div className="px-5 space-y-6">
+      <div className="px-5 pt-6 space-y-6">
         {/* Active Reminders (exclude checkIn — Home has its own check-in prompt) */}
         {activeReminders.filter(r => r.type !== 'checkIn').length > 0 && !hasCheckedInToday && (
           <ReminderList maxReminders={2} excludeTypes={['checkIn']} />

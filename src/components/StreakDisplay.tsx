@@ -123,11 +123,14 @@ export function StreakBadge() {
   if (!profile?.currentStreak) return null
 
   return (
-    <div className="px-3 py-1.5 flex items-center gap-1.5 bg-card border border-border rounded">
-      <Flame size={18} className="text-primary" />
-      <span className="text-primary font-bold font-mono">
-        {profile.currentStreak}
-      </span>
+    <div className="flex flex-col items-center gap-0.5">
+      <div className="px-3 py-1.5 flex items-center gap-1.5 bg-card border border-border rounded">
+        <Flame size={18} className="text-primary" />
+        <span className="text-primary font-bold font-mono">
+          {profile.currentStreak}
+        </span>
+      </div>
+      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Streak</span>
     </div>
   )
 }

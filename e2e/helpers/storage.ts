@@ -172,9 +172,21 @@ export async function seedAllStores(page: Page) {
         ],
       },
     ],
-    recentFoods: [],
+    recentFoods: [
+      {
+        id: 'e2e-recent-1', name: 'Oatmeal', brand: 'Quaker', protein: 5, carbs: 27, fats: 3, calories: 150,
+        servingSize: 40, servingDescription: '1/2 cup dry', quantity: 1, unit: 'serving',
+        loggedAt: Date.now() - 7200000,
+      },
+      {
+        id: 'e2e-recent-2', name: 'Whey Protein', brand: 'ON', protein: 24, carbs: 3, fats: 1, calories: 120,
+        servingSize: 31, servingDescription: '1 scoop', quantity: 1, unit: 'serving',
+        loggedAt: Date.now() - 3600000,
+      },
+    ],
+    favoriteFoods: [],
     activityLevel: 'moderate',
-  }, 3)
+  }, 4)
 
   // XP store -- some accumulated XP
   await seedStore(page, STORE_KEYS.xp, {

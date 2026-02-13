@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ProgressBar, MealBuilder, EmptyState, FoodSearch } from '@/components'
-import { useMacroStore, useUserStore, MacroTargets, MealPlan, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
-import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck } from 'lucide-react'
+import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
+import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
@@ -23,12 +23,12 @@ export function Macros() {
   const [activeTab, setActiveTab] = useState<TabType>('daily')
   const {
     targets,
-    mealPlan,
     getTodayProgress,
-    logQuickMacros,
     logNamedMeal,
     addRecentFood,
     recentFoods,
+    favoriteFoods,
+    toggleFavoriteFood,
     saveMeal,
     deleteSavedMeal,
     getSavedMeals,
@@ -49,7 +49,7 @@ export function Macros() {
   const tabs: { id: TabType; label: string }[] = [
     { id: 'daily', label: 'Daily' },
     { id: 'log', label: 'Meals' },
-    { id: 'meals', label: 'Plan' },
+    { id: 'meals', label: 'Saved' },
     { id: 'calculator', label: 'Calc' }
   ]
 
@@ -96,16 +96,14 @@ export function Macros() {
             targets={targets}
             proteinHit={isProteinTargetHit()}
             caloriesHit={isCalorieTargetHit()}
-            onLogMacros={(macros) => {
-              logQuickMacros(macros)
-              scheduleSync()
-            }}
             onLogNamedMeal={(name, macros) => {
               logNamedMeal(name, macros)
               scheduleSync()
             }}
             onAddRecentFood={addRecentFood}
             recentFoods={recentFoods}
+            favoriteFoods={favoriteFoods}
+            onToggleFavorite={toggleFavoriteFood}
             todayMeals={todayMeals}
             onDeleteMeal={deleteLoggedMeal}
             onSetupTargets={() => setActiveTab('calculator')}
@@ -115,6 +113,8 @@ export function Macros() {
         {activeTab === 'log' && (
           <LogMealView
             savedMeals={savedMeals}
+            favoriteFoods={favoriteFoods}
+            onToggleFavorite={toggleFavoriteFood}
             onLogMeal={(name, macros) => {
               logNamedMeal(name, macros)
               scheduleSync()
@@ -125,7 +125,16 @@ export function Macros() {
         )}
 
         {activeTab === 'meals' && (
-          <MealsView mealPlan={mealPlan} />
+          <SavedView
+            favoriteFoods={favoriteFoods}
+            recentFoods={recentFoods}
+            savedMeals={savedMeals}
+            onLogNamedMeal={(name, macros) => {
+              logNamedMeal(name, macros)
+              scheduleSync()
+            }}
+            onToggleFavorite={toggleFavoriteFood}
+          />
         )}
 
         {activeTab === 'calculator' && (
@@ -182,10 +191,11 @@ function DailyView({
   targets,
   proteinHit,
   caloriesHit,
-  onLogMacros,
   onLogNamedMeal,
   onAddRecentFood,
   recentFoods,
+  favoriteFoods,
+  onToggleFavorite,
   todayMeals,
   onDeleteMeal,
   onSetupTargets
@@ -194,15 +204,16 @@ function DailyView({
   targets: MacroTargets | null
   proteinHit: boolean
   caloriesHit: boolean
-  onLogMacros: (macros: { protein?: number; calories?: number; carbs?: number; fats?: number }) => void
   onLogNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   onAddRecentFood: (food: RecentFood) => void
   recentFoods: RecentFood[]
+  favoriteFoods: RecentFood[]
+  onToggleFavorite: (food: RecentFood) => void
   todayMeals: LoggedMeal[]
   onDeleteMeal: (id: string) => void
   onSetupTargets: () => void
 }) {
-  const [quickLog, setQuickLog] = useState({ protein: '', calories: '' })
+  const [quickLog, setQuickLog] = useState({ name: '', protein: '', calories: '', carbs: '', fats: '' })
   const [showMeals, setShowMeals] = useState(false)
   const [loggedRecentId, setLoggedRecentId] = useState<string | null>(null)
 
@@ -240,19 +251,30 @@ function DailyView({
   const handleQuickLog = () => {
     const proteinVal = Number(quickLog.protein)
     const caloriesVal = Number(quickLog.calories)
+    const carbsVal = Number(quickLog.carbs)
+    const fatsVal = Number(quickLog.fats)
 
-    if ((quickLog.protein && (proteinVal <= 0 || !isFinite(proteinVal))) ||
-        (quickLog.calories && (caloriesVal <= 0 || !isFinite(caloriesVal)))) {
-      toast.warning('Please enter positive values')
+    const fields = [
+      { value: quickLog.protein, parsed: proteinVal },
+      { value: quickLog.calories, parsed: caloriesVal },
+      { value: quickLog.carbs, parsed: carbsVal },
+      { value: quickLog.fats, parsed: fatsVal },
+    ]
+
+    if (fields.some(f => f.value && (f.parsed < 0 || !isFinite(f.parsed)))) {
+      toast.warning('Please enter valid positive values')
       return
     }
 
-    onLogMacros({
-      protein: quickLog.protein ? proteinVal : undefined,
-      calories: quickLog.calories ? caloriesVal : undefined
+    const name = quickLog.name.trim() || 'Quick Log'
+    onLogNamedMeal(name, {
+      protein: quickLog.protein ? proteinVal : 0,
+      carbs: quickLog.carbs ? carbsVal : 0,
+      fats: quickLog.fats ? fatsVal : 0,
+      calories: quickLog.calories ? caloriesVal : 0,
     })
     analytics.mealLogged('manual')
-    setQuickLog({ protein: '', calories: '' })
+    setQuickLog({ name: '', protein: '', calories: '', carbs: '', fats: '' })
     toast.success('Macros logged')
     setQuickLogSuccess(true)
     setTimeout(() => setQuickLogSuccess(false), 2000)
@@ -350,6 +372,20 @@ function DailyView({
                     key={`${food.id}-${food.loggedAt}`}
                     className="flex items-center justify-between bg-muted rounded-lg p-2.5"
                   >
+                    <button
+                      onClick={() => onToggleFavorite(food)}
+                      aria-label={favoriteFoods.some(f => f.id === food.id) ? `Unfavorite ${food.name}` : `Favorite ${food.name}`}
+                      className="shrink-0 p-1 mr-1"
+                    >
+                      <Heart
+                        size={16}
+                        className={cn(
+                          favoriteFoods.some(f => f.id === food.id)
+                            ? 'text-primary fill-primary'
+                            : 'text-muted-foreground'
+                        )}
+                      />
+                    </button>
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="text-sm font-medium truncate">{food.name}</p>
                       <p className="text-xs text-muted-foreground">
@@ -382,6 +418,15 @@ function DailyView({
           {/* Manual Entry */}
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-xs text-muted-foreground mb-3">MANUAL ENTRY</p>
+            <div className="mb-3">
+              <label className="text-xs text-muted-foreground block mb-1">Meal Name</label>
+              <Input
+                type="text"
+                value={quickLog.name}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Quick Log"
+              />
+            </div>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
@@ -389,7 +434,7 @@ function DailyView({
                   type="number"
                   value={quickLog.protein}
                   onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
-                  placeholder={String(targets.protein)}
+                  placeholder="0"
                   className="font-digital"
                   data-testid="macros-food-search-input"
                 />
@@ -400,7 +445,27 @@ function DailyView({
                   type="number"
                   value={quickLog.calories}
                   onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
-                  placeholder={String(targets.calories)}
+                  placeholder="0"
+                  className="font-digital"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Carbs (g)</label>
+                <Input
+                  type="number"
+                  value={quickLog.carbs}
+                  onChange={(e) => setQuickLog(prev => ({ ...prev, carbs: e.target.value }))}
+                  placeholder="0"
+                  className="font-digital"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Fats (g)</label>
+                <Input
+                  type="number"
+                  value={quickLog.fats}
+                  onChange={(e) => setQuickLog(prev => ({ ...prev, fats: e.target.value }))}
+                  placeholder="0"
                   className="font-digital"
                 />
               </div>
@@ -408,7 +473,7 @@ function DailyView({
             <Button
               onClick={handleQuickLog}
               className={cn('w-full', quickLogSuccess && 'bg-success hover:bg-success')}
-              disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories)}
+              disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories && !quickLog.carbs && !quickLog.fats)}
               data-testid="macros-add-meal-button"
             >
               {quickLogSuccess ? (
@@ -481,13 +546,40 @@ function DailyView({
               showMeals ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
             )}>
               <div className="space-y-2">
-                {todayMeals.map((meal) => (
+                {todayMeals.map((meal) => {
+                  const asFavorite: RecentFood = {
+                    id: meal.id,
+                    name: meal.name,
+                    protein: meal.protein,
+                    carbs: meal.carbs,
+                    fats: meal.fats,
+                    calories: meal.calories,
+                    servingSize: 1,
+                    servingDescription: '1 serving',
+                    quantity: 1,
+                    unit: 'serving',
+                    loggedAt: meal.timestamp,
+                  }
+                  const isFav = favoriteFoods.some(f => f.id === meal.id)
+                  return (
                   <div
                     key={meal.id}
                     className="flex items-center justify-between bg-card rounded-lg p-3"
                     data-testid="macros-meal-entry"
                   >
-                    <div>
+                    <button
+                      onClick={() => onToggleFavorite(asFavorite)}
+                      aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
+                      className="shrink-0 p-1 mr-2"
+                    >
+                      <Heart
+                        size={16}
+                        className={cn(
+                          isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
+                        )}
+                      />
+                    </button>
+                    <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm">{meal.name}</p>
                       <p className="text-xs text-muted-foreground">
                         P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
@@ -505,7 +597,8 @@ function DailyView({
                       ✕
                     </button>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </CardContent>
@@ -578,56 +671,162 @@ function MacroRing({
   )
 }
 
-function MealsView({ mealPlan }: { mealPlan: MealPlan[] }) {
-  if (!mealPlan || mealPlan.length === 0) {
-    return (
-      <Card className="py-0">
-        <CardContent className="text-center py-8">
-          <UtensilsCrossed size={40} className="mx-auto mb-4 text-muted-foreground" />
-          <p className="text-xl font-bold mb-2">No Meal Plan</p>
-          <p className="text-muted-foreground">Set your macros in Calculator to generate a meal plan</p>
-        </CardContent>
-      </Card>
-    )
+function SavedView({
+  favoriteFoods,
+  recentFoods,
+  savedMeals,
+  onLogNamedMeal,
+  onToggleFavorite,
+}: {
+  favoriteFoods: RecentFood[]
+  recentFoods: RecentFood[]
+  savedMeals: SavedMeal[]
+  onLogNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  onToggleFavorite: (food: RecentFood) => void
+}) {
+  const [loggedId, setLoggedId] = useState<string | null>(null)
+
+  const handleLog = (id: string, name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => {
+    onLogNamedMeal(name, macros)
+    analytics.mealLogged('saved')
+    toast.success(`${name} logged`)
+    setLoggedId(id)
+    setTimeout(() => setLoggedId(null), 2000)
   }
 
+  const favoriteIds = new Set(favoriteFoods.map(f => f.id))
+  const filteredRecents = recentFoods.filter(f => !favoriteIds.has(f.id))
+
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground mb-4">
-        Suggested meal breakdown based on your targets
-      </p>
-      {mealPlan.map((meal, index) => (
-        <div
-          key={index}
-          className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
+    <div className="space-y-6">
+      {/* Favorites */}
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground mb-3">FAVORITES</h3>
+        {favoriteFoods.length > 0 ? (
+          <div className="space-y-2">
+            {favoriteFoods.map((food) => (
+              <div
+                key={food.id}
+                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
+              >
+                <button
+                  onClick={() => onToggleFavorite(food)}
+                  aria-label={`Unfavorite ${food.name}`}
+                  className="shrink-0 p-1 mr-1"
+                >
+                  <Heart size={16} className="text-primary fill-primary" />
+                </button>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-sm font-medium truncate">{food.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === food.id && 'text-success')}
+                  disabled={loggedId === food.id}
+                  onClick={() => handleLog(food.id, food.name, { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories })}
+                >
+                  {loggedId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : (
           <Card className="py-0">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">{meal.name}</h3>
-                <span className="text-sm text-primary font-digital">
-                  {meal.calories} cal
-                </span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-muted rounded-lg p-2">
-                  <p className="text-xs text-muted-foreground">Protein</p>
-                  <p className="font-digital font-semibold">{meal.protein}g</p>
-                </div>
-                <div className="bg-muted rounded-lg p-2">
-                  <p className="text-xs text-muted-foreground">Carbs</p>
-                  <p className="font-digital font-semibold">{meal.carbs}g</p>
-                </div>
-                <div className="bg-muted rounded-lg p-2">
-                  <p className="text-xs text-muted-foreground">Fats</p>
-                  <p className="font-digital font-semibold">{meal.fats}g</p>
-                </div>
-              </div>
+            <CardContent className="text-center py-6">
+              <Heart size={24} className="mx-auto mb-2 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                Tap the heart on any food to pin it here
+              </p>
             </CardContent>
           </Card>
+        )}
+      </div>
+
+      {/* Recent (excluding favorites) */}
+      {filteredRecents.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">RECENT</h3>
+          <div className="space-y-2">
+            {filteredRecents.map((food) => (
+              <div
+                key={`${food.id}-${food.loggedAt}`}
+                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
+              >
+                <button
+                  onClick={() => onToggleFavorite(food)}
+                  aria-label={`Favorite ${food.name}`}
+                  className="shrink-0 p-1 mr-1"
+                >
+                  <Heart size={16} className="text-muted-foreground" />
+                </button>
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-sm font-medium truncate">{food.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === food.id && 'text-success')}
+                  disabled={loggedId === food.id}
+                  onClick={() => handleLog(food.id, food.name, { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories })}
+                >
+                  {loggedId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      )}
+
+      {/* Saved Meals */}
+      {savedMeals.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-muted-foreground mb-3">SAVED MEALS</h3>
+          <div className="space-y-2">
+            {savedMeals.map((meal) => (
+              <div
+                key={meal.id}
+                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
+              >
+                <div className="flex-1 min-w-0 mr-2">
+                  <p className="text-sm font-medium truncate">{meal.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === meal.id && 'text-success')}
+                  disabled={loggedId === meal.id}
+                  onClick={() => handleLog(meal.id, meal.name, { protein: meal.protein, carbs: meal.carbs, fats: meal.fats, calories: meal.calories })}
+                >
+                  {loggedId === meal.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state when nothing at all */}
+      {favoriteFoods.length === 0 && filteredRecents.length === 0 && savedMeals.length === 0 && (
+        <Card className="py-0">
+          <CardContent className="text-center py-8">
+            <UtensilsCrossed size={40} className="mx-auto mb-3 text-muted-foreground" />
+            <p className="text-lg font-semibold mb-1">Nothing Saved Yet</p>
+            <p className="text-sm text-muted-foreground">
+              Search and log foods from the Daily tab — they'll appear here as recents
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
@@ -883,11 +1082,15 @@ function CalculatorView({
 
 function LogMealView({
   savedMeals,
+  favoriteFoods,
+  onToggleFavorite,
   onLogMeal,
   onSaveMeal,
   onDeleteSavedMeal
 }: {
   savedMeals: SavedMeal[]
+  favoriteFoods: RecentFood[]
+  onToggleFavorite: (food: RecentFood) => void
   onLogMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
   onSaveMeal: (name: string, ingredients: MealIngredient[]) => void
   onDeleteSavedMeal: (id: string) => void
@@ -951,6 +1154,36 @@ function LogMealView({
               {/* Meal Header */}
               <div className="p-4">
                 <div className="flex items-start justify-between">
+                  {(() => {
+                    const asFavorite: RecentFood = {
+                      id: meal.id,
+                      name: meal.name,
+                      protein: meal.protein,
+                      carbs: meal.carbs,
+                      fats: meal.fats,
+                      calories: meal.calories,
+                      servingSize: 1,
+                      servingDescription: '1 serving',
+                      quantity: 1,
+                      unit: 'serving',
+                      loggedAt: meal.createdAt,
+                    }
+                    const isFav = favoriteFoods.some(f => f.id === meal.id)
+                    return (
+                      <button
+                        onClick={() => onToggleFavorite(asFavorite)}
+                        aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
+                        className="shrink-0 p-1 mr-2 mt-0.5"
+                      >
+                        <Heart
+                          size={16}
+                          className={cn(
+                            isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
+                          )}
+                        />
+                      </button>
+                    )
+                  })()}
                   <button
                     onClick={() => toggleExpandMeal(meal.id)}
                     className="flex-1 text-left"

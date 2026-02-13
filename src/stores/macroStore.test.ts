@@ -9,6 +9,8 @@ describe('macroStore', () => {
       mealPlan: [],
       dailyLogs: [],
       savedMeals: [],
+      recentFoods: [],
+      favoriteFoods: [],
       activityLevel: 'moderate'
     })
   })
@@ -327,6 +329,90 @@ describe('macroStore', () => {
     it('should return true when both targets hit', () => {
       useMacroStore.getState().logNamedMeal('Meal', { protein: 180, carbs: 250, fats: 80, calories: 2500 })
       expect(useMacroStore.getState().isPerfectDay()).toBe(true)
+    })
+  })
+
+  describe('addRecentFood', () => {
+    it('should add a food to recents', () => {
+      const food = {
+        id: 'food-1', name: 'Chicken Breast', protein: 31, carbs: 0, fats: 3.6, calories: 165,
+        servingSize: 100, servingDescription: '100g', quantity: 100, unit: 'g' as const, loggedAt: Date.now(),
+      }
+
+      useMacroStore.getState().addRecentFood(food)
+
+      expect(useMacroStore.getState().recentFoods).toHaveLength(1)
+      expect(useMacroStore.getState().recentFoods[0].name).toBe('Chicken Breast')
+    })
+
+    it('should deduplicate by name+brand (case-insensitive)', () => {
+      const food1 = {
+        id: 'food-1', name: 'Chicken Breast', brand: 'Tyson', protein: 31, carbs: 0, fats: 3.6, calories: 165,
+        servingSize: 100, servingDescription: '100g', quantity: 100, unit: 'g' as const, loggedAt: Date.now(),
+      }
+      const food2 = {
+        id: 'food-2', name: 'chicken breast', brand: 'tyson', protein: 31, carbs: 0, fats: 3.6, calories: 165,
+        servingSize: 100, servingDescription: '100g', quantity: 100, unit: 'g' as const, loggedAt: Date.now() + 1000,
+      }
+
+      useMacroStore.getState().addRecentFood(food1)
+      useMacroStore.getState().addRecentFood(food2)
+
+      expect(useMacroStore.getState().recentFoods).toHaveLength(1)
+      expect(useMacroStore.getState().recentFoods[0].id).toBe('food-2') // Most recent wins
+    })
+
+    it('should cap at 5 recent foods', () => {
+      for (let i = 0; i < 7; i++) {
+        useMacroStore.getState().addRecentFood({
+          id: `food-${i}`, name: `Food ${i}`, protein: 10, carbs: 10, fats: 5, calories: 125,
+          servingSize: 1, servingDescription: '1 serving', quantity: 1, unit: 'serving', loggedAt: Date.now() + i,
+        })
+      }
+
+      expect(useMacroStore.getState().recentFoods).toHaveLength(5)
+      expect(useMacroStore.getState().recentFoods[0].name).toBe('Food 6') // Most recent first
+    })
+  })
+
+  describe('toggleFavoriteFood', () => {
+    const food = {
+      id: 'fav-1', name: 'Greek Yogurt', protein: 17, carbs: 6, fats: 0.7, calories: 100,
+      servingSize: 170, servingDescription: '1 container', quantity: 1, unit: 'serving' as const, loggedAt: Date.now(),
+    }
+
+    it('should add a food to favorites', () => {
+      useMacroStore.getState().toggleFavoriteFood(food)
+
+      expect(useMacroStore.getState().favoriteFoods).toHaveLength(1)
+      expect(useMacroStore.getState().favoriteFoods[0].name).toBe('Greek Yogurt')
+    })
+
+    it('should remove a food from favorites when toggled again', () => {
+      useMacroStore.getState().toggleFavoriteFood(food)
+      expect(useMacroStore.getState().favoriteFoods).toHaveLength(1)
+
+      useMacroStore.getState().toggleFavoriteFood(food)
+      expect(useMacroStore.getState().favoriteFoods).toHaveLength(0)
+    })
+
+    it('should match by id, not name', () => {
+      const food2 = { ...food, id: 'fav-2', name: 'Greek Yogurt' }
+
+      useMacroStore.getState().toggleFavoriteFood(food)
+      useMacroStore.getState().toggleFavoriteFood(food2)
+
+      expect(useMacroStore.getState().favoriteFoods).toHaveLength(2)
+    })
+
+    it('should not have an upper limit on favorites', () => {
+      for (let i = 0; i < 10; i++) {
+        useMacroStore.getState().toggleFavoriteFood({
+          ...food, id: `fav-${i}`, name: `Food ${i}`,
+        })
+      }
+
+      expect(useMacroStore.getState().favoriteFoods).toHaveLength(10)
     })
   })
 
