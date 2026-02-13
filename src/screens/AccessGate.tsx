@@ -56,7 +56,8 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
   // Format code as user types (keep dashes for Lemon Squeezy format)
   const handleCodeChange = (value: string) => {
     // Allow alphanumeric and dashes (Lemon Squeezy keys are UUID-like with dashes)
-    const cleaned = value.replace(/[^A-Za-z0-9-]/g, '').toUpperCase()
+    // Preserve case — Lemon Squeezy keys are case-sensitive
+    const cleaned = value.replace(/[^A-Za-z0-9-]/g, '')
     setCode(cleaned)
     setError(null)
   }
@@ -96,7 +97,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   aria-label="License key"
                   data-testid="access-code-input"
                   className={cn(
-                    'text-center text-lg font-mono tracking-wider uppercase h-12',
+                    'text-center text-lg font-mono tracking-wider h-12',
                     error && 'border-destructive'
                   )}
                   maxLength={50}
