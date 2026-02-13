@@ -18,6 +18,7 @@ import {
   Crown,
   Home,
   TrendingUp as ChartUp,
+  X,
   LucideIcon
 } from 'lucide-react'
 
@@ -184,12 +185,49 @@ export function Onboarding() {
     navigate('/')
   }
 
+  // Emergency skip - completes onboarding with current/default data
+  const handleSkip = () => {
+    if (!window.confirm('Skip setup and use default settings? You can adjust these later in Settings.')) {
+      return
+    }
+    clearProgress()
+
+    // Merge current data with defaults for any missing fields
+    const finalData = {
+      ...defaultOnboardingData,
+      ...data,
+      username: data.username || 'Trainee'
+    }
+
+    initProfile(finalData)
+    setPlan(finalData.trainingDaysPerWeek, finalData.selectedDays)
+    calculateMacros(finalData.weight, finalData.height, finalData.age, finalData.gender, finalData.goal, 'moderate')
+    setBaseCharacter(finalData.avatarBase)
+    completeOnboarding()
+    completeXPOnboarding()
+    updateEvolutionStage(1)
+
+    navigate('/')
+  }
+
   const updateData = <K extends keyof OnboardingData>(key: K, value: OnboardingData[K]) => {
     setData(prev => ({ ...prev, [key]: value }))
   }
 
   return (
-    <div data-testid="onboarding-screen" className="min-h-screen flex flex-col px-5 pt-8 pb-24">
+    <div data-testid="onboarding-screen" className="min-h-screen flex flex-col px-5 pt-8 pb-24 relative">
+      {/* Skip/Close button - appears after welcome, hidden during evolution */}
+      {step !== 'welcome' && step !== 'evolution' && (
+        <button
+          onClick={handleSkip}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors z-10"
+          aria-label="Skip setup"
+          title="Skip setup"
+        >
+          <X size={20} />
+        </button>
+      )}
+
       {/* Progress indicator */}
       {step !== 'welcome' && (
         <div data-testid="onboarding-progress" className="mb-8">
