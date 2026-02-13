@@ -58,6 +58,7 @@ interface UserStore {
   completeOnboarding: () => void
   updateStreak: (didCheckIn: boolean) => void
   logWeight: (weight: number) => void
+  setWeightHistory: (history: WeightEntry[]) => void
   getTodayWeight: () => WeightEntry | null
   getWeightHistory: (days?: number) => WeightEntry[]
   getWeightTrend: () => WeightTrendData | null
@@ -212,6 +213,10 @@ export const useUserStore = create<UserStore>()(
         set((state) => ({
           profile: state.profile ? { ...state.profile, weight } : null
         }))
+      },
+
+      setWeightHistory: (history: WeightEntry[]) => {
+        set({ weightHistory: history })
       },
 
       getTodayWeight: () => {

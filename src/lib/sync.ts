@@ -258,8 +258,7 @@ export async function loadWeightLogsFromCloud() {
   ].sort((a, b) => a.date.localeCompare(b.date))
 
   // Update local store with merged data
-  // Note: This requires adding a setWeightHistory method to userStore
-  // For now, we'll just sync local to cloud
+  useUserStore.getState().setWeightHistory(mergedHistory)
 
   return { error: null, data: mergedHistory }
 }

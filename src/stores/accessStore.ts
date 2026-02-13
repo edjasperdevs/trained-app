@@ -84,7 +84,7 @@ export const useAccessStore = create<AccessState>()(
 
           return { success: true }
         } catch (err) {
-          console.error('Access code validation error:', err)
+          if (import.meta.env.DEV) console.error('Access code validation error:', err)
 
           // Network error — allow offline access if same code was previously validated
           const currentState = get()

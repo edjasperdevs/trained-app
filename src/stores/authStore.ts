@@ -65,7 +65,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         })
       })
     } catch (error) {
-      console.error('Auth initialization error:', error)
+      if (import.meta.env.DEV) console.error('Auth initialization error:', error)
       if (error instanceof Error) {
         captureError(error, { context: 'auth.initialize' })
       }
@@ -225,7 +225,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Then push client-owned changes to cloud
       await pushClientData()
     } catch (error) {
-      console.error('Sync error:', error)
+      if (import.meta.env.DEV) console.error('Sync error:', error)
       // Show user-friendly error message
       if (error instanceof Error) {
         captureError(error, { context: 'auth.syncData' })
