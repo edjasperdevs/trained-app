@@ -19,7 +19,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: /auth-onboarding\.spec\.ts/,
+      testIgnore: /(auth-onboarding|meal-persistence)\.spec\.ts/,
     },
     {
       name: 'chromium-auth',
@@ -27,7 +27,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: 'http://localhost:5174',
       },
-      testMatch: /auth-onboarding\.spec\.ts/,
+      testMatch: /(auth-onboarding|meal-persistence)\.spec\.ts/,
     },
   ],
 
