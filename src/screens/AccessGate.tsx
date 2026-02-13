@@ -55,9 +55,8 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
 
   // Format code as user types (keep dashes for Lemon Squeezy format)
   const handleCodeChange = (value: string) => {
-    // Allow alphanumeric and dashes (Lemon Squeezy keys are UUID-like with dashes)
-    // Preserve case — Lemon Squeezy keys are case-sensitive
-    const cleaned = value.replace(/[^A-Za-z0-9-]/g, '')
+    // Allow alphanumeric, uppercase for matching DB codes
+    const cleaned = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
     setCode(cleaned)
     setError(null)
   }
@@ -93,14 +92,14 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                   type="text"
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
-                  placeholder="XXXX-XXXX-XXXX-XXXX"
+                  placeholder="ENTER CODE"
                   aria-label="License key"
                   data-testid="access-code-input"
                   className={cn(
-                    'text-center text-lg font-mono tracking-wider h-12',
+                    'text-center text-lg font-mono tracking-wider uppercase h-12',
                     error && 'border-destructive'
                   )}
-                  maxLength={50}
+                  maxLength={12}
                   autoComplete="off"
                   autoFocus
                 />
@@ -166,7 +165,7 @@ export function AccessGate({ onAccessGranted }: AccessGateProps) {
                       <KeyRound size={18} className="text-muted-foreground" /> Already Purchased?
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Your access code was included in your purchase confirmation email. Check your inbox (and spam folder) for an email from Lemon Squeezy.
+                      Your access code was included in your welcome email. Check your inbox (and spam folder) for your purchase confirmation.
                     </p>
                   </div>
 
