@@ -525,6 +525,137 @@ export async function loadUserFoodsFromCloud() {
 }
 
 // ==========================================
+// Macro Log Loading (added for loadAllFromCloud)
+// ==========================================
+
+export async function loadMacroLogsFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Load last 90 days of macro logs (matches PERF-01 pruning window)
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - 90)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+
+  const { data, error } = await client
+    .from('daily_macro_logs')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('date', cutoffStr)
+    .order('date', { ascending: false })
+
+  if (error) return { error: error.message }
+
+  type DailyMacroLog = import('@/stores/macroStore').DailyMacroLog
+
+  // Also load logged meals for these dates
+  const dates = (data || []).map(d => d.date)
+  const { data: mealsData } = dates.length > 0 ? await client
+    .from('logged_meals')
+    .select('*')
+    .eq('user_id', user.id)
+    .in('date', dates) : { data: [] }
+
+  // Group meals by date
+  const mealsByDate = new Map<string, typeof mealsData>()
+  for (const meal of (mealsData || [])) {
+    const existing = mealsByDate.get(meal.date) || []
+    existing.push(meal)
+    mealsByDate.set(meal.date, existing)
+  }
+
+  const cloudLogs: DailyMacroLog[] = (data || []).map(row => ({
+    date: row.date,
+    protein: row.protein,
+    calories: row.calories,
+    carbs: row.carbs,
+    fats: row.fats,
+    // Meal plan not stored in cloud - provide empty array (local generates fresh)
+    meals: [],
+    loggedMeals: (mealsByDate.get(row.date) || []).map(m => ({
+      id: m.id,
+      name: m.name,
+      protein: m.protein,
+      carbs: m.carbs,
+      fats: m.fats,
+      calories: m.calories,
+      timestamp: new Date(m.created_at).getTime()
+    }))
+  }))
+
+  // Merge with local: cloud wins on matching date
+  const localLogs = useMacroStore.getState().dailyLogs
+  const cloudDates = new Set(cloudLogs.map(l => l.date))
+  const mergedLogs = [
+    ...cloudLogs,
+    ...localLogs.filter(l => !cloudDates.has(l.date))
+  ].sort((a, b) => b.date.localeCompare(a.date))
+
+  useMacroStore.setState({ dailyLogs: mergedLogs })
+  return { error: null }
+}
+
+// ==========================================
+// Workout Log Loading (added for loadAllFromCloud)
+// ==========================================
+
+export async function loadWorkoutLogsFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Load last 90 days of workout logs (matches PERF-01 pruning window)
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - 90)
+  const cutoffStr = cutoffDate.toISOString().split('T')[0]
+
+  const { data, error } = await client
+    .from('workout_logs')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('date', cutoffStr)
+    .order('date', { ascending: false })
+
+  if (error) return { error: error.message }
+
+  type WorkoutLog = import('@/stores/workoutStore').WorkoutLog
+  type Exercise = import('@/stores/workoutStore').Exercise
+  type WorkoutType = import('@/stores/workoutStore').WorkoutType
+
+  const cloudLogs: WorkoutLog[] = (data || []).map(row => ({
+    id: row.id,
+    date: row.date,
+    workoutType: row.workout_type as WorkoutType,
+    dayNumber: 1, // Default, not stored in cloud
+    weekNumber: 1, // Default, not stored in cloud
+    exercises: (row.exercises as unknown as Exercise[]) || [],
+    completed: row.completed,
+    xpAwarded: row.xp_awarded,
+    startTime: row.created_at ? new Date(row.created_at).getTime() : undefined,
+    endTime: row.duration_minutes
+      ? (row.created_at ? new Date(row.created_at).getTime() + row.duration_minutes * 60000 : undefined)
+      : undefined,
+    assignmentId: row.assignment_id || undefined
+  }))
+
+  // Merge with local: cloud wins on matching ID
+  const localLogs = useWorkoutStore.getState().workoutLogs
+  const cloudIds = new Set(cloudLogs.map(l => l.id))
+  const mergedLogs = [
+    ...cloudLogs,
+    ...localLogs.filter(l => !cloudIds.has(l.id))
+  ].sort((a, b) => b.date.localeCompare(a.date))
+
+  useWorkoutStore.setState({ workoutLogs: mergedLogs })
+  return { error: null }
+}
+
+// ==========================================
 // Workout Sync
 // ==========================================
 
@@ -806,11 +937,23 @@ export async function syncAllToCloud() {
 
 export async function loadAllFromCloud() {
   // Use retry wrapper for each load operation
+  // Run independent operations in parallel for better performance
+  const [profileResult, weightLogsResult, savedMealsResult, userFoodsResult, macroLogsResult, workoutLogsResult] = await Promise.all([
+    withRetryResult(loadProfileFromCloud),
+    withRetryResult(loadWeightLogsFromCloud),
+    withRetryResult(loadSavedMealsFromCloud),
+    withRetryResult(loadUserFoodsFromCloud),
+    withRetryResult(loadMacroLogsFromCloud),
+    withRetryResult(loadWorkoutLogsFromCloud),
+  ])
+
   const results = {
-    profile: await withRetryResult(loadProfileFromCloud),
-    weightLogs: await withRetryResult(loadWeightLogsFromCloud),
-    savedMeals: await withRetryResult(loadSavedMealsFromCloud),
-    userFoods: await withRetryResult(loadUserFoodsFromCloud),
+    profile: profileResult,
+    weightLogs: weightLogsResult,
+    savedMeals: savedMealsResult,
+    userFoods: userFoodsResult,
+    macroLogs: macroLogsResult,
+    workoutLogs: workoutLogsResult,
   }
 
   if (import.meta.env.DEV) console.log('Load results:', results)

@@ -111,8 +111,15 @@ describe('xpStore', () => {
     it('should add new log for different day', () => {
       const { logDailyXP } = useXPStore.getState()
 
+      // Use recent dates within 90-day pruning window
+      const today = new Date()
+      const yesterday = new Date(today)
+      yesterday.setDate(today.getDate() - 1)
+      const todayStr = today.toISOString().split('T')[0]
+      const yesterdayStr = yesterday.toISOString().split('T')[0]
+
       logDailyXP({
-        date: '2024-01-15',
+        date: yesterdayStr,
         workout: true,
         protein: false,
         calories: false,
@@ -122,7 +129,7 @@ describe('xpStore', () => {
       })
 
       logDailyXP({
-        date: '2024-01-16',
+        date: todayStr,
         workout: true,
         protein: false,
         calories: false,
@@ -299,8 +306,11 @@ describe('xpStore', () => {
     it('should return unclaimed logs', () => {
       const { logDailyXP, getPendingXPBreakdown } = useXPStore.getState()
 
+      // Use recent date within 90-day pruning window
+      const today = new Date().toISOString().split('T')[0]
+
       logDailyXP({
-        date: '2024-01-15',
+        date: today,
         workout: true,
         protein: false,
         calories: false,
@@ -317,8 +327,11 @@ describe('xpStore', () => {
     it('should not include claimed logs', () => {
       const { logDailyXP, claimWeeklyXP, getPendingXPBreakdown } = useXPStore.getState()
 
+      // Use recent date within 90-day pruning window
+      const today = new Date().toISOString().split('T')[0]
+
       logDailyXP({
-        date: '2024-01-15',
+        date: today,
         workout: true,
         protein: false,
         calories: false,
