@@ -371,6 +371,7 @@ export interface Database {
           fats: number
           calories: number
           usage_count: number
+          ingredients: Json
         }
         Insert: {
           id?: string
@@ -382,6 +383,7 @@ export interface Database {
           fats: number
           calories: number
           usage_count?: number
+          ingredients?: Json
         }
         Update: {
           id?: string
@@ -393,6 +395,58 @@ export interface Database {
           fats?: number
           calories?: number
           usage_count?: number
+          ingredients?: Json
+        }
+        Relationships: []
+      }
+      user_foods: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          brand: string | null
+          protein: number
+          carbs: number
+          fats: number
+          calories: number
+          serving_size: number
+          serving_description: string
+          quantity: number
+          unit: string
+          is_favorite: boolean
+          logged_at: number
+        }
+        Insert: {
+          id: string
+          user_id: string
+          name: string
+          brand?: string | null
+          protein: number
+          carbs: number
+          fats: number
+          calories: number
+          serving_size: number
+          serving_description: string
+          quantity: number
+          unit: string
+          is_favorite?: boolean
+          logged_at: number
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          brand?: string | null
+          protein?: number
+          carbs?: number
+          fats?: number
+          calories?: number
+          serving_size?: number
+          serving_description?: string
+          quantity?: number
+          unit?: string
+          is_favorite?: boolean
+          logged_at?: number
         }
         Relationships: []
       }

@@ -96,12 +96,14 @@ interface MacroStore {
   dailyLogs: DailyMacroLog[]
   savedMeals: SavedMeal[]
   recentFoods: RecentFood[]
+  favoriteFoods: RecentFood[]
   activityLevel: ActivityLevel
   setBy: 'self' | 'coach'
   setByCoachId: string | null
 
   // Actions
   addRecentFood: (food: RecentFood) => void
+  toggleFavoriteFood: (food: RecentFood) => void
   calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => void
   generateMealPlan: () => void
   logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
@@ -121,6 +123,7 @@ interface MacroStore {
   isProteinTargetHit: () => boolean
   isCalorieTargetHit: () => boolean
   isPerfectDay: () => boolean
+  setSavedMeals: (meals: SavedMeal[]) => void
   setCoachTargets: (targets: MacroTargets, coachId: string) => void
   setActivityLevel: (level: ActivityLevel) => void
   resetMacros: () => void
@@ -150,6 +153,7 @@ export const useMacroStore = create<MacroStore>()(
       dailyLogs: [],
       savedMeals: [],
       recentFoods: [],
+      favoriteFoods: [],
       activityLevel: 'moderate',
       setBy: 'self',
       setByCoachId: null,
@@ -163,6 +167,16 @@ export const useMacroStore = create<MacroStore>()(
             return fKey !== key
           })
           return { recentFoods: [food, ...filtered].slice(0, 5) }
+        })
+      },
+
+      toggleFavoriteFood: (food) => {
+        set((state) => {
+          const exists = state.favoriteFoods.some((f) => f.id === food.id)
+          if (exists) {
+            return { favoriteFoods: state.favoriteFoods.filter((f) => f.id !== food.id) }
+          }
+          return { favoriteFoods: [...state.favoriteFoods, food] }
         })
       },
 
@@ -497,6 +511,8 @@ export const useMacroStore = create<MacroStore>()(
         return get().isProteinTargetHit() && get().isCalorieTargetHit()
       },
 
+      setSavedMeals: (meals) => set({ savedMeals: meals }),
+
       setCoachTargets: (targets, coachId) => {
         set({
           targets,
@@ -574,10 +590,17 @@ export const useMacroStore = create<MacroStore>()(
     }),
     {
       name: 'gamify-gains-macros',
-      version: 3, // Bump version when schema changes (BUG-008 fix)
+      version: 4, // Bump version when schema changes (BUG-008 fix)
       // Validate and migrate data on load
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Record<string, unknown>
+
+        // v3 → v4: add favoriteFoods
+        if (version < 4) {
+          if (!isArray(state.favoriteFoods)) {
+            state.favoriteFoods = []
+          }
+        }
 
         // v2 → v3: add recentFoods
         if (version < 3) {

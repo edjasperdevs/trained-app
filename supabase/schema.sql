@@ -135,7 +135,27 @@ CREATE TABLE saved_meals (
   carbs INTEGER NOT NULL,
   fats INTEGER NOT NULL,
   calories INTEGER NOT NULL,
-  usage_count INTEGER DEFAULT 0 NOT NULL
+  usage_count INTEGER DEFAULT 0 NOT NULL,
+  ingredients JSONB DEFAULT '[]'::jsonb
+);
+
+-- User foods: combined table for recent + favorite foods
+CREATE TABLE user_foods (
+  id TEXT NOT NULL,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  brand TEXT,
+  protein INTEGER NOT NULL,
+  carbs INTEGER NOT NULL,
+  fats INTEGER NOT NULL,
+  calories INTEGER NOT NULL,
+  serving_size REAL NOT NULL,
+  serving_description TEXT NOT NULL,
+  quantity REAL NOT NULL,
+  unit TEXT NOT NULL,
+  is_favorite BOOLEAN DEFAULT FALSE NOT NULL,
+  logged_at BIGINT NOT NULL,
+  PRIMARY KEY (user_id, id)
 );
 
 -- Workout logs
@@ -200,6 +220,7 @@ ALTER TABLE macro_targets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_macro_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logged_meals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_meals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_foods ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workout_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_xp ENABLE ROW LEVEL SECURITY;
 ALTER TABLE xp_logs ENABLE ROW LEVEL SECURITY;
@@ -360,6 +381,11 @@ CREATE POLICY "Coaches can view client logged meals"
 -- Saved meals: Own data only
 CREATE POLICY "Users can manage own saved meals"
   ON saved_meals FOR ALL
+  USING (user_id = auth.uid());
+
+-- User foods: Own data only
+CREATE POLICY "Users can manage own foods"
+  ON user_foods FOR ALL
   USING (user_id = auth.uid());
 
 -- Workout logs: Own data + coach can view

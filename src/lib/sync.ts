@@ -342,12 +342,160 @@ export async function syncSavedMealsToCloud() {
           carbs: meal.carbs,
           fats: meal.fats,
           calories: meal.calories,
-          usage_count: meal.usageCount
+          usage_count: meal.usageCount,
+          ingredients: meal.ingredients as unknown as Json
         }))
       )
     if (error) return { error: error.message }
   }
 
+  return { error: null }
+}
+
+export async function syncUserFoodsToCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { recentFoods, favoriteFoods } = useMacroStore.getState()
+
+  // Build unified list: favorites get is_favorite=true, non-favorited recents get false
+  const favoriteIds = new Set(favoriteFoods.map(f => f.id))
+  const foodMap = new Map<string, typeof recentFoods[number] & { is_favorite: boolean }>()
+
+  for (const food of favoriteFoods) {
+    foodMap.set(food.id, { ...food, is_favorite: true })
+  }
+  for (const food of recentFoods) {
+    if (!foodMap.has(food.id)) {
+      foodMap.set(food.id, { ...food, is_favorite: favoriteIds.has(food.id) })
+    }
+  }
+
+  const foods = Array.from(foodMap.values())
+  if (foods.length > 0) {
+    const { error } = await client
+      .from('user_foods')
+      .upsert(
+        foods.map(food => ({
+          id: food.id,
+          user_id: user.id,
+          name: food.name,
+          brand: food.brand || null,
+          protein: food.protein,
+          carbs: food.carbs,
+          fats: food.fats,
+          calories: food.calories,
+          serving_size: food.servingSize,
+          serving_description: food.servingDescription,
+          quantity: food.quantity,
+          unit: food.unit,
+          is_favorite: food.is_favorite,
+          logged_at: food.loggedAt
+        }))
+      )
+    if (error) return { error: error.message }
+  }
+
+  return { error: null }
+}
+
+export async function loadSavedMealsFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data, error } = await client
+    .from('saved_meals')
+    .select('*')
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  const cloudMeals = (data || []).map(row => ({
+    id: row.id,
+    name: row.name,
+    ingredients: Array.isArray(row.ingredients) ? row.ingredients as unknown as import('@/stores/macroStore').MealIngredient[] : [],
+    protein: row.protein,
+    carbs: row.carbs,
+    fats: row.fats,
+    calories: row.calories,
+    createdAt: new Date(row.created_at).getTime(),
+    usageCount: row.usage_count
+  }))
+
+  // Merge: cloud wins on matching ID, local-only preserved
+  const localMeals = useMacroStore.getState().savedMeals
+  const cloudIds = new Set(cloudMeals.map(m => m.id))
+  const merged = [
+    ...cloudMeals,
+    ...localMeals.filter(m => !cloudIds.has(m.id))
+  ]
+
+  useMacroStore.getState().setSavedMeals(merged)
+  return { error: null }
+}
+
+export async function loadUserFoodsFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data, error } = await client
+    .from('user_foods')
+    .select('*')
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+
+  type RecentFood = import('@/stores/macroStore').RecentFood
+
+  const mapRow = (row: NonNullable<typeof data>[number]): RecentFood => ({
+    id: row.id,
+    name: row.name,
+    brand: row.brand || undefined,
+    protein: row.protein,
+    carbs: row.carbs,
+    fats: row.fats,
+    calories: row.calories,
+    servingSize: row.serving_size,
+    servingDescription: row.serving_description,
+    quantity: row.quantity,
+    unit: row.unit as RecentFood['unit'],
+    loggedAt: row.logged_at
+  })
+
+  const rows = data || []
+
+  // Partition: favorites and recents
+  const cloudFavorites = rows.filter(r => r.is_favorite).map(mapRow)
+  const cloudRecents = [...rows]
+    .sort((a, b) => b.logged_at - a.logged_at)
+    .slice(0, 5)
+    .map(mapRow)
+
+  // Merge with local: cloud wins on matching ID
+  const localState = useMacroStore.getState()
+
+  const cloudFavIds = new Set(cloudFavorites.map(f => f.id))
+  const mergedFavorites = [
+    ...cloudFavorites,
+    ...localState.favoriteFoods.filter(f => !cloudFavIds.has(f.id))
+  ]
+
+  const cloudRecentIds = new Set(cloudRecents.map(f => f.id))
+  const mergedRecents = [
+    ...cloudRecents,
+    ...localState.recentFoods.filter(f => !cloudRecentIds.has(f.id))
+  ].sort((a, b) => b.loggedAt - a.loggedAt).slice(0, 5)
+
+  useMacroStore.setState({ favoriteFoods: mergedFavorites, recentFoods: mergedRecents })
   return { error: null }
 }
 
@@ -447,6 +595,7 @@ export async function pushClientData() {
     profile: await withRetryResult(syncProfileToCloud),
     weightLogs: await withRetryResult(syncWeightLogsToCloud),
     savedMeals: await withRetryResult(syncSavedMealsToCloud),
+    userFoods: await withRetryResult(syncUserFoodsToCloud),
     xp: await withRetryResult(syncXPToCloud),
   }
 
@@ -595,8 +744,9 @@ export async function loadAllFromCloud() {
   // Use retry wrapper for each load operation
   const results = {
     profile: await withRetryResult(loadProfileFromCloud),
-    weightLogs: await withRetryResult(loadWeightLogsFromCloud)
-    // avatar: Disabled until user_avatar table created
+    weightLogs: await withRetryResult(loadWeightLogsFromCloud),
+    savedMeals: await withRetryResult(loadSavedMealsFromCloud),
+    userFoods: await withRetryResult(loadUserFoodsFromCloud),
   }
 
   if (import.meta.env.DEV) console.log('Load results:', results)
