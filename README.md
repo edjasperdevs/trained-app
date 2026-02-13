@@ -29,7 +29,7 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 
 ### Training
 - **Workout Logging** — Standard tracking (exercises, sets, reps, weights) or Quick Compliance mode. Workout history and PR tracking. Labeled weight/reps inputs, auto warmup sets (50% weight placeholder), placeholder carry-forward between sets, and mid-workout exercise reordering.
-- **Macro Tracking** — Daily calorie and protein targets with food search (USDA + Open Food Facts fallback). Meal builder and adherence visualization.
+- **Macro Tracking** — Daily calorie and protein targets with food search (USDA + Open Food Facts fallback). Meal builder, favorites, recent foods, and adherence visualization.
 - **Daily Assignments** — Three daily tasks (Workout, Protein, Calories) plus check-in bonus and perfect day multiplier.
 - **Weekly Check-ins** — 16-field structured form with auto-populated data (weight, macros, workouts, cardio, steps). Coach review and response.
 
@@ -42,8 +42,8 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Client Detail Modal** — 5 tabs: overview, weight chart, macro adherence, workout history, activity feed.
 
 ### Infrastructure
-- **Offline-First** — All data persisted to localStorage via Zustand. Full functionality without network.
-- **Cloud Sync** — Incremental sync to Supabase after workouts and meals. Auto-retry with exponential backoff. Visual sync status indicator.
+- **Offline-First** — All data persisted to localStorage via Zustand with 90-day rolling window pruning. Full functionality without network.
+- **Cloud Sync** — Parallel sync to Supabase (profiles, weight logs, saved meals, user foods, macro logs, workout logs). Auto-retry with exponential backoff. Visual sync status indicator.
 - **Resilience** — Online/offline detection, visibility-change sync, USDA 429 rate limit cooldown with Open Food Facts fallback.
 - **PWA** — Installable on mobile, prompt-based service worker updates, runtime caching (NetworkFirst for API, CacheFirst for fonts).
 - **Accessibility** — WCAG AA color contrast (4.5:1+), skeleton loading states, haptic feedback on key actions.
@@ -51,9 +51,9 @@ A fitness PWA that gamifies your training with XP, leveling, streaks, avatar evo
 - **Analytics** — Plausible tracking onboarding, workouts, meals, gamification, and engagement events.
 
 ### Additional
-- **Onboarding** — 10-step wizard with progress indicator ("Step X of Y")
+- **Onboarding** — 10-step wizard with progress persistence and progress indicator ("Step X of Y")
 - **Data Export/Import** — Full profile backup and restore
-- **Access Code Gating** — Required at app entry
+- **Access Code Gating** — Server-side validation via Supabase RPC, required at app entry
 
 ## Project Structure
 
@@ -68,9 +68,15 @@ src/
 ├── App.tsx              # Router with per-route Suspense boundaries
 └── main.tsx             # Entry point with Sentry ErrorBoundary
 e2e/
-├── tests/               # Playwright E2E specs (smoke, auth-onboarding, core-journeys, workout-features)
-├── fixtures/            # Test fixtures
-└── helpers/             # Storage and Supabase mock helpers
+├── tests/               # Playwright E2E specs (27 tests across 6 files)
+│   ├── smoke.spec.ts            # App loading and navigation
+│   ├── auth-onboarding.spec.ts  # Access gate, signup, signin, onboarding flows
+│   ├── core-journeys.spec.ts    # Workout logging, meal logging, check-in, XP claim, offline sync
+│   ├── workout-features.spec.ts # Warmup sets, input labels, placeholders, exercise reorder, workout picker
+│   ├── food-search.spec.ts      # Food search, quantity modal, recent foods
+│   └── favorites.spec.ts        # Favorite foods, saved tab, persistence
+├── fixtures/            # Test fixtures (seededPage with localStorage seeding)
+└── helpers/             # Storage seeding and Supabase auth mocks
 ```
 
 ## Getting Started
@@ -88,10 +94,10 @@ npm run dev
 # Build for production
 npm run build
 
-# Run unit tests
+# Run unit tests (174 tests across 9 files)
 npm run test:run
 
-# Run E2E tests
+# Run E2E tests (27 tests across 6 files)
 npm run test:e2e
 ```
 
@@ -103,8 +109,6 @@ npm run test:e2e
 | `VITE_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
 | `VITE_SENTRY_DSN` | Production | Sentry DSN for error monitoring |
 | `VITE_USDA_API_KEY` | Recommended | USDA FoodData Central API key |
-| `VITE_MASTER_ACCESS_CODE` | No | Universal bypass access code |
-| `VITE_LEMONSQUEEZY_API_URL` | No | LemonSqueezy license validation URL |
 | `SENTRY_AUTH_TOKEN` | Build | Sentry auth token for source map upload |
 | `SENTRY_ORG` | Build | Sentry organization slug |
 | `SENTRY_PROJECT` | Build | Sentry project slug |

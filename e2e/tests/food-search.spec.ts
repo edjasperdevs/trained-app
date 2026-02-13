@@ -108,8 +108,8 @@ test.describe('Food Search & Recent Foods', () => {
       .locator('xpath=ancestor::div[contains(@class, "bg-muted")]')
     await recentItem.getByRole('button', { name: 'Log' }).click()
 
-    // Button should show check indicator
-    await expect(recentItem.locator('svg')).toBeVisible({ timeout: 2000 })
+    // Button should show check indicator (use .first() to avoid strict mode violation)
+    await expect(recentItem.locator('svg').first()).toBeVisible({ timeout: 2000 })
 
     // Toast should confirm
     await expect(page.getByText('Chicken Breast, Grilled logged').nth(1)).toBeVisible({ timeout: 5000 })
@@ -131,11 +131,13 @@ test.describe('Food Search & Recent Foods', () => {
     await expect(page.getByText('RECENT')).toBeVisible({ timeout: 5000 })
 
     // Verify recentFoods was persisted to localStorage
+    // Seeded data has 2 recent foods (Oatmeal, Whey Protein), plus the one just added = 3 total
     const macroData = await page.evaluate(() => localStorage.getItem('gamify-gains-macros'))
     expect(macroData).toBeTruthy()
     const parsed = JSON.parse(macroData!)
     expect(parsed.state.recentFoods).toBeDefined()
-    expect(parsed.state.recentFoods.length).toBe(1)
+    expect(parsed.state.recentFoods.length).toBe(3)
+    // Most recently added food should be first (sorted by loggedAt)
     expect(parsed.state.recentFoods[0].name).toBe('Chicken Breast, Grilled')
   })
 })

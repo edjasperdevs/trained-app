@@ -451,6 +451,7 @@ function DailyView({
                   onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
                   placeholder="0"
                   className="font-digital"
+                  data-testid="macros-calories-input"
                 />
               </div>
               <div>

@@ -93,6 +93,18 @@ export async function mockSupabaseSignUp(page: Page) {
 
   // Mock generic REST API calls to prevent Supabase data sync failures
   await page.route('**/rest/v1/**', async (route) => {
+    const url = route.request().url()
+
+    // RPC call for access code validation
+    if (url.includes('/rest/v1/rpc/validate_access_code')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ valid: true, email: 'e2e@test.com' }),
+      })
+      return
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -180,6 +192,18 @@ export async function mockSupabaseSignIn(page: Page) {
 
   // Mock generic REST API calls to prevent Supabase data sync failures
   await page.route('**/rest/v1/**', async (route) => {
+    const url = route.request().url()
+
+    // RPC call for access code validation
+    if (url.includes('/rest/v1/rpc/validate_access_code')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ valid: true, email: 'e2e@test.com' }),
+      })
+      return
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -286,6 +310,16 @@ export async function mockSupabaseFullCycle(page: Page, options: { role?: string
 
   await page.route('**/rest/v1/**', async (route) => {
     const url = route.request().url()
+
+    // RPC call for access code validation
+    if (url.includes('/rest/v1/rpc/validate_access_code')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ valid: true, email: 'e2e@test.com' }),
+      })
+      return
+    }
 
     // Profile queries (isCoach checks select=role, loadProfileFromCloud checks select=*)
     if (url.includes('/rest/v1/profiles') && url.includes('select=')) {

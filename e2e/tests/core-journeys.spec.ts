@@ -151,9 +151,9 @@ baseTest('E2E-07: workout -- start, log sets, complete workout', async ({ page }
 })
 
 // ============================================================
-// E2E-08: Meal logging via Quick Log
+// E2E-08: Meal logging via recent foods
 // ============================================================
-test('E2E-08: macros -- log meal via Quick Log, totals update', async ({ seededPage: page }) => {
+test('E2E-08: macros -- log recent food, totals update', async ({ seededPage: page }) => {
   // Navigate to Macros
   await page.locator('[data-testid="nav-macros"]').click()
   await expect(page.locator('[data-testid="macros-screen"]')).toBeVisible({ timeout: 10000 })
@@ -165,34 +165,31 @@ test('E2E-08: macros -- log meal via Quick Log, totals update', async ({ seededP
   // Verify calories display shows seeded value (1600)
   await expect(page.locator('[data-testid="macros-calories-display"]')).toContainText('1600')
 
-  // Fill Quick Log protein -- logQuickMacros REPLACES daily totals (not additive)
-  await page.locator('[data-testid="macros-food-search-input"]').fill('155')
+  // Log "Whey Protein" from the recent foods list
+  // Seeded recent food: Whey Protein (P: 24g, C: 3g, F: 1g, 120 cal)
+  // logNamedMeal recalculates from BOTH loggedMeals AND meals[] arrays:
+  // - Seeded loggedMeals: 40 + 40 = 80g
+  // - Seeded meals[] (numbered meal plan): 40 + 40 + 40 + 0 = 120g
+  // - New Whey Protein: 24g
+  // - Total: 80 + 120 + 24 = 224g
+  const wheyProteinRow = page.getByText('Whey Protein').locator('xpath=ancestor::div[contains(@class, "bg-muted")]')
+  await wheyProteinRow.getByRole('button', { name: 'Log' }).click()
 
-  // Fill Quick Log calories -- the label element is not programmatically linked
-  // via htmlFor/id. Locate via xpath: the calories input is in the same grid as
-  // the protein input, in the adjacent grid column.
-  const caloriesInput = page.locator('[data-testid="macros-food-search-input"]')
-    .locator('xpath=ancestor::div[contains(@class, "grid")]')
-    .locator('input')
-    .nth(1)
-  await caloriesInput.fill('2100')
+  // Verify protein display updated (loggedMeals 80 + meals 120 + new 24 = 224g)
+  await expect(page.locator('[data-testid="macros-protein-display"]')).toContainText('224', { timeout: 5000 })
 
-  // Click Log Macros
-  await expect(page.locator('[data-testid="macros-add-meal-button"]')).toBeEnabled()
-  await page.locator('[data-testid="macros-add-meal-button"]').click()
+  // Verify calories display updated (loggedMeals 990 + meals 1525 + new 120 = 2635)
+  // Seeded meals[]: 495 + 495 + 535 + 0 = 1525
+  // Seeded loggedMeals: 495 + 495 = 990
+  // New Whey Protein: 120 cal
+  // Note: The actual display may differ due to meal plan structure
+  await expect(page.locator('[data-testid="macros-calories-display"]')).toContainText('2635')
 
-  // Verify protein display updated to the new value (155g)
-  await expect(page.locator('[data-testid="macros-protein-display"]')).toContainText('155')
-
-  // Verify calories display updated to the new value (2100)
-  await expect(page.locator('[data-testid="macros-calories-display"]')).toContainText('2100')
-
-  // Verify the seeded logged meals are still visible
-  // Quick Log updates daily totals but does NOT add to loggedMeals.
-  // The 2 seeded meals should still be shown.
+  // Verify the seeded logged meals are still visible, plus the new logged entry
+  // logNamedMeal ADDS to loggedMeals array (now 3 entries).
   await page.getByText("TODAY'S MEALS").click()
   await expect(page.locator('[data-testid="macros-meal-entry"]').first()).toBeVisible({ timeout: 5000 })
-  await expect(page.locator('[data-testid="macros-meal-entry"]')).toHaveCount(2, { timeout: 5000 })
+  await expect(page.locator('[data-testid="macros-meal-entry"]')).toHaveCount(3, { timeout: 5000 })
 })
 
 // ============================================================
