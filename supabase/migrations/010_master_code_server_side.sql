@@ -1,12 +1,22 @@
 -- SEC-02: Master Access Code Server-Side Validation
 -- Moves master code check from client bundle to server-side RPC
--- Master code is stored securely in Supabase Vault (not in source code)
+-- Master code stored in app_config table (RLS blocks direct access)
 --
--- SETUP REQUIRED: Before deploying, add the master code to Vault:
---   INSERT INTO vault.secrets (name, secret)
---   VALUES ('master_access_code', 'YOUR_MASTER_CODE_HERE');
+-- SETUP REQUIRED: After running migration, add master code:
+--   INSERT INTO app_config (key, value) VALUES ('master_access_code', 'YOUR_CODE');
 
--- Drop and recreate the function to add master code check
+-- Create config table (RLS-protected, no public access)
+CREATE TABLE IF NOT EXISTS app_config (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Block all direct access - only SECURITY DEFINER functions can read
+ALTER TABLE app_config ENABLE ROW LEVEL SECURITY;
+-- No policies = no direct access for anon/authenticated
+
+-- Update function to check master code from config table
 CREATE OR REPLACE FUNCTION validate_access_code(input_code TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
@@ -16,10 +26,10 @@ DECLARE
   result JSON;
   master_code TEXT;
 BEGIN
-  -- SEC-02: Check for master code from Vault first
-  SELECT decrypted_secret INTO master_code
-  FROM vault.decrypted_secrets
-  WHERE name = 'master_access_code'
+  -- SEC-02: Check master code from config table
+  SELECT value INTO master_code
+  FROM app_config
+  WHERE key = 'master_access_code'
   LIMIT 1;
 
   IF master_code IS NOT NULL AND upper(input_code) = upper(master_code) THEN
@@ -58,11 +68,9 @@ BEGIN
     RETURN result;
   END IF;
 
-  -- No match found
   RETURN json_build_object('valid', false);
 END;
 $$;
 
--- Grant execute permission to anon role (needed for pre-auth validation)
 GRANT EXECUTE ON FUNCTION validate_access_code(TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION validate_access_code(TEXT) TO authenticated;
