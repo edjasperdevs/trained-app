@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { pushClientData, pullCoachData, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
 import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
+import { removeDeviceToken } from '@/lib/push'
 import { useUserStore } from './userStore'
 import { useXPStore } from './xpStore'
 import { useMacroStore } from './macroStore'
@@ -149,6 +150,14 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   signOut: async () => {
     if (!supabase) return
+
+    // Remove push device token before session is cleared (needs auth context)
+    try {
+      const userId = get().user?.id
+      if (userId) await removeDeviceToken(userId)
+    } catch {
+      // Non-blocking -- sign-out should never fail due to token removal
+    }
 
     await supabase.auth.signOut()
     set({ user: null, session: null })
