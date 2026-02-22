@@ -1,3 +1,4 @@
+/// <reference types="@capacitor/push-notifications" />
 /// <reference types="@capacitor/status-bar" />
 /// <reference types="@capacitor/splash-screen" />
 import type { CapacitorConfig } from '@capacitor/cli'
@@ -20,6 +21,9 @@ const config: CapacitorConfig = {
       launchShowDuration: 500,
       backgroundColor: '#0a0a0aff',
       launchFadeOutDuration: 200,
+    },
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
     },
   },
   server: process.env.CAPACITOR_LIVE_RELOAD ? {

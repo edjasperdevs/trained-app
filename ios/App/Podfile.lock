@@ -10,6 +10,8 @@ PODS:
     - Capacitor
   - CapacitorHaptics (7.0.3):
     - Capacitor
+  - CapacitorPushNotifications (7.0.5):
+    - Capacitor
   - CapacitorShare (7.0.4):
     - Capacitor
   - CapacitorSplashScreen (7.0.5):
@@ -24,6 +26,7 @@ DEPENDENCIES:
   - "CapacitorDialog (from `../../node_modules/@capacitor/dialog`)"
   - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
+  - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
@@ -41,6 +44,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/filesystem"
   CapacitorHaptics:
     :path: "../../node_modules/@capacitor/haptics"
+  CapacitorPushNotifications:
+    :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorShare:
     :path: "../../node_modules/@capacitor/share"
   CapacitorSplashScreen:
@@ -55,10 +60,11 @@ SPEC CHECKSUMS:
   CapacitorDialog: 870022e984975fad89eb4bbac84afb3cc2a666ea
   CapacitorFilesystem: 307f97c27a265edf8396a1c9c235592fd8572fe3
   CapacitorHaptics: d17da7dd984cae34111b3f097ccd3e21f9feec62
+  CapacitorPushNotifications: 71b0fa4221378d1168e9d62dbe2efa8ca7eaf6fb
   CapacitorShare: 14b5d7f0a2c6de86dcad8995da80fb707ee32f62
   CapacitorSplashScreen: b3d12b4324d93ce605fe57f05a199ade7f26189e
   CapacitorStatusBar: b4bdcf487553983ffc68d81dfe1668bacb48252f
 
-PODFILE CHECKSUM: 70e7ab0940e61f37947442e0782c28acee9350bb
+PODFILE CHECKSUM: 397a7c46b8bfa701a718c8500a9af210d20f2a9b
 
 COCOAPODS: 1.9.3

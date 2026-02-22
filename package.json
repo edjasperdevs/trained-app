@@ -27,6 +27,7 @@
     "@capacitor/filesystem": "^7.0.1",
     "@capacitor/haptics": "^7.0.3",
     "@capacitor/ios": "^7.5.0",
+    "@capacitor/push-notifications": "^7.0.5",
     "@capacitor/share": "^7.0.4",
     "@capacitor/splash-screen": "^7.0.5",
     "@capacitor/status-bar": "^7.0.5",
