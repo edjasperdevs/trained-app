@@ -1,10 +1,11 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useSyncStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { App as CapApp } from '@capacitor/app'
 import { isNative } from '@/lib/platform'
+import { initDeepLinkHandler } from '@/lib/deep-link'
 import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
@@ -35,6 +36,7 @@ const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m
 const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
 const WeeklyCheckIn = lazy(() => import('@/screens/WeeklyCheckIn').then(m => ({ default: m.WeeklyCheckIn })))
+const ResetPassword = lazy(() => import('@/screens/ResetPassword').then(m => ({ default: m.ResetPassword })))
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -43,12 +45,17 @@ function AppContent() {
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
   const location = useLocation()
+  const navigate = useNavigate()
 
   // Initialize auth on app load
   useEffect(() => {
     initializeAuth()
   }, [initializeAuth])
 
+  // Initialize deep link handler (native only -- no-op on web)
+  useEffect(() => {
+    initDeepLinkHandler(navigate)
+  }, [navigate])
 
   // Online/offline detection and background sync
   useEffect(() => {
@@ -152,6 +159,7 @@ function AppContent() {
         <SentryRoutes>
           <Route path="/coach" element={<Auth defaultMode="login" />} />
           <Route path="/auth" element={<Auth defaultMode="login" />} />
+          <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="*" element={<Auth />} />
         </SentryRoutes>
       </>
@@ -186,6 +194,7 @@ function AppContent() {
           <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
+          <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
           {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
           <Route path="*" element={<NotFound />} />

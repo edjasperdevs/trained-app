@@ -194,7 +194,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: 'https://app.welltrained.fitness/reset-password'
       })
 
       if (error) {
