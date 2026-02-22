@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["XXXXXXXXXX.fitness.welltrained.app"],
+        "components": [
+          {
+            "/": "/reset-password*",
+            "comment": "Password reset deep links"
+          }
+        ]
+      }
+    ]
+  }
+}

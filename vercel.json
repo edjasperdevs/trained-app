@@ -3,7 +3,8 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/((?!assets|sw|workbox|manifest).*)", "destination": "/" }
+    { "source": "/.well-known/apple-app-site-association", "destination": "/.well-known/apple-app-site-association" },
+    { "source": "/((?!assets|sw|workbox|manifest|\\.well-known).*)", "destination": "/" }
   ],
   "headers": [
     {
@@ -22,6 +23,12 @@
       "source": "/manifest.webmanifest",
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json" }
+      ]
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" }
       ]
     }
   ]
