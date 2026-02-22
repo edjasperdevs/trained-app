@@ -93,13 +93,45 @@ Wrap the existing PWA with Capacitor and ship to the iOS App Store, adding real 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| SHELL-01 | Phase 11 | Pending |
+| SHELL-02 | Phase 11 | Pending |
+| SHELL-03 | Phase 11 | Pending |
+| SHELL-04 | Phase 11 | Pending |
+| SHELL-05 | Phase 11 | Pending |
+| NATIVE-01 | Phase 12 | Pending |
+| NATIVE-02 | Phase 12 | Pending |
+| NATIVE-03 | Phase 12 | Pending |
+| NATIVE-04 | Phase 12 | Pending |
+| NATIVE-05 | Phase 12 | Pending |
+| DEEP-01 | Phase 13 | Pending |
+| DEEP-03 | Phase 13 | Pending |
+| PUSH-01 | Phase 14 | Pending |
+| PUSH-02 | Phase 14 | Pending |
+| PUSH-03 | Phase 14 | Pending |
+| PUSH-04 | Phase 14 | Pending |
+| PUSH-05 | Phase 14 | Pending |
+| PUSH-06 | Phase 14 | Pending |
+| DEEP-02 | Phase 14 | Pending |
+| LOCAL-01 | Phase 15 | Pending |
+| LOCAL-02 | Phase 15 | Pending |
+| LOCAL-03 | Phase 15 | Pending |
+| LOCAL-04 | Phase 15 | Pending |
+| LOCAL-05 | Phase 15 | Pending |
+| LOCAL-06 | Phase 15 | Pending |
+| ENGAGE-01 | Phase 15 | Pending |
+| ENGAGE-02 | Phase 15 | Pending |
+| STORE-01 | Phase 16 | Pending |
+| STORE-02 | Phase 16 | Pending |
+| STORE-03 | Phase 16 | Pending |
+| STORE-04 | Phase 16 | Pending |
+| STORE-05 | Phase 16 | Pending |
+| STORE-06 | Phase 16 | Pending |
 
 **Coverage:**
-- v1.5 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- v1.5 requirements: 33 total
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 after roadmap creation*
