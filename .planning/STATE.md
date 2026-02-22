@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 14 (Remote Push Notifications)
-Plan: 1 of 3 (done)
-Status: 14-01 complete
-Last activity: 2026-02-22 -- Completed 14-01 (Push Infrastructure, 2 tasks)
+Plan: 2 of 3 (done)
+Status: 14-02 complete
+Last activity: 2026-02-22 -- Completed 14-02 (Server-Side APNs Push Delivery, 2 tasks)
 
-Progress: [███████░░░] 58% (7/12 plans estimated)
+Progress: [████████░░] 67% (8/12 plans estimated)
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [███████░░░] 58% (7/12 plans estimated)
 | 11. Capacitor Shell | 2/2 | 14min | 7min |
 | 12. Native Polish | 2/2 | 28min | 14min |
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
-| 14. Remote Push Notifications | 1/3 | 6min | 6min |
+| 14. Remote Push Notifications | 2/3 | 8min | 4min |
 
 ## Accumulated Context
 
@@ -58,6 +58,9 @@ Progress: [███████░░░] 58% (7/12 plans estimated)
 - /reset-password route in both auth states to handle brief session restoration window
 - @capacitor/push-notifications@7.0.5 (not 8.x) to match Capacitor 7.5.x peer dependency
 - device_tokens types added manually to database.types.ts (migration not yet applied to running DB)
+- No Firebase -- direct APNs HTTP/2 via Deno fetch (auto-negotiates HTTP/2 via TLS ALPN)
+- 50-minute JWT cache to stay under APNs 60-min limit and avoid TooManyProviderTokenUpdates
+- Webhook payloads trusted without caller auth -- only Supabase admins can create webhooks
 
 ### Pending Todos
 
@@ -77,5 +80,5 @@ Progress: [███████░░░] 58% (7/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 14-01-PLAN.md
-Resume file: .planning/phases/14-remote-push-notifications/14-02-PLAN.md
+Stopped at: Completed 14-02-PLAN.md
+Resume file: .planning/phases/14-remote-push-notifications/14-03-PLAN.md
