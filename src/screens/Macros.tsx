@@ -22,12 +22,15 @@ type MacroProgress = {
 export function Macros() {
   const [activeTab, setActiveTab] = useState<TabType>('daily')
 
-  // PERF-02: Use granular selectors for reactive state only
+  // PERF-02: Use granular selectors for reactive state
   const targets = useMacroStore((state) => state.targets)
   const recentFoods = useMacroStore((state) => state.recentFoods)
   const favoriteFoods = useMacroStore((state) => state.favoriteFoods)
   const activityLevel = useMacroStore((state) => state.activityLevel)
   const setBy = useMacroStore((state) => state.setBy)
+  // Subscribe to dailyLogs so derived values (progress, todayMeals) re-compute on change
+  useMacroStore((state) => state.dailyLogs)
+  const savedMeals = useMacroStore((state) => state.savedMeals)
 
   // PERF-02: Access non-reactive functions via getState()
   const {
@@ -37,7 +40,6 @@ export function Macros() {
     toggleFavoriteFood,
     saveMeal,
     deleteSavedMeal,
-    getSavedMeals,
     getTodayMeals,
     deleteLoggedMeal,
     isProteinTargetHit,
@@ -47,7 +49,6 @@ export function Macros() {
 
   const profile = useUserStore((state) => state.profile)
   const progress = getTodayProgress()
-  const savedMeals = getSavedMeals()
   const todayMeals = getTodayMeals()
 
   const tabs: { id: TabType; label: string }[] = [
