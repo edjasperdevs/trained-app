@@ -95,11 +95,11 @@ Plans:
   3. User can configure notification times and toggle each notification type on/off from the Settings screen
   4. User receives a streak-at-risk push notification in the evening if they have not checked in that day
   5. App icon badge on the home screen shows the count of pending actions (unread coach responses, pending check-ins)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 15-01: TBD
-- [ ] 15-02: TBD
+- [ ] 15-01-PLAN.md -- Install plugins, create notification scheduling + badge modules, extend reminders store with time preferences
+- [ ] 15-02-PLAN.md -- Settings UI for push notification configuration, App.tsx lifecycle wiring, remove badge from remote push
 
 ### Phase 16: App Store Submission
 **Goal**: The app is published on the iOS App Store, having passed Apple review with all compliance requirements met
