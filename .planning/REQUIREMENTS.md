@@ -1,81 +1,105 @@
-# Requirements: Trained v1.4 Intake Dashboard
+# Requirements: Trained v1.5 Native iOS App
 
-**Defined:** 2026-02-08
+**Defined:** 2026-02-21
 **Core Value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
 
-## v1.4 Requirements
+## v1.5 Requirements
 
-Integrate archived intake submissions dashboard into the coach section. Tables (intake_submissions, intake_photos) and intake form already exist -- this milestone adapts the coach-side viewer into trained-app's design system and Coach.tsx patterns.
+Wrap the existing PWA with Capacitor and ship to the iOS App Store, adding real push notifications for reminders and coach actions, native haptics, native share, and App Store compliance.
 
-### Intake Segment
+### Capacitor Shell
 
-- [ ] **INTAKE-01**: Coach can see "Intake" as a 4th segment in the Coach dashboard alongside Clients / Templates / Check-ins
-- [ ] **INTAKE-02**: Coach can view a list of all intake submissions ordered by submission date (newest first)
-- [ ] **INTAKE-03**: Coach can filter submissions by status (All / New / Reviewed / Active / Archived) with counts per status
-- [ ] **INTAKE-04**: Coach can see a badge on the Intake segment tab showing count of new submissions
+- [ ] **SHELL-01**: App runs in a native iOS WebView (WKWebView) via Capacitor with no browser chrome visible
+- [ ] **SHELL-02**: Service worker is disabled for native builds while remaining active for web PWA builds
+- [ ] **SHELL-03**: Web and native builds are produced from the same codebase via separate build commands
+- [ ] **SHELL-04**: All `window.confirm()` calls are replaced with native-compatible dialog (Capacitor Dialog plugin)
+- [ ] **SHELL-05**: App detects background/foreground transitions via Capacitor App plugin
 
-### Submission Detail
+### Native Polish
 
-- [ ] **DETAIL-01**: Coach can click a submission row to navigate to its full detail view
-- [ ] **DETAIL-02**: Coach can view submission data organized in collapsible sections (10 sections, ~50 fields)
-- [ ] **DETAIL-03**: Coach can view intake photos in a gallery using signed URLs (1-hour expiry)
-- [ ] **DETAIL-04**: Coach can change submission status via dropdown with optimistic updates
-- [ ] **DETAIL-05**: Coach can write and save private coach notes on a submission
+- [ ] **NATIVE-01**: User feels Taptic Engine haptic feedback on iOS for all existing haptic trigger points (set completion, XP claim, achievements)
+- [ ] **NATIVE-02**: User can export data via the native iOS share sheet instead of browser file download
+- [ ] **NATIVE-03**: App displays a branded splash screen on launch matching the dark theme
+- [ ] **NATIVE-04**: App icon renders correctly at all required iOS sizes (20pt through 1024pt)
+- [ ] **NATIVE-05**: Status bar shows light text on dark background matching the app theme
 
-### Client Linking
+### Push Notifications — Remote
 
-- [ ] **LINK-01**: Coach can link an intake submission to a client from the client detail Intake tab
-- [ ] **LINK-02**: Coach can view a linked submission's summary in the client detail Intake tab
+- [ ] **PUSH-01**: App registers for push notifications and stores the APNs device token per user in Supabase
+- [ ] **PUSH-02**: Client receives push notification when coach assigns a new workout
+- [ ] **PUSH-03**: Client receives push notification when coach updates their macro targets
+- [ ] **PUSH-04**: Client receives push notification when coach responds to their weekly check-in
+- [ ] **PUSH-05**: App requests push permission at a contextual moment (not on first launch)
+- [ ] **PUSH-06**: Push notifications are delivered via direct APNs HTTP/2 from a Supabase Edge Function (no Firebase)
 
-### Code Adaptation
+### Push Notifications — Local
 
-- [ ] **ADAPT-01**: Submission components use the existing design system (shadcn/ui, CVA, trained theme tokens)
-- [ ] **ADAPT-02**: API layer uses the existing Supabase client (getSupabaseClient) and CoachGuard auth pattern
-- [ ] **ADAPT-03**: Intake views are lazy-loaded consistent with other coach features
+- [ ] **LOCAL-01**: User receives a daily check-in reminder at a configurable time
+- [ ] **LOCAL-02**: User receives a workout reminder on training days at a configurable time
+- [ ] **LOCAL-03**: User receives an evening macro logging reminder
+- [ ] **LOCAL-04**: User receives a weekly XP claim reminder on Sundays
+- [ ] **LOCAL-05**: User receives a weekly check-in submission reminder on Saturdays
+- [ ] **LOCAL-06**: User can configure notification times and toggle each notification type on/off in Settings
+
+### Deep Linking
+
+- [ ] **DEEP-01**: Universal Links are configured so welltrained.fitness URLs open the app when installed
+- [ ] **DEEP-02**: Tapping a push notification navigates to the relevant screen (workouts, macros, check-in)
+- [ ] **DEEP-03**: Supabase auth redirects (password reset) work correctly in the Capacitor context
+
+### App Store Compliance
+
+- [ ] **STORE-01**: User can delete their account from within the app (Apple Guideline 5.1.1v)
+- [ ] **STORE-02**: Privacy policy is accessible from within the app
+- [ ] **STORE-03**: Privacy nutrition labels are accurately declared in App Store Connect
+- [ ] **STORE-04**: App Store listing includes screenshots, description, and keywords
+- [ ] **STORE-05**: App is distributed via TestFlight before App Store submission
+- [ ] **STORE-06**: App passes Apple App Store review and is published
+
+### Engagement
+
+- [ ] **ENGAGE-01**: User receives a streak-at-risk push notification in the evening if they haven't checked in that day
+- [ ] **ENGAGE-02**: App icon displays a badge count for pending actions (unread coach responses, pending check-ins)
 
 ## Future Requirements
 
-### Intake Enhancements
+### Push Enhancements
 
-- **INTAKE-05**: Coach can search submissions by name or email
-- **LINK-03**: Coach can unlink a submission from a client
-- **LINK-04**: Submissions auto-match to clients by email address
-- **DETAIL-06**: Coach can send an invite to a submission's email directly from detail view
+- **PUSH-07**: Coach receives push notification when a client submits their weekly check-in
+- **PUSH-08**: Coach receives push notification when a client has been inactive for 3+ days
+- **ENGAGE-03**: User receives a local notification when a new badge is earned
+- **ENGAGE-04**: User receives a local notification on level-up
+
+### Native Enhancements
+
+- **NATIVE-06**: User can lock the app with Face ID / Touch ID
+- **NATIVE-07**: App checks App Store for updates and prompts user to update
+- **NATIVE-08**: Coach can see which clients have push notifications enabled
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Client-facing intake form | Already live on marketing site |
-| intake_submissions/intake_photos migrations | Tables already exist in Supabase |
-| Separate auth context for dashboard | trained-app has Zustand authStore + CoachGuard |
-| Submission search | Deferred to future -- filter tabs sufficient for v1.4 |
-| Auto-match submissions to clients | Manual linking chosen for v1.4 |
+| Android / Play Store | iOS only for v1.5 — Android in future milestone |
+| In-app purchases | Access code monetization via Lemon Squeezy avoids Apple 30% commission |
+| HealthKit integration | High complexity, different data model, not needed for coaching workflow |
+| Widget extensions | Requires native Swift development, separate milestone |
+| Native tab bar rebuild | Existing web-based bottom navigation satisfies App Store guidelines |
+| Firebase SDK | iOS-only app — direct APNs avoids unnecessary dependency |
+| localStorage → SQLite migration | Current data fits within localStorage limits; premature optimization |
+| Light mode | Dark-only aesthetic |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INTAKE-01 | Phase 7 | Pending |
-| INTAKE-02 | Phase 8 | Pending |
-| INTAKE-03 | Phase 8 | Pending |
-| INTAKE-04 | Phase 8 | Pending |
-| DETAIL-01 | Phase 9 | Pending |
-| DETAIL-02 | Phase 9 | Pending |
-| DETAIL-03 | Phase 9 | Pending |
-| DETAIL-04 | Phase 9 | Pending |
-| DETAIL-05 | Phase 9 | Pending |
-| LINK-01 | Phase 10 | Pending |
-| LINK-02 | Phase 10 | Pending |
-| ADAPT-01 | Phase 8 | Pending |
-| ADAPT-02 | Phase 7 | Pending |
-| ADAPT-03 | Phase 7 | Pending |
+| (populated during roadmap creation) | | |
 
 **Coverage:**
-- v1.4 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0
+- v1.5 requirements: 30 total
+- Mapped to phases: 0
+- Unmapped: 30
 
 ---
-*Requirements defined: 2026-02-08*
-*Last updated: 2026-02-08 after roadmap creation*
+*Requirements defined: 2026-02-21*
+*Last updated: 2026-02-21 after initial definition*
