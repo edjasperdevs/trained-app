@@ -216,7 +216,6 @@ export async function seedAllStores(page: Page) {
   // Avatar store
   await seedStore(page, STORE_KEYS.avatar, {
     baseCharacter: 'dominant',
-    evolutionStage: 5,
     currentMood: 'happy',
     accessories: [],
     lastInteraction: Date.now(),

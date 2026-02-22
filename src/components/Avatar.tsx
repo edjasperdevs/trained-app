@@ -1,10 +1,7 @@
-import { useAvatarStore, EVOLUTION_STAGES } from '@/stores'
-import { AVATAR_STAGES, LABELS } from '@/design/constants'
+import { useAvatarStore } from '@/stores'
+import { LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
-import {
-  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
-  Trophy, Sparkles, Star, Crown, Wand2, Moon, LucideIcon
-} from 'lucide-react'
+import { Sword, Wand2, Moon, LucideIcon } from 'lucide-react'
 
 interface AvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -20,14 +17,8 @@ const sizeClasses = {
   xl: { container: 'w-48 h-48', icon: 80 }
 }
 
-// Map icon names to Lucide components
-const ICON_MAP: Record<string, LucideIcon> = {
-  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame,
-  Trophy, Bolt: Zap, Sparkles, Star, Crown, Wand2, Moon
-}
-
 // Character base icon representations
-const CHARACTER_BASES = {
+const CHARACTER_BASES: Record<string, { icon: LucideIcon; color: string }> = {
   dominant: { icon: Sword, color: 'text-destructive' },
   switch: { icon: Wand2, color: 'text-primary' },
   submissive: { icon: Moon, color: 'text-info' }
@@ -48,55 +39,25 @@ export function Avatar({
   showLevel = false,
   level
 }: AvatarProps) {
-  const { evolutionStage, currentMood, baseCharacter, recentReaction } = useAvatarStore()
-
-  const stageName = AVATAR_STAGES[evolutionStage - 1] || AVATAR_STAGES[0]
-  const stageInfo = EVOLUTION_STAGES.find(s => s.stage === evolutionStage) || EVOLUTION_STAGES[0]
+  const { currentMood, baseCharacter, recentReaction } = useAvatarStore()
 
   const iconSize = sizeClasses[size].icon
-
-  // Get the icon component for the current evolution stage
-  const iconName = stageInfo.emoji
-  const AvatarIcon = ICON_MAP[iconName] || Circle
-  const CharacterIcon = CHARACTER_BASES[baseCharacter].icon
+  const CharacterIcon = CHARACTER_BASES[baseCharacter]?.icon || Sword
 
   return (
     <div className="relative inline-flex flex-col items-center">
-      {/* Glow effect for higher levels */}
-      {evolutionStage >= 6 && (
-        <div
-          className={cn(
-            'absolute inset-0 blur-xl opacity-20 rounded-lg',
-            evolutionStage >= 9 ? 'bg-warning' : 'bg-primary'
-          )}
-        />
-      )}
-
       {/* Main avatar container */}
       <div
         className={cn(
           sizeClasses[size].container,
-          'relative flex items-center justify-center bg-card border-2 rounded-lg transition-transform',
-          evolutionStage >= 9 ? 'border-warning' : evolutionStage >= 6 ? 'border-primary' : 'border-border',
+          'relative flex items-center justify-center bg-card border-2 rounded-lg transition-transform border-border',
           showMood && moodClasses[currentMood]
         )}
       >
-        {/* Avatar icon */}
-        <div className="relative">
-          <AvatarIcon
-            size={iconSize}
-            className={cn(
-              evolutionStage >= 9 ? 'text-warning' : evolutionStage >= 6 ? 'text-primary' : 'text-muted-foreground'
-            )}
-          />
-          {/* Character accent for higher evolutions */}
-          {evolutionStage >= 9 && (
-            <CharacterIcon
-              size={iconSize * 0.35}
-              className={cn('absolute -bottom-1 -right-1', CHARACTER_BASES[baseCharacter].color)}
-            />
-          )}
-        </div>
+        <CharacterIcon
+          size={iconSize}
+          className={CHARACTER_BASES[baseCharacter]?.color || 'text-muted-foreground'}
+        />
       </div>
 
       {/* Reaction bubble */}
@@ -106,17 +67,12 @@ export function Avatar({
         </div>
       )}
 
-      {/* Stage name and level */}
-      {showLevel && (
+      {/* Level label */}
+      {showLevel && level && (
         <div className="mt-2 text-center">
           <p className="text-sm text-primary font-semibold">
-            {stageName}
+            {LABELS.level} {level}
           </p>
-          {level && (
-            <p className="text-xs text-muted-foreground">
-              {LABELS.level} {level}
-            </p>
-          )}
         </div>
       )}
     </div>

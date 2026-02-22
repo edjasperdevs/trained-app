@@ -9,7 +9,7 @@ export const LABELS = {
   streakSaver: 'Safe Word',
   dailyQuests: 'Daily Assignments',
   checkIn: 'Daily Report',
-  weeklyXPClaim: 'Weekly Reward Ritual',
+  weeklyXPClaim: 'Weekly Reward',
   achievements: 'Marks of Devotion',
   reminders: 'Protocol Reminders',
   motivationalMessages: 'Standing Orders',
@@ -26,22 +26,6 @@ export const LABELS = {
     submissive: 'The Sub',
   },
 } as const
-
-export const AVATAR_STAGES: string[] = [
-  'Uninitiated',
-  'Novice',
-  'Trainee',
-  'Pledged',
-  'Collared',
-  'Devoted',
-  'Bound',
-  'Proven',
-  'Mastered',
-  'Dominant',
-  'Sovereign',
-  'Ascended',
-  'Unchained',
-]
 
 export const STANDING_ORDERS = {
   discipline: [
@@ -86,11 +70,11 @@ export const STANDING_ORDERS = {
     "Don't compare your protocol to anyone else's. Run your own.",
   ],
   reward: [
-    "You've been putting in the work. Sunday's coming.",
+    "You've been putting in the work. Time to collect.",
     "Delayed gratification hits different when you've earned it.",
-    "The reward ritual exists because you've earned something worth claiming.",
+    "The reward exists because you've earned something worth claiming.",
     'Every DP earned is proof that the system works.',
-    "Your avatar didn't evolve by accident. You built that.",
+    "Your rank didn't climb by accident. You built that.",
     'Rank is a record of every day you chose to show up.',
     'The work is the point. The reward is the proof.',
   ],

@@ -10,23 +10,11 @@ import {
   Beef,
   Zap,
   Shield,
-  Circle,
-  Sprout,
-  Footprints,
-  Trophy,
-  Star,
-  Crown,
   Home,
   TrendingUp as ChartUp,
   X,
   LucideIcon
 } from 'lucide-react'
-
-// Map icon names to Lucide components for evolution stages
-const STAGE_ICON_MAP: Record<string, LucideIcon> = {
-  Circle, Zap, Sprout, Footprints, Dumbbell, Sword, Shield, Flame: Zap,
-  Trophy, Bolt: Zap, Sparkles: Star, Star, Crown
-}
 import {
   useUserStore,
   useWorkoutStore,
@@ -42,12 +30,12 @@ import {
   DayOfWeek
 } from '@/stores'
 import { getDefaultDays } from '@/stores/workoutStore'
-import { EVOLUTION_STAGES } from '@/stores/avatarStore'
 import { analytics } from '@/lib/analytics'
-import { LABELS, AVATAR_STAGES } from '@/design/constants'
+import { LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
+import { toDisplayWeight, toInternalWeight, toDisplayHeight, toInternalHeight, getWeightUnit } from '@/lib/units'
 
-type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'avatar' | 'features' | 'tutorial' | 'evolution'
+type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'features' | 'tutorial' | 'levelup'
 
 const ONBOARDING_STORAGE_KEY = 'onboarding-progress'
 
@@ -121,7 +109,7 @@ export function Onboarding() {
   const { initProfile, completeOnboarding } = useUserStore()
   const { setPlan } = useWorkoutStore()
   const { calculateMacros } = useMacroStore()
-  const { setBaseCharacter, updateEvolutionStage } = useAvatarStore()
+  const { setBaseCharacter } = useAvatarStore()
   const { completeOnboarding: completeXPOnboarding } = useXPStore()
 
   // Load saved progress on mount
@@ -131,12 +119,12 @@ export function Onboarding() {
   const [_direction, setDirection] = useState(1)
   const [data, setData] = useState<OnboardingData>(savedProgress?.data || defaultOnboardingData)
 
-  const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'avatar', 'features', 'tutorial']
+  const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'features', 'tutorial']
   const currentIndex = steps.indexOf(step)
 
   // Save progress whenever step or data changes (except for evolution step)
   useEffect(() => {
-    if (step !== 'evolution') {
+    if (step !== 'levelup') {
       saveProgress(step, data)
     }
   }, [step, data])
@@ -169,19 +157,18 @@ export function Onboarding() {
     setBaseCharacter(data.avatarBase)
     completeOnboarding()
 
-    // Trigger level up from 0 to 1 and evolution from Egg to Hatchling
+    // Trigger level up from 0 to 1
     completeXPOnboarding()
-    updateEvolutionStage(1)
 
     // Track analytics
     analytics.onboardingCompleted(data.trainingDaysPerWeek)
 
-    // Show the evolution animation
+    // Show the level up animation
     setDirection(1)
-    setStep('evolution')
+    setStep('levelup')
   }
 
-  const finishEvolution = () => {
+  const finishLevelUp = () => {
     navigate('/')
   }
 
@@ -205,7 +192,6 @@ export function Onboarding() {
     setBaseCharacter(finalData.avatarBase)
     completeOnboarding()
     completeXPOnboarding()
-    updateEvolutionStage(1)
 
     navigate('/')
   }
@@ -216,8 +202,8 @@ export function Onboarding() {
 
   return (
     <div data-testid="onboarding-screen" className="min-h-screen flex flex-col px-5 pt-8 pb-24 relative">
-      {/* Skip/Close button - appears after welcome, hidden during evolution */}
-      {step !== 'welcome' && step !== 'evolution' && (
+      {/* Skip/Close button - appears after welcome, hidden during level up */}
+      {step !== 'welcome' && step !== 'levelup' && (
         <button
           onClick={handleSkip}
           className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors z-10"
@@ -249,8 +235,8 @@ export function Onboarding() {
       )}
 
       {/* Step content */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md animate-in fade-in duration-300">
+      <div className="flex-1 flex items-start justify-center overflow-y-auto">
+        <div className="w-full max-w-md animate-in fade-in duration-300 my-auto">
           {step === 'welcome' && <WelcomeStep onNext={goNext} />}
           {step === 'name' && (
             <NameStep
@@ -302,18 +288,12 @@ export function Onboarding() {
               height={data.height}
               age={data.age}
               goal={data.goal}
+              units={data.units}
               onWeightChange={(v) => updateData('weight', v)}
               onHeightChange={(v) => updateData('height', v)}
               onAgeChange={(v) => updateData('age', v)}
               onGoalChange={(v) => updateData('goal', v)}
-              onNext={goNext}
-              onBack={goBack}
-            />
-          )}
-          {step === 'avatar' && (
-            <AvatarStep
-              value={data.avatarBase}
-              onChange={(v) => updateData('avatarBase', v)}
+              onUnitsChange={(v) => updateData('units', v)}
               onNext={goNext}
               onBack={goBack}
             />
@@ -331,11 +311,11 @@ export function Onboarding() {
               onBack={goBack}
             />
           )}
-          {step === 'evolution' && (
-            <EvolutionStep
+          {step === 'levelup' && (
+            <LevelUpStep
               username={data.username}
               avatarBase={data.avatarBase}
-              onContinue={finishEvolution}
+              onContinue={finishLevelUp}
             />
           )}
         </div>
@@ -693,10 +673,12 @@ function GoalStep({
   height,
   age,
   goal,
+  units,
   onWeightChange,
   onHeightChange,
   onAgeChange,
   onGoalChange,
+  onUnitsChange,
   onNext,
   onBack
 }: {
@@ -704,10 +686,12 @@ function GoalStep({
   height: number
   age: number
   goal: Goal
+  units: UnitSystem
   onWeightChange: (v: number) => void
   onHeightChange: (v: number) => void
   onAgeChange: (v: number) => void
   onGoalChange: (v: Goal) => void
+  onUnitsChange: (v: UnitSystem) => void
   onNext: () => void
   onBack: () => void
 }) {
@@ -726,22 +710,37 @@ function GoalStep({
     bulk: 'Maximize muscle growth with a caloric surplus. Best for those who are already lean and want to add size. Expect strength gains but some fat accumulation is normal.'
   }
 
-  // Validation ranges
+  const isMetric = units === 'metric'
+
+  // Validation ranges (in internal units: lbs, inches)
   const VALIDATION = {
-    weight: { min: 70, max: 500, unit: 'lbs' },  // Reasonable range for adults
-    height: { min: 48, max: 96 },                 // 4'0" to 8'0" in inches
+    weight: { min: 70, max: 500 },     // lbs
+    height: { min: 48, max: 96 },       // inches (4'0" to 8'0")
     age: { min: 13, max: 100 }
   }
+
+  // Display values converted from internal storage
+  const displayWeight = isMetric ? toDisplayWeight(weight, 'metric') : weight
+  const displayHeight = isMetric ? toDisplayHeight(height, 'metric') : height
+
+  // Display validation ranges
+  const displayWeightMin = isMetric ? toDisplayWeight(VALIDATION.weight.min, 'metric') : VALIDATION.weight.min
+  const displayWeightMax = isMetric ? toDisplayWeight(VALIDATION.weight.max, 'metric') : VALIDATION.weight.max
+  const displayHeightMin = isMetric ? toDisplayHeight(VALIDATION.height.min, 'metric') : VALIDATION.height.min
+  const displayHeightMax = isMetric ? toDisplayHeight(VALIDATION.height.max, 'metric') : VALIDATION.height.max
 
   // Validate inputs and generate error messages
   const getValidationErrors = () => {
     const errors: string[] = []
+    const weightUnit = getWeightUnit(units)
 
     if (weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) {
-      errors.push(`Weight must be between ${VALIDATION.weight.min}-${VALIDATION.weight.max} ${VALIDATION.weight.unit}`)
+      errors.push(`Weight must be between ${displayWeightMin}-${displayWeightMax} ${weightUnit}`)
     }
     if (height < VALIDATION.height.min || height > VALIDATION.height.max) {
-      errors.push(`Height must be between 4'0" and 8'0"`)
+      errors.push(isMetric
+        ? `Height must be between ${displayHeightMin}-${displayHeightMax} cm`
+        : `Height must be between 4'0" and 8'0"`)
     }
     if (age < VALIDATION.age.min || age > VALIDATION.age.max) {
       errors.push(`Age must be between ${VALIDATION.age.min}-${VALIDATION.age.max}`)
@@ -753,23 +752,31 @@ function GoalStep({
   const validationErrors = getValidationErrors()
   const isValid = validationErrors.length === 0 && weight > 0 && height > 0 && age > 0
 
-  // Handle input changes with clamping to reasonable ranges
-  const handleWeightChange = (value: number) => {
-    // Allow any input but validation will catch issues
-    onWeightChange(Math.max(0, value))
+  // Handle input changes — convert from display units to internal (lbs, inches)
+  const handleWeightChange = (displayValue: number) => {
+    const internal = isMetric ? toInternalWeight(displayValue, 'metric') : displayValue
+    onWeightChange(Math.max(0, internal))
   }
 
-  const handleHeightChange = (newHeight: number) => {
-    onHeightChange(Math.max(0, newHeight))
+  const handleHeightChangeMetric = (cm: number) => {
+    const internal = toInternalHeight(cm, 'metric')
+    onHeightChange(Math.max(0, internal))
+  }
+
+  const handleHeightChangeImperial = (newInches: number) => {
+    onHeightChange(Math.max(0, newInches))
   }
 
   const handleAgeChange = (value: number) => {
     onAgeChange(Math.max(0, value))
   }
 
-  // Convert height to feet and inches for display
+  // Imperial height display
   const feet = Math.floor(height / 12)
   const inches = height % 12
+
+  const heightInvalid = height < VALIDATION.height.min || height > VALIDATION.height.max
+  const weightInvalid = weight < VALIDATION.weight.min || weight > VALIDATION.weight.max
 
   return (
     <div data-testid="onboarding-step-7">
@@ -780,55 +787,92 @@ function GoalStep({
         These numbers are where you start. Not where you stay.
       </p>
 
+      {/* Unit Toggle */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => onUnitsChange('imperial')}
+          className={cn(
+            'flex-1 py-3 rounded-xl border-2 text-center transition-colors',
+            !isMetric ? 'border-primary bg-primary/10' : 'border-transparent bg-card hover:bg-muted/50'
+          )}
+        >
+          <p className="font-semibold text-sm">Imperial</p>
+          <p className="text-xs text-muted-foreground">lbs, ft/in</p>
+        </button>
+        <button
+          onClick={() => onUnitsChange('metric')}
+          className={cn(
+            'flex-1 py-3 rounded-xl border-2 text-center transition-colors',
+            isMetric ? 'border-primary bg-primary/10' : 'border-transparent bg-card hover:bg-muted/50'
+          )}
+        >
+          <p className="font-semibold text-sm">Metric</p>
+          <p className="text-xs text-muted-foreground">kg, cm</p>
+        </button>
+      </div>
+
       {/* Height */}
       <div className="mb-4" data-sentry-mask>
         <label className="block text-sm text-muted-foreground mb-2 font-medium">
           Height
         </label>
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <div className="relative">
-              <Input
-                type="number"
-                value={feet || ''}
-                onChange={(e) => handleHeightChange(e.target.value === '' ? 0 : Number(e.target.value) * 12 + inches)}
-                className={cn('h-12 font-mono tabular-nums text-xl pr-12', (height < VALIDATION.height.min || height > VALIDATION.height.max) && 'border-destructive')}
-                min={4}
-                max={8}
-                data-testid="onboarding-height-input"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">ft</span>
+        {isMetric ? (
+          <div className="relative">
+            <Input
+              type="number"
+              value={displayHeight || ''}
+              onChange={(e) => handleHeightChangeMetric(e.target.value === '' ? 0 : Number(e.target.value))}
+              className={cn('h-12 font-mono tabular-nums text-xl pr-12', heightInvalid && 'border-destructive')}
+              min={Math.round(displayHeightMin)}
+              max={Math.round(displayHeightMax)}
+              data-testid="onboarding-height-input"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">cm</span>
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={feet || ''}
+                  onChange={(e) => handleHeightChangeImperial(e.target.value === '' ? 0 : Number(e.target.value) * 12 + inches)}
+                  className={cn('h-12 font-mono tabular-nums text-xl pr-12', heightInvalid && 'border-destructive')}
+                  min={4}
+                  max={8}
+                  data-testid="onboarding-height-input"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">ft</span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={inches || ''}
+                  onChange={(e) => handleHeightChangeImperial(e.target.value === '' ? 0 : feet * 12 + Number(e.target.value))}
+                  className={cn('h-12 font-mono tabular-nums text-xl pr-12', heightInvalid && 'border-destructive')}
+                  min={0}
+                  max={11}
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">in</span>
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <div className="relative">
-              <Input
-                type="number"
-                value={inches || ''}
-                onChange={(e) => handleHeightChange(e.target.value === '' ? 0 : feet * 12 + Number(e.target.value))}
-                className={cn('h-12 font-mono tabular-nums text-xl pr-12', (height < VALIDATION.height.min || height > VALIDATION.height.max) && 'border-destructive')}
-                min={0}
-                max={11}
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">in</span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Weight and Age side by side */}
       <div className="flex gap-3 mb-4" data-sentry-mask>
         <div className="flex-1">
           <label className="block text-sm text-muted-foreground mb-2 font-medium">
-            Weight (lbs)
+            Weight ({getWeightUnit(units)})
           </label>
           <Input
             type="number"
-            value={weight || ''}
+            value={displayWeight || ''}
             onChange={(e) => handleWeightChange(e.target.value === '' ? 0 : Number(e.target.value))}
-            className={cn('h-12 font-mono tabular-nums text-xl', (weight < VALIDATION.weight.min || weight > VALIDATION.weight.max) && 'border-destructive')}
-            min={VALIDATION.weight.min}
-            max={VALIDATION.weight.max}
+            className={cn('h-12 font-mono tabular-nums text-xl', weightInvalid && 'border-destructive')}
             data-testid="onboarding-weight-input"
           />
         </div>
@@ -894,88 +938,6 @@ function GoalStep({
           Back
         </Button>
         <Button onClick={onNext} className="flex-1" disabled={!isValid}>
-          Continue
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-function AvatarStep({
-  value,
-  onChange,
-  onNext,
-  onBack
-}: {
-  value: AvatarBase
-  onChange: (v: AvatarBase) => void
-  onNext: () => void
-  onBack: () => void
-}) {
-  const options: { base: AvatarBase; label: string; description: string; icon: LucideIcon; color: string }[] = [
-    {
-      base: 'dominant',
-      label: LABELS.avatarClasses.dominant,
-      description: 'Control. Authority. Leads from the front.',
-      icon: Sword,
-      color: 'text-destructive'
-    },
-    {
-      base: 'switch',
-      label: LABELS.avatarClasses.switch,
-      description: 'Versatile. Adapts to any situation.',
-      icon: Wand2,
-      color: 'text-primary'
-    },
-    {
-      base: 'submissive',
-      label: LABELS.avatarClasses.submissive,
-      description: 'Obedient. Follows the protocol.',
-      icon: Zap,
-      color: 'text-warning'
-    }
-  ]
-
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-2">
-        Choose your persona
-      </h2>
-      <p className="text-muted-foreground mb-6">
-        This represents your avatar identity as you progress.
-      </p>
-
-      <div className="space-y-3 mb-6">
-        {options.map((opt) => {
-          const Icon = opt.icon
-          return (
-            <button
-              key={opt.base}
-              onClick={() => onChange(opt.base)}
-              className={cn(
-                'w-full text-left p-4 rounded-xl border-2 bg-card transition-colors hover:bg-muted/50',
-                value === opt.base ? 'border-primary' : 'border-transparent'
-              )}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                  <Icon size={24} className={opt.color} />
-                </div>
-                <div>
-                  <p className="font-semibold">{opt.label}</p>
-                  <p className="text-sm text-muted-foreground">{opt.description}</p>
-                </div>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="flex gap-3">
-        <Button variant="ghost" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={onNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -1110,7 +1072,7 @@ function TutorialStep({
       </div>
 
       <p className="text-sm text-muted-foreground mb-6">
-        {xpLabel} accumulates all week. Claim your reward every Sunday.
+        {xpLabel} accumulates all week. Claim your reward every 7 days.
       </p>
 
       <div className="flex gap-3">
@@ -1125,7 +1087,7 @@ function TutorialStep({
   )
 }
 
-function EvolutionStep({
+function LevelUpStep({
   username,
   avatarBase,
   onContinue
@@ -1134,42 +1096,16 @@ function EvolutionStep({
   avatarBase: AvatarBase
   onContinue: () => void
 }) {
-  const [showNew, setShowNew] = useState(false)
-
-  const oldStage = EVOLUTION_STAGES[0] // Egg
-  const newStage = EVOLUTION_STAGES[1] // Hatchling
-
-  // Get stage names from constants
-  const oldStageName = AVATAR_STAGES[0] || oldStage.name
-  const newStageName = AVATAR_STAGES[1] || newStage.name
-
   const avatarIcons: Record<AvatarBase, { icon: LucideIcon; color: string }> = {
     dominant: { icon: Sword, color: 'text-destructive' },
     switch: { icon: Wand2, color: 'text-primary' },
     submissive: { icon: Zap, color: 'text-warning' }
   }
 
-  // Trigger the evolution animation after a delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNew(true)
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [])
+  const AvatarIcon = avatarIcons[avatarBase].icon
 
   return (
     <div className="text-center">
-      {/* Background glow effect */}
-      <div
-        className={cn(
-          'absolute inset-0 pointer-events-none transition-opacity duration-500',
-          showNew ? 'opacity-30' : 'opacity-0'
-        )}
-        style={{
-          background: 'radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, transparent 70%)'
-        }}
-      />
-
       <div className="mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <span className="text-sm font-semibold text-primary">
           First Advancement
@@ -1180,48 +1116,19 @@ function EvolutionStep({
         {`Welcome, ${username}.`}
       </h2>
 
-      {/* Evolution animation */}
+      {/* Character icon */}
       <div className="relative h-48 flex items-center justify-center mb-8">
-        {!showNew ? (
-          <div className="text-center animate-pulse">
-            {(() => {
-              const OldIcon = STAGE_ICON_MAP[oldStage.emoji] || Circle
-              return (
-                <>
-                  <div className="mb-2">
-                    <OldIcon size={80} className="mx-auto text-muted-foreground" />
-                  </div>
-                  <p className="text-muted-foreground">{oldStageName}</p>
-                </>
-              )
-            })()}
-          </div>
-        ) : (
-          <div className="text-center animate-in zoom-in-50 duration-500">
-            <div className="animate-bounce">
-              {(() => {
-                const NewIcon = STAGE_ICON_MAP[newStage.emoji] || Zap
-                return (
-                  <div className="mb-2">
-                    <NewIcon size={80} className="mx-auto text-primary" />
-                  </div>
-                )
-              })()}
+        <div className="text-center animate-in zoom-in-50 duration-500">
+          <div className="animate-bounce">
+            <div className="mb-2">
+              <AvatarIcon size={80} className={cn('mx-auto', avatarIcons[avatarBase].color)} />
             </div>
-            <p className="text-xl font-bold text-primary animate-in fade-in duration-300 delay-300">
-              {newStageName}
-            </p>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Level/Rank up indicator */}
-      <div
-        className={cn(
-          'mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500',
-          showNew ? 'delay-500' : 'delay-[2000ms]'
-        )}
-      >
+      <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
         <div className="inline-block">
           <Card className="py-0">
             <CardContent className="px-6 py-4 flex items-center gap-4">
@@ -1241,31 +1148,18 @@ function EvolutionStep({
                 <p className="text-2xl font-bold font-digital text-primary">1</p>
               </div>
               <div className="ml-2">
-                {(() => {
-                  const AvatarIcon = avatarIcons[avatarBase].icon
-                  return <AvatarIcon size={28} className={avatarIcons[avatarBase].color} />
-                })()}
+                <AvatarIcon size={28} className={avatarIcons[avatarBase].color} />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      <p
-        className={cn(
-          'text-muted-foreground mb-8 animate-in fade-in duration-500',
-          showNew ? 'delay-700' : 'delay-[2200ms]'
-        )}
-      >
+      <p className="text-muted-foreground mb-8 animate-in fade-in duration-500 delay-700">
         The protocol begins now.
       </p>
 
-      <div
-        className={cn(
-          'animate-in fade-in slide-in-from-bottom-4 duration-500',
-          showNew ? 'delay-1000' : 'delay-[2500ms]'
-        )}
-      >
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-1000">
         <Button onClick={onContinue} className="w-full" size="lg">
           Begin
         </Button>

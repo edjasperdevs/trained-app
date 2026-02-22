@@ -33,8 +33,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   const { logDailyXP, XP_VALUES } = useXPStore()
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
   const { isProteinTargetHit, isCalorieTargetHit } = useMacroStore()
-  const { triggerReaction, updateEvolutionStage } = useAvatarStore()
-  const currentLevel = useXPStore((state) => state.currentLevel)
+  const { triggerReaction } = useAvatarStore()
 
   const [data, setData] = useState<CheckInData>({
     workout: false,
@@ -129,9 +128,6 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
     // Trigger avatar reaction
     triggerReaction('checkIn')
-
-    // Check for evolution
-    updateEvolutionStage(currentLevel)
 
     // Track analytics
     analytics.checkInCompleted((profile?.currentStreak || 0) + 1)
@@ -319,7 +315,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 +{earnedXP} {LABELS.xp}
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Pending until Sunday ritual
+                Pending until weekly claim
               </p>
             </div>
 

@@ -42,7 +42,7 @@ function Confetti({ particle }: { particle: ConfettiParticle }) {
 
 export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
   const { claimWeeklyXP, getPendingXPBreakdown, pendingXP, currentLevel, totalXP, getCurrentLevelProgress, getXPForNextLevel } = useXPStore()
-  const { triggerReaction, updateEvolutionStage } = useAvatarStore()
+  const { triggerReaction } = useAvatarStore()
 
   const [phase, setPhase] = useState<'preview' | 'claiming' | 'complete' | 'levelup'>('preview')
   const [claimResult, setClaimResult] = useState<{ xpClaimed: number; leveledUp: boolean; newLevel: number } | null>(null)
@@ -161,13 +161,6 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
       analytics.levelUp(result.newLevel)
     }
 
-    // Check for evolution
-    const prevStage = useAvatarStore.getState().evolutionStage
-    updateEvolutionStage(result.newLevel)
-    const newStage = useAvatarStore.getState().evolutionStage
-    if (newStage !== prevStage) {
-      analytics.avatarEvolved(newStage)
-    }
   }
 
   if (!isOpen) return null
@@ -229,7 +222,7 @@ export function XPClaimModal({ isOpen, onClose }: XPClaimModalProps) {
                   <Gift size={56} className="mx-auto text-warning" />
                 </div>
                 <h2 className="text-2xl font-bold mb-2">
-                  Weekly Reward Ritual
+                  Claim Reward
                 </h2>
                 <p className="text-muted-foreground">
                   You've earned this. Claim your reward.

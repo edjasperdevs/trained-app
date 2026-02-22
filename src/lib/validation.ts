@@ -102,10 +102,6 @@ export function isValidAvatarBase(value: unknown): value is 'dominant' | 'switch
   return value === 'dominant' || value === 'switch' || value === 'submissive'
 }
 
-export function isValidEvolutionStage(value: unknown): value is number {
-  return isNumber(value) && value >= 0 && value <= 12
-}
-
 export function isValidMood(value: unknown): value is 'happy' | 'neutral' | 'sad' | 'hyped' | 'neglected' {
   return value === 'happy' || value === 'neutral' || value === 'sad' || value === 'hyped' || value === 'neglected'
 }

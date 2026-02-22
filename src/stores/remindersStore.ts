@@ -56,7 +56,7 @@ const REMINDER_CONFIGS: Record<ReminderType, Omit<ActiveReminder, 'type'>> = {
   },
   claimXP: {
     title: 'Weekly Reward Ready',
-    description: "Claim your points before Sunday ends.",
+    description: "Your weekly reward is ready to claim.",
     icon: 'Gift',
     action: 'Claim',
     route: '/'
@@ -138,13 +138,8 @@ export const useRemindersStore = create<RemindersStore>()(
         const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('claimXP')) return false
 
-        // Check if it's Sunday
-        const isSunday = new Date().getDay() === 0
-        if (!isSunday) return false
-
-        // Check if there's pending XP
-        const canClaim = useXPStore.getState().canClaimXP()
-        return canClaim
+        // Check if the weekly cooldown has passed and there's pending XP
+        return useXPStore.getState().canClaimXP()
       },
 
       shouldShowWorkoutReminder: () => {
@@ -170,7 +165,7 @@ export const useRemindersStore = create<RemindersStore>()(
           reminders.push({ type: 'checkIn', ...REMINDER_CONFIGS.checkIn })
         }
 
-        // Then XP claim (Sunday only)
+        // Then XP claim (when cooldown has passed)
         if (state.shouldShowClaimXPReminder()) {
           reminders.push({ type: 'claimXP', ...REMINDER_CONFIGS.claimXP })
         }

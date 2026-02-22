@@ -172,7 +172,6 @@ export function Settings() {
       },
       avatar: {
         baseCharacter: avatarData.baseCharacter,
-        evolutionStage: avatarData.evolutionStage,
         currentMood: avatarData.currentMood,
         accessories: avatarData.accessories,
         lastInteraction: avatarData.lastInteraction
@@ -653,7 +652,7 @@ export function Settings() {
               {([
                 { key: 'logMacros' as ReminderType, label: 'Log Protocol', description: 'When no food logged today', icon: UtensilsCrossed },
                 { key: 'checkIn' as ReminderType, label: LABELS.checkIn, description: 'When report not submitted', icon: CheckCircle2 },
-                { key: 'claimXP' as ReminderType, label: `Claim ${LABELS.xp}`, description: `On Sunday with pending ${LABELS.xp}`, icon: Gift },
+                { key: 'claimXP' as ReminderType, label: `Claim ${LABELS.xp}`, description: `When pending ${LABELS.xp} is ready to claim`, icon: Gift },
                 { key: 'workout' as ReminderType, label: 'Training', description: 'When training scheduled but not done', icon: Dumbbell }
               ]).map(({ key, label, description, icon: Icon }) => (
                 <button

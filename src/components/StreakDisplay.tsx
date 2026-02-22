@@ -2,6 +2,7 @@ import { useXPStore, useUserStore } from '@/stores'
 import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Lock } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { getDaysSince } from '@/lib/dateUtils'
 
 interface StreakDisplayProps {
   showCard?: boolean
@@ -21,20 +22,12 @@ function getLast7Days(): { date: string; dayLetter: string }[] {
   return days
 }
 
-// Get days until next Sunday
-function getDaysUntilSunday(): number {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0 = Sunday
-  if (dayOfWeek === 0) return 0 // Today is Sunday
-  return 7 - dayOfWeek
-}
-
 export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
   const profile = useUserStore((state) => state.profile)
-  const { dailyLogs, pendingXP } = useXPStore()
+  const { dailyLogs, pendingXP, lastClaimDate } = useXPStore()
 
   const last7Days = getLast7Days()
-  const daysUntilClaim = getDaysUntilSunday()
+  const daysUntilClaim = lastClaimDate ? Math.max(0, 7 - getDaysSince(lastClaimDate)) : 0
 
   // Check which days in the last 7 had check-ins
   const checkInDays = new Set(

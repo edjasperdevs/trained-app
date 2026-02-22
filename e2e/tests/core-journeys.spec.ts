@@ -316,22 +316,22 @@ baseTest('E2E-09: check-in -- complete daily check-in, maintain streak', async (
 // ============================================================
 // Uses baseTest because we need Date mocked to Sunday AND custom XP store.
 // ============================================================
-baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
-  // Mock Date to a known Sunday BEFORE any page scripts run
+baseTest('E2E-10: xp claim -- claim weekly XP after 7-day cooldown', async ({ page }) => {
+  // Mock Date to a known date (7+ days after lastClaimDate) BEFORE any page scripts run
   await page.addInitScript(() => {
-    const sunday = new Date('2025-01-19T12:00:00')
+    const mockDate = new Date('2025-01-20T12:00:00') // Monday — any day works now
     const RealDate = globalThis.Date
 
     class MockDate extends RealDate {
       constructor(...args: unknown[]) {
         if (args.length === 0) {
-          super(sunday.getTime())
+          super(mockDate.getTime())
         } else {
           // @ts-expect-error spread args
           super(...args)
         }
       }
-      static override now() { return sunday.getTime() }
+      static override now() { return mockDate.getTime() }
       static override parse(s: string) { return RealDate.parse(s) }
       static override UTC(...args: unknown[]) {
         // @ts-expect-error spread args
@@ -346,7 +346,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
   // Seed all stores
   await seedAllStores(page)
 
-  // Override user store: set lastCheckInDate to the mocked Sunday so the
+  // Override user store: set lastCheckInDate to today so the
   // check-in button doesn't appear (keeps the home screen focused on XP claim).
   await seedStore(page, STORE_KEYS.user, {
     profile: {
@@ -362,7 +362,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
       createdAt: 1734652800000,
       currentStreak: 7,
       longestStreak: 14,
-      lastCheckInDate: '2025-01-19', // Mocked Sunday
+      lastCheckInDate: '2025-01-20', // Mocked today
       streakPaused: false,
       onboardingComplete: true,
       units: 'imperial',
@@ -371,7 +371,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
     weightHistory: [],
   }, 0)
 
-  // Override XP store with claimable state
+  // Override XP store with claimable state (7+ days since last claim)
   await seedStore(page, STORE_KEYS.xp, {
     totalXP: 2500,
     currentLevel: 8,
@@ -393,7 +393,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
         claimed: false,
       },
     ],
-    lastClaimDate: '2025-01-12', // 7+ days ago
+    lastClaimDate: '2025-01-12', // 8 days ago — claimable
   }, 0)
 
   // Disable animations
@@ -403,7 +403,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP on Sunday', async ({ page }) => {
   await page.goto('/')
   await waitForApp(page)
 
-  // XP claim button should be visible (it's Sunday and pendingXP > 0)
+  // XP claim button should be visible (7+ days since last claim and pendingXP > 0)
   await baseExpect(page.locator('[data-testid="home-claim-xp-button"]')).toBeVisible({ timeout: 10000 })
 
   // Click the claim card

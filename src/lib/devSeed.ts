@@ -300,27 +300,9 @@ const xpStore = {
 }
 
 // --- Avatar Store ---
-const level = calcLevel(xpData.totalXP)
-function getEvolutionStage(lvl: number) {
-  if (lvl < 1) return 0
-  if (lvl < 2) return 1
-  if (lvl < 4) return 2
-  if (lvl < 6) return 3
-  if (lvl < 9) return 4
-  if (lvl < 15) return 5
-  if (lvl < 22) return 6
-  if (lvl < 30) return 7
-  if (lvl < 40) return 8
-  if (lvl < 50) return 9
-  if (lvl < 70) return 10
-  if (lvl < 85) return 11
-  return 12
-}
-
 const avatarStore = {
   state: {
     baseCharacter: 'dominant',
-    evolutionStage: getEvolutionStage(level),
     currentMood: 'happy',
     accessories: [],
     lastInteraction: Date.now(),
@@ -383,7 +365,7 @@ export function seedTestData() {
   localStorage.setItem('gamify-gains-reminders', JSON.stringify(remindersStore))
 
   console.log('✅ Test data seeded!')
-  console.log(`   Level: ${level} | XP: ${xpData.totalXP}`)
+  console.log(`   Level: ${calcLevel(xpData.totalXP)} | XP: ${xpData.totalXP}`)
   console.log(`   Workouts: ${workoutStore.state.workoutLogs.length}`)
   console.log(`   Macro days: ${macroStore.state.dailyLogs.length}`)
   console.log(`   Badges: ${achievementsStore.state.earnedBadges.length}`)

@@ -94,13 +94,6 @@ export function getLocalDayOfWeek(date: Date = new Date()): number {
 }
 
 /**
- * Check if today is Sunday in local timezone.
- */
-export function isLocalSunday(date: Date = new Date()): boolean {
-  return date.getDay() === 0
-}
-
-/**
  * Get days since a date string, in local timezone.
  */
 export function getDaysSince(dateStr: string): number {

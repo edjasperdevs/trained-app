@@ -12,8 +12,8 @@ export type { MacroTargets, MealPlan, DailyMacroLog, SavedMeal, LoggedMeal, Meal
 export { useWorkoutStore } from './workoutStore'
 export type { WorkoutType, ExerciseSet, Exercise, WorkoutLog, WorkoutPlan, DayOfWeek, CustomExercise, WorkoutCustomization } from './workoutStore'
 
-export { useAvatarStore, EVOLUTION_STAGES } from './avatarStore'
-export type { EvolutionStage, AvatarMood, EvolutionInfo } from './avatarStore'
+export { useAvatarStore } from './avatarStore'
+export type { AvatarMood } from './avatarStore'
 
 export { useToastStore, toast } from './toastStore'
 export type { Toast, ToastType } from './toastStore'

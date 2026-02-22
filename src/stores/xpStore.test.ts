@@ -349,12 +349,28 @@ describe('xpStore', () => {
   })
 
   describe('canClaimXP', () => {
-    it('should return false if not Sunday', () => {
-      // Mock a non-Sunday (Monday)
-      vi.useFakeTimers()
-      vi.setSystemTime(new Date('2024-01-15T12:00:00')) // Monday noon local time
-
+    it('should return true with pending XP and no previous claim', () => {
       useXPStore.setState({ pendingXP: 100, lastClaimDate: null })
+      const { canClaimXP } = useXPStore.getState()
+
+      expect(canClaimXP()).toBe(true)
+    })
+
+    it('should return false with no pending XP', () => {
+      useXPStore.setState({ pendingXP: 0, lastClaimDate: null })
+      const { canClaimXP } = useXPStore.getState()
+
+      expect(canClaimXP()).toBe(false)
+    })
+
+    it('should return false if claimed within last 7 days', () => {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2024-01-21T12:00:00'))
+
+      useXPStore.setState({
+        pendingXP: 100,
+        lastClaimDate: '2024-01-17' // 4 days ago
+      })
       const { canClaimXP } = useXPStore.getState()
 
       expect(canClaimXP()).toBe(false)
@@ -362,11 +378,14 @@ describe('xpStore', () => {
       vi.useRealTimers()
     })
 
-    it('should return true on Sunday with pending XP and no previous claim', () => {
+    it('should return true after 7 days since last claim', () => {
       vi.useFakeTimers()
-      vi.setSystemTime(new Date('2024-01-21T12:00:00')) // Sunday noon local time
+      vi.setSystemTime(new Date('2024-01-24T12:00:00'))
 
-      useXPStore.setState({ pendingXP: 100, lastClaimDate: null })
+      useXPStore.setState({
+        pendingXP: 100,
+        lastClaimDate: '2024-01-17' // 7 days ago
+      })
       const { canClaimXP } = useXPStore.getState()
 
       expect(canClaimXP()).toBe(true)
@@ -374,29 +393,15 @@ describe('xpStore', () => {
       vi.useRealTimers()
     })
 
-    it('should return false on Sunday with no pending XP', () => {
+    it('should allow claiming on any day of the week', () => {
       vi.useFakeTimers()
-      vi.setSystemTime(new Date('2024-01-21T12:00:00')) // Sunday noon local time
+      // Wednesday — previously would have been blocked
+      vi.setSystemTime(new Date('2024-01-17T12:00:00'))
 
-      useXPStore.setState({ pendingXP: 0, lastClaimDate: null })
+      useXPStore.setState({ pendingXP: 100, lastClaimDate: null })
       const { canClaimXP } = useXPStore.getState()
 
-      expect(canClaimXP()).toBe(false)
-
-      vi.useRealTimers()
-    })
-
-    it('should return false if claimed within last 7 days', () => {
-      vi.useFakeTimers()
-      vi.setSystemTime(new Date('2024-01-21T12:00:00')) // Sunday noon local time
-
-      useXPStore.setState({
-        pendingXP: 100,
-        lastClaimDate: '2024-01-17' // Less than 7 days ago (Wednesday)
-      })
-      const { canClaimXP } = useXPStore.getState()
-
-      expect(canClaimXP()).toBe(false)
+      expect(canClaimXP()).toBe(true)
 
       vi.useRealTimers()
     })

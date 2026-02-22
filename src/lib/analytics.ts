@@ -74,9 +74,6 @@ export const analytics = {
     trackEvent('Level Up', { level }),
   badgeEarned: (badge: string, rarity: string) =>
     trackEvent('Badge Earned', { badge, rarity }),
-  avatarEvolved: (stage: number) =>
-    trackEvent('Avatar Evolved', { stage }),
-
   // Engagement events
   appOpened: () => trackEvent('App Opened'),
   settingsViewed: () => trackEvent('Settings Viewed'),

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { getLocalDateString, getLocalWeekString, isLocalSunday, getDaysSince } from '../lib/dateUtils'
+import { getLocalDateString, getLocalWeekString, getDaysSince } from '../lib/dateUtils'
 
 export interface WeeklyHistory {
   weekOf: string
@@ -245,16 +245,13 @@ export const useXPStore = create<XPStore>()(
       },
 
       canClaimXP: () => {
-        // Use local timezone for Sunday check and day calculations
-        if (!isLocalSunday()) return false
-
         const state = get()
+        if (state.pendingXP <= 0) return false
+
         const lastClaim = state.lastClaimDate
+        if (!lastClaim) return true
 
-        if (!lastClaim) return state.pendingXP > 0
-
-        const daysSinceLastClaim = getDaysSince(lastClaim)
-        return daysSinceLastClaim >= 7 && state.pendingXP > 0
+        return getDaysSince(lastClaim) >= 7
       },
 
       resetXP: () => set({

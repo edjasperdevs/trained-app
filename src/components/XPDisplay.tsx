@@ -116,7 +116,7 @@ export function XPDisplay({ compact = false, showPending = true }: XPDisplayProp
             <p className="text-sm text-secondary">
               <span className="font-mono font-bold">+{pendingXP} {LABELS.xp}</span> pending
             </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Claim on Sunday</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Claim after 7 days</p>
           </div>
         )}
       </div>

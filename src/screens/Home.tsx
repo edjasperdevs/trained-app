@@ -293,7 +293,7 @@ export function Home() {
         <Card className="py-0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
           <CardContent className="p-4 relative">
-            <div className="flex items-center gap-6">
+            <div className="flex items-start gap-6">
               <div data-testid="home-level-display">
                 <Avatar size="lg" showMood showLevel level={currentLevel} />
               </div>
@@ -321,7 +321,7 @@ export function Home() {
                     <Gift size={28} className="text-warning" />
                     <div>
                       <p className="font-bold text-base">
-                        Reward Ritual Ready
+                        Reward Ready
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {pendingXP} {LABELS.xp} awaiting claim
