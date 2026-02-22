@@ -1,6 +1,8 @@
 import { useRegisterSW } from 'virtual:pwa-register/react'
+import { isNative } from '@/lib/platform'
 
-export function UpdatePrompt() {
+/** Inner component -- only mounts on web. Contains the useRegisterSW hook. */
+function WebUpdatePrompt() {
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
@@ -30,4 +32,10 @@ export function UpdatePrompt() {
       </div>
     </div>
   )
+}
+
+/** Service workers don't exist in WKWebView -- skip entirely on native. */
+export function UpdatePrompt() {
+  if (isNative()) return null
+  return <WebUpdatePrompt />
 }
