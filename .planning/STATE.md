@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 13 in progress
+**Current focus:** v1.5 Native iOS App -- Phase 13 complete
 
 ## Current Position
 
-Phase: 13 (Deep Linking + Auth) -- in progress
-Plan: 1 of 1 (checkpoint pending)
-Status: 13-01 auto tasks complete, awaiting human-verify checkpoint
-Last activity: 2026-02-22 -- Completed 13-01 Tasks 1-2 (Universal Links + deep link handler)
+Phase: 13 (Deep Linking + Auth) -- complete
+Plan: 1 of 1 (done)
+Status: 13-01 complete (checkpoint approved)
+Last activity: 2026-02-22 -- Completed 13-01 (Deep Linking + Auth, all 3 tasks)
 
-Progress: [█████░░░░░] 42% (5/12 plans estimated)
+Progress: [██████░░░░] 50% (6/12 plans estimated)
 
 ## Performance Metrics
 
@@ -73,5 +73,5 @@ Progress: [█████░░░░░] 42% (5/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: 13-01-PLAN.md checkpoint (Tasks 1-2 complete, Task 3 human-verify pending)
-Resume file: .planning/phases/13-deep-linking-auth/13-01-PLAN.md
+Stopped at: Completed 13-01-PLAN.md (phase 13 done)
+Resume file: N/A (ready for Phase 14)
