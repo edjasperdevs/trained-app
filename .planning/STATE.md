@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 12 complete, ready for Phase 13
+**Current focus:** v1.5 Native iOS App -- Phase 13 in progress
 
 ## Current Position
 
-Phase: 12 (Native Polish) -- complete
-Plan: 2 of 2 complete
-Status: Phase 12 complete
-Last activity: 2026-02-22 -- Completed 12-02 (App icon, splash screen & data export)
+Phase: 13 (Deep Linking + Auth) -- in progress
+Plan: 1 of 1 (checkpoint pending)
+Status: 13-01 auto tasks complete, awaiting human-verify checkpoint
+Last activity: 2026-02-22 -- Completed 13-01 Tasks 1-2 (Universal Links + deep link handler)
 
-Progress: [████░░░░░░] 33% (4/12 plans estimated)
+Progress: [█████░░░░░] 42% (5/12 plans estimated)
 
 ## Performance Metrics
 
@@ -31,6 +31,7 @@ Progress: [████░░░░░░] 33% (4/12 plans estimated)
 |-------|-------|-------|----------|
 | 11. Capacitor Shell | 2/2 | 14min | 7min |
 | 12. Native Polish | 2/2 | 28min | 14min |
+| 13. Deep Linking + Auth | 1/1 | 5min | 5min |
 
 ## Accumulated Context
 
@@ -49,12 +50,19 @@ Progress: [████░░░░░░] 33% (4/12 plans estimated)
 - @capacitor/filesystem downgraded to 7.0.1 (7.1.8 IONFilesystemLib linker errors on x86_64)
 - Cache directory for temp export files, cleanup after share
 - Sharp-based asset generation pipeline for icon and splash source images
+- AASA scoped to /reset-password* only (not catch-all) to avoid hijacking PWA web experience
+- Team ID placeholder XXXXXXXXXX in AASA -- Apple Developer account not yet created
+- Hardcoded web domain for Supabase auth redirectTo (capacitor://localhost breaks redirect chain)
+- Deep link handler shared function for warm start (appUrlOpen) and cold start (getLaunchUrl)
+- /reset-password route in both auth states to handle brief session restoration window
 
 ### Pending Todos
 
 - Apply Supabase migrations 003-007 to production
 - Deploy send-invite Edge Function + set RESEND_API_KEY
 - Configure Sentry alert rules, set deploy env vars
+- Replace XXXXXXXXXX in AASA file with actual Apple Team ID
+- Add https://app.welltrained.fitness/** to Supabase Auth redirect URL allowlist
 
 ### Blockers/Concerns
 
@@ -65,5 +73,5 @@ Progress: [████░░░░░░] 33% (4/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 12-02-PLAN.md (App icon, splash screen & data export) -- Phase 12 complete
-Resume file: None
+Stopped at: 13-01-PLAN.md checkpoint (Tasks 1-2 complete, Task 3 human-verify pending)
+Resume file: .planning/phases/13-deep-linking-auth/13-01-PLAN.md
