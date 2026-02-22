@@ -34,11 +34,11 @@
   3. Running `npm run build:web` produces the Vercel-deployed PWA and `npm run build:ios` (or equivalent) produces the Capacitor native build from the same codebase
   4. Every destructive confirmation dialog (delete account, clear data, etc.) uses native iOS dialog instead of browser `window.confirm()`
   5. App detects background/foreground transitions (e.g., logs or syncs on foreground resume)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
+- [ ] 11-02-PLAN.md -- Dialog migration (10 window.confirm replacements) and native app lifecycle detection
 
 ### Phase 12: Native Polish
 **Goal**: The app feels like a native iOS app -- real haptic feedback, native file sharing, branded launch experience, and correct status bar appearance
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Capacitor Shell | v1.5 | 0/TBD | Not started | - |
+| 11. Capacitor Shell | v1.5 | 0/2 | Planned | - |
 | 12. Native Polish | v1.5 | 0/TBD | Not started | - |
 | 13. Deep Linking + Auth | v1.5 | 0/TBD | Not started | - |
 | 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
