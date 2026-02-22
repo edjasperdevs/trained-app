@@ -1,3 +1,5 @@
+/// <reference types="@capacitor/status-bar" />
+/// <reference types="@capacitor/splash-screen" />
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
@@ -7,6 +9,18 @@ const config: CapacitorConfig = {
   ios: {
     backgroundColor: '#0a0a0a',
     allowsBackForwardNavigationGestures: false,
+  },
+  plugins: {
+    StatusBar: {
+      style: 'DARK',
+      overlaysWebView: true,
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 500,
+      backgroundColor: '#0a0a0aff',
+      launchFadeOutDuration: 200,
+    },
   },
   server: process.env.CAPACITOR_LIVE_RELOAD ? {
     url: process.env.CAPACITOR_DEV_URL || 'http://localhost:5173',
