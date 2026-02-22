@@ -17,7 +17,7 @@
 
 - [x] **Phase 11: Capacitor Shell** - Working native iOS shell with WKWebView compatibility fixes (shipped 2026-02-22)
 - [x] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar (shipped 2026-02-22)
-- [ ] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor
+- [x] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor (shipped 2026-02-22)
 - [ ] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation
 - [ ] **Phase 15: Local Notifications + Engagement** - Scheduled reminders, streak-at-risk, badge count
 - [ ] **Phase 16: App Store Submission** - Compliance, TestFlight, App Store review and publish
@@ -66,7 +66,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 13-01-PLAN.md -- Universal Links infrastructure (AASA, Vercel config, Xcode entitlements) + deep link handler + password reset screen
+- [x] 13-01-PLAN.md -- Universal Links infrastructure (AASA, Vercel config, Xcode entitlements) + deep link handler + password reset screen
 
 ### Phase 14: Remote Push Notifications
 **Goal**: Clients receive real-time push notifications when the coach takes actions (assigns workout, updates macros, responds to check-in), delivered via direct APNs from Supabase
@@ -125,7 +125,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 11. Capacitor Shell | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 12. Native Polish | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
-| 13. Deep Linking + Auth | v1.5 | 0/1 | Not started | - |
+| 13. Deep Linking + Auth | v1.5 | 1/1 | ✓ Complete | 2026-02-22 |
 | 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
 | 15. Local Notifications + Engagement | v1.5 | 0/TBD | Not started | - |
 | 16. App Store Submission | v1.5 | 0/TBD | Not started | - |
