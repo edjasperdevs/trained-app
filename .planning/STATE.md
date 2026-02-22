@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 11 (Capacitor Shell) -- first of 6 phases (11-16)
-Plan: 1 of 2 complete, ready for plan 02
-Status: Executing
-Last activity: 2026-02-22 -- Completed 11-01 (Capacitor shell init + iOS simulator verified)
+Phase: 11 (Capacitor Shell) -- first of 6 phases (11-16) -- COMPLETE
+Plan: 2 of 2 complete
+Status: Phase complete, ready for Phase 12
+Last activity: 2026-02-22 -- Completed 11-02 (Native dialogs + lifecycle listener)
 
-Progress: [█░░░░░░░░░] 8% (1/12 plans estimated)
+Progress: [██░░░░░░░░] 17% (2/12 plans estimated)
 
 ## Performance Metrics
 
@@ -29,7 +29,7 @@ Progress: [█░░░░░░░░░] 8% (1/12 plans estimated)
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 11. Capacitor Shell | 1/2 | 5min | 5min |
+| 11. Capacitor Shell | 2/2 | 14min | 7min |
 
 ## Accumulated Context
 
@@ -39,7 +39,8 @@ Progress: [█░░░░░░░░░] 8% (1/12 plans estimated)
 - Direct APNs (no Firebase) since iOS-only with Supabase Edge Functions
 - Service worker conditionally disabled for native builds via isNative() guard in UpdatePrompt
 - Hook guarding pattern: outer component checks platform, inner component contains hooks
-- 10 window.confirm() call sites across 6 files need Dialog plugin replacement
+- All 10 window.confirm() replaced with async confirmAction() using @capacitor/dialog on native
+- Native lifecycle: appStateChange for iOS foreground sync, visibilitychange for web tabs (both coexist)
 - Data export Blob+anchor pattern non-functional in WKWebView, needs Filesystem+Share
 
 ### Pending Todos
@@ -57,5 +58,5 @@ Progress: [█░░░░░░░░░] 8% (1/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 11-01-PLAN.md (Capacitor shell + iOS simulator verified)
+Stopped at: Completed 11-02-PLAN.md (Native dialogs + lifecycle listener -- Phase 11 complete)
 Resume file: None
