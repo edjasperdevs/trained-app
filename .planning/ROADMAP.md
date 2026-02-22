@@ -63,10 +63,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Tapping a welltrained.fitness link on an iOS device with the app installed opens the app instead of Safari
   2. User can complete a password reset flow initiated from within the app -- the email link returns to the app (not Safari) and the password is successfully changed
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 13-01: TBD
+- [ ] 13-01-PLAN.md -- Universal Links infrastructure (AASA, Vercel config, Xcode entitlements) + deep link handler + password reset screen
 
 ### Phase 14: Remote Push Notifications
 **Goal**: Clients receive real-time push notifications when the coach takes actions (assigns workout, updates macros, responds to check-in), delivered via direct APNs from Supabase
@@ -125,7 +125,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 11. Capacitor Shell | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 12. Native Polish | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
-| 13. Deep Linking + Auth | v1.5 | 0/TBD | Not started | - |
+| 13. Deep Linking + Auth | v1.5 | 0/1 | Not started | - |
 | 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
 | 15. Local Notifications + Engagement | v1.5 | 0/TBD | Not started | - |
 | 16. App Store Submission | v1.5 | 0/TBD | Not started | - |
