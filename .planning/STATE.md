@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 14 in progress
+**Current focus:** v1.5 Native iOS App -- Phase 14 complete
 
 ## Current Position
 
 Phase: 14 (Remote Push Notifications)
-Plan: 2 of 3 (done)
-Status: 14-02 complete
-Last activity: 2026-02-22 -- Completed 14-02 (Server-Side APNs Push Delivery, 2 tasks)
+Plan: 3 of 3 (done)
+Status: Phase 14 complete
+Last activity: 2026-02-22 -- Completed 14-03 (App Integration and Verification, 2 tasks)
 
-Progress: [████████░░] 67% (8/12 plans estimated)
+Progress: [█████████░] 75% (9/12 plans estimated)
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [████████░░] 67% (8/12 plans estimated)
 | 11. Capacitor Shell | 2/2 | 14min | 7min |
 | 12. Native Polish | 2/2 | 28min | 14min |
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
-| 14. Remote Push Notifications | 2/3 | 8min | 4min |
+| 14. Remote Push Notifications | 3/3 | 10min | 3.3min |
 
 ## Accumulated Context
 
@@ -70,6 +70,9 @@ Progress: [████████░░] 67% (8/12 plans estimated)
 - Replace XXXXXXXXXX in AASA file with actual Apple Team ID
 - Add https://app.welltrained.fitness/** to Supabase Auth redirect URL allowlist
 - Apply migration 011_device_tokens.sql to production Supabase
+- Deploy send-push Edge Function (`supabase functions deploy send-push`)
+- Create 3 database webhooks in Supabase Dashboard (assigned_workouts, macro_targets, weekly_checkins -> send-push)
+- Set APNs secrets in Supabase (APNS_P8_KEY, APNS_KEY_ID, APNS_TEAM_ID, APNS_BUNDLE_ID, APNS_ENV)
 
 ### Blockers/Concerns
 
@@ -80,5 +83,5 @@ Progress: [████████░░] 67% (8/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 14-02-PLAN.md
-Resume file: .planning/phases/14-remote-push-notifications/14-03-PLAN.md
+Stopped at: Completed 14-03-PLAN.md (Phase 14 complete)
+Resume file: Next phase planning
