@@ -13,9 +13,18 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "build:web": "tsc -b && vite build",
+    "build:ios": "tsc -b && vite build && npx cap sync ios",
+    "cap:open": "npx cap open ios",
+    "cap:sync": "npx cap sync ios",
+    "cap:run": "npx cap run ios"
   },
   "dependencies": {
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.5.0",
+    "@capacitor/dialog": "^7.0.4",
+    "@capacitor/ios": "^7.5.0",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/oswald": "^5.2.8",
@@ -34,6 +43,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.5.0",
     "@eslint/js": "^9.9.1",
     "@playwright/test": "^1.58.2",
     "@sentry/vite-plugin": "^4.9.0",
