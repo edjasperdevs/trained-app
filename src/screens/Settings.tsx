@@ -8,6 +8,9 @@ import { WeightChart, ProgressBar } from '@/components'
 import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
+import { isNative } from '@/lib/platform'
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 import {
   useUserStore,
   useXPStore,
@@ -139,7 +142,7 @@ export function Settings() {
     toast.success('Goal weight configured')
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     // Gather all data from stores
     const userData = useUserStore.getState()
     const xpData = useXPStore.getState()
@@ -181,16 +184,43 @@ export function Settings() {
 
     try {
       const dataStr = JSON.stringify(exportObj, null, 2)
-      const blob = new Blob([dataStr], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `trained-backup-${getLocalDateString()}.json`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const fileName = `trained-backup-${getLocalDateString()}.json`
+
+      if (isNative()) {
+        // Write to cache directory (temp, auto-cleaned by OS)
+        const result = await Filesystem.writeFile({
+          path: fileName,
+          data: dataStr,
+          directory: Directory.Cache,
+          encoding: Encoding.UTF8,
+        })
+
+        // Present iOS share sheet with the file
+        await Share.share({
+          title: 'Trained Backup',
+          url: result.uri,
+          dialogTitle: 'Export Trained Data',
+        })
+
+        // Clean up temp file after sharing
+        await Filesystem.deleteFile({
+          path: fileName,
+          directory: Directory.Cache,
+        }).catch(() => {}) // Ignore cleanup errors
+      } else {
+        // Web: existing Blob + anchor pattern
+        const blob = new Blob([dataStr], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }
+
       analytics.dataExported()
-      URL.revokeObjectURL(url)
       toast.success('Data exported')
     } catch (error) {
       toast.error(friendlyError('export your data', error))
