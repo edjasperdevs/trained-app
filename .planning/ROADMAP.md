@@ -15,7 +15,7 @@
 
 ### Phases
 
-- [ ] **Phase 11: Capacitor Shell** - Working native iOS shell with WKWebView compatibility fixes
+- [x] **Phase 11: Capacitor Shell** - Working native iOS shell with WKWebView compatibility fixes (shipped 2026-02-22)
 - [ ] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar
 - [ ] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor
 - [ ] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation
@@ -37,8 +37,8 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
-- [ ] 11-02-PLAN.md -- Dialog migration (10 window.confirm replacements) and native app lifecycle detection
+- [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
+- [x] 11-02-PLAN.md -- Dialog migration (10 window.confirm replacements) and native app lifecycle detection
 
 ### Phase 12: Native Polish
 **Goal**: The app feels like a native iOS app -- real haptic feedback, native file sharing, branded launch experience, and correct status bar appearance
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Capacitor Shell | v1.5 | 0/2 | Planned | - |
+| 11. Capacitor Shell | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 12. Native Polish | v1.5 | 0/TBD | Not started | - |
 | 13. Deep Linking + Auth | v1.5 | 0/TBD | Not started | - |
 | 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
