@@ -18,7 +18,7 @@
 - [x] **Phase 11: Capacitor Shell** - Working native iOS shell with WKWebView compatibility fixes (shipped 2026-02-22)
 - [x] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar (shipped 2026-02-22)
 - [x] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor (shipped 2026-02-22)
-- [ ] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation
+- [x] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation (shipped 2026-02-22)
 - [ ] **Phase 15: Local Notifications + Engagement** - Scheduled reminders, streak-at-risk, badge count
 - [ ] **Phase 16: App Store Submission** - Compliance, TestFlight, App Store review and publish
 
@@ -81,9 +81,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 14-01-PLAN.md -- Client-side push infrastructure (plugin, iOS config, device_tokens migration, push.ts module, sign-out cleanup)
-- [ ] 14-02-PLAN.md -- Server-side APNs Edge Function (JWT helper, send-push webhook handler with coach-action filtering)
-- [ ] 14-03-PLAN.md -- Integration and verification (wire into App.tsx, contextual permission, end-to-end checkpoint)
+- [x] 14-01-PLAN.md -- Client-side push infrastructure (plugin, iOS config, device_tokens migration, push.ts module, sign-out cleanup)
+- [x] 14-02-PLAN.md -- Server-side APNs Edge Function (JWT helper, send-push webhook handler with coach-action filtering)
+- [x] 14-03-PLAN.md -- Integration and verification (wire into App.tsx, contextual permission, end-to-end checkpoint)
 
 ### Phase 15: Local Notifications + Engagement
 **Goal**: Users receive configurable daily and weekly reminder notifications, streak protection alerts, and see a badge count for pending actions
@@ -126,6 +126,6 @@ Plans:
 | 11. Capacitor Shell | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 12. Native Polish | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 13. Deep Linking + Auth | v1.5 | 1/1 | ✓ Complete | 2026-02-22 |
-| 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
+| 14. Remote Push Notifications | v1.5 | 3/3 | ✓ Complete | 2026-02-22 |
 | 15. Local Notifications + Engagement | v1.5 | 0/TBD | Not started | - |
 | 16. App Store Submission | v1.5 | 0/TBD | Not started | - |
