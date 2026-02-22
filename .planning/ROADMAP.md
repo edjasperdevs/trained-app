@@ -16,7 +16,7 @@
 ### Phases
 
 - [x] **Phase 11: Capacitor Shell** - Working native iOS shell with WKWebView compatibility fixes (shipped 2026-02-22)
-- [ ] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar
+- [x] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar (shipped 2026-02-22)
 - [ ] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor
 - [ ] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation
 - [ ] **Phase 15: Local Notifications + Engagement** - Scheduled reminders, streak-at-risk, badge count
@@ -53,8 +53,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md -- Install Capacitor plugins, configure StatusBar + SplashScreen, replace haptics with @capacitor/haptics
-- [ ] 12-02-PLAN.md -- Generate branded icon + splash assets, fix storyboard background, implement native data export via share sheet
+- [x] 12-01-PLAN.md -- Install Capacitor plugins, configure StatusBar + SplashScreen, replace haptics with @capacitor/haptics
+- [x] 12-02-PLAN.md -- Generate branded icon + splash assets, fix storyboard background, implement native data export via share sheet
 
 ### Phase 13: Deep Linking + Auth
 **Goal**: Universal Links route welltrained.fitness URLs into the app, and Supabase auth flows (password reset) work correctly in the Capacitor context
@@ -124,7 +124,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 11. Capacitor Shell | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
-| 12. Native Polish | v1.5 | 0/TBD | Not started | - |
+| 12. Native Polish | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 13. Deep Linking + Auth | v1.5 | 0/TBD | Not started | - |
 | 14. Remote Push Notifications | v1.5 | 0/TBD | Not started | - |
 | 15. Local Notifications + Engagement | v1.5 | 0/TBD | Not started | - |
