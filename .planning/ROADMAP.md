@@ -78,12 +78,12 @@ Plans:
   3. All push notifications are sent via direct APNs HTTP/2 from a Supabase Edge Function with no Firebase dependency
   4. Tapping a push notification opens the app and navigates to the relevant screen (Workouts for assignment, Macros for update, Home for check-in response)
   5. Push notifications display correctly when the app is in foreground, background, and terminated states
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 14-01: TBD
-- [ ] 14-02: TBD
-- [ ] 14-03: TBD
+- [ ] 14-01-PLAN.md -- Client-side push infrastructure (plugin, iOS config, device_tokens migration, push.ts module, sign-out cleanup)
+- [ ] 14-02-PLAN.md -- Server-side APNs Edge Function (JWT helper, send-push webhook handler with coach-action filtering)
+- [ ] 14-03-PLAN.md -- Integration and verification (wire into App.tsx, contextual permission, end-to-end checkpoint)
 
 ### Phase 15: Local Notifications + Engagement
 **Goal**: Users receive configurable daily and weekly reminder notifications, streak protection alerts, and see a badge count for pending actions
