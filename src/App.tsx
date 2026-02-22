@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useSyncStore } from '@/stores'
@@ -6,6 +6,7 @@ import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { App as CapApp } from '@capacitor/app'
 import { isNative } from '@/lib/platform'
 import { initDeepLinkHandler } from '@/lib/deep-link'
+import { initPushListeners, requestPushPermission } from '@/lib/push'
 import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
@@ -46,6 +47,7 @@ function AppContent() {
   const user = useAuthStore((state) => state.user)
   const location = useLocation()
   const navigate = useNavigate()
+  const pushPermissionRequested = useRef(false)
 
   // Initialize auth on app load
   useEffect(() => {
@@ -56,6 +58,43 @@ function AppContent() {
   useEffect(() => {
     initDeepLinkHandler(navigate)
   }, [navigate])
+
+  // Initialize push notification listeners (native only)
+  useEffect(() => {
+    if (!user) return
+    initPushListeners(user.id)
+  }, [user])
+
+  // Request push permission after first sync completes (contextual, not on launch)
+  useEffect(() => {
+    if (!user || pushPermissionRequested.current) return
+    if (!isNative()) return
+
+    // Wait for sync to complete, then request permission
+    // This ensures user has context about coach interaction before seeing the prompt
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      if (!state.isSyncing && state.user && !pushPermissionRequested.current) {
+        pushPermissionRequested.current = true
+        // Small delay to let the UI settle after sync
+        setTimeout(() => {
+          requestPushPermission()
+        }, 2000)
+        unsubscribe()
+      }
+    })
+
+    // Also check immediately if sync already completed
+    const current = useAuthStore.getState()
+    if (!current.isSyncing && current.user) {
+      pushPermissionRequested.current = true
+      setTimeout(() => {
+        requestPushPermission()
+      }, 2000)
+      unsubscribe()
+    }
+
+    return () => unsubscribe()
+  }, [user])
 
   // Online/offline detection and background sync
   useEffect(() => {
