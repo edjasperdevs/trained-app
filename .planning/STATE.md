@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 12: Native Polish
+**Current focus:** v1.5 Native iOS App -- Phase 12 complete, ready for Phase 13
 
 ## Current Position
 
-Phase: 12 (Native Polish) -- second of 6 phases (11-16)
-Plan: 1 of 2 complete
-Status: Executing Phase 12
-Last activity: 2026-02-22 -- Completed 12-01 (Plugin foundation + haptics)
+Phase: 12 (Native Polish) -- complete
+Plan: 2 of 2 complete
+Status: Phase 12 complete
+Last activity: 2026-02-22 -- Completed 12-02 (App icon, splash screen & data export)
 
-Progress: [███░░░░░░░] 25% (3/12 plans estimated)
+Progress: [████░░░░░░] 33% (4/12 plans estimated)
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [███░░░░░░░] 25% (3/12 plans estimated)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 11. Capacitor Shell | 2/2 | 14min | 7min |
-| 12. Native Polish | 1/2 | 10min | 10min |
+| 12. Native Polish | 2/2 | 28min | 14min |
 
 ## Accumulated Context
 
@@ -46,6 +46,9 @@ Progress: [███░░░░░░░] 25% (3/12 plans estimated)
 - Fire-and-forget haptic calls (no await) to avoid blocking UI thread
 - StatusBar style DARK for light text on dark app background
 - SplashScreen auto-hide with 500ms display + 200ms fade
+- @capacitor/filesystem downgraded to 7.0.1 (7.1.8 IONFilesystemLib linker errors on x86_64)
+- Cache directory for temp export files, cleanup after share
+- Sharp-based asset generation pipeline for icon and splash source images
 
 ### Pending Todos
 
@@ -62,5 +65,5 @@ Progress: [███░░░░░░░] 25% (3/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 12-01-PLAN.md (Plugin foundation + haptics)
+Stopped at: Completed 12-02-PLAN.md (App icon, splash screen & data export) -- Phase 12 complete
 Resume file: None
