@@ -50,10 +50,11 @@ Plans:
   3. App displays a branded splash screen on cold launch with the dark theme aesthetic before the React app renders
   4. App icon appears correctly on the iOS home screen, in Settings, and in Spotlight search at all required sizes
   5. Status bar shows light text on the dark background, consistent with the app theme
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md -- Install Capacitor plugins, configure StatusBar + SplashScreen, replace haptics with @capacitor/haptics
+- [ ] 12-02-PLAN.md -- Generate branded icon + splash assets, fix storyboard background, implement native data export via share sheet
 
 ### Phase 13: Deep Linking + Auth
 **Goal**: Universal Links route welltrained.fitness URLs into the app, and Supabase auth flows (password reset) work correctly in the Capacitor context
