@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 13 complete
+**Current focus:** v1.5 Native iOS App -- Phase 14 in progress
 
 ## Current Position
 
-Phase: 13 (Deep Linking + Auth) -- complete
-Plan: 1 of 1 (done)
-Status: 13-01 complete (checkpoint approved)
-Last activity: 2026-02-22 -- Completed 13-01 (Deep Linking + Auth, all 3 tasks)
+Phase: 14 (Remote Push Notifications)
+Plan: 1 of 3 (done)
+Status: 14-01 complete
+Last activity: 2026-02-22 -- Completed 14-01 (Push Infrastructure, 2 tasks)
 
-Progress: [██████░░░░] 50% (6/12 plans estimated)
+Progress: [███████░░░] 58% (7/12 plans estimated)
 
 ## Performance Metrics
 
@@ -32,6 +32,7 @@ Progress: [██████░░░░] 50% (6/12 plans estimated)
 | 11. Capacitor Shell | 2/2 | 14min | 7min |
 | 12. Native Polish | 2/2 | 28min | 14min |
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
+| 14. Remote Push Notifications | 1/3 | 6min | 6min |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Progress: [██████░░░░] 50% (6/12 plans estimated)
 - Hardcoded web domain for Supabase auth redirectTo (capacitor://localhost breaks redirect chain)
 - Deep link handler shared function for warm start (appUrlOpen) and cold start (getLaunchUrl)
 - /reset-password route in both auth states to handle brief session restoration window
+- @capacitor/push-notifications@7.0.5 (not 8.x) to match Capacitor 7.5.x peer dependency
+- device_tokens types added manually to database.types.ts (migration not yet applied to running DB)
 
 ### Pending Todos
 
@@ -63,6 +66,7 @@ Progress: [██████░░░░] 50% (6/12 plans estimated)
 - Configure Sentry alert rules, set deploy env vars
 - Replace XXXXXXXXXX in AASA file with actual Apple Team ID
 - Add https://app.welltrained.fitness/** to Supabase Auth redirect URL allowlist
+- Apply migration 011_device_tokens.sql to production Supabase
 
 ### Blockers/Concerns
 
@@ -73,5 +77,5 @@ Progress: [██████░░░░] 50% (6/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 13-01-PLAN.md (phase 13 done)
-Resume file: N/A (ready for Phase 14)
+Stopped at: Completed 14-01-PLAN.md
+Resume file: .planning/phases/14-remote-push-notifications/14-02-PLAN.md
