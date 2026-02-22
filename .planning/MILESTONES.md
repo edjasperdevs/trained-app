@@ -1,5 +1,22 @@
 # Project Milestones: Trained
 
+## v1.4 Intake Dashboard (Shipped: 2026-02-21)
+
+**Delivered:** Intake submissions dashboard integrated into Coach section — 4th "Intake" segment with submission browsing, filtering by status, full detail views with collapsible sections and photo gallery, coach notes, status management, and manual client-submission linking via client detail Intake tab. All archive components restyled to shadcn/ui + CVA patterns.
+
+**Phases completed:** 7-10 (built outside GSD)
+
+**Key accomplishments:**
+
+- Ported intake types and API layer to use existing Supabase client (no separate AuthContext)
+- Built filterable submissions list with status tabs and new-count badge on segment tab
+- Created submission detail view with 10 collapsible sections, signed-URL photo gallery, status dropdown, and coach notes
+- Added Intake tab to client detail modal with manual submission linking
+
+**What's next:** Native iOS app via Capacitor for App Store distribution.
+
+---
+
 ## v1.3 Coach Dashboard (Shipped: 2026-02-08)
 
 **Delivered:** Full coaching platform — invite clients, manage macro targets, program workouts, review structured weekly check-ins — all from a dedicated `/coach` route with directional sync preventing data collisions.

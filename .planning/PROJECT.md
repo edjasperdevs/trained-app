@@ -47,28 +47,35 @@ Previous milestones delivered:
 - ✓ Coach macro management with "Set by Coach" indicator and locked calculator — v1.3
 - ✓ Workout programming: template builder, assignment, prescribed-vs-actual comparison — v1.3
 - ✓ Structured weekly check-ins with 16-field form, auto-data, coach review, response viewing — v1.3
+- ✓ Intake submissions dashboard (4th Coach segment, detail views, photo gallery, coach notes) — v1.4
+- ✓ Manual client-submission linking with Intake tab in client detail modal — v1.4
+- ✓ Archive components restyled to shadcn/ui + CVA patterns — v1.4
 
 ### Active
 
-**Current Milestone: v1.4 Intake Dashboard**
+**Current Milestone: v1.5 Native iOS App**
 
-**Goal:** Integrate the archived intake submissions dashboard into the coach section — a 4th "Intake" segment for viewing/managing all submissions, plus a client detail tab for linked submissions, with manual client-submission linking.
+**Goal:** Wrap the PWA with Capacitor and ship to the iOS App Store for 90k-audience credibility, adding real push notifications for reminders and coach actions.
 
 **Target features:**
-- 4th "Intake" segment in Coach dashboard with status filtering and submission list
-- Submission detail view with collapsible data sections, photo gallery (signed URLs), coach notes, status management
-- "Intake" tab in client detail modal showing linked submission
-- Manual linking: coach can associate a submission with a client
-- Design system adaptation: restyle archive components to match shadcn/ui + CVA patterns
-- API layer: use existing Supabase client and CoachGuard auth (no separate AuthContext)
+- Capacitor iOS shell wrapping existing React app in native WebView
+- Push notifications: daily reminders (workout, meals, check-in) + coach action triggers (macro update, workout assignment, check-in response)
+- Native iOS haptics replacing no-op navigator.vibrate
+- Native file sharing replacing Blob download hack
+- App lifecycle events (background/foreground detection via Capacitor App plugin)
+- Splash screen and App Store assets
+- Deep link handling for password reset (replacing window.location.origin redirect)
+- App Store submission preparation (metadata, screenshots, review compliance)
 
 ### Out of Scope
 
-- Native mobile app — still PWA
+- Android / Play Store — iOS only for v1.5, Android in future milestone
 - Light mode — dark-only
 - Marketing site — app only
 - A/B testing infrastructure — premature for launch
 - Custom analytics backend — leverage Plausible + Sentry
+- HealthKit / Apple Health integration — not needed for v1.5 scope
+- Background fitness tracking (GPS, step counter) — not needed
 - Full chat / messaging — check-in responses cover 80% of communication needs
 - Multi-coach / team features — single-coach app
 - AI workout generation — coach expertise is the product
@@ -76,7 +83,7 @@ Previous milestones delivered:
 ## Context
 
 **Current State:**
-- Four milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence, v1.3 coach dashboard), v1.4 in progress
+- Five milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence, v1.3 coach dashboard, v1.4 intake dashboard)
 - 139 unit tests + 10 E2E tests passing
 - Full coaching platform: invitations, roster, macro management, workout programming, weekly check-ins
 - Directional sync separates client-owned vs coach-owned data
@@ -105,7 +112,8 @@ Previous milestones delivered:
 - **Supabase**: All backend through Supabase (auth, database, edge functions) — no separate backend
 - **Privacy**: Client data visible only to coach — clients cannot see each other
 - **Existing aesthetic**: Coach dashboard follows the same premium dark design system (shadcn/ui, CVA)
-- **PWA**: Still a PWA — no native app
+- **iOS first**: Capacitor wrapping existing PWA — no React Native rewrite
+- **Apple Developer account**: Enrollment needed (can develop in parallel)
 
 ## Key Decisions
 
@@ -125,9 +133,12 @@ Previous milestones delivered:
 | Non-persisted assignedWorkout | Server-authoritative data fetched fresh each session | ✓ Good — no stale workout assignments |
 | localStorage for check-in status | Single read-only value doesn't need Zustand reactive state | ✓ Good — lightweight sync pattern |
 
-| Adapt archive code, not new AuthContext | trained-app has Zustand authStore + CoachGuard, archive's AuthContext/useAuth not needed | — Pending |
-| Manual client-submission linking | Coach manually associates submissions vs auto-match by email | — Pending |
-| intake_submissions/intake_photos tables pre-exist | Tables already in Supabase from marketing site — no migration needed | — Pending |
+| Adapt archive code, not new AuthContext | trained-app has Zustand authStore + CoachGuard, archive's AuthContext/useAuth not needed | ✓ Good |
+| Manual client-submission linking | Coach manually associates submissions vs auto-match by email | ✓ Good |
+| intake_submissions/intake_photos tables pre-exist | Tables already in Supabase from marketing site — no migration needed | ✓ Good |
+| Capacitor over React Native | Preserves entire React codebase, Tailwind, routing — WebView performance fine for forms/lists | — Pending |
+| iOS only for v1.5 | Most fitness users on iPhone, reduces scope, Android deferred | — Pending |
+| Push via APNs + Supabase | Supabase Edge Functions can trigger APNs — no separate push infra | — Pending |
 
 ---
-*Last updated: 2026-02-08 — v1.4 Intake Dashboard started*
+*Last updated: 2026-02-21 — v1.5 Native iOS App started*

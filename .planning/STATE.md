@@ -2,19 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-08)
+See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.4 Intake Dashboard -- Phase 7: Intake Foundation
+**Current focus:** v1.5 Native iOS App
 
 ## Current Position
 
-Phase: 7 of 10 (Intake Foundation)
-Plan: 0 of 1 in current phase
-Status: Ready to plan
-Last activity: 2026-02-08 -- Roadmap created for v1.4 (4 phases, 14 requirements)
-
-Progress: [░░░░░░░░░░░░░░░░░░] 0%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-21 — Milestone v1.5 started
 
 ## Performance Metrics
 
@@ -23,25 +21,22 @@ Progress: [░░░░░░░░░░░░░░░░░░] 0%
 - v1.1 Design Refresh: 7 phases, 12 plans (1.48 hours, avg 7.4min/plan)
 - v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
 - v1.3 Coach Dashboard: 6 phases, 18 plans (61min, avg 3.4min/plan)
+- v1.4 Intake Dashboard: 4 phases (built outside GSD)
 
-**v1.4 Intake Dashboard:**
+**v1.5 Native iOS App:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 7. Intake Foundation | 0/1 | - | - |
-| 8. Submissions List | 0/1 | - | - |
-| 9. Submission Detail | 0/1 | - | - |
-| 10. Client Linking | 0/1 | - | - |
+| TBD | - | - | - |
 
 ## Accumulated Context
 
 ### Decisions
 
-- Adapt archive code into existing Coach.tsx patterns (no separate AuthContext)
-- Manual client-submission linking (not auto-match by email)
-- intake_submissions + intake_photos tables already exist in Supabase
-- 4th "Intake" segment + client detail "Intake" tab (both placements)
-- ADAPT requirements woven into phases (not a separate phase)
+- Capacitor over React Native (preserves entire codebase)
+- iOS only for v1.5 (Android deferred)
+- Push notifications: reminders + coach action triggers
+- Apple Developer account enrollment needed (parallel to dev work)
 
 ### Pending Todos
 
@@ -53,10 +48,10 @@ Progress: [░░░░░░░░░░░░░░░░░░] 0%
 
 ### Blockers/Concerns
 
-None.
+- Apple Developer account not yet created (blocks App Store submission, not development)
 
 ## Session Continuity
 
-Last session: 2026-02-08
-Stopped at: Roadmap created for v1.4 Intake Dashboard
+Last session: 2026-02-21
+Stopped at: Defining requirements for v1.5 Native iOS App
 Resume file: None
