@@ -14,6 +14,7 @@ import { WorkoutBuilder } from '@/components/WorkoutBuilder'
 import { WorkoutAssigner } from '@/components/WorkoutAssigner'
 import { PrescribedVsActual } from '@/components/PrescribedVsActual'
 import { analytics, trackEvent } from '@/lib/analytics'
+import { confirmAction } from '@/lib/confirm'
 import { getLocalDateString, getTimeAgo } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { getMockProfileByEmail, addMockClient, removeMockClient } from '@/lib/devSeed'
@@ -133,7 +134,7 @@ function MacroEditor({
   }
 
   const handleRevert = async () => {
-    if (!window.confirm('Release macro targets back to the client? They will be able to recalculate their own macros.')) {
+    if (!await confirmAction('Release macro targets back to the client? They will be able to recalculate their own macros.', 'Release Targets')) {
       return
     }
 
@@ -793,7 +794,7 @@ export function Coach() {
   }
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!window.confirm('Delete this template? This cannot be undone.')) return
+    if (!await confirmAction('Delete this template? This cannot be undone.', 'Delete Template')) return
     await deleteTemplate(id)
     toast.success('Template deleted')
   }
@@ -804,7 +805,7 @@ export function Coach() {
   }
 
   const handleDeleteAssignment = async (id: string) => {
-    if (!window.confirm('Remove this assigned workout?')) return
+    if (!await confirmAction('Remove this assigned workout?', 'Remove Workout')) return
     await deleteAssignment(id)
     // Refresh assignments
     if (selectedClient?.client_id) {

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import type { PrescribedExercise } from '@/lib/database.types'
 import { useCoachTemplates } from '@/hooks/useCoachTemplates'
 import { toast } from '@/stores'
+import { confirmAction } from '@/lib/confirm'
 import { Calendar, Dumbbell, FileText } from 'lucide-react'
 
 interface WorkoutAssignerProps {
@@ -67,8 +68,9 @@ export function WorkoutAssigner({
       // Check for existing assignment on that date
       const existing = await checkExistingAssignment(selectedClientId, date)
       if (existing) {
-        const confirmed = window.confirm(
-          `${selectedClientName || 'This client'} already has a workout assigned for ${date}. Replace it?`
+        const confirmed = await confirmAction(
+          `${selectedClientName || 'This client'} already has a workout assigned for ${date}. Replace it?`,
+          'Replace Workout'
         )
         if (!confirmed) {
           setIsAssigning(false)

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar } from '@/components'
 import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
+import { confirmAction } from '@/lib/confirm'
 import {
   useUserStore,
   useXPStore,
@@ -276,8 +277,8 @@ export function Settings() {
     reader.readAsText(file)
   }
 
-  const handleResetProgress = () => {
-    if (window.confirm('Are you sure? This will delete ALL your progress and cannot be undone.')) {
+  const handleResetProgress = async () => {
+    if (await confirmAction('Are you sure? This will delete ALL your progress and cannot be undone.', 'Delete Progress')) {
       try {
         useUserStore.getState().resetProgress()
         useXPStore.getState().resetXP()

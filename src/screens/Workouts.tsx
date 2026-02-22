@@ -8,6 +8,7 @@ import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toas
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
+import { confirmAction } from '@/lib/confirm'
 import { scheduleSync } from '@/lib/sync'
 import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
@@ -156,10 +157,9 @@ export function Workouts() {
     setActiveWorkout(null)
   }
 
-  const handleEndWorkoutEarly = () => {
+  const handleEndWorkoutEarly = async () => {
     if (isSubmitting) return
     if (!activeWorkout) return
-    setIsSubmitting(true)
 
     // Check if at least one set was completed
     const completedSets = activeWorkout.exercises.reduce(
@@ -168,10 +168,12 @@ export function Workouts() {
     )
 
     if (completedSets === 0) {
-      if (!window.confirm('You haven\'t completed any sets. End workout anyway?')) {
+      if (!await confirmAction('You haven\'t completed any sets. End workout anyway?', 'End Workout')) {
         return
       }
     }
+
+    setIsSubmitting(true)
 
     endWorkoutEarly(activeWorkout.id)
     markXPAwarded(activeWorkout.id)
@@ -857,8 +859,8 @@ export function Workouts() {
             {/* Reset Button */}
             {customizations.some(c => c.workoutType === editingWorkoutType) && (
               <button
-                onClick={() => {
-                  if (window.confirm(`Reset ${editingWorkoutType} exercises to defaults?`)) {
+                onClick={async () => {
+                  if (await confirmAction(`Reset ${editingWorkoutType} exercises to defaults?`, 'Reset Exercises')) {
                     resetToDefaults(editingWorkoutType)
                   }
                 }}

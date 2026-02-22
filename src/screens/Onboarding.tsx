@@ -31,6 +31,7 @@ import {
 } from '@/stores'
 import { getDefaultDays } from '@/stores/workoutStore'
 import { analytics } from '@/lib/analytics'
+import { confirmAction } from '@/lib/confirm'
 import { LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
 import { toDisplayWeight, toInternalWeight, toDisplayHeight, toInternalHeight, getWeightUnit } from '@/lib/units'
@@ -173,8 +174,8 @@ export function Onboarding() {
   }
 
   // Emergency skip - completes onboarding with current/default data
-  const handleSkip = () => {
-    if (!window.confirm('Skip setup and use default settings? You can adjust these later in Settings.')) {
+  const handleSkip = async () => {
+    if (!await confirmAction('Skip setup and use default settings? You can adjust these later in Settings.', 'Skip Setup')) {
       return
     }
     clearProgress()

@@ -6,6 +6,7 @@ import { ProgressBar, MealBuilder, EmptyState, FoodSearch } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
+import { confirmAction } from '@/lib/confirm'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { LABELS } from '@/design/constants'
@@ -592,8 +593,8 @@ function DailyView({
                       </p>
                     </div>
                     <button
-                      onClick={() => {
-                        if (window.confirm('Delete this meal entry?')) {
+                      onClick={async () => {
+                        if (await confirmAction('Delete this meal entry?', 'Delete Entry')) {
                           onDeleteMeal(meal.id)
                         }
                       }}
@@ -1227,8 +1228,8 @@ function LogMealView({
                     Edit
                   </button>
                   <button
-                    onClick={() => {
-                      if (window.confirm(`Delete saved meal "${meal.name}"?`)) {
+                    onClick={async () => {
+                      if (await confirmAction(`Delete saved meal "${meal.name}"?`, 'Delete Meal')) {
                         onDeleteSavedMeal(meal.id)
                       }
                     }}
