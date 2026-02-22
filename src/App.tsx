@@ -1,12 +1,14 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
-import { useUserStore, useAvatarStore, useAuthStore, useAccessStore, useSyncStore } from '@/stores'
+import { useUserStore, useAvatarStore, useAuthStore, useSyncStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
+import { App as CapApp } from '@capacitor/app'
+import { isNative } from '@/lib/platform'
 import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
-import { AccessGate, Auth } from '@/screens'
+import { Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
@@ -40,14 +42,13 @@ function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initialize)
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
-  const hasAccess = useAccessStore((state) => state.hasAccess)
-  const [accessGranted, setAccessGranted] = useState(hasAccess)
   const location = useLocation()
 
   // Initialize auth on app load
   useEffect(() => {
     initializeAuth()
   }, [initializeAuth])
+
 
   // Online/offline detection and background sync
   useEffect(() => {
@@ -89,6 +90,29 @@ function AppContent() {
     }
   }, [])
 
+  // Native app lifecycle: background/foreground detection (SHELL-05)
+  useEffect(() => {
+    if (!isNative()) return
+
+    let lastBackground = 0
+
+    const listener = CapApp.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive) {
+        lastBackground = Date.now()
+        console.log('[Capacitor] App went to background')
+      } else {
+        console.log('[Capacitor] App resumed to foreground')
+        const elapsed = Date.now() - lastBackground
+        if (elapsed > 30_000 && navigator.onLine) {
+          pullCoachData()
+          flushPendingSync()
+        }
+      }
+    })
+
+    return () => { listener.then(l => l.remove()) }
+  }, [])
+
   // Track app opened once per session
   useEffect(() => {
     analytics.appOpened()
@@ -119,19 +143,6 @@ function AppContent() {
   }
 
   const isCoachRoute = location.pathname === '/coach'
-  const isAuthRoute = location.pathname === '/auth'
-
-  // Check access code first (before auth) — coach route, auth route, and authenticated users bypass
-  if (!devBypass && !hasAccess && !accessGranted && !user && !isCoachRoute && !isAuthRoute) {
-    return (
-      <>
-        <ToastContainer />
-        <SentryRoutes>
-          <Route path="*" element={<AccessGate onAccessGranted={() => setAccessGranted(true)} />} />
-        </SentryRoutes>
-      </>
-    )
-  }
 
   // If not authenticated, show auth screen
   if (!devBypass && !user) {
@@ -176,7 +187,6 @@ function AppContent() {
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
-          {devBypass && <Route path="/access" element={<AccessGate onAccessGranted={() => {}} />} />}
           {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
           <Route path="*" element={<NotFound />} />
         </SentryRoutes>
