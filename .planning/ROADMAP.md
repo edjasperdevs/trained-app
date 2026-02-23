@@ -19,7 +19,7 @@
 - [x] **Phase 12: Native Polish** - Haptics, share sheet, splash screen, app icon, status bar (shipped 2026-02-22)
 - [x] **Phase 13: Deep Linking + Auth** - Universal Links and Supabase auth redirects in Capacitor (shipped 2026-02-22)
 - [x] **Phase 14: Remote Push Notifications** - APNs infrastructure, coach-triggered pushes, tap navigation (shipped 2026-02-22)
-- [ ] **Phase 15: Local Notifications + Engagement** - Scheduled reminders, streak-at-risk, badge count
+- [x] **Phase 15: Local Notifications + Engagement** - Scheduled reminders, streak-at-risk, badge count (shipped 2026-02-22)
 - [ ] **Phase 16: App Store Submission** - Compliance, TestFlight, App Store review and publish
 
 ## Phase Details
@@ -95,11 +95,11 @@ Plans:
   3. User can configure notification times and toggle each notification type on/off from the Settings screen
   4. User receives a streak-at-risk push notification in the evening if they have not checked in that day
   5. App icon badge on the home screen shows the count of pending actions (unread coach responses, pending check-ins)
-**Plans:** 2 plans
+**Plans:** 2 plans (2/2 complete)
 
 Plans:
-- [ ] 15-01-PLAN.md -- Install plugins, create notification scheduling + badge modules, extend reminders store with time preferences
-- [ ] 15-02-PLAN.md -- Settings UI for push notification configuration, App.tsx lifecycle wiring, remove badge from remote push
+- [x] 15-01-PLAN.md -- Install plugins, create notification scheduling + badge modules, extend reminders store with time preferences
+- [x] 15-02-PLAN.md -- Settings UI for push notification configuration, App.tsx lifecycle wiring, remove badge from remote push
 
 ### Phase 16: App Store Submission
 **Goal**: The app is published on the iOS App Store, having passed Apple review with all compliance requirements met
@@ -127,5 +127,5 @@ Plans:
 | 12. Native Polish | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 13. Deep Linking + Auth | v1.5 | 1/1 | ✓ Complete | 2026-02-22 |
 | 14. Remote Push Notifications | v1.5 | 3/3 | ✓ Complete | 2026-02-22 |
-| 15. Local Notifications + Engagement | v1.5 | 0/TBD | Not started | - |
+| 15. Local Notifications + Engagement | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
 | 16. App Store Submission | v1.5 | 0/TBD | Not started | - |
