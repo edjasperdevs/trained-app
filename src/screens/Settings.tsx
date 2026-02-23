@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar } from '@/components'
-import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award } from 'lucide-react'
+import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { isNative } from '@/lib/platform'
@@ -23,12 +23,14 @@ import {
   toast,
   DayOfWeek,
   ReminderType,
-  UnitSystem
+  UnitSystem,
+  NotificationPreferences
 } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { friendlyError } from '@/lib/errors'
-import { isCoach as checkIsCoach } from '@/lib/supabase'
+import { isCoach as checkIsCoach, getSupabaseClient } from '@/lib/supabase'
+import { scheduleAllNotifications } from '@/lib/notifications'
 import { getLocalDateString } from '@/lib/dateUtils'
 import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidXPState, isValidDailyLog, isArray } from '@/lib/validation'
 import { cn } from '@/lib/cn'
@@ -59,6 +61,10 @@ export function Settings() {
   const reminderPreferences = useRemindersStore((state) => state.preferences)
   const setReminderPreference = useRemindersStore((state) => state.setPreference)
 
+  const notificationPreferences = useRemindersStore((state) => state.notificationPreferences)
+  const setNotificationPreference = useRemindersStore((state) => state.setNotificationPreference)
+  const setNotificationTime = useRemindersStore((state) => state.setNotificationTime)
+
   const [showDangerZone, setShowDangerZone] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   const [importData, setImportData] = useState('')
@@ -67,12 +73,16 @@ export function Settings() {
   const [goalWeightInput, setGoalWeightInput] = useState('')
   const [showWeightChart, setShowWeightChart] = useState(false)
   const [isCoach, setIsCoach] = useState(false)
+  const [hasCoach, setHasCoach] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (user) {
       checkIsCoach().then(setIsCoach)
+      // Check if user is a coaching client (for weekly check-in notification visibility)
+      getSupabaseClient().from('coach_clients').select('id').eq('client_id', user.id).eq('status', 'active').maybeSingle()
+        .then(({ data }) => setHasCoach(data !== null))
     }
   }, [user])
 
@@ -89,6 +99,19 @@ export function Settings() {
   const selectedDays = currentPlan?.selectedDays || []
   const trainingDays = profile?.trainingDaysPerWeek || 3
   const units: UnitSystem = profile?.units || 'imperial'
+
+  const handleNotificationToggle = (key: keyof NotificationPreferences, enabled: boolean) => {
+    setNotificationPreference(key, enabled)
+    // Reschedule after state update
+    const updated = { ...notificationPreferences, [key]: { ...notificationPreferences[key], enabled } }
+    scheduleAllNotifications(updated, selectedDays)
+  }
+
+  const handleNotificationTimeChange = (key: keyof NotificationPreferences, hour: number, minute: number) => {
+    setNotificationTime(key, hour, minute)
+    const updated = { ...notificationPreferences, [key]: { ...notificationPreferences[key], time: { hour, minute } } }
+    scheduleAllNotifications(updated, selectedDays)
+  }
 
   const toggleDay = (day: DayOfWeek) => {
     const isSelected = selectedDays.includes(day)
@@ -107,6 +130,10 @@ export function Settings() {
     }
 
     setWorkoutDays(newDays)
+    // Reschedule workout notifications with new days
+    if (isNative()) {
+      scheduleAllNotifications(notificationPreferences, newDays)
+    }
   }
 
   const handleLogWeight = () => {
@@ -716,6 +743,69 @@ export function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Push Notifications (native only) */}
+        {isNative() && (
+          <Card className="py-0">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                Push Notifications
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Schedule push reminders to help maintain your daily discipline.
+              </p>
+              <div className="space-y-2">
+                {([
+                  { key: 'checkIn' as keyof NotificationPreferences, label: LABELS.checkIn, description: 'Daily reminder at your chosen time', icon: CheckCircle2, visible: true },
+                  { key: 'workout' as keyof NotificationPreferences, label: 'Training', description: 'Reminder on workout days', icon: Dumbbell, visible: true },
+                  { key: 'logMacros' as keyof NotificationPreferences, label: 'Log Protocol', description: 'Evening reminder to track nutrition', icon: UtensilsCrossed, visible: true },
+                  { key: 'claimXP' as keyof NotificationPreferences, label: `Claim ${LABELS.xp}`, description: 'Sunday reminder to claim your weekly reward', icon: Gift, visible: true },
+                  { key: 'weeklyCheckIn' as keyof NotificationPreferences, label: 'Weekly Check-in', description: 'Saturday reminder to submit your check-in', icon: CheckCircle2, visible: hasCoach },
+                  { key: 'streakProtection' as keyof NotificationPreferences, label: 'Streak Protection', description: "Evening alert if you haven't checked in", icon: Bell, visible: true },
+                ]).filter(i => i.visible).map(({ key, label, description, icon: Icon }) => (
+                  <div key={key} className="rounded bg-muted p-3">
+                    <button
+                      role="switch"
+                      aria-checked={notificationPreferences[key].enabled}
+                      onClick={() => handleNotificationToggle(key, !notificationPreferences[key].enabled)}
+                      className="w-full flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon size={20} className="text-muted-foreground" />
+                        <div className="text-left">
+                          <p className="font-medium text-sm">{label}</p>
+                          <p className="text-xs text-muted-foreground">{description}</p>
+                        </div>
+                      </div>
+                      <div className={cn(
+                        'w-11 h-6 transition-all duration-300 flex items-center rounded',
+                        notificationPreferences[key].enabled ? 'bg-primary justify-end' : 'bg-card justify-start'
+                      )}>
+                        <div className={cn(
+                          'w-5 h-5 mx-0.5 rounded-sm transition-all duration-300',
+                          notificationPreferences[key].enabled ? 'bg-primary-foreground' : 'bg-muted-foreground/50'
+                        )} />
+                      </div>
+                    </button>
+                    {notificationPreferences[key].enabled && (
+                      <div className="mt-2 pl-8">
+                        <input
+                          type="time"
+                          value={`${String(notificationPreferences[key].time.hour).padStart(2, '0')}:${String(notificationPreferences[key].time.minute).padStart(2, '0')}`}
+                          onChange={(e) => {
+                            const [h, m] = e.target.value.split(':').map(Number)
+                            if (!isNaN(h) && !isNaN(m)) handleNotificationTimeChange(key, h, m)
+                          }}
+                          className="bg-transparent text-sm text-primary font-digital border border-border rounded px-2 py-1 outline-none focus:border-primary"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Data Management */}
         <Card className="py-0">
