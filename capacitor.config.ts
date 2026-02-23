@@ -1,3 +1,4 @@
+/// <reference types="@capacitor/local-notifications" />
 /// <reference types="@capacitor/push-notifications" />
 /// <reference types="@capacitor/status-bar" />
 /// <reference types="@capacitor/splash-screen" />
@@ -24,6 +25,14 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_notification',
+      iconColor: '#D4443B',
+    },
+    Badge: {
+      persist: true,
+      autoClear: false,
     },
   },
   server: process.env.CAPACITOR_LIVE_RELOAD ? {

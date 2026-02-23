@@ -5,6 +5,20 @@ import { useWorkoutStore } from './workoutStore'
 import { useXPStore } from './xpStore'
 import { getLocalDateString } from '../lib/dateUtils'
 
+export interface NotificationTimePreference {
+  hour: number   // 0-23
+  minute: number // 0-59
+}
+
+export interface NotificationPreferences {
+  checkIn: { enabled: boolean; time: NotificationTimePreference }
+  workout: { enabled: boolean; time: NotificationTimePreference }
+  logMacros: { enabled: boolean; time: NotificationTimePreference }
+  claimXP: { enabled: boolean; time: NotificationTimePreference }
+  weeklyCheckIn: { enabled: boolean; time: NotificationTimePreference }
+  streakProtection: { enabled: boolean; time: NotificationTimePreference }
+}
+
 export type ReminderType = 'logMacros' | 'checkIn' | 'claimXP' | 'workout'
 
 export interface ReminderPreferences {
