@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 16 (App Store Submission) -- IN PROGRESS
-Plan: 1 of 4 (16-01 complete)
+Plan: 2 of 4 (16-02 complete)
 Status: Executing phase 16
-Last activity: 2026-02-22 -- Completed 16-01 (Account Deletion, 2 tasks)
+Last activity: 2026-02-22 -- Completed 16-02 (Privacy Policy & Apple Manifest, 2 tasks)
 
 Progress: [█████████░] 88% (12/13+ plans estimated)
 
@@ -34,7 +34,7 @@ Progress: [█████████░] 88% (12/13+ plans estimated)
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
 | 14. Remote Push Notifications | 3/3 | 10min | 3.3min |
 | 15. Local Notifications | 2/2 | 9min | 4.5min |
-| 16. App Store Submission | 1/4 | 3min | 3min |
+| 16. App Store Submission | 2/4 | 8min | 4min |
 
 ## Accumulated Context
 
@@ -73,6 +73,7 @@ Progress: [█████████░] 88% (12/13+ plans estimated)
 - Removed badge:1 from APNs payload so badge count is exclusively client-managed
 - Best-effort table deletion in delete-account (continue on individual errors, fail only on auth.admin.deleteUser)
 - 13 tables deleted in dependency-safe order (children before parents, profiles last)
+- Manual Tailwind utilities for Privacy.tsx (no @tailwindcss/typography plugin installed)
 
 ### Pending Todos
 
@@ -96,5 +97,5 @@ Progress: [█████████░] 88% (12/13+ plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 16-01-PLAN.md
-Resume file: .planning/phases/16-app-store-submission/16-02-PLAN.md
+Stopped at: Completed 16-02-PLAN.md
+Resume file: .planning/phases/16-app-store-submission/16-03-PLAN.md
