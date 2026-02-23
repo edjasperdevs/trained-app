@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 15 in progress
+**Current focus:** v1.5 Native iOS App -- Phase 16 in progress
 
 ## Current Position
 
-Phase: 15 (Local Notifications & Engagement) -- COMPLETE
-Plan: 2 of 2 (done)
-Status: Phase 15 complete
-Last activity: 2026-02-22 -- Completed 15-02 (Settings UI & Lifecycle Integration, 2 tasks)
+Phase: 16 (App Store Submission) -- IN PROGRESS
+Plan: 1 of 4 (16-01 complete)
+Status: Executing phase 16
+Last activity: 2026-02-22 -- Completed 16-01 (Account Deletion, 2 tasks)
 
-Progress: [████████░░] 85% (11/13 plans estimated)
+Progress: [█████████░] 88% (12/13+ plans estimated)
 
 ## Performance Metrics
 
@@ -34,6 +34,7 @@ Progress: [████████░░] 85% (11/13 plans estimated)
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
 | 14. Remote Push Notifications | 3/3 | 10min | 3.3min |
 | 15. Local Notifications | 2/2 | 9min | 4.5min |
+| 16. App Store Submission | 1/4 | 3min | 3min |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Progress: [████████░░] 85% (11/13 plans estimated)
 - Badge updates on every foreground resume (not just after 30s threshold)
 - Direct store imports (workoutStore, remindersStore) in App.tsx for .getState() calls to avoid circular deps
 - Removed badge:1 from APNs payload so badge count is exclusively client-managed
+- Best-effort table deletion in delete-account (continue on individual errors, fail only on auth.admin.deleteUser)
+- 13 tables deleted in dependency-safe order (children before parents, profiles last)
 
 ### Pending Todos
 
@@ -82,6 +85,7 @@ Progress: [████████░░] 85% (11/13 plans estimated)
 - Deploy send-push Edge Function (`supabase functions deploy send-push`)
 - Create 3 database webhooks in Supabase Dashboard (assigned_workouts, macro_targets, weekly_checkins -> send-push)
 - Set APNs secrets in Supabase (APNS_P8_KEY, APNS_KEY_ID, APNS_TEAM_ID, APNS_BUNDLE_ID, APNS_ENV)
+- Deploy delete-account Edge Function (`supabase functions deploy delete-account`)
 
 ### Blockers/Concerns
 
@@ -92,5 +96,5 @@ Progress: [████████░░] 85% (11/13 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 15-02-PLAN.md (Phase 15 complete)
-Resume file: Next phase TBD
+Stopped at: Completed 16-01-PLAN.md
+Resume file: .planning/phases/16-app-store-submission/16-02-PLAN.md
