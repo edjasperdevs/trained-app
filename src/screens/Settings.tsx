@@ -18,6 +18,7 @@ import {
   useWorkoutStore,
   useAvatarStore,
   useAuthStore,
+  useAccessStore,
   useRemindersStore,
   useAchievementsStore,
   toast,
@@ -346,6 +347,37 @@ export function Settings() {
         setTimeout(() => window.location.reload(), 1000)
       } catch (error) {
         toast.error(friendlyError('reset your progress', error))
+      }
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user) return
+
+    if (await confirmAction(
+      'This will permanently delete your account and ALL associated data from our servers. This action cannot be undone.',
+      'Delete Account'
+    )) {
+      try {
+        const { error } = await getSupabaseClient().functions.invoke('delete-account')
+        if (error) {
+          toast.error(friendlyError('delete your account', error))
+          return
+        }
+
+        // Clear all local stores
+        useUserStore.getState().resetProgress()
+        useXPStore.getState().resetXP()
+        useMacroStore.getState().resetMacros()
+        useWorkoutStore.getState().resetWorkouts()
+        useAvatarStore.getState().resetAvatar()
+        useAccessStore.getState().revokeAccess()
+
+        await signOut()
+        toast.success('Account deleted')
+        navigate('/auth')
+      } catch (error) {
+        toast.error(friendlyError('delete your account', error))
       }
     }
   }
@@ -854,7 +886,7 @@ export function Settings() {
             )}>
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  This will permanently delete all your progress including XP, workout history, and avatar evolution.
+                  Reset deletes local progress. Delete Account permanently removes your account and all server data.
                 </p>
                 <Button
                   variant="destructive"
@@ -863,6 +895,15 @@ export function Settings() {
                 >
                   Reset All Progress
                 </Button>
+                {user && (
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={handleDeleteAccount}
+                  >
+                    Delete Account
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
