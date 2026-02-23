@@ -19,7 +19,7 @@ export { useToastStore, toast } from './toastStore'
 export type { Toast, ToastType } from './toastStore'
 
 export { useRemindersStore } from './remindersStore'
-export type { ReminderType, ReminderPreferences, ActiveReminder } from './remindersStore'
+export type { ReminderType, ReminderPreferences, ActiveReminder, NotificationTimePreference, NotificationPreferences } from './remindersStore'
 
 export { useAchievementsStore, RARITY_COLORS } from './achievementsStore'
 export type { Badge, BadgeRarity, EarnedBadge } from './achievementsStore'

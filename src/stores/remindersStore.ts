@@ -41,10 +41,13 @@ interface RemindersStore {
   preferences: ReminderPreferences
   dismissedToday: ReminderType[]
   lastDismissDate: string | null
+  notificationPreferences: NotificationPreferences
 
   // Actions
   setPreference: (type: ReminderType, enabled: boolean) => void
   dismissReminder: (type: ReminderType) => void
+  setNotificationPreference: (key: keyof NotificationPreferences, enabled: boolean) => void
+  setNotificationTime: (key: keyof NotificationPreferences, hour: number, minute: number) => void
   shouldShowLogMacrosReminder: () => boolean
   shouldShowCheckInReminder: () => boolean
   shouldShowClaimXPReminder: () => boolean
@@ -95,6 +98,14 @@ export const useRemindersStore = create<RemindersStore>()(
       },
       dismissedToday: [],
       lastDismissDate: null,
+      notificationPreferences: {
+        checkIn: { enabled: true, time: { hour: 8, minute: 0 } },
+        workout: { enabled: true, time: { hour: 7, minute: 0 } },
+        logMacros: { enabled: true, time: { hour: 19, minute: 0 } },
+        claimXP: { enabled: true, time: { hour: 10, minute: 0 } },
+        weeklyCheckIn: { enabled: false, time: { hour: 10, minute: 0 } },
+        streakProtection: { enabled: true, time: { hour: 20, minute: 0 } },
+      },
 
       setPreference: (type, enabled) => {
         set((state) => ({
@@ -102,6 +113,24 @@ export const useRemindersStore = create<RemindersStore>()(
             ...state.preferences,
             [type]: enabled
           }
+        }))
+      },
+
+      setNotificationPreference: (key, enabled) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            [key]: { ...state.notificationPreferences[key], enabled },
+          },
+        }))
+      },
+
+      setNotificationTime: (key, hour, minute) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            [key]: { ...state.notificationPreferences[key], time: { hour, minute } },
+          },
         }))
       },
 
