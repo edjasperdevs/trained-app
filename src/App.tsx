@@ -6,7 +6,12 @@ import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { App as CapApp } from '@capacitor/app'
 import { isNative } from '@/lib/platform'
 import { initDeepLinkHandler } from '@/lib/deep-link'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import { initPushListeners, requestPushPermission } from '@/lib/push'
+import { scheduleAllNotifications } from '@/lib/notifications'
+import { updateBadge } from '@/lib/badge'
+import { useWorkoutStore } from '@/stores/workoutStore'
+import { useRemindersStore } from '@/stores/remindersStore'
 import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
@@ -65,6 +70,23 @@ function AppContent() {
     initPushListeners(user.id)
   }, [user])
 
+  // Local notification tap navigation (native only)
+  useEffect(() => {
+    if (!isNative()) return
+
+    const listener = LocalNotifications.addListener(
+      'localNotificationActionPerformed',
+      (action) => {
+        const route = action.notification.extra?.route as string | undefined
+        if (route) {
+          navigate(route)
+        }
+      }
+    )
+
+    return () => { listener.then(l => l.remove()) }
+  }, [navigate])
+
   // Request push permission after first sync completes (contextual, not on launch)
   useEffect(() => {
     if (!user || pushPermissionRequested.current) return
@@ -94,6 +116,16 @@ function AppContent() {
     }
 
     return () => unsubscribe()
+  }, [user])
+
+  // Schedule local notifications on app launch and update badge (native only)
+  useEffect(() => {
+    if (!user || !isNative()) return
+
+    const prefs = useRemindersStore.getState().notificationPreferences
+    const workoutDays = useWorkoutStore.getState().currentPlan?.selectedDays || []
+    scheduleAllNotifications(prefs, workoutDays)
+    updateBadge()
   }, [user])
 
   // Online/offline detection and background sync
@@ -148,6 +180,8 @@ function AppContent() {
         console.log('[Capacitor] App went to background')
       } else {
         console.log('[Capacitor] App resumed to foreground')
+        // Always update badge on foreground
+        updateBadge()
         const elapsed = Date.now() - lastBackground
         if (elapsed > 30_000 && navigator.onLine) {
           pullCoachData()

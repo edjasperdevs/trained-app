@@ -50,7 +50,6 @@ export async function sendAPNs(
       aps: {
         alert: { title: payload.title, body: payload.body },
         sound: 'default',
-        badge: 1,
       },
       // data fields at TOP level (not inside aps) so they appear in notification.data on client
       ...(payload.data || {}),
