@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** The coach can manage every client's training from one place -- programs, macros, check-ins -- and clients see their personalized plans without friction
-**Current focus:** v1.5 Native iOS App -- Phase 14 complete
+**Current focus:** v1.5 Native iOS App -- Phase 15 in progress
 
 ## Current Position
 
-Phase: 14 (Remote Push Notifications)
-Plan: 3 of 3 (done)
-Status: Phase 14 complete
-Last activity: 2026-02-22 -- Completed 14-03 (App Integration and Verification, 2 tasks)
+Phase: 15 (Local Notifications & Engagement)
+Plan: 1 of 2 (done)
+Status: Executing phase 15
+Last activity: 2026-02-22 -- Completed 15-01 (Local Notification Infrastructure, 2 tasks)
 
-Progress: [█████████░] 75% (9/12 plans estimated)
+Progress: [█████████░] 77% (10/13 plans estimated)
 
 ## Performance Metrics
 
@@ -33,6 +33,7 @@ Progress: [█████████░] 75% (9/12 plans estimated)
 | 12. Native Polish | 2/2 | 28min | 14min |
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
 | 14. Remote Push Notifications | 3/3 | 10min | 3.3min |
+| 15. Local Notifications | 1/2 | 5min | 5min |
 
 ## Accumulated Context
 
@@ -61,6 +62,10 @@ Progress: [█████████░] 75% (9/12 plans estimated)
 - No Firebase -- direct APNs HTTP/2 via Deno fetch (auto-negotiates HTTP/2 via TLS ALPN)
 - 50-minute JWT cache to stay under APNs 60-min limit and avoid TooManyProviderTokenUpdates
 - Webhook payloads trusted without caller auth -- only Supabase admins can create webhooks
+- Separate notificationPreferences from existing in-app preferences for backward compatibility
+- weeklyCheckIn defaults to disabled (only relevant for coaching clients)
+- Workout notification IDs use computed 20+dayOfWeek for individual per-day cancel targeting
+- Badge count from two sources: pending daily check-in + unread coach response
 
 ### Pending Todos
 
@@ -83,5 +88,5 @@ Progress: [█████████░] 75% (9/12 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 14-03-PLAN.md (Phase 14 complete)
-Resume file: Next phase planning
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-local-notifications-engagement/15-02-PLAN.md
