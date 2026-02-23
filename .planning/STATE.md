@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 15 (Local Notifications & Engagement)
-Plan: 1 of 2 (done)
-Status: Executing phase 15
-Last activity: 2026-02-22 -- Completed 15-01 (Local Notification Infrastructure, 2 tasks)
+Phase: 15 (Local Notifications & Engagement) -- COMPLETE
+Plan: 2 of 2 (done)
+Status: Phase 15 complete
+Last activity: 2026-02-22 -- Completed 15-02 (Settings UI & Lifecycle Integration, 2 tasks)
 
-Progress: [█████████░] 77% (10/13 plans estimated)
+Progress: [████████░░] 85% (11/13 plans estimated)
 
 ## Performance Metrics
 
@@ -33,7 +33,7 @@ Progress: [█████████░] 77% (10/13 plans estimated)
 | 12. Native Polish | 2/2 | 28min | 14min |
 | 13. Deep Linking + Auth | 1/1 | 5min | 5min |
 | 14. Remote Push Notifications | 3/3 | 10min | 3.3min |
-| 15. Local Notifications | 1/2 | 5min | 5min |
+| 15. Local Notifications | 2/2 | 9min | 4.5min |
 
 ## Accumulated Context
 
@@ -66,6 +66,10 @@ Progress: [█████████░] 77% (10/13 plans estimated)
 - weeklyCheckIn defaults to disabled (only relevant for coaching clients)
 - Workout notification IDs use computed 20+dayOfWeek for individual per-day cancel targeting
 - Badge count from two sources: pending daily check-in + unread coach response
+- Weekly check-in notification toggle conditionally visible based on active coach_clients row
+- Badge updates on every foreground resume (not just after 30s threshold)
+- Direct store imports (workoutStore, remindersStore) in App.tsx for .getState() calls to avoid circular deps
+- Removed badge:1 from APNs payload so badge count is exclusively client-managed
 
 ### Pending Todos
 
@@ -88,5 +92,5 @@ Progress: [█████████░] 77% (10/13 plans estimated)
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-local-notifications-engagement/15-02-PLAN.md
+Stopped at: Completed 15-02-PLAN.md (Phase 15 complete)
+Resume file: Next phase TBD
