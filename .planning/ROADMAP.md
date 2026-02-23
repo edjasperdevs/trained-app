@@ -111,11 +111,13 @@ Plans:
   3. App is available on TestFlight for beta testing before App Store submission
   4. App Store listing includes screenshots, description, keywords, and privacy nutrition labels
   5. App is live on the iOS App Store and downloadable by any iOS user
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md -- Account deletion Edge Function + Settings UI (STORE-01)
+- [ ] 16-02-PLAN.md -- In-app privacy policy + PrivacyInfo.xcprivacy (STORE-02)
+- [ ] 16-03-PLAN.md -- Apple Developer enrollment, Xcode signing, TestFlight (STORE-05)
+- [ ] 16-04-PLAN.md -- App Store Connect metadata, screenshots, submission (STORE-03, STORE-04, STORE-06)
 
 ## Progress
 
@@ -128,4 +130,4 @@ Plans:
 | 13. Deep Linking + Auth | v1.5 | 1/1 | ✓ Complete | 2026-02-22 |
 | 14. Remote Push Notifications | v1.5 | 3/3 | ✓ Complete | 2026-02-22 |
 | 15. Local Notifications + Engagement | v1.5 | 2/2 | ✓ Complete | 2026-02-22 |
-| 16. App Store Submission | v1.5 | 0/TBD | Not started | - |
+| 16. App Store Submission | v1.5 | 0/4 | Not started | - |
