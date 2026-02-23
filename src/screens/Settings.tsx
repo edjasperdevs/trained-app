@@ -983,6 +983,12 @@ export function Settings() {
                 <span className="text-white">Well</span><span className="text-primary">Trained</span>
               </p>
               <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+              <button
+                onClick={() => navigate('/privacy')}
+                className="text-xs text-primary mt-2"
+              >
+                Privacy Policy
+              </button>
               <p className="text-xs text-muted-foreground/60 mt-2">
                 Structure creates freedom
               </p>

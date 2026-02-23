@@ -43,6 +43,7 @@ const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
 const WeeklyCheckIn = lazy(() => import('@/screens/WeeklyCheckIn').then(m => ({ default: m.WeeklyCheckIn })))
 const ResetPassword = lazy(() => import('@/screens/ResetPassword').then(m => ({ default: m.ResetPassword })))
+const Privacy = lazy(() => import('@/screens/Privacy').then(m => ({ default: m.Privacy })))
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -233,6 +234,7 @@ function AppContent() {
           <Route path="/coach" element={<Auth defaultMode="login" />} />
           <Route path="/auth" element={<Auth defaultMode="login" />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+          <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="*" element={<Auth />} />
         </SentryRoutes>
       </>
@@ -268,6 +270,7 @@ function AppContent() {
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+          <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
           {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
           <Route path="*" element={<NotFound />} />

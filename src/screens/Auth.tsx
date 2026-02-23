@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Mail, Eye, EyeOff } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
 import { analytics } from '@/lib/analytics'
@@ -12,6 +13,7 @@ import { Separator } from '@/components/ui/separator'
 type AuthMode = 'login' | 'signup' | 'forgot'
 
 export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
+  const navigate = useNavigate()
   const { signIn, signUp, resetPassword, resendConfirmation, isConfigured } = useAuthStore()
 
   const [mode, setMode] = useState<AuthMode>(defaultMode)
@@ -321,6 +323,16 @@ export function Auth({ defaultMode = 'signup' }: { defaultMode?: AuthMode }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Privacy Policy link -- required for App Store compliance (visible before sign-in) */}
+        <div className="text-center mt-4">
+          <button
+            onClick={() => navigate('/privacy')}
+            className="text-xs text-muted-foreground"
+          >
+            Privacy Policy
+          </button>
+        </div>
       </div>
     </div>
   )
