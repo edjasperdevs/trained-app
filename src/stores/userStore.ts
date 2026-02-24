@@ -110,7 +110,6 @@ export const useUserStore = create<UserStore>()(
           lastCheckInDate: null,
           streakPaused: false,
           onboardingComplete: false,
-          units: 'imperial',
         }
       }),
 

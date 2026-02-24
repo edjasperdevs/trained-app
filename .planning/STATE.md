@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 16 (App Store Submission) -- IN PROGRESS
-Plan: 2 of 4 (16-02 complete)
-Status: Executing phase 16
-Last activity: 2026-02-22 -- Completed 16-02 (Privacy Policy & Apple Manifest, 2 tasks)
+Phase: 16 (App Store Submission) -- PAUSED (waiting on Apple Developer approval)
+Plan: 2 of 4 (16-01 + 16-02 complete, 16-03 checkpoint: Apple Developer enrollment done, awaiting approval)
+Status: Paused at 16-03 checkpoint -- Apple Developer enrollment submitted, waiting 24-48h approval
+Last activity: 2026-02-23 -- Paused at 16-03 checkpoint (Apple Developer approval pending)
 
 Progress: [█████████░] 88% (12/13+ plans estimated)
 
@@ -90,12 +90,13 @@ Progress: [█████████░] 88% (12/13+ plans estimated)
 
 ### Blockers/Concerns
 
-- Apple Developer account not yet created (blocks TestFlight/submission, not development)
+- Apple Developer enrollment submitted, awaiting approval (blocks 16-03 steps 2-5 and 16-04)
 - Capacitor 7 to 8 migration needed before April 28, 2026 Apple deadline (not in v1.5 scope)
 - APNs without Firebase needs implementation validation (plugin may have internal Firebase deps)
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 16-02-PLAN.md
+Last session: 2026-02-23
+Stopped at: 16-03 checkpoint -- Apple Developer enrollment submitted, awaiting approval (24-48h)
 Resume file: .planning/phases/16-app-store-submission/16-03-PLAN.md
+Resume instructions: User completed Apple Developer enrollment (step 1 of 5). When approved, resume with steps 2-5 (AASA Team ID, Xcode signing, archive, TestFlight). Type "testflight-ready" to continue.

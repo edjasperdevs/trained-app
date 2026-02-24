@@ -1,917 +1,1134 @@
-# Architecture Patterns: Coach Dashboard Integration
+# Architecture Patterns: Capacitor iOS Native App Integration
 
-**Domain:** Coach dashboard for existing fitness gamification PWA
-**Researched:** 2026-02-07
-**Confidence:** HIGH (based on direct codebase analysis + verified Supabase patterns)
+**Domain:** Native iOS wrapper for existing fitness gamification PWA
+**Researched:** 2026-02-21
+**Confidence:** HIGH (based on direct codebase analysis + verified Capacitor/Supabase documentation)
 
 ## Current Architecture Snapshot
 
-Before designing the integration, here is what already exists:
+Before designing the Capacitor integration, here is what exists and what each module requires:
 
-### Existing Coach Infrastructure (Already Built)
+### Existing Module Inventory
 
-The codebase already has significant coach infrastructure in place:
-
-| Component | Location | Status |
-|-----------|----------|--------|
-| `coach_clients` table | `supabase/schema.sql` | Deployed, with indexes |
-| `coach_client_summary` view | `supabase/schema.sql` | Deployed, joins profiles + XP + weight + workouts |
-| `profiles.role` column | `supabase/schema.sql` | Deployed, enum `user_role = 'client' \| 'coach' \| 'admin'` |
-| RLS policies (read) | `supabase/schema.sql` | Deployed for all data tables |
-| `Coach.tsx` screen | `src/screens/Coach.tsx` | Functional client list + detail modal with tabs |
-| `useClientDetails` hook | `src/hooks/useClientDetails.ts` | Functional with 5-min cache, fetches weight/macros/activity |
-| `ClientActivityFeed` | `src/components/ClientActivityFeed.tsx` | Functional, grouped by date |
-| `ClientMacroAdherence` | `src/components/ClientMacroAdherence.tsx` | Functional, adherence bars |
-| `WeightChart` (reused) | `src/components/WeightChart.tsx` | Accepts generic `WeightEntry[]`, works for coach view |
-| `isCoach()` helper | `src/lib/supabase.ts` | Queries `profiles.role === 'coach'` |
-| Coach link in Settings | `src/screens/Settings.tsx` | Conditionally shows "Open Dom/me Dashboard" |
-| `/coach` route | `src/App.tsx` | Lazy-loaded, inside authenticated routes |
-| Mock data (dev bypass) | `src/lib/devSeed.ts` | 4 mock clients with weight/macro/activity data |
-| Analytics events | `src/lib/analytics.ts` | `coachDashboardViewed`, `clientViewed` |
-| Theme labels | `src/design/constants.ts` | `coach: 'Dom/me'`, `client: 'Sub'`, etc. |
-
-### What is NOT Built Yet
-
-The milestone asks about features that go BEYOND read-only client monitoring:
-
-| Feature | Status | What's Needed |
-|---------|--------|---------------|
-| Coach assigns workout templates | NOT BUILT | New table, new RLS, new UI, client pull mechanism |
-| Coach sets macro targets | PARTIALLY BUILT | RLS policy for coach UPDATE on `macro_targets` exists, but no UI |
-| Coach-client check-ins/messaging | NOT BUILT | New table, new RLS, new UI |
-| Client sees coach assignments | NOT BUILT | Client-side polling/subscription, store integration |
-| Coach role assignment | MANUAL ONLY | Must be set via Supabase dashboard SQL |
-
-### Existing Data Flow
-
-```
-CLIENT CREATES DATA:
-  User action
-    -> Zustand store (localStorage, source of truth)
-      -> scheduleSync() (2s debounce)
-        -> syncAllToCloud() (Supabase)
-
-COACH READS DATA:
-  Coach opens dashboard
-    -> Direct Supabase queries (NOT Zustand)
-      -> coach_client_summary view (client list)
-      -> useClientDetails hook (weight, macros, activity)
-```
-
-### Existing Auth Flow
-
-```
-AccessGate (access code)
-  -> Auth (email/password via Supabase)
-    -> Onboarding (profile setup)
-      -> Main App (routes)
-
-Coach detection:
-  Settings.tsx calls isCoach() -> queries profiles.role
-  If coach, shows link to /coach route
-  /coach route is inside main authenticated routes (no separate auth)
-```
+| Module | Location | Capacitor Impact | Change Required |
+|--------|----------|-----------------|-----------------|
+| BrowserRouter | `src/main.tsx` | Works in WKWebView | NONE |
+| Zustand + localStorage persist | `src/stores/*.ts` (8 stores) | localStorage unreliable on iOS | MEDIUM - adapter needed |
+| Supabase auth (email/password) | `src/lib/supabase.ts`, `src/stores/authStore.ts` | Works but needs deep link handling for password reset | LOW |
+| Service worker (vite-plugin-pwa) | `vite.config.ts`, `src/components/UpdatePrompt.tsx` | WKWebView does NOT support service workers | HIGH - must disable in native |
+| navigator.vibrate haptics | `src/lib/haptics.ts` | 0% iOS support (already known) | HIGH - replace with @capacitor/haptics |
+| File export (Blob + `<a download>`) | `src/screens/Settings.tsx` | `<a download>` does not work in WKWebView | HIGH - replace with Filesystem + Share |
+| File import (FileReader) | `src/screens/Settings.tsx` | FileReader works, native file picker triggers | NONE |
+| window.confirm (10 call sites) | `Workouts.tsx`, `Settings.tsx`, `Macros.tsx`, `Coach.tsx`, `Onboarding.tsx`, `WorkoutAssigner.tsx` | Works but looks non-native | LOW - optional upgrade to @capacitor/dialog |
+| Online/offline detection | `src/App.tsx` (navigator.onLine, visibilitychange) | WebView events less reliable than native | MEDIUM - supplement with @capacitor/network + @capacitor/app |
+| window.location.origin (password reset) | `src/stores/authStore.ts:197` | Returns `capacitor://localhost` in native | HIGH - must detect platform |
+| Plausible analytics (`<script>` tag) | `index.html`, `src/lib/analytics.ts` | Script tag works in WebView but tracks wrong domain | MEDIUM - needs Plausible Events API |
+| Sentry (@sentry/react) | `src/lib/sentry.ts` | Works but misses native crashes | MEDIUM - upgrade to @sentry/capacitor |
+| visibilitychange sync | `src/App.tsx:68-79` | Less reliable in native app lifecycle | MEDIUM - supplement with @capacitor/app |
+| UpdatePrompt (SW update) | `src/components/UpdatePrompt.tsx` | No service worker in native, component is useless | HIGH - must hide in native |
 
 ---
 
-## Recommended Architecture for Coach Dashboard Expansion
+## Recommended Architecture
 
-### Design Principle: Two Data Authorities
-
-The fundamental challenge is that Trained is offline-first (Zustand localStorage is truth), but coach data is server-authoritative (Supabase is truth). These two models must coexist.
-
-**Rule:** Coach-originated data flows FROM Supabase TO client. Client-originated data flows FROM Zustand TO Supabase. They never conflict because they are different data domains.
+### High-Level: Thin Native Shell + Existing Web App
 
 ```
-COACH-ORIGINATED DATA (server-authoritative):
-  Coach writes in dashboard
-    -> Supabase directly
-      -> Client polls on app open / visibility change
-        -> Merged into Zustand stores
-
-CLIENT-ORIGINATED DATA (offline-first, unchanged):
-  User action
-    -> Zustand store (localStorage)
-      -> scheduleSync() -> Supabase
++--------------------------------------------------+
+|  iOS App (Xcode Project)                         |
+|  +--------------------------------------------+  |
+|  |  WKWebView (Capacitor)                     |  |
+|  |  +--------------------------------------+  |  |
+|  |  |  Vite dist/ (React SPA)              |  |  |
+|  |  |  - All existing screens              |  |  |
+|  |  |  - Zustand stores                    |  |  |
+|  |  |  - React Router (BrowserRouter)      |  |  |
+|  |  |  - Supabase client                   |  |  |
+|  |  +--------------------------------------+  |  |
+|  |                                            |  |
+|  |  Capacitor Bridge (JS <-> Swift)           |  |
+|  |  - @capacitor/push-notifications           |  |
+|  |  - @capacitor/haptics                      |  |
+|  |  - @capacitor/filesystem + @capacitor/share|  |
+|  |  - @capacitor/preferences                  |  |
+|  |  - @capacitor/app + @capacitor/network     |  |
+|  +--------------------------------------------+  |
+|                                                  |
+|  Native Layer (Swift)                            |
+|  - AppDelegate (push notification delegates)     |
+|  - Info.plist (permissions, URL schemes)         |
+|  - PrivacyInfo.xcprivacy (privacy manifest)      |
+|  - LaunchScreen.storyboard                       |
++--------------------------------------------------+
 ```
+
+### Principle: Platform Abstraction Layer
+
+Create a thin abstraction layer (`src/lib/platform.ts`) that detects the runtime environment and routes calls to the appropriate implementation. Web code stays unchanged; native overrides are injected conditionally.
+
+```
+src/
+  lib/
+    platform.ts          # NEW: Capacitor.isNativePlatform() + getPlatform()
+    haptics.ts           # MODIFY: add native haptics branch
+    storage.ts           # NEW: abstract over localStorage vs Preferences
+    fileExport.ts        # NEW: abstract over Blob/<a> vs Filesystem+Share
+    pushNotifications.ts # NEW: registration, token storage, listener setup
+    analytics.ts         # MODIFY: add Events API branch for native
+    sentry.ts            # MODIFY: use @sentry/capacitor in native
+    supabase.ts          # MODIFY: redirect URL platform-aware, session storage
+  hooks/
+    useAppLifecycle.ts       # NEW: React hook for native app state changes
+  components/
+    PushPermissionPrompt.tsx # NEW: deferred push permission UX
+```
+
+### Component Boundaries
+
+| Component | Responsibility | Communicates With |
+|-----------|---------------|-------------------|
+| `platform.ts` | Single source of truth for `isNative()`, `getPlatform()` | Every module that branches on platform |
+| `haptics.ts` (modified) | Unified haptics API: native Taptic Engine on iOS, navigator.vibrate on Android/web | Called from UI components (~15 call sites) |
+| `storage.ts` | Wraps Zustand persist storage engine; uses `@capacitor/preferences` on native, `localStorage` on web | Zustand middleware configuration in all 8 stores |
+| `pushNotifications.ts` | Register for push, store device token in Supabase, handle incoming notifications | `supabase.ts`, App.tsx initialization |
+| `fileExport.ts` | Platform-aware file export: Filesystem.writeFile + Share.share on native, Blob+`<a>` on web | Settings screen |
+| `useAppLifecycle.ts` | Replaces visibilitychange with @capacitor/app events on native; triggers sync on resume | `App.tsx` |
+| Supabase Edge Function (`push/`) | Receives notification trigger, reads device tokens from DB, sends APNs payload | Supabase DB webhook, APNs |
 
 ---
 
-## 1. Supabase Schema Design
+## Integration Detail: Module by Module
 
-### New Tables Needed
+### 1. Service Worker -- DISABLE in Native
 
-#### `coach_workout_templates`
+**What changes:** WKWebView on iOS does not support service workers at all. The `vite-plugin-pwa` generates a service worker that will fail to register silently, but the `UpdatePrompt` component (which uses `useRegisterSW` from `virtual:pwa-register/react`) will break or behave unpredictably.
 
-Coach-created workout templates that can be assigned to clients.
-
-```sql
-CREATE TABLE coach_workout_templates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  description TEXT,
-  workout_type workout_type NOT NULL,
-  exercises JSONB DEFAULT '[]'::jsonb NOT NULL,
-  -- exercises format matches existing Exercise[] shape:
-  -- [{ name, targetSets, targetReps, notes }]
-  is_active BOOLEAN DEFAULT TRUE NOT NULL
-);
-
-CREATE INDEX idx_coach_templates_coach ON coach_workout_templates(coach_id);
-
-CREATE TRIGGER coach_workout_templates_updated_at
-  BEFORE UPDATE ON coach_workout_templates
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-```
-
-#### `client_assignments`
-
-Links a coach template to a specific client with scheduling info.
-
-```sql
-CREATE TABLE client_assignments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  template_id UUID REFERENCES coach_workout_templates(id) ON DELETE SET NULL,
-  -- Assignment can be a workout template OR macro targets
-  assignment_type TEXT NOT NULL CHECK (assignment_type IN ('workout', 'macros')),
-  -- For macro assignments, store targets directly
-  macro_targets JSONB, -- { protein, calories, carbs, fats, activity_level }
-  -- Scheduling
-  effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  expires_date DATE, -- NULL = indefinite
-  notes TEXT,
-  -- Client acknowledgment
-  seen_at TIMESTAMPTZ,
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'completed', 'expired', 'cancelled'))
-);
-
-CREATE INDEX idx_assignments_client ON client_assignments(client_id, status);
-CREATE INDEX idx_assignments_coach ON client_assignments(coach_id);
-CREATE INDEX idx_assignments_effective ON client_assignments(client_id, effective_date DESC);
-
-CREATE TRIGGER client_assignments_updated_at
-  BEFORE UPDATE ON client_assignments
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-```
-
-#### `coach_notes`
-
-Coach can leave notes/check-in messages for clients.
-
-```sql
-CREATE TABLE coach_notes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  coach_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  client_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  content TEXT NOT NULL,
-  -- Simple types: 'note' (coach internal), 'message' (visible to client), 'check_in' (prompted response)
-  note_type TEXT DEFAULT 'note' CHECK (note_type IN ('note', 'message', 'check_in')),
-  -- Client response (for check_in type)
-  client_response TEXT,
-  responded_at TIMESTAMPTZ,
-  -- Read tracking
-  seen_at TIMESTAMPTZ
-);
-
-CREATE INDEX idx_coach_notes_client ON coach_notes(client_id, created_at DESC);
-CREATE INDEX idx_coach_notes_coach ON coach_notes(coach_id, created_at DESC);
-CREATE INDEX idx_coach_notes_unseen ON coach_notes(client_id) WHERE seen_at IS NULL;
-```
-
-### Schema NOT Recommended
-
-| Rejected Idea | Why |
-|---------------|-----|
-| `coach_programs` (multi-week plans) | Scope creep. Start with single assignments, add programs later if needed. |
-| Separate `coach_macro_targets` table | Unnecessary. `client_assignments` with `assignment_type = 'macros'` plus `macro_targets` JSONB handles this cleanly. Coach can also directly UPDATE the existing `macro_targets` table (RLS already allows this). |
-| `conversations` / `messages` tables | Over-engineered for single-coach model. `coach_notes` with types covers check-ins and messages. |
-| Custom claims in JWT | Adds complexity. `profiles.role` column query is fast with index and caches well. |
-
-### Tables Already Deployed (No Changes Needed)
-
-- `profiles` -- Has `role` column, no changes
-- `coach_clients` -- Has coach-client relationship, no changes
-- `coach_client_summary` view -- May need minor updates for new fields
-- All data tables (weight_logs, workout_logs, etc.) -- RLS already allows coach read
-
----
-
-## 2. Row Level Security (RLS) Policies
-
-### Existing Policies (Already Deployed, No Changes)
-
-All existing RLS policies follow the correct pattern. Summary:
-
-| Table | Client Access | Coach Access |
-|-------|--------------|--------------|
-| `profiles` | Own row (SELECT, UPDATE) | Client rows via `coach_clients` join (SELECT only) |
-| `coach_clients` | Own relationship (SELECT) | Full CRUD on own relationships |
-| `weight_logs` | Full CRUD own rows | SELECT client rows |
-| `macro_targets` | Full CRUD own rows | SELECT + UPDATE client rows |
-| `daily_macro_logs` | Full CRUD own rows | SELECT client rows |
-| `logged_meals` | Full CRUD own rows | SELECT client rows |
-| `workout_logs` | Full CRUD own rows | SELECT client rows |
-| `user_xp` | Full CRUD own rows | SELECT client rows |
-| `xp_logs` | Full CRUD own rows | SELECT client rows |
-
-### New Policies Needed
-
-#### `coach_workout_templates`
-
-```sql
-ALTER TABLE coach_workout_templates ENABLE ROW LEVEL SECURITY;
-
--- Coach owns their templates
-CREATE POLICY "Coaches can manage own templates"
-  ON coach_workout_templates FOR ALL
-  USING (coach_id = auth.uid());
-
--- Clients can see templates assigned to them (via client_assignments)
-CREATE POLICY "Clients can view assigned templates"
-  ON coach_workout_templates FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM client_assignments ca
-      WHERE ca.template_id = coach_workout_templates.id
-      AND ca.client_id = auth.uid()
-      AND ca.status = 'active'
-    )
-  );
-```
-
-#### `client_assignments`
-
-```sql
-ALTER TABLE client_assignments ENABLE ROW LEVEL SECURITY;
-
--- Coaches can manage assignments for their clients
-CREATE POLICY "Coaches can manage client assignments"
-  ON client_assignments FOR ALL
-  USING (coach_id = auth.uid());
-
--- Clients can view their own assignments
-CREATE POLICY "Clients can view own assignments"
-  ON client_assignments FOR SELECT
-  USING (client_id = auth.uid());
-
--- Clients can mark assignments as seen
-CREATE POLICY "Clients can mark assignments as seen"
-  ON client_assignments FOR UPDATE
-  USING (client_id = auth.uid())
-  WITH CHECK (client_id = auth.uid());
-```
-
-#### `coach_notes`
-
-```sql
-ALTER TABLE coach_notes ENABLE ROW LEVEL SECURITY;
-
--- Coaches can manage notes for their clients
-CREATE POLICY "Coaches can manage notes"
-  ON coach_notes FOR ALL
-  USING (coach_id = auth.uid());
-
--- Clients can view messages/check-ins addressed to them (NOT internal notes)
-CREATE POLICY "Clients can view their messages"
-  ON coach_notes FOR SELECT
-  USING (
-    client_id = auth.uid()
-    AND note_type IN ('message', 'check_in')
-  );
-
--- Clients can update their response and seen_at
-CREATE POLICY "Clients can respond to check-ins"
-  ON coach_notes FOR UPDATE
-  USING (client_id = auth.uid())
-  WITH CHECK (client_id = auth.uid());
-```
-
-### RLS Performance Considerations
-
-The existing coach RLS policies use `EXISTS (SELECT 1 FROM coach_clients WHERE ...)` subqueries. With indexes already on `coach_clients(coach_id)` and `coach_clients(client_id)`, these are efficient.
-
-**Recommendation:** Add a composite partial index for the most common coach RLS check:
-
-```sql
-CREATE INDEX idx_coach_clients_active
-  ON coach_clients(coach_id, client_id)
-  WHERE status = 'active';
-```
-
-This partial index covers every coach RLS policy check with a single index scan.
-
-**Confidence:** HIGH -- this follows documented Supabase RLS performance best practices for EXISTS subqueries with filtered indexes.
-
----
-
-## 3. Route Structure
-
-### Current Route Structure
-
-```
-/           -> Home
-/workouts   -> Workouts
-/macros     -> Macros
-/avatar     -> AvatarScreen
-/settings   -> Settings
-/coach      -> Coach (single flat screen)
-/achievements -> Achievements
-```
-
-### Recommended: Keep `/coach` as Entry, No Sub-routes Initially
-
-The existing Coach.tsx is already a functional single-page dashboard with modal-based client detail views. For the expansion, continue this pattern rather than introducing sub-routes.
-
-**Rationale:**
-- The coach dashboard is mobile-first (same PWA)
-- Modal-based navigation matches existing patterns (CheckInModal, XPClaimModal)
-- Sub-routes (`/coach/clients/:id`, `/coach/templates`) add complexity for routing, back-button handling, and lazy loading without clear UX benefit on mobile
-- The existing Coach.tsx already handles client selection + detail tabs via state
-
-**If sub-routes become necessary later** (e.g., template editor needs its own URL), add them as:
-```
-/coach              -> Client list (existing)
-/coach/templates    -> Template management (future)
-/coach/assign/:id   -> Assignment flow (future)
-```
-
-But start without sub-routes.
-
-### Navigation Changes
-
-The coach dashboard is NOT in the bottom nav (correct -- it is accessed via Settings). This should remain the same because:
-1. Most users are clients, not coaches (single coach, many clients)
-2. Adding a nav item for one user bloats the nav for everyone
-3. The Settings > Coach Dashboard link already works
-
-**No changes needed to Navigation.tsx.**
-
----
-
-## 4. State Management
-
-### The Core Decision: Zustand vs React Query vs Direct Fetch
-
-| Approach | Pros | Cons | Verdict |
-|----------|------|------|---------|
-| **Zustand store for coach data** | Consistent with codebase | Coach data is server-authoritative, localStorage persistence is wrong | REJECT |
-| **React Query / TanStack Query** | Built for server-state, caching, stale-while-revalidate | New dependency, learning curve, different pattern from rest of app | REJECT for now |
-| **Custom hooks with in-memory cache** | Already used (`useClientDetails`), familiar pattern, no new deps | Manual cache management, no optimistic updates | USE THIS |
-
-**Recommendation: Extend the existing `useClientDetails` hook pattern.**
-
-The codebase already uses this pattern successfully:
-- `useClientDetails.ts` -- fetches weight/macros/activity with 5-minute Map-based cache
-- Direct Supabase queries (no Zustand)
-- State managed via `useState` inside the hook
-- Cache invalidation via `refresh()` callback
-
-New hooks following the same pattern:
+**Architecture:**
 
 ```typescript
-// src/hooks/useCoachTemplates.ts
-// Fetches/creates/updates coach workout templates
-// Uses same Map-based cache pattern as useClientDetails
+// src/lib/platform.ts (NEW)
+import { Capacitor } from '@capacitor/core'
 
-// src/hooks/useClientAssignments.ts
-// For coach: fetches assignments for a client
-// For client: fetches own assignments (server-authoritative)
-
-// src/hooks/useCoachNotes.ts
-// Fetches/creates notes for a client
+export const isNative = () => Capacitor.isNativePlatform()
+export const getPlatform = () => Capacitor.getPlatform() // 'ios' | 'android' | 'web'
+export const isIOS = () => getPlatform() === 'ios'
 ```
-
-### Client-Side: Coach Assignments in Zustand
-
-When the CLIENT opens their app, they need to see coach assignments. This data should NOT live in a separate store -- it should merge into existing stores.
-
-```
-Client opens app
-  -> loadAllFromCloud() (existing)
-  -> NEW: loadCoachAssignments()
-    -> Fetches active assignments from client_assignments
-    -> Macro assignment -> updates macroStore.targets (if newer)
-    -> Workout assignment -> updates workoutStore.customizations (if newer)
-    -> Message -> shows notification banner
-```
-
-**Key insight:** Coach assignments update EXISTING stores, not a new store. The client's Zustand stores remain the source of truth for their current workout plan and macro targets. Coach assignments are a mechanism to UPDATE those stores, not replace them.
-
-### Where Coach Data Lives at Runtime
-
-| Data | Where | Why |
-|------|-------|-----|
-| Client list | `useState` in Coach.tsx (fetched from `coach_client_summary` view) | Server-authoritative, no persistence needed |
-| Client details (weight, macros, activity) | `useClientDetails` hook with Map cache | Already implemented, works well |
-| Coach templates | New `useCoachTemplates` hook with Map cache | Server-authoritative, coach-only |
-| Assignments | New `useClientAssignments` hook | Server-authoritative |
-| Coach notes | New `useCoachNotes` hook | Server-authoritative |
-| Client's active macro targets | `macroStore` (Zustand, persisted) | Offline-first, may be set by coach |
-| Client's workout plan | `workoutStore` (Zustand, persisted) | Offline-first, may be set by coach |
-
----
-
-## 5. Data Flow: Coach Assignments to Client Stores
-
-### How Coach-Assigned Macros Flow to Client
-
-```
-COACH SIDE:
-  Coach opens client detail
-    -> Views current macro targets (from macro_targets table via RLS)
-    -> Edits targets in UI
-    -> Two options:
-      a) Direct update: coach UPDATEs macro_targets row (RLS allows this)
-      b) Assignment: coach INSERTs into client_assignments (audit trail)
-    -> Recommendation: Use BOTH. Update macro_targets directly AND create
-       an assignment record for audit trail.
-
-CLIENT SIDE:
-  Client opens app (or returns from background after 30s)
-    -> flushPendingSync() fires (existing)
-    -> NEW: checkCoachUpdates() runs alongside
-      -> Queries macro_targets from Supabase for own user_id
-      -> Compares with macroStore.targets
-      -> If Supabase version is newer (updated_at comparison):
-        -> Updates macroStore.targets
-        -> Shows toast: "Your coach updated your macro targets"
-      -> Queries client_assignments WHERE seen_at IS NULL
-      -> If unseen assignments exist:
-        -> Shows notification banner
-        -> Marks as seen when user taps
-```
-
-### How Coach-Assigned Workouts Flow to Client
-
-```
-COACH SIDE:
-  Coach creates workout template (exercises JSONB matches existing Exercise shape)
-    -> Saves to coach_workout_templates
-  Coach assigns template to client
-    -> Creates client_assignments with template_id
-    -> Can set effective_date (start next week, etc.)
-
-CLIENT SIDE:
-  Client opens app
-    -> checkCoachUpdates() queries active workout assignments
-    -> If active workout assignment exists:
-      -> Converts template exercises to workoutStore.customizations format
-      -> Updates workoutStore.setCustomExercises() for the assigned workout type
-      -> Shows toast: "Your coach updated your workout plan"
-    -> Client still starts workouts normally (getTodayWorkout())
-    -> The customized exercises from coach assignment are automatically used
-       because workoutStore.startWorkout() already checks customizations first
-```
-
-### Sync Timing
-
-When does the client check for coach updates?
-
-| Trigger | Mechanism | Already Exists? |
-|---------|-----------|-----------------|
-| App open (cold start) | `authStore.syncData()` calls `loadAllFromCloud()` | YES -- add `checkCoachUpdates()` here |
-| Return from background (30s+) | `flushPendingSync()` in visibility change handler | YES -- add `checkCoachUpdates()` here |
-| Manual pull-to-refresh | Not implemented | Add if needed later |
-| Supabase Realtime subscription | Would provide instant updates | NOT RECOMMENDED initially (see below) |
-
-### Why Not Supabase Realtime?
-
-Supabase Realtime (Postgres Changes) would let the client get instant notifications when the coach updates their data. However:
-
-1. **Overkill for single-coach model.** Coach updates are infrequent (maybe 1-2x/week per client). Polling on app open is sufficient.
-2. **Adds WebSocket connection overhead.** Every client maintains a persistent connection. At 90K potential clients, this is 90K WebSocket connections.
-3. **Complexity.** Requires channel management, reconnection logic, and state synchronization -- for updates that happen very rarely.
-4. **PWA background limitations.** Service workers cannot maintain WebSocket connections. The client only receives updates when the app is in the foreground anyway.
-
-**Recommendation:** Poll on app open + visibility change. If latency becomes an issue (coach changes something and calls client to check), add a "Refresh" button. Realtime can be added later as an enhancement.
-
-**Confidence:** HIGH -- polling is the correct pattern for low-frequency server-authoritative updates in a PWA.
-
----
-
-## 6. Auth Model
-
-### Current Implementation (Already Working)
-
-The auth model for coach identification is already implemented:
 
 ```typescript
-// src/lib/supabase.ts
-export const isCoach = async (): Promise<boolean> => {
-  const user = await getUser()
-  const { data } = await client
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  return data?.role === 'coach'
+// src/components/UpdatePrompt.tsx (MODIFY)
+import { isNative } from '@/lib/platform'
+
+export function UpdatePrompt() {
+  // Service workers don't exist in native WebView -- skip entirely
+  if (isNative()) return null
+
+  // ... existing useRegisterSW code unchanged
 }
 ```
 
-```sql
--- supabase/schema.sql
-CREATE TYPE user_role AS ENUM ('client', 'coach', 'admin');
+**Important:** The `useRegisterSW` hook must NOT be called when native. The early return before the hook is acceptable because the platform doesn't change mid-session (always native or always web). If React strict mode causes issues with conditional hooks, extract into two separate components: `WebUpdatePrompt` and a wrapper.
 
-CREATE TABLE profiles (
-  role user_role DEFAULT 'client' NOT NULL,
-  ...
-);
-```
+No changes needed to `vite.config.ts` -- the SW file will still be generated (needed for the PWA web build), but it simply won't be registered when running inside Capacitor.
 
-### How Coach Role is Set
+**What stays unchanged:** The entire `vite-plugin-pwa` configuration, Workbox runtime caching rules, manifest. These only affect the web build. The SW file in `dist/` is harmless.
 
-Currently: Manually via Supabase dashboard SQL.
+**Why not separate builds:** Maintaining a single build output that works for both web and native is simpler. One `dist/`, two deployment targets.
 
-```sql
-UPDATE profiles SET role = 'coach' WHERE email = 'coach@example.com';
-```
+### 2. BrowserRouter -- WORKS AS-IS
 
-**This is correct for a single-coach model.** No self-service coach registration is needed. The coach is the product owner.
+**What changes:** Nothing. BrowserRouter works in Capacitor's WKWebView because Capacitor serves the app from `capacitor://localhost/` and handles all routing internally. React Router's `pushState`/`popState` work correctly in WKWebView.
 
-### Recommendations
+**One caveat:** The `window.location.origin` call in `authStore.ts:197` will return `capacitor://localhost` instead of `https://app.welltrained.fitness`. This breaks Supabase password reset redirects. See section 4.
 
-1. **Keep `profiles.role` column.** It works, it is simple, it is already deployed.
-2. **Do NOT use Supabase custom claims (JWT).** Custom claims require Edge Functions or a separate auth hook. The `profiles.role` query is fast enough (one indexed lookup on app load).
-3. **Cache the coach check.** Currently `isCoach()` is called in `Settings.tsx` on mount. The result should be cached in a `useState` or a lightweight store so it is not re-queried on every Settings re-render. (It already does this -- `const [isCoach, setIsCoach] = useState(false)` in Settings.tsx.)
-4. **For the coach screen itself:** The `/coach` route should verify the role on mount and redirect non-coaches. Currently it does NOT do this -- any authenticated user can navigate to `/coach` directly. The RLS policies prevent data access, but the UI should also guard.
+### 3. Zustand + localStorage Persistence -- STORAGE ADAPTER
 
-### Auth Guard Recommendation
+**What changes:** iOS can evict localStorage data from WKWebView under storage pressure. This is the single biggest data integrity risk. All 8 Zustand stores use `persist` middleware with `localStorage` as the default storage engine.
 
-Add a role check at the route level:
+**Affected stores (from codebase):**
+
+| Store | Persist Name | Data Criticality |
+|-------|-------------|-----------------|
+| `userStore` | `gamify-gains-user` | HIGH - profile, weight history |
+| `macroStore` | `gamify-gains-macros` | HIGH - daily logs, saved meals, favorites |
+| `workoutStore` | `gamify-gains-workouts` | HIGH - workout logs |
+| `xpStore` | `gamify-gains-xp` | MEDIUM - XP, level, pending XP |
+| `avatarStore` | `gamify-gains-avatar` | LOW - cosmetic state |
+| `achievementsStore` | `gamify-gains-achievements` | MEDIUM - unlocked badges |
+| `accessStore` | `gamify-gains-access` | LOW - access gate bypass |
+| `remindersStore` | `gamify-gains-reminders` | LOW - UI preferences |
+
+**Architecture:**
 
 ```typescript
-// In Coach.tsx, add at the top of the component:
-const [authorized, setAuthorized] = useState<boolean | null>(null)
+// src/lib/storage.ts (NEW)
+import { Preferences } from '@capacitor/preferences'
+import { isNative } from './platform'
+import type { StateStorage } from 'zustand/middleware'
 
-useEffect(() => {
-  isCoach().then(result => {
-    setAuthorized(result)
-    if (!result) navigate('/') // redirect non-coaches
+/**
+ * Capacitor-safe storage adapter for Zustand persist middleware.
+ * Uses @capacitor/preferences (UserDefaults) on native iOS/Android.
+ * Falls back to localStorage on web (unchanged behavior).
+ */
+export const createCapacitorStorage = (): StateStorage => {
+  if (!isNative()) {
+    // Web: use localStorage exactly as before
+    return {
+      getItem: (name) => localStorage.getItem(name),
+      setItem: (name, value) => localStorage.setItem(name, value),
+      removeItem: (name) => localStorage.removeItem(name),
+    }
+  }
+
+  // Native: use @capacitor/preferences (UserDefaults on iOS)
+  return {
+    getItem: async (name) => {
+      const { value } = await Preferences.get({ key: name })
+      return value
+    },
+    setItem: async (name, value) => {
+      await Preferences.set({ key: name, value })
+    },
+    removeItem: async (name) => {
+      await Preferences.remove({ key: name })
+    },
+  }
+}
+```
+
+**Integration with existing stores:** Each store's `persist` call gets the new storage:
+
+```typescript
+// Example: src/stores/userStore.ts (MODIFY persist config)
+import { createJSONStorage } from 'zustand/middleware'
+import { createCapacitorStorage } from '@/lib/storage'
+
+export const useUserStore = create<UserStore>()(
+  persist(
+    (set, get) => ({ /* ... unchanged ... */ }),
+    {
+      name: 'gamify-gains-user',
+      storage: createJSONStorage(() => createCapacitorStorage()),
+    }
+  )
+)
+```
+
+**Important:** Zustand's persist middleware already supports async storage (returns `Promise`). The `createJSONStorage` wrapper from `zustand/middleware` handles the async/sync difference transparently. Existing code that reads synchronously from stores continues to work because initial hydration happens once on app boot and Zustand handles the async hydration automatically.
+
+**What stays unchanged:** All store logic, state shapes, actions, selectors. Only the storage engine configuration changes.
+
+**Risk mitigation:** Because the app already has cloud sync (`pushClientData`/`pullCoachData`), even if local storage were somehow lost, data can be recovered from Supabase on next login. The Preferences adapter prevents this scenario in the first place.
+
+### 4. Supabase Auth -- REDIRECT URL FIX + SESSION STORAGE
+
+**What changes:** Two issues:
+
+**Issue A:** Password reset redirect URL uses `window.location.origin`:
+
+```typescript
+// src/stores/authStore.ts:196-198 (current)
+const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: `${window.location.origin}/reset-password`
+})
+```
+
+In Capacitor, `window.location.origin` returns `capacitor://localhost`, which Supabase will reject as an invalid redirect URL.
+
+**Issue B:** Supabase JS client uses `localStorage` internally for session persistence (access token, refresh token). Same iOS eviction risk as Zustand stores.
+
+**Architecture:**
+
+```typescript
+// src/stores/authStore.ts (MODIFY)
+import { isNative } from '@/lib/platform'
+
+resetPassword: async (email: string) => {
+  // ...
+  const redirectOrigin = isNative()
+    ? 'https://app.welltrained.fitness'  // Always use web URL for auth redirects
+    : window.location.origin
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${redirectOrigin}/reset-password`
   })
-}, [])
-
-if (authorized === null) return <LoadingSkeleton />
-if (authorized === false) return null // redirect happens in effect
+  // ...
+}
 ```
-
----
-
-## 7. Component Architecture
-
-### New Components Needed
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `CoachTemplateEditor` | `src/components/CoachTemplateEditor.tsx` | Create/edit workout templates (exercise list editor) |
-| `MacroTargetEditor` | `src/components/MacroTargetEditor.tsx` | Edit macro targets for a client (reuse calculation logic from macroStore) |
-| `AssignmentCard` | `src/components/AssignmentCard.tsx` | Display an assignment in the client's view |
-| `CoachNoteBanner` | `src/components/CoachNoteBanner.tsx` | Show coach messages/check-in prompts to client |
-| `AssignmentFlow` | `src/components/AssignmentFlow.tsx` | Multi-step flow: pick template -> pick client -> set dates -> confirm |
-
-### Modified Components
-
-| Component | Change | Reason |
-|-----------|--------|--------|
-| `Coach.tsx` | Add "Assign Workout" and "Update Macros" buttons to client detail modal | Core new functionality |
-| `Coach.tsx` | Add templates tab or section | Coach needs to manage templates |
-| `Home.tsx` | Add coach notification banner | Client needs to see coach messages |
-| `Macros.tsx` | Add "Set by coach" indicator | Client should know when targets are coach-set |
-| `Workouts.tsx` | Add "Custom plan from coach" indicator | Client should know when plan is coach-assigned |
-| `sync.ts` | Add `checkCoachUpdates()` function | Client needs to pull coach changes |
-
-### Component Reuse
-
-Several existing components work directly for coach features with no changes:
-
-- `WeightChart` -- Already accepts generic `WeightEntry[]` data prop
-- `ProgressBar` -- Used by `ClientMacroAdherence`, reusable
-- `Card`, `Button`, `Input` (shadcn/ui) -- Standard throughout
-- `ClientActivityFeed` -- Already built for coach view
-- `ClientMacroAdherence` -- Already built for coach view
-
-### Existing Pattern for Exercise Editing
-
-The `workoutStore` already has `CustomExercise` and `WorkoutCustomization` types that match what the coach template editor needs:
 
 ```typescript
-// Already exists in workoutStore.ts
-export interface CustomExercise {
-  id: string
-  name: string
-  targetSets: number
-  targetReps: string
-}
+// src/lib/supabase.ts (MODIFY for native session storage)
+import { Preferences } from '@capacitor/preferences'
+import { isNative } from './platform'
 
-export interface WorkoutCustomization {
-  workoutType: WorkoutType
-  exercises: CustomExercise[]
-}
+// Custom storage adapter for Supabase auth sessions on native
+const supabaseStorageAdapter = isNative() ? {
+  getItem: async (key: string) => {
+    const { value } = await Preferences.get({ key })
+    return value
+  },
+  setItem: async (key: string, value: string) => {
+    await Preferences.set({ key, value })
+  },
+  removeItem: async (key: string) => {
+    await Preferences.remove({ key })
+  },
+} : undefined  // undefined = use default localStorage on web
+
+const _supabase = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: supabaseStorageAdapter,  // Native: UserDefaults, Web: localStorage
+  }
+})
 ```
 
-The coach template editor can produce this same shape, making assignment to the client's workoutStore trivial.
+**Deep link handling for password reset:** When the user clicks the reset password link in email, it opens in Safari (not the app). The user resets their password on the web. This is the simplest flow and matches how most native apps handle email-based auth flows. No deep link handling needed for this use case.
 
----
+**For future OAuth flows (if ever needed):** Would require `@capacitor/app`'s `appUrlOpen` listener to capture Universal Links/custom URL schemes. Not needed for the current email/password-only auth.
 
-## 8. Suggested Build Order
+**What stays unchanged:** All auth flows (signIn, signUp, signOut), auth state management, Sentry user tracking, auth state change listener.
 
-Based on dependencies between components:
+### 5. Push Notifications -- NEW MODULE (Complete Data Flow)
 
-### Phase 1: Schema + Coach Auth Guard (Foundation)
+**What changes:** This is entirely new functionality.
 
-**Dependencies:** None (builds on existing schema)
-**What:** New tables, RLS policies, migration, auth guard
-**Why first:** Everything else depends on the schema existing
+#### Full Data Flow
 
-1. Create migration for `coach_workout_templates`, `client_assignments`, `coach_notes`
-2. Add RLS policies for new tables
-3. Add composite partial index for coach RLS performance
-4. Update `database.types.ts` with new table types
-5. Add auth guard to `Coach.tsx` (redirect non-coaches)
+```
+COACH ACTION (Coach.tsx)
+    |
+    v
+SUPABASE DB (e.g., assigned_workouts INSERT)
+    |
+    v
+DATABASE WEBHOOK (configured in Supabase Dashboard)
+    |
+    v
+EDGE FUNCTION (supabase/functions/push/index.ts)
+    |-- Reads device_tokens table for target user_id
+    |-- Generates APNs JWT from .p8 key (stored as env secret)
+    |
+    v
+APNs HTTP/2 API (api.push.apple.com)
+    |
+    v
+iOS DEVICE (receives remote notification)
+    |
+    +-- App in FOREGROUND:
+    |   PushNotifications 'pushNotificationReceived' fires
+    |   -> Show in-app toast via toast.info()
+    |
+    +-- App in BACKGROUND / KILLED:
+        System notification banner shown
+        User taps notification
+        -> PushNotifications 'pushNotificationActionPerformed' fires
+        -> Navigate to relevant route (data.route)
+```
 
-### Phase 2: Coach Template Management (Coach UI)
-
-**Dependencies:** Phase 1
-**What:** Coach can create and manage workout templates
-
-1. `useCoachTemplates` hook (CRUD operations + Map cache)
-2. `CoachTemplateEditor` component (exercise list CRUD matching existing CustomExercise shape)
-3. Add templates section to `Coach.tsx`
-4. Dev mock data for templates
-
-### Phase 3: Coach Assignments + Macro Editing (Coach UI)
-
-**Dependencies:** Phases 1-2
-**What:** Coach can assign workouts and update macros for clients
-
-1. `useClientAssignments` hook
-2. `MacroTargetEditor` component (direct update to client's macro_targets)
-3. `AssignmentFlow` component (pick template -> pick client -> set dates)
-4. Add assignment + macro editing to client detail modal in `Coach.tsx`
-5. `useCoachNotes` hook + note input in client detail
-
-### Phase 4: Client Receives Coach Data (Client Side)
-
-**Dependencies:** Phase 3
-**What:** Client's app pulls coach assignments and updates stores
-
-1. `checkCoachUpdates()` function in `sync.ts`
-2. Wire into `loadAllFromCloud()` and visibility change handler
-3. `AssignmentCard` component for Home screen
-4. `CoachNoteBanner` component for messages
-5. "Set by coach" indicators on Macros and Workouts screens
-6. Mark assignments as seen (client UPDATE via RLS)
-
-### Phase 5: Polish + Edge Cases
-
-**Dependencies:** Phase 4
-**What:** Edge cases, check-in responses, expiration handling
-
-1. Check-in prompt flow (coach sends check-in, client responds)
-2. Assignment expiration handling (cron or check-on-load)
-3. Empty states for all new coach views
-4. Client pagination for coach dashboard (currently loads all)
-
----
-
-## 9. Anti-Patterns to Avoid
-
-### Anti-Pattern 1: Separate Zustand Store for Coach Data
-**What:** Creating a `coachStore.ts` with localStorage persistence for coach-side data.
-**Why bad:** Coach data is server-authoritative. Persisting it in localStorage creates stale data problems and sync conflicts. The coach could be on a different device.
-**Instead:** Use hooks with in-memory cache (Map-based, like `useClientDetails`).
-
-### Anti-Pattern 2: Zustand Store for Coach Assignments on Client Side
-**What:** Creating a `coachAssignmentsStore.ts` on the client side.
-**Why bad:** Assignments are server-authoritative. If the coach revokes an assignment, the client's localStorage still has it.
-**Instead:** Merge assignment data INTO existing stores (macroStore, workoutStore). Poll for changes on app open.
-
-### Anti-Pattern 3: Real-time WebSocket for Coach Updates
-**What:** Using Supabase Realtime channels for coach-to-client updates.
-**Why bad:** Overkill for infrequent updates, creates 90K persistent connections, does not work in PWA background.
-**Instead:** Poll on app open + visibility change. Sub-second latency is not needed.
-
-### Anti-Pattern 4: Separate Auth System for Coach
-**What:** Different login flow, separate JWT, admin panel.
-**Why bad:** Adds massive complexity. Coach is just a user with `role = 'coach'`.
-**Instead:** Same auth, same app, conditional UI based on `profiles.role`.
-
-### Anti-Pattern 5: Coach Editing Client's Zustand Directly
-**What:** Trying to push data directly into a client's localStorage.
-**Why bad:** Impossible -- coach and client are on different devices/browsers.
-**Instead:** Coach writes to Supabase. Client pulls from Supabase on next open.
-
-### Anti-Pattern 6: Building Multi-Coach Support Prematurely
-**What:** Adding `organization_id`, team permissions, coach-to-coach handoffs.
-**Why bad:** Scope creep. This is a single-coach product.
-**Instead:** Design for single coach. The `coach_id` foreign keys are already there if multi-coach is needed later, but do not build the infrastructure now.
-
----
-
-## 10. Scalability Considerations
-
-| Concern | Current (1 coach, 10 clients) | At 1K clients | At 90K clients |
-|---------|-------------------------------|---------------|----------------|
-| `coach_client_summary` view | Fast (subquery per row) | Add pagination | Materialized view with refresh trigger |
-| RLS policy checks | Negligible | Add partial index (recommended above) | Partial index sufficient |
-| Coach loading all clients | Single query | Paginate (limit/offset) | Virtual scrolling + search |
-| Client polling for assignments | 1 query on app open | Same | Same (indexed, single-row lookup) |
-| Coach notes volume | Minimal | Paginate per client | Archive old notes |
-
-**Critical at scale:** The `coach_client_summary` view does correlated subqueries (latest weight, workouts last 7 days) per client row. At 90K clients, this view will be slow. Solutions:
-1. Paginate the client list (show 50 at a time with search)
-2. Replace correlated subqueries with a materialized view refreshed on a schedule
-3. Add `last_activity_at` denormalized column to `coach_clients` for sorting
-
-**Recommendation:** Add pagination to the client list from the start. The current code fetches ALL clients with `.select('*')`. Change to `.select('*').order('last_check_in_date', { ascending: false, nullsFirst: false }).limit(50)` and add search.
-
----
-
-## 11. Database Types Update
-
-The `database.types.ts` file must be updated with the new tables. This can be generated via `supabase gen types typescript` or manually added:
+#### Device Registration Architecture
 
 ```typescript
-// Add to Database.public.Tables:
+// src/lib/pushNotifications.ts (NEW)
+import { PushNotifications } from '@capacitor/push-notifications'
+import { isNative } from './platform'
+import { getSupabaseClient } from './supabase'
+import { captureError } from './sentry'
+import { toast } from '@/stores/toastStore'
 
-coach_workout_templates: {
-  Row: {
-    id: string
-    created_at: string
-    updated_at: string
-    coach_id: string
-    name: string
-    description: string | null
-    workout_type: WorkoutType
-    exercises: Json
-    is_active: boolean
-  }
-  Insert: {
-    id?: string
-    created_at?: string
-    updated_at?: string
-    coach_id: string
-    name: string
-    description?: string | null
-    workout_type: WorkoutType
-    exercises?: Json
-    is_active?: boolean
-  }
-  Update: {
-    id?: string
-    created_at?: string
-    updated_at?: string
-    coach_id?: string
-    name?: string
-    description?: string | null
-    workout_type?: WorkoutType
-    exercises?: Json
-    is_active?: boolean
-  }
-  Relationships: []
+export async function requestPushPermission(): Promise<boolean> {
+  if (!isNative()) return false
+
+  const permission = await PushNotifications.requestPermissions()
+  if (permission.receive !== 'granted') return false
+
+  await PushNotifications.register()
+  return true
 }
 
-client_assignments: {
-  Row: {
-    id: string
-    created_at: string
-    updated_at: string
-    coach_id: string
-    client_id: string
-    template_id: string | null
-    assignment_type: 'workout' | 'macros'
-    macro_targets: Json | null
-    effective_date: string
-    expires_date: string | null
-    notes: string | null
-    seen_at: string | null
-    status: 'active' | 'completed' | 'expired' | 'cancelled'
-  }
-  Insert: {
-    id?: string
-    created_at?: string
-    updated_at?: string
-    coach_id: string
-    client_id: string
-    template_id?: string | null
-    assignment_type: 'workout' | 'macros'
-    macro_targets?: Json | null
-    effective_date?: string
-    expires_date?: string | null
-    notes?: string | null
-    seen_at?: string | null
-    status?: 'active' | 'completed' | 'expired' | 'cancelled'
-  }
-  Update: {
-    id?: string
-    created_at?: string
-    updated_at?: string
-    coach_id?: string
-    client_id?: string
-    template_id?: string | null
-    assignment_type?: 'workout' | 'macros'
-    macro_targets?: Json | null
-    effective_date?: string
-    expires_date?: string | null
-    notes?: string | null
-    seen_at?: string | null
-    status?: 'active' | 'completed' | 'expired' | 'cancelled'
-  }
-  Relationships: []
+export function initPushListeners(userId: string) {
+  if (!isNative()) return
+
+  // Token received from APNs
+  PushNotifications.addListener('registration', async (token) => {
+    await storeDeviceToken(userId, token.value)
+  })
+
+  // Registration failed
+  PushNotifications.addListener('registrationError', (error) => {
+    captureError(new Error(`Push registration failed: ${error.error}`))
+  })
+
+  // Notification received while app is in foreground
+  PushNotifications.addListener('pushNotificationReceived', (notification) => {
+    toast.info(notification.title || notification.body || 'New notification')
+  })
+
+  // User tapped notification (app was in background or killed)
+  PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+    const data = action.notification.data
+    if (data?.route) {
+      window.location.href = data.route  // Navigate to relevant screen
+    }
+  })
 }
 
-coach_notes: {
-  Row: {
-    id: string
-    created_at: string
-    coach_id: string
-    client_id: string
-    content: string
-    note_type: 'note' | 'message' | 'check_in'
-    client_response: string | null
-    responded_at: string | null
-    seen_at: string | null
-  }
-  Insert: {
-    id?: string
-    created_at?: string
-    coach_id: string
-    client_id: string
-    content: string
-    note_type?: 'note' | 'message' | 'check_in'
-    client_response?: string | null
-    responded_at?: string | null
-    seen_at?: string | null
-  }
-  Update: {
-    id?: string
-    created_at?: string
-    coach_id?: string
-    client_id?: string
-    content?: string
-    note_type?: 'note' | 'message' | 'check_in'
-    client_response?: string | null
-    responded_at?: string | null
-    seen_at?: string | null
-  }
-  Relationships: []
+async function storeDeviceToken(userId: string, token: string) {
+  const client = getSupabaseClient()
+  await client.from('device_tokens').upsert({
+    user_id: userId,
+    token: token,
+    platform: 'ios',
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id,platform' })
 }
+
+export async function removeDeviceToken(userId: string) {
+  // Call on sign out to prevent notifications to wrong user
+  const client = getSupabaseClient()
+  await client.from('device_tokens')
+    .delete()
+    .eq('user_id', userId)
+    .eq('platform', 'ios')
+}
+```
+
+#### Database Schema
+
+```sql
+-- New table: device_tokens
+CREATE TABLE device_tokens (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  token text NOT NULL,
+  platform text NOT NULL CHECK (platform IN ('ios', 'android')),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE(user_id, platform)
+);
+
+-- RLS: users can only manage their own tokens
+ALTER TABLE device_tokens ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own tokens"
+  ON device_tokens FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Index for Edge Function lookups (service_role bypasses RLS)
+CREATE INDEX idx_device_tokens_user_id ON device_tokens(user_id);
+```
+
+#### Supabase Edge Function (APNs Direct -- No Firebase)
+
+```typescript
+// supabase/functions/push/index.ts (NEW)
+import { serve } from 'https://deno.land/std/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+serve(async (req) => {
+  const { user_id, title, body, data } = await req.json()
+
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  // Fetch device token(s) for user
+  const { data: tokens } = await supabase
+    .from('device_tokens')
+    .select('token, platform')
+    .eq('user_id', user_id)
+
+  if (!tokens?.length) return new Response('No tokens', { status: 200 })
+
+  for (const device of tokens) {
+    if (device.platform === 'ios') {
+      await sendAPNs(device.token, { title, body, data })
+    }
+  }
+
+  return new Response('OK', { status: 200 })
+})
+
+async function sendAPNs(
+  deviceToken: string,
+  payload: { title: string; body: string; data?: Record<string, string> }
+) {
+  const jwt = await generateAPNsJWT()  // JWT from .p8 key stored as env secret
+  const apnsUrl = `https://api.push.apple.com/3/device/${deviceToken}`
+
+  await fetch(apnsUrl, {
+    method: 'POST',
+    headers: {
+      'authorization': `bearer ${jwt}`,
+      'apns-topic': 'fitness.welltrained.app',  // Must match Bundle ID
+      'apns-push-type': 'alert',
+    },
+    body: JSON.stringify({
+      aps: {
+        alert: { title: payload.title, body: payload.body },
+        sound: 'default',
+        badge: 1,
+      },
+      ...payload.data,
+    }),
+  })
+}
+```
+
+#### Notification Triggers (Coach Actions)
+
+| Event | DB Table | Trigger | Notification |
+|-------|----------|---------|-------------|
+| Coach sets macros | `macro_targets` UPDATE with `set_by = 'coach'` | DB webhook | "Your coach updated your macros" |
+| Coach assigns workout | `assigned_workouts` INSERT | DB webhook | "New workout assigned for [date]" |
+| Coach reviews check-in | `weekly_checkins` UPDATE with `coach_response` filled | DB webhook | "Coach responded to your check-in" |
+
+#### Token Lifecycle
+
+1. App launch -> `initPushListeners(userId)` called after auth resolves
+2. Deferred permission prompt at meaningful moment (first workout complete, first coach assignment)
+3. If granted, APNs returns device token via `registration` event
+4. Token stored in `device_tokens` table via Supabase client (upsert)
+5. Token refreshed on each app launch (upsert handles updates)
+6. On sign out, `removeDeviceToken()` deletes the row
+
+### 6. Native Haptics -- REPLACE navigator.vibrate
+
+**What changes:** The existing `src/lib/haptics.ts` uses `navigator.vibrate()` which has 0% iOS Safari/WKWebView support. Replace with `@capacitor/haptics` on native, keep `navigator.vibrate` as web/Android fallback.
+
+**Current API surface (from codebase):**
+
+| Method | Duration/Pattern | Usage | Native Equivalent |
+|--------|-----------------|-------|-------------------|
+| `haptics.light()` | 10ms | Set completion, toggles | `ImpactStyle.Light` |
+| `haptics.medium()` | 25ms | Action confirmed | `ImpactStyle.Medium` |
+| `haptics.success()` | [15, 50, 30] | Workout complete, check-in, achievement | `NotificationType.Success` |
+| `haptics.heavy()` | 50ms | XP claim milestone | `ImpactStyle.Heavy` |
+| `haptics.error()` | [50, 30, 50] | Error feedback | `NotificationType.Error` |
+
+**Architecture:**
+
+```typescript
+// src/lib/haptics.ts (MODIFY)
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
+import { isNative } from './platform'
+
+const canVibrate = typeof navigator !== 'undefined' && 'vibrate' in navigator
+
+export const haptics = {
+  light: () => {
+    if (isNative()) return Haptics.impact({ style: ImpactStyle.Light })
+    if (canVibrate) navigator.vibrate(10)
+  },
+  medium: () => {
+    if (isNative()) return Haptics.impact({ style: ImpactStyle.Medium })
+    if (canVibrate) navigator.vibrate(25)
+  },
+  success: () => {
+    if (isNative()) return Haptics.notification({ type: NotificationType.Success })
+    if (canVibrate) navigator.vibrate([15, 50, 30])
+  },
+  heavy: () => {
+    if (isNative()) return Haptics.impact({ style: ImpactStyle.Heavy })
+    if (canVibrate) navigator.vibrate(50)
+  },
+  error: () => {
+    if (isNative()) return Haptics.notification({ type: NotificationType.Error })
+    if (canVibrate) navigator.vibrate([50, 30, 50])
+  },
+}
+```
+
+**What stays unchanged:** All call sites (~15 locations across UI components). The haptics API surface is identical -- same method names, same semantics.
+
+### 7. File Export -- NATIVE FILE HANDLING
+
+**What changes:** The current export creates a Blob, generates an object URL, and simulates a click on a hidden `<a download>` element. The `download` attribute does NOT work in WKWebView. Import uses `<input type="file">` + FileReader which works fine in WKWebView.
+
+**Current flow (from `src/screens/Settings.tsx:183-193`):**
+1. Export: `JSON.stringify` -> `new Blob()` -> `URL.createObjectURL()` -> `<a download>` click
+2. Import: `<input type="file">` -> `FileReader.readAsText()` -> `JSON.parse` (NO CHANGE NEEDED)
+
+**Architecture:**
+
+```typescript
+// src/lib/fileExport.ts (NEW)
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
+import { isNative } from './platform'
+import { getLocalDateString } from './dateUtils'
+
+export async function exportBackup(data: object): Promise<void> {
+  const dataStr = JSON.stringify(data, null, 2)
+  const filename = `trained-backup-${getLocalDateString()}.json`
+
+  if (isNative()) {
+    // Native: write to cache directory, then share via native share sheet
+    const result = await Filesystem.writeFile({
+      path: filename,
+      data: dataStr,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+    })
+
+    await Share.share({
+      title: 'Trained Backup',
+      url: result.uri,  // Native share sheet: AirDrop, Files, email, etc.
+    })
+  } else {
+    // Web: existing Blob + <a download> approach (unchanged)
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+}
+```
+
+**Settings.tsx integration:** Replace the inline export code with a call to `exportBackup(exportObj)`.
+
+**Import stays unchanged:** `<input type="file">` + FileReader works in WKWebView and triggers the native iOS file picker automatically.
+
+### 8. App Lifecycle Events -- NATIVE SUPPLEMENT
+
+**What changes:** The current `App.tsx` uses three web events for sync:
+- `window.addEventListener('online', ...)` -- navigator.onLine
+- `window.addEventListener('offline', ...)`
+- `document.addEventListener('visibilitychange', ...)`
+
+These work in WKWebView but are less reliable than native equivalents. The native `@capacitor/app` plugin fires real iOS lifecycle events (UIApplication notifications), and `@capacitor/network` provides native connectivity status.
+
+**Architecture:**
+
+```typescript
+// src/hooks/useAppLifecycle.ts (NEW)
+import { useEffect } from 'react'
+import { App } from '@capacitor/app'
+import { Network } from '@capacitor/network'
+import { isNative } from '@/lib/platform'
+import { useSyncStore } from '@/stores/syncStore'
+import { pullCoachData, flushPendingSync } from '@/lib/sync'
+
+/**
+ * Supplements web lifecycle events with native equivalents.
+ * On web: existing visibilitychange + online/offline in App.tsx (unchanged).
+ * On native: adds @capacitor/app state changes + @capacitor/network.
+ */
+export function useAppLifecycle() {
+  useEffect(() => {
+    if (!isNative()) return  // Web uses existing event listeners in App.tsx
+
+    let lastBackground = 0
+
+    // Native app state (foreground/background)
+    const stateListener = App.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive) {
+        lastBackground = Date.now()
+      } else {
+        // Returning to foreground after 30+ seconds -> sync
+        const elapsed = Date.now() - lastBackground
+        if (elapsed > 30_000) {
+          pullCoachData()
+          flushPendingSync()
+        }
+      }
+    })
+
+    // Native network status
+    const networkListener = Network.addListener('networkStatusChange', (status) => {
+      const store = useSyncStore.getState()
+      if (status.connected) {
+        store.setOnline(true)
+        store.setStatus('synced')
+        pullCoachData()
+        flushPendingSync()
+      } else {
+        store.setOnline(false)
+        store.setStatus('offline')
+      }
+    })
+
+    return () => {
+      stateListener.then(l => l.remove())
+      networkListener.then(l => l.remove())
+    }
+  }, [])
+}
+```
+
+**Integration:** Add `useAppLifecycle()` call in `App.tsx`'s `AppContent` component alongside existing web event listeners. The web listeners remain and still fire on web. On native, the Capacitor listeners provide more reliable signals.
+
+**What stays unchanged:** The web event listeners in `App.tsx` lines 52-90, sync logic in `sync.ts`.
+
+### 9. window.confirm Dialogs -- OPTIONAL NATIVE UPGRADE
+
+**What changes:** 10 `window.confirm()` calls work in WKWebView and show standard iOS alert dialogs. They are functional but can be upgraded to `@capacitor/dialog` for a slightly more polished native feel.
+
+**Locations (from codebase grep):**
+
+| File | Line | Dialog Text |
+|------|------|-------------|
+| `Workouts.tsx` | 171 | "You haven't completed any sets. End workout anyway?" |
+| `Workouts.tsx` | 861 | "Reset [type] exercises to defaults?" |
+| `Settings.tsx` | 281 | "Are you sure? This will delete ALL your progress..." |
+| `Macros.tsx` | 595 | "Delete this meal entry?" |
+| `Macros.tsx` | 1230 | "Delete saved meal [name]?" |
+| `WorkoutAssigner.tsx` | 70 | Confirm assignment overwrite |
+| `Coach.tsx` | 136 | "Release macro targets back to client?" |
+| `Coach.tsx` | 796 | "Delete this template?" |
+| `Coach.tsx` | 807 | "Remove this assigned workout?" |
+| `Onboarding.tsx` | 190 | "Skip setup and use default settings?" |
+
+**Architecture (optional -- can defer to polish phase):**
+
+```typescript
+// src/lib/confirm.ts (NEW)
+import { Dialog } from '@capacitor/dialog'
+import { isNative } from './platform'
+
+export async function confirm(message: string, title = 'Confirm'): Promise<boolean> {
+  if (isNative()) {
+    const { value } = await Dialog.confirm({ title, message })
+    return value
+  }
+  return window.confirm(message)
+}
+```
+
+**Trade-off:** Changing synchronous `window.confirm()` to `async confirm()` requires all 10 call sites to become async. This is low priority since `window.confirm()` works fine in WKWebView -- it produces a native iOS alert automatically.
+
+### 10. Analytics (Plausible) -- EVENTS API FOR NATIVE
+
+**What changes:** The Plausible `<script>` tag in `index.html` loads in WKWebView but sees `capacitor://localhost` as the page URL, not `app.welltrained.fitness`. Page views will not match the configured domain. Custom events may still fire but with wrong URL context.
+
+**Architecture:**
+
+```typescript
+// src/lib/analytics.ts (MODIFY)
+import { isNative, getPlatform } from './platform'
+
+export function trackEvent(
+  event: string,
+  props?: Record<string, string | number | boolean>
+) {
+  if (import.meta.env.DEV) {
+    console.log('[Analytics]', event, props)
+    return
+  }
+
+  if (isNative()) {
+    // Use Plausible Events API directly (bypasses script tag domain issues)
+    fetch('https://plausible.io/api/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: event,
+        domain: 'app.welltrained.fitness',
+        url: `app://welltrained.fitness/${event.toLowerCase().replace(/\s/g, '-')}`,
+        props: { ...props, platform: getPlatform() },
+      }),
+    }).catch(() => {})  // Fire and forget
+  } else {
+    // Web: existing Plausible script tag integration (unchanged)
+    if (window.plausible) {
+      window.plausible(event, props ? { props } : undefined)
+    }
+  }
+}
+```
+
+**What stays unchanged:** All event definitions (`analytics.workoutCompleted`, etc.), all call sites. Only the transport mechanism changes for native.
+
+### 11. Sentry -- UPGRADE TO @sentry/capacitor
+
+**What changes:** Replace `@sentry/react` with `@sentry/capacitor` + `@sentry/react` pair. `@sentry/capacitor` wraps `@sentry/react` and adds native iOS crash reporting (Objective-C/Swift crashes, out-of-memory kills, native symbolication via dSYM upload).
+
+**Architecture:**
+
+```typescript
+// src/lib/sentry.ts (MODIFY)
+import * as SentryCapacitor from '@sentry/capacitor'
+import * as SentryReact from '@sentry/react'
+import { isNative } from './platform'
+
+export function initSentry() {
+  if (import.meta.env.DEV || !SENTRY_DSN) return
+
+  if (isNative()) {
+    // Native: Capacitor SDK wraps React SDK + adds native crash reporting
+    SentryCapacitor.init({
+      dsn: SENTRY_DSN,
+      release: `fitness.welltrained.app@${APP_VERSION}`,
+      dist: BUILD_NUMBER,
+      integrations: [
+        SentryReact.reactRouterV6BrowserTracingIntegration({
+          useEffect, useLocation, useNavigationType,
+          createRoutesFromChildren, matchRoutes,
+        }),
+      ],
+      tracesSampleRate: 0.1,
+    })
+  } else {
+    // Web: existing @sentry/react initialization (unchanged)
+    SentryReact.init({ /* ... existing config exactly as-is ... */ })
+  }
+}
+
+// All other exports remain the same (captureError, captureMessage, etc.)
+// @sentry/capacitor re-exports all @sentry/react functions
+```
+
+**What stays unchanged:** All `captureError`, `captureMessage`, `setUser`, `clearUser` call sites. The `ErrorBoundary` component. The Sentry Vite plugin for source maps.
+
+### 12. Capacitor Configuration
+
+```typescript
+// capacitor.config.ts (NEW)
+import type { CapacitorConfig } from '@capacitor/cli'
+
+const config: CapacitorConfig = {
+  appId: 'fitness.welltrained.app',
+  appName: 'WellTrained',
+  webDir: 'dist',
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
+    Keyboard: {
+      resize: 'body',     // Resize body, not viewport (preserves vh units)
+      style: 'dark',       // Match dark theme
+    },
+    StatusBar: {
+      style: 'dark',            // Light text for dark background
+      backgroundColor: '#0a0a0a',  // Match theme-color from index.html
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      backgroundColor: '#0a0a0a',
+    },
+  },
+  ios: {
+    scheme: 'WellTrained',
+    contentInset: 'always',
+  },
+}
+
+export default config
+```
+
+### 13. Xcode Project Configuration
+
+Required capabilities and settings for the iOS project:
+
+| Setting | Location | Value |
+|---------|----------|-------|
+| Push Notifications capability | Signing & Capabilities | Enable |
+| Background Modes > Remote notifications | Signing & Capabilities | Enable |
+| Bundle ID | General | `fitness.welltrained.app` |
+| Deployment Target | General | iOS 16.0 (minimum for good WKWebView support) |
+| UIFileSharingEnabled | Info.plist | YES (for file export to Files app) |
+| LSSupportsOpeningDocumentsInPlace | Info.plist | YES |
+| NSAppTransportSecurity (if needed) | Info.plist | Allow Supabase, Plausible domains |
+
+---
+
+## Patterns to Follow
+
+### Pattern 1: Platform-Conditional at Module Boundary
+
+**What:** Use `isNative()` checks at the module boundary (in `src/lib/`), not deep in component logic.
+
+**When:** Every Capacitor plugin integration.
+
+**Example:**
+
+```typescript
+// GOOD: Branch at the module boundary
+// src/lib/haptics.ts
+export const haptics = {
+  light: () => isNative() ? nativeImpact(ImpactStyle.Light) : webVibrate(10),
+}
+
+// BAD: Branch deep in component
+// src/screens/Workouts.tsx
+const handleComplete = () => {
+  if (Capacitor.isNativePlatform()) {
+    Haptics.impact({ style: ImpactStyle.Heavy })
+  } else {
+    navigator.vibrate(50)
+  }
+}
+```
+
+**Why:** Keeps components platform-agnostic. All platform branching is isolated to `src/lib/` modules. Components never import from `@capacitor/*` directly.
+
+### Pattern 2: Additive, Not Replacement
+
+**What:** Capacitor native features supplement web features rather than replacing them entirely. Web code continues to work as-is.
+
+**When:** Network detection, app lifecycle, storage.
+
+**Example:** The web `online`/`offline`/`visibilitychange` event listeners stay in `App.tsx`. The native `@capacitor/app` and `@capacitor/network` listeners are added alongside via `useAppLifecycle()`.
+
+**Why:** Single codebase serves both web (PWA) and native (Capacitor). Web users are completely unaffected.
+
+### Pattern 3: Storage Abstraction for Data Safety
+
+**What:** Never rely on `localStorage` directly for persistent data on native. Always go through the storage adapter.
+
+**When:** All Zustand persist configurations, Supabase session storage.
+
+**Why:** iOS WKWebView can evict localStorage under storage pressure. The adapter routes to UserDefaults (via `@capacitor/preferences`) on native, which is not subject to WebView storage eviction.
+
+### Pattern 4: Deferred Push Permission
+
+**What:** Don't request push permission on first launch. Wait until a meaningful moment.
+
+**When:** After user completes first workout, or receives first coach assignment.
+
+**Why:** iOS users who see a permission prompt before understanding the app's value will deny it. Once denied, re-prompting requires the user to navigate to iOS Settings. A pre-permission screen explaining the value dramatically improves opt-in rates.
+
+### Pattern 5: Single Codebase, Dual Deployment
+
+**What:** One `vite build` output serves both Vercel (PWA) and Capacitor (native). No separate build configurations or environment variables for platform differences.
+
+**Why:** Runtime detection via `Capacitor.isNativePlatform()` keeps the codebase simple. Two build pipelines means two sets of bugs, version drift, and double the testing surface.
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Separate Build Configs for Web vs Native
+
+**What:** Creating different Vite configs or environment variables for web vs. native builds.
+**Why bad:** Two build paths means two test surfaces, divergence over time, and bugs that only appear in one build.
+**Instead:** One build, runtime detection.
+
+### Anti-Pattern 2: Letting Service Worker Register in Native
+
+**What:** Not guarding `useRegisterSW()` call in `UpdatePrompt.tsx`.
+**Why bad:** WKWebView on iOS does not support service workers. Silent failure at best, bridge interference at worst.
+**Instead:** Guard with `isNative()` check, return null.
+
+### Anti-Pattern 3: Using Firebase for Push (Unnecessary Complexity)
+
+**What:** Adding Firebase Cloud Messaging as an intermediary for iOS push notifications.
+**Why bad:** Adds another service, another SDK, another config layer. APNs can be called directly from Edge Functions via HTTP/2.
+**Instead:** Send directly to APNs from Supabase Edge Function using the .p8 key. Simpler, fewer moving parts, no Google dependency.
+
+### Anti-Pattern 4: Replacing BrowserRouter with HashRouter
+
+**What:** Switching to `#/` routes because "Capacitor needs it."
+**Why bad:** This is a misconception from old Cordova days. Capacitor's WKWebView supports the History API. HashRouter breaks existing bookmarks and link sharing.
+**Instead:** Keep BrowserRouter. It works.
+
+### Anti-Pattern 5: Storing Push Tokens in localStorage / Zustand
+
+**What:** Saving the APNs device token in Zustand or localStorage.
+**Why bad:** Token can change (Apple rotates tokens). Token must be associated with user ID on the server for sending. Local storage is device-local -- useless for server-side push delivery.
+**Instead:** Store tokens in Supabase `device_tokens` table. Upsert on every registration event.
+
+### Anti-Pattern 6: Requesting Push Permission at Launch
+
+**What:** Calling `PushNotifications.requestPermissions()` immediately on app start.
+**Why bad:** iOS users who see a prompt before understanding the value will deny it. Once denied, it requires navigating to iOS Settings to re-enable.
+**Instead:** Defer to meaningful moment with pre-permission explanation screen.
+
+---
+
+## New Capacitor Plugins Required
+
+| Plugin | npm Package | Purpose | Phase |
+|--------|------------|---------|-------|
+| Core | `@capacitor/core` | Platform detection, plugin bridge | 1 |
+| CLI | `@capacitor/cli` (devDep) | Build tooling, `npx cap sync` | 1 |
+| iOS platform | `@capacitor/ios` | iOS native shell | 1 |
+| Preferences | `@capacitor/preferences` | Persistent key-value (UserDefaults) | 1 |
+| App | `@capacitor/app` | Lifecycle events, URL open | 2 |
+| Network | `@capacitor/network` | Native online/offline detection | 2 |
+| Haptics | `@capacitor/haptics` | Native Taptic Engine feedback | 2 |
+| Keyboard | `@capacitor/keyboard` | Keyboard resize behavior | 2 |
+| Status Bar | `@capacitor/status-bar` | Status bar styling | 2 |
+| Splash Screen | `@capacitor/splash-screen` | Launch screen | 2 |
+| Push Notifications | `@capacitor/push-notifications` | APNs registration + handling | 3 |
+| Filesystem | `@capacitor/filesystem` | Write files to device storage | 4 |
+| Share | `@capacitor/share` | Native share sheet | 4 |
+| Dialog | `@capacitor/dialog` | Native confirm/alert (optional) | 4 |
+| Sentry Capacitor | `@sentry/capacitor` | Native crash reporting | 4 |
+
+**Installation:**
+
+```bash
+# Core Capacitor
+npm install @capacitor/core
+npm install -D @capacitor/cli
+npm install @capacitor/ios
+
+# Phase 1 plugins
+npm install @capacitor/preferences
+
+# Phase 2 plugins
+npm install @capacitor/app @capacitor/network @capacitor/haptics \
+  @capacitor/keyboard @capacitor/status-bar @capacitor/splash-screen
+
+# Phase 3 plugins
+npm install @capacitor/push-notifications
+
+# Phase 4 plugins
+npm install @capacitor/filesystem @capacitor/share @capacitor/dialog @sentry/capacitor
+
+# Initialize iOS project
+npx cap init WellTrained fitness.welltrained.app --web-dir dist
+npx cap add ios
+npm run build && npx cap sync ios
 ```
 
 ---
 
-## 12. Integration Points Summary
+## Build Pipeline Changes
 
-### Files That Need Changes
+### Current (Web Only)
 
-| File | Change Type | What Changes |
-|------|-------------|-------------|
-| `supabase/migrations/002_coach_dashboard.sql` | NEW | New tables, indexes, RLS, triggers |
-| `src/lib/database.types.ts` | MODIFY | Add new table types |
-| `src/lib/sync.ts` | MODIFY | Add `checkCoachUpdates()` function |
-| `src/lib/supabase.ts` | NO CHANGE | `isCoach()` already works |
-| `src/screens/Coach.tsx` | MODIFY | Add template management, assignment, macro editing, auth guard |
-| `src/screens/Home.tsx` | MODIFY | Add coach notification banner |
-| `src/screens/Macros.tsx` | MODIFY | Add "Set by coach" indicator |
-| `src/screens/Workouts.tsx` | MODIFY | Add "Custom plan from coach" indicator |
-| `src/hooks/useCoachTemplates.ts` | NEW | Template CRUD hook |
-| `src/hooks/useClientAssignments.ts` | NEW | Assignment CRUD hook |
-| `src/hooks/useCoachNotes.ts` | NEW | Notes CRUD hook |
-| `src/components/CoachTemplateEditor.tsx` | NEW | Exercise list editor UI |
-| `src/components/MacroTargetEditor.tsx` | NEW | Macro target editing UI |
-| `src/components/AssignmentCard.tsx` | NEW | Client-facing assignment display |
-| `src/components/CoachNoteBanner.tsx` | NEW | Client-facing coach message display |
-| `src/components/AssignmentFlow.tsx` | NEW | Multi-step assignment creation flow |
-| `src/lib/devSeed.ts` | MODIFY | Add mock templates, assignments, notes |
+```
+npm run build  -->  dist/  -->  Vercel deploy
+```
 
-### Files That Do NOT Need Changes
+### With Capacitor (Web + iOS)
 
-| File | Why |
-|------|-----|
-| `src/stores/authStore.ts` | Auth flow unchanged |
-| `src/stores/syncStore.ts` | Sync status tracking unchanged |
-| `src/components/Navigation.tsx` | Coach not in bottom nav |
-| `src/screens/Auth.tsx` | Same auth for coach and client |
-| `src/screens/AccessGate.tsx` | Same access code flow |
-| `src/screens/Onboarding.tsx` | Coach does not go through onboarding differently |
-| `src/components/WeightChart.tsx` | Already generic, no changes |
-| `src/components/ClientActivityFeed.tsx` | Already built, no changes |
-| `src/components/ClientMacroAdherence.tsx` | Already built, no changes |
+```
+npm run build  -->  dist/  -->  Vercel deploy (web, unchanged)
+                       |
+                       v
+                 npx cap sync ios  -->  ios/ (Xcode project updated)
+                       |
+                       v
+                 Xcode archive  -->  App Store Connect
+```
+
+**Key insight:** ONE Vite build, TWO deployment targets. No separate "native build" of the web app.
+
+### Development Workflow
+
+```bash
+# Web development (unchanged)
+npm run dev
+
+# iOS development (with live reload from Vite dev server)
+npm run dev &
+# In capacitor.config.ts, temporarily set:
+#   server: { url: 'http://YOUR_LOCAL_IP:5173' }
+npx cap open ios
+# Run from Xcode on simulator/device
+# Remember to remove server.url before production build
+```
+
+---
+
+## What Stays Completely Unchanged
+
+These modules require ZERO changes for Capacitor integration:
+
+| Module | Why No Change |
+|--------|--------------|
+| React 18 + JSX | Renders in WKWebView identically to browser |
+| React Router v6 (BrowserRouter) | History API works in WKWebView |
+| Zustand store logic (all actions, selectors, state) | Only storage engine config changes |
+| Tailwind CSS styling | CSS renders identically in WKWebView |
+| All Supabase queries (sync.ts, hooks) | HTTP requests work identically |
+| Lucide icons (SVG) | SVG renders in WKWebView |
+| Radix UI, CVA, clsx, tailwind-merge | DOM-based, platform-agnostic |
+| All screen components (Home, Workouts, Macros, etc.) | No platform-specific code |
+| Coach.tsx (all 1700+ lines) | No platform-specific code |
+| Toast system (sonner) | DOM-based notifications |
+| Theme tokens and CSS custom properties | Pure CSS |
+| Lazy loading with React.lazy + Suspense | Standard JS dynamic imports |
+| Manual chunks in Vite rollup config | Build optimization, not runtime |
+| Import path alias (`@/`) | Vite resolve config, not runtime |
+| ESLint config | Development tooling only |
+| Vitest + Playwright | Testing tooling only |
+
+---
+
+## Suggested Build Order (Dependency-Aware)
+
+```
+Phase 1: Foundation (must come first -- everything depends on this)
+  1. capacitor.config.ts + npx cap add ios
+  2. platform.ts (isNative, getPlatform)
+  3. storage.ts adapter (Preferences on native)
+  4. Wire storage adapter into all 8 Zustand stores
+  5. Wire storage adapter into Supabase auth config
+     => At this point: app runs in Capacitor with reliable persistence
+
+Phase 2: Core Native Features (independent of each other)
+  6. haptics.ts native branch
+  7. useAppLifecycle.ts (App + Network plugins)
+  8. UpdatePrompt.tsx native guard
+  9. authStore.ts redirect URL fix
+  10. Keyboard, StatusBar, SplashScreen config
+      => At this point: fully functional native app (minus push + export)
+
+Phase 3: Push Notifications (requires Apple Developer setup)
+  11. Apple Developer: create App ID, enable Push, generate .p8 key
+  12. Xcode: add Push Notifications + Background Modes capabilities
+  13. device_tokens migration
+  14. pushNotifications.ts (registration, listeners)
+  15. Edge Function: push/ (APNs integration)
+  16. Database webhooks for notification triggers
+  17. PushPermissionPrompt.tsx (deferred permission UX)
+      => Push notifications fully operational
+
+Phase 4: Polish + Distribution
+  18. fileExport.ts (Filesystem + Share)
+  19. analytics.ts (Plausible Events API for native)
+  20. sentry.ts (@sentry/capacitor upgrade)
+  21. confirm.ts (optional Dialog replacement)
+  22. App icons, splash screens, PrivacyInfo.xcprivacy
+  23. TestFlight beta testing
+  24. App Store Connect submission
+```
+
+---
+
+## Scalability Considerations
+
+| Concern | At 100 users | At 10K users | At 100K users |
+|---------|------------|------------|-------------|
+| Device token storage | Single table, trivial | Index on user_id sufficient | Add cleanup cron for stale tokens |
+| Push notification delivery | Sequential APNs calls OK | Batch Edge Function calls | Queue system or third-party service |
+| APNs rate limits | No concern | No concern | 100K+ per second per key |
+| Edge Function invocations | Well within free tier | Supabase Pro plan | Consider dedicated push service |
+| App Store review | Standard review (~24-48h) | No change | No change |
+| TestFlight distribution | Manual Xcode builds | Fastlane automation | CI/CD (GitHub Actions + Fastlane) |
 
 ---
 
 ## Sources
 
-- Direct codebase analysis of all files listed above (HIGH confidence)
-- Existing `supabase/schema.sql` for current schema and RLS policies (HIGH confidence)
-- [Supabase RLS Documentation](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [Supabase RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
-- [Supabase Realtime Documentation](https://supabase.com/docs/guides/realtime)
-- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/postgres-changes)
+- [Capacitor Push Notifications Plugin API](https://capacitorjs.com/docs/apis/push-notifications) -- HIGH confidence
+- [Capacitor Haptics Plugin API](https://capacitorjs.com/docs/apis/haptics) -- HIGH confidence
+- [Capacitor App Plugin API](https://capacitorjs.com/docs/apis/app) -- HIGH confidence
+- [Capacitor Preferences Plugin API](https://capacitorjs.com/docs/apis/preferences) -- HIGH confidence
+- [Capacitor Filesystem Plugin API](https://capacitorjs.com/docs/apis/filesystem) -- HIGH confidence
+- [Capacitor Share Plugin API](https://capacitorjs.com/docs/apis/share) -- HIGH confidence
+- [Capacitor Network Plugin API](https://capacitorjs.com/docs/apis/network) -- HIGH confidence
+- [Capacitor Dialog Plugin API](https://capacitorjs.com/docs/apis/dialog) -- HIGH confidence
+- [Capacitor Configuration Docs](https://capacitorjs.com/docs/config) -- HIGH confidence
+- [Capacitor JavaScript Utilities](https://capacitorjs.com/docs/basics/utilities) -- HIGH confidence
+- [Sentry Capacitor SDK](https://docs.sentry.io/platforms/javascript/guides/capacitor/) -- HIGH confidence
+- [Supabase Push Notifications Guide](https://supabase.com/docs/guides/functions/examples/push-notifications) -- HIGH confidence
+- [Supabase Native Mobile Deep Linking](https://supabase.com/docs/guides/auth/native-mobile-deep-linking) -- HIGH confidence
+- [Supabase Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls) -- HIGH confidence
+- [Capacitor Service Worker iOS Issue #7069](https://github.com/ionic-team/capacitor/issues/7069) -- HIGH confidence (confirms no SW in WKWebView)
+- [Capacitor localStorage Persistence Discussion #3321](https://github.com/ionic-team/capacitor/discussions/3321) -- HIGH confidence (confirms eviction risk)
+- [WKWebView localStorage lost - Apple Developer Forums](https://developer.apple.com/forums/thread/742037) -- HIGH confidence
+- [Capawesome Push Notifications Guide](https://capawesome.io/blog/the-push-notifications-guide-for-capacitor/) -- MEDIUM confidence
+- [Plausible Mobile App Tracking Discussion](https://github.com/plausible/analytics/discussions/677) -- MEDIUM confidence

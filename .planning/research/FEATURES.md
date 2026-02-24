@@ -1,450 +1,623 @@
-# Feature Landscape: Coach Dashboard
+# Feature Landscape: Capacitor iOS Native App
 
-**Domain:** Online fitness coaching platform (single coach managing clients via PWA)
-**Researched:** 2026-02-07
-**Overall confidence:** HIGH (based on codebase analysis + competitive platform research across TrueCoach, TrainHeroic, Hevy Coach, Everfit, CoachRx)
+**Domain:** Native iOS wrapper for existing fitness gamification PWA with push notifications
+**Researched:** 2026-02-21
+**Overall confidence:** HIGH (Capacitor docs, Apple guidelines, codebase analysis, competitive research)
 
 ---
 
 ## Existing State (Already Built)
 
-Before detailing new features, here is what already exists in the codebase and can be leveraged:
+Before detailing new features, here is what already exists and must be preserved or adapted during the native wrapping process.
 
-| Existing Feature | Location | Integration Implications |
-|-----------------|----------|-------------------------|
-| Coach screen with client roster | `src/screens/Coach.tsx` | Basic list view with status indicators, add/remove clients, client detail modal with overview/progress/activity tabs |
-| Client invitation by email | `Coach.tsx` handleInviteClient | Finds user by email in `profiles` table, creates `coach_clients` row. Client must already have an account. |
-| `coach_clients` table + RLS | `supabase/schema.sql` | Coach-client relationship table with `pending/active/inactive` status. RLS policies allow coach to view client data. |
-| `coach_client_summary` view | `supabase/schema.sql` | Materialized join giving coach at-a-glance stats: streak, level, XP, latest weight, workouts in last 7 days. |
-| Coach can view client macro targets | RLS policy on `macro_targets` | Coach has SELECT + UPDATE on client macro targets. |
-| Coach can view client workout logs | RLS policy on `workout_logs` | Coach has SELECT on client workout logs (exercises stored as JSONB). |
-| Client workout system | `src/stores/workoutStore.ts` | Template-based workouts (3/4/5 day splits), exercises with sets/reps/weight, client-side Zustand with localStorage. |
-| Client macro system | `src/stores/macroStore.ts` | Mifflin-St Jeor calculation, daily logging, saved meals, target tracking (protein/calories/carbs/fats). |
-| Daily check-in with XP | `src/screens/CheckInModal.tsx` | Workout completion, protein target, calorie target, streak bonus. Gamification layer. |
-| Bottom nav (5 tabs) | `src/components/Navigation.tsx` | Home, Workouts, Macros, Avatar, Settings. Coach screen at `/coach` route but NOT in nav. |
-| Role system | `profiles.role` column | `user_role` enum: `client`, `coach`, `admin`. Not currently enforced in frontend routing. |
-| `useClientDetails` hook | `src/hooks/useClientDetails.ts` | Fetches weight history, macro adherence, activity feed for a specific client. Cached for 5 minutes. |
+| Existing Feature | Location | Native Adaptation Needed |
+|-----------------|----------|--------------------------|
+| PWA with service worker (Workbox) | `vite.config.ts` VitePWA plugin | Must be **disabled** for native builds. Capacitor bundles assets locally; service workers conflict with WKWebView on iOS. |
+| In-app reminder banners | `src/stores/remindersStore.ts`, `src/components/ReminderCard.tsx` | Keep as-is for in-app state. Push notifications **supplement** these, not replace. |
+| navigator.vibrate haptics | `src/lib/haptics.ts` | Replace with `@capacitor/haptics` for real iOS Taptic Engine feedback. Current implementation is a no-op on iOS Safari. |
+| Blob/FileReader export/import | Various screens | Replace with `@capacitor/share` for native iOS share sheet. |
+| Offline-first Zustand + localStorage | All stores | Keep as-is. Capacitor bundles the web app locally, so offline works by default for the app shell. Supabase sync remains the same. |
+| Supabase auth (email/password) | `src/stores/authStore.ts` | Works in WKWebView. No changes needed. |
+| Plausible analytics (22 events) | `src/lib/analytics.ts` | Works in WKWebView. May need to add native app tracking context. |
+| Sentry error monitoring | `src/lib/sentry.ts` | Works in WKWebView. Should add Capacitor platform tags for debugging. |
+| coach_clients + RLS | `src/lib/sync.ts` pullCoachData | Push notification triggers will fire from coach actions on these tables. |
+| Weekly check-in system | `src/screens/WeeklyCheckIn.tsx`, `src/hooks/useWeeklyCheckins.ts` | Coach response to check-in should trigger push notification to client. |
+| Assigned workouts | `src/lib/sync.ts` pullCoachData, assigned_workouts table | New workout assignment should trigger push notification to client. |
+| Macro targets (set_by: coach) | `src/stores/macroStore.ts` setCoachTargets | Coach macro update should trigger push notification to client. |
 
-**Key observation:** The coach dashboard foundation exists (client list, detail views, read-only data). What is MISSING is the coach's ability to **prescribe** (workouts, macros) and **collect structured feedback** (check-ins). The dashboard is currently view-only.
+**Key observation:** The app is feature-rich with a working offline-first architecture. The native wrapping is not about rebuilding features -- it is about adding iOS-native capabilities (push notifications, real haptics, native share, App Store presence) and satisfying Apple's review requirements for a non-trivial native app.
 
 ---
 
 ## Table Stakes
 
-Features users expect. Missing = coach dashboard feels incomplete and unusable for actual coaching.
+Features users expect in a native iOS fitness app. Missing = App Store rejection or user confusion.
 
-### 1. Client Invitation Flow (Enhancement of Existing)
+### 1. Push Notifications -- Coach Action Triggers
 
-**Why expected:** Every coaching platform has this. Current implementation requires clients to already have accounts. Industry standard (TrueCoach, Hevy Coach) is email invite that triggers signup.
+**Why expected:** This is the primary reason for going native. iOS has no reliable web push for PWAs (Safari Web Push requires explicit setup and user opt-in per visit). Native push via APNs is the standard and expected channel for fitness coaching apps. Every competitor (TrueCoach, Hevy Coach, Everfit, Trainerize) has native push.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Email invitation | Coach enters email, client receives invitation to join | Medium | Currently: client must have account first. Enhancement: send actual invite email via Supabase email or custom flow. |
-| Invitation link / code | Generate shareable link or code the client can use to sign up and auto-connect to coach | Low | Alternative to email: coach copies a link, sends via DM/text. On signup, client is auto-linked to coach. |
-| Pending state visibility | Coach sees "Pending" clients who have been invited but not yet signed up | Low | `coach_clients.status = 'pending'` already exists in schema. Just needs UI support. |
-| Re-send / copy link | Ability to re-send or copy the invitation link | Low | TrueCoach supports resend + copy link. |
+| APNs device token registration | App registers with Apple Push Notification service on launch, stores token per user in Supabase | Medium | Requires Apple Developer Account, APNs key (.p8), Capacitor Push Notifications plugin, `device_tokens` table in Supabase. |
+| Coach assigns workout notification | Client receives push when coach assigns a new workout | Low | Database webhook on `assigned_workouts` INSERT triggers Supabase Edge Function to send push via APNs. |
+| Coach updates macros notification | Client receives push when coach changes their macro targets | Low | Database webhook on `macro_targets` UPDATE (where set_by = 'coach') triggers Edge Function. |
+| Coach responds to check-in notification | Client receives push when coach writes a check-in response | Low | Database webhook on `weekly_checkins` UPDATE (where coach_response IS NOT NULL) triggers Edge Function. |
+| New client invitation notification | Client receives push when invited by coach (if they already have the app) | Low | Edge Function on `coach_clients` INSERT with status = 'pending'. |
+| Permission request with context | Ask for push permission after demonstrating value, not on first launch | Low | Show permission prompt after first coach action or during onboarding ("Enable notifications to know when your coach updates your plan"). iOS median opt-in is 51% -- earning the ask matters. |
 
-**Existing dependency:** `coach_clients` table already supports `pending` status. `profiles.email` lookup exists. Enhancement is the email delivery and signup-to-coach linking.
+**Architecture for push delivery:**
 
-**Recommendation:** Skip email delivery for V1. Use a shareable invitation link/code approach. Coach generates a code, shares it however they want (DM, email, social). Client enters code during signup to auto-link to coach. Simpler, no email infrastructure needed.
+```
+Coach Action (web/app)
+  --> Supabase table mutation (INSERT/UPDATE)
+    --> Database Webhook fires
+      --> Supabase Edge Function (send-push)
+        --> APNs (via Firebase Cloud Messaging or direct APNs HTTP/2)
+          --> iOS device notification
+            --> User taps notification
+              --> Deep link to relevant screen
+```
 
-**Confidence:** HIGH (pattern observed across TrueCoach, Hevy Coach, Everfit)
+**Critical design decision: FCM vs Direct APNs:**
+
+Use **direct APNs HTTP/2** for push delivery, not Firebase Cloud Messaging. Reasons:
+1. iOS-only app -- FCM adds unnecessary dependency for a single platform
+2. Direct APNs avoids Firebase SDK (reduces bundle size, no GoogleService-Info.plist)
+3. Capacitor's `@capacitor/push-notifications` supports direct APNs on iOS -- returns the native APNs token (not FCM token) when Firebase is not configured
+4. Supabase Edge Functions can speak APNs HTTP/2 directly using the .p8 key for JWT signing
+5. FCM only becomes valuable if Android is added later (separate milestone per Anti-Features)
+6. Fewer moving parts = easier to debug token registration issues
+
+**Confidence:** HIGH (universal pattern; Capacitor docs explicitly support this; Supabase has Edge Function examples)
 
 ---
 
-### 2. Workout Programming (New Feature)
+### 2. Push Notifications -- Local Scheduled Reminders
 
-**Why expected:** This is the core value of a coaching platform. Without it, the coach cannot do their job. Every platform (TrueCoach, TrainHeroic, Hevy Coach, Everfit, CoachRx) has this.
+**Why expected:** The app already has in-app reminder banners (check-in, workout, macros, XP claim) via `remindersStore.ts`. These only work when the app is open. Users expect OS-level reminders that appear in Notification Center even when the app is closed. This is the single most impactful engagement mechanism for fitness apps.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Exercise selection | Coach picks exercises from a library when building a workout | Medium | Existing app has hardcoded templates (3/4/5 day splits with ~5 exercises each). Coach needs to select from these + add custom exercises. |
-| Sets/reps/weight prescription | Coach specifies target sets, rep range, and optional weight for each exercise | Low | Existing `Exercise` type already has `targetSets`, `targetReps`, `notes`. Coach just needs UI to set these per client. |
-| Day-by-day assignment | Coach assigns workouts to specific days of the week for a client | Medium | Existing `WorkoutPlan.schedule` maps days to workout types. Coach needs to override the client's self-selected schedule. |
-| Program templates | Coach saves a workout program and applies it to multiple clients | Medium | TrueCoach: "build once, copy-paste to many clients." Critical for scaling beyond 10 clients. |
-| Workout sections/grouping | Organize exercises into sections (Warm-up, Strength, Finisher, Superset) | Low | TrueCoach uses custom group labels. Nice organizational UX. |
-| Client sees prescribed workout | Prescribed workout appears in client's existing workout screen, replacing self-generated template | Medium | This is the bridge: coach writes it, client's `workoutStore` reads it. Key architectural challenge. |
+| Daily check-in reminder | Scheduled local notification at user-configured time (e.g., 8 PM) reminding them to complete their daily check-in | Low | Uses `@capacitor/local-notifications`. Schedule repeating daily notification. Critical for streak maintenance. |
+| Workout reminder | Scheduled notification on training days at configured time | Medium | Needs to know which days are training days from `workoutStore.selectedDays`. Schedule per-day recurring notifications. |
+| Macro logging reminder | Evening reminder to log macros if not yet logged today | Medium | Needs to check state before firing. Can use local notification with `at` scheduling; app checks on resume whether macros are logged. |
+| Weekly XP claim reminder | Sunday notification reminding user to claim weekly XP | Low | Schedule weekly repeating on Sunday. |
+| User-configurable timing | Settings screen to set notification times and toggle each type | Low | Map to existing `remindersStore.preferences` structure. Add `notificationTime` per type. |
+| Weekly check-in submission reminder | Reminder to submit weekly coaching check-in (e.g., Saturday morning) | Low | Schedule weekly repeating. |
 
-**How competitors handle the coach-to-client flow:**
-- **TrueCoach:** Drag-and-drop builder, 1200+ exercise video library, assign to client calendar. Client sees it on their app immediately.
-- **Hevy Coach:** Prescribe exercises with sets, reps, weight, RPE targets. Client logs actual performance against prescribed targets.
-- **TrainHeroic:** Master Calendar for programming blocks, apply to individuals or teams.
+**Integration with existing reminders system:**
 
-**Critical design decision for Trained:** The client currently generates workouts from templates in `workoutStore.ts` (lines 229-243, `getTemplateForDay`). Coach-prescribed workouts need to **override** this template system. Two approaches:
+The existing `remindersStore.ts` already has the logic for determining when each reminder type should show (`shouldShowCheckInReminder`, `shouldShowWorkoutReminder`, etc.). The local notification system should mirror these types but fire at the OS level. The in-app banners remain for when the user is already in the app.
 
-1. **Server-first:** Coach writes workout to a `prescribed_workouts` table in Supabase. Client fetches prescribed workout instead of generating from template. Requires client to be online for initial workout fetch.
-2. **Sync-first:** Coach writes workout, it syncs to client's local store. Client works from local copy (offline-compatible). More complex but aligns with existing offline-first architecture.
-
-**Recommendation:** Server-first for prescribed workouts. Clients need to be online at least once to get their program. Once fetched, cache locally. This is how TrueCoach and Hevy Coach work -- coach publishes, client downloads.
-
-**Confidence:** HIGH (universal pattern across all coaching platforms)
+**Confidence:** HIGH (standard pattern; `@capacitor/local-notifications` is a core Capacitor plugin)
 
 ---
 
-### 3. Macro Target Setting (Enhancement of Existing)
+### 3. Native Haptics (Replacing navigator.vibrate)
 
-**Why expected:** Setting nutrition targets is fundamental coaching. The client already has macro tracking built in -- the coach just needs to be able to set and adjust the targets remotely.
+**Why expected:** The app already uses haptics extensively for key moments (set completion, workout finish, XP claim, achievement unlock). Currently `navigator.vibrate()` which has 0% support on iOS Safari. Going native means real Taptic Engine feedback via `@capacitor/haptics`.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Set client macro targets | Coach sets protein, calories, carbs, fats targets for a client | Low | RLS policy already grants coach UPDATE on `macro_targets`. Just needs coach-side UI. |
-| Per-day targets (training/rest) | Different macro targets for training days vs rest days | Medium | Everfit supports this natively: separate "Rest day macros goal." Not in current schema -- would need a `rest_day_targets` column or separate row. |
-| Adjustment history | Log of when targets were changed and what they were changed to | Low | Useful for coach to see "I bumped protein from 180g to 200g on Jan 15." Simple audit log table. |
-| Client sees coach-set targets | Coach-set targets override the client's self-calculated targets | Low | Client's `macroStore` currently uses `calculateMacros()`. If coach has set targets in Supabase `macro_targets`, client should fetch those instead. |
-| TDEE calculator for coach | Coach can auto-calculate starting macros using client's stats | Low | `calculateMacros` function already exists in `macroStore.ts` (Mifflin-St Jeor). Reuse server-side or in coach UI. |
+| Replace haptics.ts with Capacitor Haptics | Swap `navigator.vibrate` calls to `Haptics.impact()`, `Haptics.notification()`, etc. | Low | Drop-in replacement. 5 call sites in codebase (XPClaimModal, Home, Workouts, plus any new screens). |
+| Platform-aware haptics module | Detect Capacitor native vs web and use appropriate API | Low | `Capacitor.isNativePlatform()` check. Fall back to `navigator.vibrate` on web, use native Haptics API on iOS. |
 
-**How competitors handle this:**
-- **Everfit:** Manual input OR auto-calculate from TDEE. Separate training-day and rest-day targets. Client sees targets in their tracking screen.
-- **MacroFactor:** Weekly check-ins automatically adjust targets based on weight trend. Algorithm-driven.
-- **Carbon Diet Coach:** Weekly target adjustments based on logged data and metabolic feedback.
+**Existing mapping from `src/lib/haptics.ts`:**
 
-**Recommendation for Trained:** Start with single daily targets (not per-day). Coach sets protein/calories/carbs/fats. The per-day (training vs rest) distinction is a differentiator, not table stakes. Most coaches start clients on flat daily targets and only periodize nutrition for advanced clients.
+```
+Current (web, no-op on iOS)          --> Native Capacitor equivalent
+haptics.light()  [vibrate(10)]       --> Haptics.impact({ style: ImpactStyle.Light })
+haptics.medium() [vibrate(25)]       --> Haptics.impact({ style: ImpactStyle.Medium })
+haptics.success()[vibrate([15,50,30])]--> Haptics.notification({ type: NotificationType.Success })
+haptics.heavy()  [vibrate(50)]       --> Haptics.impact({ style: ImpactStyle.Heavy })
+haptics.error()  [vibrate([50,30,50])]--> Haptics.notification({ type: NotificationType.Error })
+```
 
-**Confidence:** HIGH (existing RLS and schema support this; just needs UI)
+**Confidence:** HIGH (`@capacitor/haptics` is a core plugin, API mapping is straightforward)
 
 ---
 
-### 4. Client Roster & At-a-Glance Dashboard (Enhancement of Existing)
+### 4. Native Splash Screen and App Icon
 
-**Why expected:** The coach needs to know which clients need attention, who is falling off, and who is crushing it. Current implementation has this -- needs refinement.
+**Why expected:** Every iOS app has a launch screen (Apple requires it) and an app icon. The PWA already has icons (192x192, 512x512) but iOS native requires specific sizes and a storyboard-based launch screen.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Status indicators (active/stale/falling off) | Color-coded status based on last check-in | Already built | `getStatusColor` and `getStatusEmoji` in `Coach.tsx` already implement this (green <= 1 day, yellow <= 3 days, red > 3 days). |
-| Quick stats (active/needs check-in/falling off) | Summary counts at top of dashboard | Already built | Three-card grid already shows Active Today, Need Check-in, Falling Off counts. |
-| Sort by urgency | Clients who need attention appear first | Already built | Sort by `bDays - aDays` (descending) puts most neglected clients at top. |
-| Compliance rate | 7/30/90 day compliance percentage | Low | TrueCoach: "exercises completed vs exercises assigned." Requires comparing prescribed workouts against completed workouts. Cannot implement without workout programming first. |
-| Search / filter | Find specific clients, filter by status | Low | Not critical at 15-50 clients, but becomes important as roster grows. |
-| Client detail expansion | Drill into a client's full data (weight chart, macro adherence, activity feed) | Already built | Modal with overview/progress/activity tabs already exists. |
+| iOS app icon (all sizes) | Generate required icon sizes for iOS (20pt through 1024pt, @2x and @3x) | Low | Use `@capacitor/assets` CLI or manual export from existing icon. Needed: 1024x1024 source icon. |
+| Launch screen (splash) | Native iOS launch screen storyboard with app branding | Low | Capacitor uses `@capacitor/splash-screen` plugin. Configure background color (#0a0a0a to match theme), centered logo, auto-hide after app loads. |
+| Status bar configuration | Match dark theme -- light text on dark background | Low | `@capacitor/status-bar` plugin. Set `style: Style.Dark` and `backgroundColor: '#0a0a0a'`. |
 
-**Typical roster sizes (from research):**
-- Online personal trainers: 15-25 active clients is typical
-- At premium pricing ($150-300/mo): 8-20 clients covers full-time income
-- For Trained (~90k followers): Could see 50-200 paying clients if conversion is even 0.1-0.2%
-
-**Implication for scale:** Current implementation uses a flat list. Fine up to ~50 clients. Beyond that, needs pagination or search. Recommend building for 50 initially, adding search/pagination in a later phase if needed.
-
-**Recommendation:** The existing roster view is serviceable. Primary enhancement: add compliance rate once workout programming exists, and add macro adherence percentage to the client card (not just in the detail modal).
-
-**Confidence:** HIGH (existing implementation reviewed; competitive patterns well-documented)
+**Confidence:** HIGH (standard Capacitor setup; well-documented)
 
 ---
 
-### 5. Structured Weekly Check-ins (New Feature)
+### 5. Native Share (Replacing Blob/FileReader Export)
 
-**Why expected:** Check-ins are how coaches gather qualitative data and make informed adjustments. Every serious coaching platform has this. Without it, coaches must rely on external tools (Google Forms, WhatsApp messages) which fragments the experience.
+**Why expected:** The app has data export functionality. On iOS native, users expect the standard iOS share sheet (UIActivityViewController) instead of browser-style file downloads.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Check-in form (client side) | Client fills out a structured weekly form with predefined questions | Medium | Separate from the daily XP check-in (`CheckInModal.tsx`). This is a weekly coaching check-in. |
-| Coach reviews submissions | Coach sees submitted check-ins and can mark them reviewed | Medium | TrueCoach: "Needs Attention" flag. Everfit: "Pending" / "Reviewed" statuses in Check-In Review Dashboard. |
-| Standard question set | Predefined questions covering the key areas | Low | See recommended questions below. |
-| Bodyweight entry | Client logs current weight as part of check-in | Low | Already supported by `weight_logs` table and `logWeight()` in `userStore`. Just wire into check-in form. |
-| Progress photos | Client uploads front/side photos | High | Requires image upload to Supabase Storage, storage policies, image compression. Significantly increases scope. |
-| Coach response | Coach can write a response to the check-in | Low | Simple text field stored alongside the check-in submission. |
+| Share via native share sheet | Replace file download with `@capacitor/share` to invoke iOS share sheet for data export | Low | `Share.share({ title, text, url, files })`. Users can share to Messages, Mail, Files, etc. Native feel. |
+| Platform-aware sharing | Detect native vs web and use appropriate API | Low | `Capacitor.isNativePlatform()` -> use Share plugin; web -> use existing Blob/download approach. |
 
-**Standard check-in questions (from research across MyPTHub, HubFit, OriGym, industry best practices):**
-
-1. **Adherence:** "How many prescribed workouts did you complete this week?" (number)
-2. **Training quality:** "Rate your training performance this week." (1-10 scale)
-3. **Nutrition adherence:** "How closely did you follow your nutrition plan?" (1-10 scale)
-4. **Sleep:** "Average hours of sleep per night this week." (number)
-5. **Stress:** "Rate your overall stress level this week." (1-10 scale)
-6. **Energy:** "Rate your overall energy level this week." (1-10 scale)
-7. **Wins:** "What went well this week?" (text)
-8. **Challenges:** "What challenges did you face?" (text)
-9. **Questions:** "Any questions or concerns for your coach?" (text)
-10. **Weight:** "Current bodyweight." (number, auto-populated from last entry)
-
-**Key insight:** Avoid yes/no questions. Research emphasizes that "Did you stick to the plan?" oversimplifies complex situations. Use scales (1-10) for quantitative and open-ended for qualitative.
-
-**Recommendation:** Build check-in form with the 10 questions above. Skip progress photos for V1 -- they add significant complexity (image upload, storage, compression, viewing UI) for marginal value. Photos can be added later. The coach response should be a simple text reply, not a full messaging system.
-
-**Confidence:** HIGH (universal pattern across coaching platforms; question set derived from multiple sources)
+**Confidence:** HIGH (`@capacitor/share` is a core plugin)
 
 ---
 
-### 6. Coach Navigation (Enhancement of Existing)
+### 6. Disable Service Worker for Native Build
 
-**Why expected:** The coach needs a different navigation structure than clients. Currently the coach screen is at `/coach` but not in the bottom nav. Coaches access it by... typing the URL manually? This is broken.
+**Why expected:** WKWebView on iOS does not properly support service workers. The app uses `vite-plugin-pwa` with Workbox which registers a service worker for offline caching. In a Capacitor native build, assets are bundled locally -- the service worker is redundant and causes WKWebView registration failures and console errors.
 
 | Sub-feature | What It Does | Complexity | Notes |
 |-------------|-------------|------------|-------|
-| Role-based navigation | Coach sees different nav items than clients | Medium | `profiles.role` exists but is not used in frontend routing. Need to conditionally render nav based on role. |
-| Coach-specific tabs | Coach nav includes: Clients, Programs, Check-ins | Low | TrueCoach uses: Dashboard, Clients, Programs. TrainHeroic: Athletes, Calendar, Programs. |
-| Sub-navigation within coach views | Tabs or sections within the coach area (client list, individual client, programming) | Low | Current Coach.tsx uses a modal for client details. Could upgrade to sub-routes (e.g., `/coach/clients/:id`). |
-| Preserve client nav for coach's own training | Coach may also be a trainee. They need access to their own workout/macro screens. | Low | Either: (a) separate toggle "Coach Mode / Training Mode" or (b) coach nav includes their own training as a tab. |
+| Conditional VitePWA disable | Detect native build target and set `VitePWA({ disabled: true })` | Low | Environment variable (e.g., `VITE_CAPACITOR=true`) or build script flag. Single change in `vite.config.ts`. |
+| Dual build pipeline | Maintain separate web (with PWA) and native (without PWA) build commands | Low | `"build:web": "vite build"` and `"build:native": "VITE_CAPACITOR=true vite build && npx cap sync"` in package.json. |
 
-**How competitors structure coach navigation:**
-- **TrueCoach (web):** Top sidebar with: Dashboard (today's clients), Clients (full list), Programs (template library), Messages. Each client click opens their calendar/detail view.
-- **Hevy Coach (web):** Left sidebar: Clients, Programs, Exercises. Click client to see their assigned program + progress.
-- **Everfit (web):** Left sidebar: Clients, Autoflow, Calendar, Library. Mobile: bottom tabs.
+**Confidence:** HIGH (documented Capacitor recommendation; service workers + WKWebView is a known conflict)
 
-**Critical design decision for Trained (PWA/mobile-first):**
+---
 
-The app is a mobile-first PWA with a 5-tab bottom nav. Coach navigation needs to work within this constraint. Two options:
+### 7. Offline Error Handling (Non-Browser)
 
-1. **Replace nav tabs for coaches:** When user has `role: 'coach'`, show coach-specific bottom nav: Home (coach dashboard), Clients, Programs, Training (their own), Settings. 5 tabs, clean.
-2. **Add coach tab to existing nav:** Add a 6th "Coach" tab to the existing 5. Apple recommends max 6 tabs, but it is crowded and the coach sees client-specific screens they do not need day-to-day.
+**Why expected:** Without the service worker handling offline, the app needs its own network status management for the native context. Browser-style "You are offline" error pages would immediately flag the app as a web wrapper to Apple reviewers.
 
-**Recommendation:** Option 1 -- role-based navigation. When `profiles.role === 'coach'`, render a different `Navigation` component with coach-specific tabs. The coach can access their own training from a "My Training" tab. This is cleaner than cramming coaching into the client nav.
+| Sub-feature | What It Does | Complexity | Notes |
+|-------------|-------------|------------|-------|
+| Native network status detection | Use `@capacitor/network` instead of `navigator.onLine` | Low | Already have `useSyncStore` with `isOnline` state. Wire native network detection to it. |
+| Graceful offline states | All screens handle offline gracefully with proper messaging | Already built | `SyncStatusIndicator` already shows sync state. Existing offline-first architecture means app functions fully offline. |
 
-**Confidence:** HIGH (standard pattern; single-role navigation is the norm in TrueCoach, Hevy Coach, Everfit)
+**Confidence:** HIGH (app is already offline-first; just need native network detection wiring)
+
+---
+
+### 8. Deep Linking (Universal Links)
+
+**Why expected:** Push notifications need to open specific screens. Coach sends workout notification -- tapping it should open the Workouts screen, not just the app root. Also needed for invitation links.
+
+| Sub-feature | What It Does | Complexity | Notes |
+|-------------|-------------|------------|-------|
+| Universal Links setup | Associate welltrained.fitness domain with iOS app via Apple App Site Association file | Medium | Requires: AASA file hosted at `.well-known/apple-app-site-association` on welltrained.fitness, Associated Domains capability in Xcode, route parsing in app. |
+| Notification deep links | Push notifications include deep link URL that opens the correct screen | Low | Include `data: { route: '/workouts' }` in push payload. Handle `pushNotificationActionPerformed` event to navigate via react-router. |
+| Invitation link handling | Invitation links (from coach) open the app if installed or the website if not | Medium | Universal link to `/invite/:code` opens the app's AccessGate with pre-filled code. Falls back to web if app not installed. |
+
+**Confidence:** MEDIUM (standard Capacitor pattern, but AASA file hosting and domain verification add complexity)
+
+---
+
+### 9. App Store Submission Requirements
+
+**Why expected:** Without meeting these, the app will be rejected. These are not features per se, but required compliance items.
+
+| Requirement | What It Means | Complexity | Notes |
+|-------------|--------------|------------|-------|
+| Apple Developer Account ($99/year) | Required for App Store distribution, APNs certificates, and provisioning profiles | N/A | One-time setup. Must be an individual or organization account. |
+| Privacy Policy URL | Must be accessible from within the app and listed in App Store Connect | Low | Already have app at welltrained.fitness -- add /privacy route or page. |
+| Privacy Nutrition Labels | Declare all data collection in App Store Connect (health/fitness data, usage data, identifiers) | Medium | Must accurately declare: email (account), weight/body data (health), workout logs (fitness), usage analytics (Plausible), crash data (Sentry). Inaccurate labels = rejection. |
+| Account Deletion | If the app has account creation (it does via Supabase Auth), must provide in-app account deletion | Medium | Apple Guideline 5.1.1(v). Requires "Delete Account" in Settings, Supabase Admin API call to delete user data + auth record. |
+| iOS 18 SDK minimum | Apps must be built with Xcode 16+ / iOS 18 SDK (current requirement); iOS 26 SDK required by April 28, 2026 | N/A | Use latest Xcode. Capacitor 7+ supports this. |
+| Non-trivial native functionality | App must not be a "web clipping" -- needs native features beyond just WKWebView | Addressed | Push notifications + haptics + native share + splash screen + deep linking collectively satisfy Guideline 4.2. |
+| App Review Information | Test account credentials, demo instructions for Apple reviewer | Low | Provide a test account with coach-assigned workout + macros so reviewer can see full functionality. |
+| Export Compliance (HTTPS) | Declare whether the app uses encryption | Low | Standard HTTPS declaration. Supabase uses TLS. Standard exemption applies. |
+
+**Confidence:** HIGH (Apple's guidelines are explicit; multiple verified sources)
 
 ---
 
 ## Differentiators
 
-Features that set the product apart. Not expected in V1 but add competitive value.
+Features that set the app apart from a basic Capacitor wrapper. Not required for launch but add meaningful value.
 
-### 1. Gamification Visibility for Coach
+### 1. Streak-Saving Notifications
 
-**Value proposition:** No competitor shows XP, levels, streaks, and avatar evolution to the coach. Trained already has this gamification system -- surfacing it to the coach is unique. Coach can see which clients are "leveling up" vs "stagnating" in gamification terms, adding a motivational layer to coaching.
+**Value proposition:** The app's streak system is a core engagement mechanic with grace periods. A "You haven't checked in today -- your 47-day streak is at risk!" notification at 9 PM could be the most retention-impactful notification in the entire app. No competitor ties push notifications to gamification streaks this way.
 
 | Feature | What It Does | Complexity | Notes |
 |---------|-------------|------------|-------|
-| Level + XP on client card | Show client's current level and XP next to their name | Already built | `Coach.tsx` already shows `Lvl {current_level}` and streak on client cards. |
-| Achievement badges visible to coach | Coach can see which badges a client has earned | Low | Achievements are in `achievementsStore`. Would need Supabase table for synced achievements. |
-| Avatar evolution stage | Coach can see client's avatar evolution | Low | Fun coaching tool: "Your client just evolved their avatar!" |
-| Streak leaderboard | Coach sees clients ranked by current streak | Low | Simple sort of existing data. Motivational tool. |
+| Streak-at-risk evening alert | If user hasn't checked in by a configured time, send an urgent-style notification | Medium | Local notification that checks streak status. Could use `@capacitor/local-notifications` with daily scheduling, or a scheduled Edge Function that checks `profiles.last_check_in_date`. |
+| Grace period expiry warning | "Your grace period expires tomorrow" notification | Low | Schedule based on streak state in local store. |
+| Streak milestone celebration | "Congratulations! 30-day streak achieved!" push notification | Low | Triggered locally when streak crosses milestone thresholds (7, 14, 30, 60, 90, 180, 365 days). |
 
-**Confidence:** MEDIUM (unique to Trained; no competitive validation, but logical extension of existing system)
+**Confidence:** MEDIUM (unique to Trained's gamification model; no competitive validation but logically high-impact)
 
 ---
 
-### 2. Training-Day vs Rest-Day Macro Targets
+### 2. Badge/Achievement Unlock Notifications
 
-**Value proposition:** Most coaching apps offer only flat daily targets. Everfit is the main competitor offering training/rest day differentiation. This is a genuine coaching best practice (higher carbs on training days, lower on rest days) that most apps do not support.
+**Value proposition:** Achievement unlocks already have in-app modal animations (`BadgeUnlockModal.tsx`). Adding a push notification means users who are not currently in the app still learn about unlocks, creating a pull-back-in moment.
 
 | Feature | What It Does | Complexity | Notes |
 |---------|-------------|------------|-------|
-| Dual target sets | Coach sets separate macros for training and rest days | Medium | Requires schema change: either separate columns or a second `macro_targets` row per user. Client needs to know which days are training days (already in `workoutStore.selectedDays`). |
-| Auto-detection | Client's app automatically applies correct targets based on whether today is a training day | Low | `workoutStore.getTodayWorkout()` already returns null on rest days. Use this to pick the right target set. |
+| Achievement unlock push | Fire a local notification when a new badge is earned | Low | Hook into `achievementsStore` badge unlock logic. Fire local notification with badge name and description. |
+| Level-up notification | "You reached Level 12 -- Warrior!" notification | Low | Hook into XP store level-up detection. |
 
-**Confidence:** MEDIUM (validated by Everfit's approach; adds real coaching value but not required for V1)
+**Confidence:** MEDIUM (unique to Trained's gamification; natural extension of existing system)
 
 ---
 
-### 3. Prescribed vs Actual Reporting
+### 3. Biometric App Lock
 
-**Value proposition:** Coach prescribes 4 sets of 8 reps at 185 lbs. Client actually does 4 sets of 6, 7, 8, 5 reps at 175 lbs. The coach sees both side-by-side. TrainHeroic and Hevy Coach highlight this as a core feature.
+**Value proposition:** Users with sensitive body data (weight, macros, progress) may want Face ID/Touch ID lock. Adds a premium native feel and security credibility.
 
 | Feature | What It Does | Complexity | Notes |
 |---------|-------------|------------|-------|
-| Side-by-side comparison | Shows prescribed targets vs what client actually logged | Medium | Requires storing prescribed workout separately from logged workout. Current `WorkoutLog` stores the final logged data. |
-| Completion percentage | "Client completed 85% of prescribed volume" | Low | Calculate from prescribed vs actual sets/reps/weight. |
-| Progressive overload tracking | "Client has increased squat weight by 10 lbs over 4 weeks" | Medium | Requires exercise-level history aggregation across workout logs. |
+| Face ID / Touch ID unlock | Require biometric authentication to open the app | Medium | Use `@aparajita/capacitor-biometric-auth` or `@capgo/capacitor-native-biometric`. Requires NSFaceIDUsageDescription in Info.plist. Optional feature in Settings. |
+| Auto-lock timeout | Lock app after configurable inactivity period | Low | Timer-based, check on app resume. |
 
-**Confidence:** HIGH (well-documented pattern in TrainHeroic and Hevy Coach)
+**Confidence:** MEDIUM (common in health/fitness apps; multiple Capacitor plugins available)
 
 ---
 
-### 4. Program Templates and Library
+### 4. App Update Prompting (Native)
 
-**Value proposition:** Coach builds a "12-Week Hypertrophy Program" once and assigns it to many clients with minor modifications. Critical for scaling beyond 20 clients. TrueCoach's entire business model is built around this efficiency.
+**Value proposition:** The PWA already has update prompting via `vite-plugin-pwa` registerType: 'prompt'. The native equivalent should check the App Store for updates and prompt users.
 
 | Feature | What It Does | Complexity | Notes |
 |---------|-------------|------------|-------|
-| Save program as template | Coach saves a multi-week program that can be reused | Medium | Requires a `program_templates` table with week/day/exercise structure. |
-| Assign template to client | One-click assignment with optional customization | Low | Copy template data into client's prescribed workouts. |
-| Template marketplace | Coach sells programs to other coaches | High | Out of scope. TrainHeroic has this, but it is a platform feature, not a single-coach feature. |
+| Check for App Store update | On launch, check if a newer version is available on the App Store | Low | `@capawesome/capacitor-app-update` plugin. `getAppUpdateInfo()` returns current vs available version. |
+| Update prompt | Show dialog prompting user to go to App Store to update | Low | Unlike Android, iOS does not support in-app updates. Redirect to App Store page. |
 
-**Confidence:** MEDIUM (clear competitive pattern; complexity depends on program structure)
+**Confidence:** HIGH (well-documented Capacitor plugin; standard iOS pattern)
 
 ---
 
-### 5. In-App Messaging
+### 5. Coach Push Notification Dashboard (Coach-Side)
 
-**Value proposition:** Direct communication between coach and client without leaving the app. TrueCoach and Everfit both have this. However, for a single coach with ~90k followers, messaging could become overwhelming.
+**Value proposition:** The coach can see which clients have notifications enabled and know their engagement-channel reach. Optionally, send targeted nudge messages.
 
 | Feature | What It Does | Complexity | Notes |
 |---------|-------------|------------|-------|
-| 1:1 text messaging | Coach and client can exchange text messages | High | Requires real-time infrastructure (Supabase Realtime or polling). Chat UI is deceptively complex. |
-| Workout-attached comments | Client can comment on specific workouts, coach responds | Medium | Lighter than full messaging. Contextual communication. |
-| Notification on new message | Push or in-app notification when new message arrives | High | Requires push notification infrastructure (web push, service worker). |
+| Notification status per client | Coach sees which clients have push notifications enabled | Low | Query `device_tokens` table -- if client has a valid token, they have push enabled. Show indicator on client roster. |
+| Manual coach nudge push | Coach can send a custom text notification to a specific client | Medium | Edge Function takes client_id + message, sends via APNs. Simple form in client detail view. Lightweight alternative to full messaging. |
 
-**Confidence:** HIGH (pattern is universal, but messaging is a high-complexity feature with real-time infrastructure needs)
+**Confidence:** MEDIUM (not standard in competitors, but natural fit for single-coach model)
+
+---
+
+### 6. App Badge Count
+
+**Value proposition:** App icon badge count (the red number bubble) signals to users that something needs their attention. Fitness apps commonly show pending check-ins or unreviewed coach actions.
+
+| Feature | What It Does | Complexity | Notes |
+|---------|-------------|------------|-------|
+| Badge count on app icon | Show count of pending actions (uncompleted check-in, unread coach response) | Medium | Use `@capawesome/capacitor-badge` plugin. Set count from push notification payload or calculate locally on app resume. Clear when user addresses the item. |
+
+**Confidence:** MEDIUM (standard iOS pattern; Capawesome plugin is well-maintained)
 
 ---
 
 ## Anti-Features
 
-Things to deliberately NOT build. Common mistakes when building a coach dashboard.
+Things to deliberately NOT build. Common mistakes when wrapping a PWA as a native app.
 
-### 1. Do NOT Build Full Messaging / Chat
+### 1. Do NOT Build Android Support in This Milestone
 
-**Why avoid:** Messaging is a deceptively complex feature. It requires real-time sync (Supabase Realtime channels), read receipts, typing indicators, notification infrastructure, message history pagination, and a full chat UI. For a single coach managing 50+ clients, an inbox quickly becomes unmanageable. Every coaching platform eventually regrets how they built messaging.
+**Why avoid:** iOS-only milestone. The 90k-follower fitness audience skews heavily iOS. Adding Android doubles the testing surface, introduces Google Play submission requirements, and complicates push notification infrastructure (FCM required for Android but not iOS). Keep scope tight.
 
-**What to do instead:** Use the weekly check-in system as the primary structured communication channel. Coach responds to check-ins with a text reply. For ad-hoc communication, the coach already has DMs on the social platform where their ~90k followers are. The check-in response covers 80% of coach-client communication needs without the infrastructure burden.
-
----
-
-### 2. Do NOT Build Progress Photo Comparison (V1)
-
-**Why avoid:** Progress photos require: image upload to storage, image compression/resizing, storage bucket policies, a photo viewer with comparison overlay (Kahunas-style), and privacy controls. It is a full sub-feature that touches storage infrastructure the app does not currently use. The coaching value is real but the complexity is disproportionate.
-
-**What to do instead:** Defer to a later phase. Clients can share progress photos via their existing social/messaging channels with the coach. Add photo support to check-ins in a future milestone once the check-in system is stable.
+**What to do instead:** Ship iOS first. If Android is needed, it is a separate future milestone. The Capacitor architecture makes this straightforward to add later.
 
 ---
 
-### 3. Do NOT Build an Exercise Video Library
+### 2. Do NOT Build In-App Purchases or Subscriptions
 
-**Why avoid:** TrueCoach has 1,200+ exercise videos. Building or licensing an exercise video library is a content project, not a software project. It requires video hosting, CDN costs, and ongoing content maintenance. The coach (app owner with 90k followers) likely already creates exercise demonstration content.
+**Why avoid:** Apple takes 30% commission on in-app purchases. The app uses Lemon Squeezy access codes for monetization -- this flow happens outside the app (web purchase, get code, enter in app). Adding IAP would require Apple's payment infrastructure, revenue sharing, and subscription management UI. The access code system specifically avoids this.
 
-**What to do instead:** Use exercise names with text notes (the existing `Exercise.notes` field: "Barbell or dumbbell", "Seat back, slow eccentric"). If the coach wants to link a video, allow a URL field on the exercise. Do not host video content.
+**What to do instead:** Continue using the existing access code flow. The user purchases access externally, enters their code in the AccessGate screen. This is a well-established pattern (Netflix, Kindle, Spotify for content purchased elsewhere).
 
----
-
-### 4. Do NOT Build Multi-Coach / Team Features
-
-**Why avoid:** This is a single-coach app for the app owner's coaching business. Multi-coach features (assistant coaches, team management, permission hierarchies) add significant complexity with zero value for the use case. TrainHeroic supports this because they serve university athletic programs. Trained does not need it.
-
-**What to do instead:** Hardcode for single coach. `profiles.role === 'coach'` applies to exactly one user. If multi-coach is ever needed, it is a separate milestone.
+**Risk note:** Apple has become more aggressive about IAP enforcement. Ensure the app does not contain ANY purchase links, "subscribe" buttons, or references to external pricing. The access code entry screen should be framed as "enter your code" not "don't have a code? buy one here."
 
 ---
 
-### 5. Do NOT Build Payment / Subscription Management
+### 3. Do NOT Build HealthKit Integration (V1)
 
-**Why avoid:** Billing, invoicing, subscription management, and payment processing are entire product categories. Platforms like TrueCoach integrate with Stripe; this is weeks of development. The coach already has a payment flow (Lemon Squeezy license keys for access codes).
+**Why avoid:** HealthKit integration (syncing workouts, weight, calories to Apple Health) is a significant undertaking. It requires HealthKit entitlements, additional privacy disclosures, bidirectional sync logic, unit conversion, and careful handling of data conflicts. It also triggers heightened App Store review scrutiny. The app's data model (XP-based, gamified) does not map cleanly to HealthKit's activity model.
 
-**What to do instead:** Continue using the existing Lemon Squeezy access code system for client onboarding. Clients pay through whatever external system the coach already uses and receive their access code.
-
----
-
-### 6. Do NOT Build AI Workout Generation
-
-**Why avoid:** TrueCoach recently added an AI Workout Builder. Building an AI-powered program generator requires LLM integration, prompt engineering, exercise safety validation, and testing across client profiles. It is a feature that sounds impressive but adds little value for a single coach who already knows how to program workouts. The coach's expertise IS the product.
-
-**What to do instead:** Make the manual workout builder fast and efficient. Program templates (build once, assign to many) solve the efficiency problem without AI.
+**What to do instead:** Defer to a future milestone. HealthKit adds credibility but is not required for the core coaching workflow. The app's own tracking is the source of truth.
 
 ---
 
-### 7. Do NOT Build Custom Check-in Form Builder
+### 4. Do NOT Build Widget Extensions (V1)
 
-**Why avoid:** Everfit has a full form builder where coaches can create custom questionnaires. For a single coach, the question set is fixed -- they ask the same 10 questions every week. A form builder adds UI complexity (drag-and-drop, question types, conditional logic) that serves platform products, not single-coach products.
+**Why avoid:** iOS widgets (Today View, Lock Screen, StandBy) require a separate App Extension target, SwiftUI code (not web), shared data container between app and extension, and ongoing maintenance for each iOS version's widget API changes. The complexity is high relative to the value.
 
-**What to do instead:** Hardcode the 10 standard check-in questions (listed in Table Stakes #5). If the coach needs to change a question, it is a code change, not a feature.
+**What to do instead:** Defer entirely. If users request it, the most impactful widget would be a simple streak counter or "next workout" display. But this is a full native Swift development effort.
+
+---
+
+### 5. Do NOT Rebuild Navigation as a Native Tab Bar
+
+**Why avoid:** Some guides recommend using a native iOS tab bar (UITabBarController) to avoid Apple's Guideline 4.2 rejection. This is unnecessary for Capacitor apps with well-designed web-based navigation. The existing bottom tab navigation in `Navigation.tsx` already looks and behaves like a native tab bar. Adding a native tab bar would create two navigation systems and break code sharing.
+
+**What to do instead:** Keep the existing web-based bottom navigation. It already satisfies Apple's "app-like experience" requirement. The combination of push notifications + haptics + native share + splash screen + deep linking provides more than enough native functionality to pass Guideline 4.2.
+
+---
+
+### 6. Do NOT Use Firebase SDK
+
+**Why avoid:** For an iOS-only app, the Firebase SDK (GoogleService-Info.plist, Firebase iOS SDK pods) adds unnecessary complexity, bundle size, and a third-party dependency. The `@capacitor/push-notifications` plugin returns native APNs tokens on iOS when Firebase is not configured. Supabase Edge Functions can send directly to APNs using HTTP/2 and a .p8 authentication key.
+
+**What to do instead:** Use direct APNs integration. The Supabase Edge Function handles JWT signing with the .p8 key and sends directly to the APNs HTTP/2 endpoint. This eliminates an entire service dependency.
+
+---
+
+### 7. Do NOT Replace localStorage with Native SQLite
+
+**Why avoid:** Capacitor's WKWebView has the same localStorage limits as Safari (~5-10 MB). The app's current data (profiles, workout logs, macro logs, XP) fits well within these limits. Replacing localStorage with SQLite or Capacitor Preferences would require rewriting every Zustand persist store, is a massive refactor for no immediate benefit, and introduces native storage APIs that differ between platforms.
+
+**What to do instead:** Keep `zustand/persist` with localStorage. Monitor storage usage. If limits become a problem (unlikely for the current data model), address it then.
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Existing] coach_clients table + RLS policies
+[Prerequisite] Apple Developer Account + Provisioning
     |
-    +--> [Enhance] Client invitation flow (shareable code/link)
-    |
-    +--> [Existing] Client roster (Coach.tsx)
+    +--> [Table Stakes] Capacitor project init + iOS platform setup
             |
-            +--> [Enhance] Role-based navigation
+            +--> [Table Stakes] Disable service worker for native build
             |       |
-            |       +--> Coach sees coach nav (Clients, Programs, Check-ins, Training, Settings)
-            |       |
-            |       +--> Client sees client nav (Home, Workouts, Macros, Avatar, Settings)
+            |       +--> Conditional VitePWA config in vite.config.ts
+            |       +--> Dual build pipeline (web + native)
             |
-            +--> [New] Workout programming
+            +--> [Table Stakes] Native splash screen + app icons + status bar
+            |
+            +--> [Table Stakes] Native haptics replacement
             |       |
-            |       +--> [New] prescribed_workouts table (Supabase)
+            |       +--> Platform-aware haptics.ts module
+            |
+            +--> [Table Stakes] Native share replacement
+            |       |
+            |       +--> Platform-aware share module
+            |
+            +--> [Table Stakes] Native network detection
+            |       |
+            |       +--> Wire @capacitor/network to syncStore.isOnline
+            |
+            +--> [Table Stakes] Push notification infrastructure
+            |       |
+            |       +--> APNs key (.p8) from Apple Developer Account
             |       |       |
-            |       |       +--> [New] Client fetches prescribed workout (replaces template)
+            |       |       +--> device_tokens table in Supabase
             |       |       |
-            |       |       +--> [Differentiator] Prescribed vs Actual reporting
+            |       |       +--> Token registration on app launch
             |       |
-            |       +--> [Differentiator] Program templates (build once, assign many)
-            |
-            +--> [Enhance] Macro target setting (coach UI for existing macro_targets table)
+            |       +--> Supabase Edge Function (send-push)
+            |       |       |
+            |       |       +--> Database webhooks on coach action tables
+            |       |       |       |
+            |       |       |       +--> assigned_workouts INSERT
+            |       |       |       +--> macro_targets UPDATE (set_by='coach')
+            |       |       |       +--> weekly_checkins UPDATE (coach_response)
+            |       |       |
+            |       |       +--> APNs HTTP/2 direct integration
             |       |
-            |       +--> [Differentiator] Training-day vs rest-day targets
+            |       +--> Local notifications (scheduled reminders)
+            |       |       |
+            |       |       +--> Mirror existing remindersStore types
+            |       |       |
+            |       |       +--> Notification time preferences UI in Settings
+            |       |
+            |       +--> Deep linking (notification tap -> screen)
+            |               |
+            |               +--> AASA file on welltrained.fitness
+            |               |
+            |               +--> Route handling in pushNotificationActionPerformed
+            |               |
+            |               +--> Invitation link deep linking
             |
-            +--> [New] Weekly check-ins
-                    |
-                    +--> [New] check_in_submissions table (Supabase)
-                    |
-                    +--> [New] Check-in form (client side)
-                    |
-                    +--> [New] Check-in review (coach side)
-                    |
-                    +--> Coach response to check-in
+            +--> [Table Stakes] App Store compliance
+            |       |
+            |       +--> Privacy policy page
+            |       |
+            |       +--> Privacy nutrition labels in App Store Connect
+            |       |
+            |       +--> Account deletion feature in Settings
+            |       |
+            |       +--> App Store listing (screenshots, description, keywords)
+            |       |
+            |       +--> TestFlight beta distribution
+            |
+            +--> [Differentiator] Streak-saving notifications
+            |
+            +--> [Differentiator] Badge/level-up notifications
+            |
+            +--> [Differentiator] App badge count
+            |
+            +--> [Differentiator] Biometric app lock
+            |
+            +--> [Differentiator] App update prompting
 ```
 
-**Key dependency chain:**
-1. Role-based navigation must come first (coach needs to access coach features)
-2. Workout programming is independent of macro setting and check-ins
-3. Macro setting is the simplest new feature (existing schema + RLS support it)
-4. Check-ins are independent but inform macro/workout adjustments
-5. Compliance rate (in roster) depends on workout programming existing first
+**Key dependency chains:**
+
+1. **Apple Developer Account is prerequisite for everything** -- needed for provisioning profiles, APNs key, and App Store submission
+2. **Capacitor init must come before any native plugin integration** -- project structure, Xcode project, native dependencies
+3. **Push notification infrastructure has 3 independent sub-tracks:** remote push (APNs), local notifications, and deep linking -- these can be developed in parallel
+4. **Service worker disabling must happen before first native build** -- prevents WKWebView errors
+5. **App Store compliance can be done in parallel** with notification work -- mostly content/config, not code
+6. **Native haptics, share, and network detection are independent** -- small scoped changes, can be done in any order
+
+---
+
+## Notification Trigger Matrix
+
+Comprehensive mapping of all notification types, their triggers, and delivery mechanism.
+
+### Remote Push Notifications (Server-Triggered via APNs)
+
+| Trigger Event | Who Receives | Message Template | Deep Link | Priority |
+|--------------|-------------|------------------|-----------|----------|
+| Coach assigns workout | Client | "Your coach assigned a new workout for {day}" | `/workouts` | High |
+| Coach updates macros | Client | "Your coach updated your nutrition targets" | `/macros` | Medium |
+| Coach responds to check-in | Client | "Your coach reviewed your weekly check-in" | `/checkin` | High |
+| Coach invites client | Client (if app installed) | "You've been invited to join WellTrained" | `/` | Medium |
+| Client submits check-in | Coach | "{name} submitted their weekly check-in" | `/coach` | Medium |
+| Client goes inactive (3+ days) | Coach | "{name} hasn't been active for {n} days" | `/coach` | Low |
+
+### Local Notifications (Device-Scheduled)
+
+| Trigger | Timing | Message Template | Deep Link | Configurable |
+|---------|--------|------------------|-----------|-------------|
+| Daily check-in reminder | User-set time (default 8 PM) | "Time for your daily check-in. Keep your streak alive!" | `/` | Yes (time + on/off) |
+| Workout reminder | Training days, user-set time (default 7 AM) | "Today is a training day. Time to get after it." | `/workouts` | Yes (time + on/off) |
+| Macro logging reminder | Daily, user-set time (default 7 PM) | "Don't forget to log your nutrition today." | `/macros` | Yes (time + on/off) |
+| Weekly XP claim | Sunday, user-set time (default 10 AM) | "Your weekly XP reward is ready to claim!" | `/` | Yes (time + on/off) |
+| Weekly check-in submission | Saturday, user-set time (default 9 AM) | "Submit your weekly check-in for your coach." | `/checkin` | Yes (time + on/off) |
+| Streak at risk (differentiator) | Daily at 9 PM, only if no check-in today | "Your {n}-day streak is at risk! Check in before midnight." | `/` | Yes (on/off) |
+
+---
+
+## App Store Review Strategy
+
+Specific guidance for passing Apple's review with a Capacitor-wrapped web app.
+
+### Guideline 4.2 (Minimum Functionality) Compliance
+
+Apple rejects apps that are merely "websites wrapped in a WebView." The following native features collectively demonstrate the app is NOT a lazy wrapper:
+
+| Native Feature | How It Satisfies 4.2 |
+|---------------|---------------------|
+| Push notifications (remote + local) | Uses APNs, which is a native-only capability |
+| Native haptics (Taptic Engine) | Uses device hardware not accessible from the web |
+| Native share sheet | UIActivityViewController, a native iOS API |
+| Native splash screen + status bar | Standard native app feel |
+| Deep linking (Universal Links) | OS-level integration for URL handling |
+| Network detection | Native `@capacitor/network` over `navigator.onLine` |
+| App badge count | Notification badge on app icon |
+
+**Additional strategies from successful Capacitor App Store approvals:**
+- Ensure no visible browser-style loading bars or error pages
+- Handle all empty states gracefully (no generic browser error pages)
+- Ensure transitions feel smooth (no visible page reloads)
+- Test on a real device (not just simulator) before submission
+
+### Privacy Nutrition Label Declaration
+
+Based on the app's data collection:
+
+| Data Type | Category | Purpose | Linked to Identity |
+|-----------|----------|---------|-------------------|
+| Email address | Contact Info | App Functionality | Yes |
+| Body weight | Health & Fitness | App Functionality | Yes |
+| Workout data | Fitness | App Functionality | Yes |
+| Macro/nutrition logs | Health & Fitness | App Functionality | Yes |
+| Device push token | Identifiers | App Functionality | Yes |
+| Crash logs | Diagnostics | App Functionality | No |
+| Usage analytics | Analytics | Analytics | No (Plausible is privacy-first, no cookies) |
+
+### Account Deletion Requirement
+
+Apple Guideline 5.1.1(v) requires in-app account deletion. Implementation:
+
+1. Add "Delete Account" button in Settings screen
+2. Show confirmation dialog with consequences ("This will permanently delete all your data including workout history, macros, XP, and achievements")
+3. Require re-authentication (password entry) before deletion
+4. Call Supabase Edge Function that: deletes all user rows across tables, calls Supabase Auth Admin API to delete the auth user
+5. Clear all localStorage
+6. Redirect to Auth screen
+
+This is **required** -- not optional. Missing this will result in rejection.
 
 ---
 
 ## MVP Recommendation
 
-For the coach dashboard milestone, prioritize in this order:
+For the Capacitor native iOS milestone, prioritize in this order:
 
-### Phase 1: Foundation (Role-Based Navigation + Client Invitation Enhancement)
-1. Role-based navigation (coach vs client bottom nav)
-2. Improve client invitation flow (shareable link/code)
-3. Pending client visibility in roster
+### Phase 1: Capacitor Foundation + Native Polish
 
-**Rationale:** Cannot build coach features if the coach cannot navigate to them. Must be first.
+1. Initialize Capacitor project with iOS platform
+2. Configure dual build pipeline (web with PWA, native without PWA)
+3. Native splash screen, app icons, status bar
+4. Replace `haptics.ts` with platform-aware Capacitor Haptics
+5. Replace file export with platform-aware native Share
+6. Wire native Network detection to syncStore
+7. Build and test on real iOS device via Xcode
 
-### Phase 2: Macro Target Setting
-4. Coach UI to set/update client macro targets
-5. Client fetches coach-set targets (overrides self-calculated)
-6. Target change history/audit log
+**Rationale:** Establishes the native shell. App runs identically to PWA but with native polish. No server-side changes needed. Must be rock-solid before adding push infrastructure.
 
-**Rationale:** Lowest complexity coach feature. Existing schema and RLS policies already support it. Quick win that delivers real coaching value.
+### Phase 2: Push Notification Infrastructure
 
-### Phase 3: Workout Programming
-7. Prescribed workout data model (Supabase table)
-8. Coach workout builder UI (exercise selection, sets/reps/weight)
-9. Day-by-day assignment to client calendar
-10. Client fetches and displays prescribed workouts
+8. Apple Developer Account + APNs key (.p8) setup
+9. `device_tokens` table in Supabase
+10. `@capacitor/push-notifications` integration -- APNs token registration
+11. Supabase Edge Function: `send-push` (receives webhook, sends via APNs HTTP/2)
+12. Database webhooks on coach action tables (assigned_workouts, macro_targets, weekly_checkins)
+13. Notification permission request flow (contextual, after value demonstrated)
+14. Test end-to-end: coach action -> webhook -> Edge Function -> APNs -> device notification
 
-**Rationale:** Core coaching feature. Higher complexity but essential. Depends on nothing from Phase 2, so could run in parallel, but sequencing after macros allows the coach to set up nutrition first (common coaching workflow).
+**Rationale:** Core native capability that justifies the native app and App Store presence. Server-side + client-side work. Depends on Phase 1 being stable.
 
-### Phase 4: Weekly Check-ins
-11. Check-in data model (Supabase table)
-12. Client check-in form (10 standard questions)
-13. Coach check-in review dashboard
-14. Coach response to check-in
+### Phase 3: Local Notifications + Deep Linking
 
-**Rationale:** Structured feedback loop. Depends on nothing from Phase 3, but logically comes after workouts and macros are in place (check-in questions reference workout adherence and nutrition).
+15. `@capacitor/local-notifications` -- scheduled reminders mirroring remindersStore types
+16. Notification preferences UI in Settings (time picker per notification type)
+17. Universal Links setup (AASA file on welltrained.fitness, Xcode config)
+18. Deep link handling for notification taps (route to correct screen via react-router)
+19. App badge count management
+
+**Rationale:** Completes the notification experience. Local notifications are independent of remote push infrastructure but share deep linking code. Deep linking makes both local and remote notifications useful.
+
+### Phase 4: App Store Submission
+
+20. Privacy policy page at welltrained.fitness/privacy
+21. Account deletion feature in Settings
+22. Privacy nutrition labels in App Store Connect
+23. App Store listing content (screenshots, description, keywords, category: Health & Fitness)
+24. App review information (test account with coach data, demo walkthrough notes)
+25. TestFlight beta distribution to small group (internal testing)
+26. Submit for App Store review
+
+**Rationale:** Compliance and distribution. Cannot submit until all native features are tested. TestFlight first for real-device validation with beta users.
 
 ### Defer to Later Milestone
-- Progress photos (storage infrastructure)
-- Training-day vs rest-day macro targets (schema change)
-- Prescribed vs actual reporting (requires workout programming data)
-- Program templates (requires workout programming first)
-- In-app messaging (infrastructure heavy)
-- Compliance rate on client cards (requires workout programming data)
+
+- **Streak-saving notifications:** Differentiator -- add after launch metrics show engagement patterns
+- **Badge/level-up notifications:** Differentiator -- add once base notification system is stable
+- **Biometric app lock:** Nice-to-have, not retention-critical
+- **App update prompting:** Low effort, can add in a quick follow-up
+- **Coach notification dashboard:** Useful but coach already manages via web
+- **HealthKit integration:** High complexity, different data model, separate milestone
+- **Widget extensions:** Requires native Swift development, separate milestone
+- **Android support:** Separate milestone, different distribution requirements
 
 ---
 
 ## Sources
 
 ### HIGH Confidence
-- Codebase analysis: `src/screens/Coach.tsx` (existing coach dashboard implementation)
-- Codebase analysis: `src/stores/workoutStore.ts` (workout template system, exercise types)
-- Codebase analysis: `src/stores/macroStore.ts` (macro calculation and tracking)
-- Codebase analysis: `src/screens/CheckInModal.tsx` (existing daily check-in, distinct from weekly coaching check-in)
-- Codebase analysis: `supabase/schema.sql` (existing tables, RLS policies, coach_client_summary view)
-- Codebase analysis: `src/components/Navigation.tsx` (5-tab bottom nav structure)
-- Codebase analysis: `src/App.tsx` (routing, role not enforced)
-- [TrueCoach Dashboard Features](https://truecoach.co/features/dashboard/)
-- [TrueCoach Program & Workout Builder](https://truecoach.co/features/program-workout-builder/)
-- [TrueCoach Client Invitation Email](https://help.truecoach.co/en/articles/2403930-client-invitation-email)
-- [TrueCoach Compliance Tracking](https://truecoach.co/features/compliance-tracking/)
-- [Hevy Coach Workout Builder](https://hevycoach.com/features/workout-builder/)
-- [Everfit Nutrition Coaching Macros](https://help.everfit.io/en/articles/4578482-nutrition-coaching-macros)
-- [Everfit Forms & Questionnaires](https://help.everfit.io/en/articles/6633667-how-to-create-forms-questionnaires)
+- Codebase analysis: `src/lib/haptics.ts` (current navigator.vibrate implementation, 0% iOS support)
+- Codebase analysis: `src/stores/remindersStore.ts` (existing 4 reminder types: logMacros, checkIn, claimXP, workout)
+- Codebase analysis: `src/lib/sync.ts` (push/pull sync architecture, coach data flow via pullCoachData)
+- Codebase analysis: `vite.config.ts` (VitePWA configuration with Workbox, runtime caching)
+- Codebase analysis: `supabase/functions/` (existing Edge Functions: send-invite, handle-intake-complete)
+- [Capacitor Push Notifications Plugin API](https://capacitorjs.com/docs/apis/push-notifications) -- registration, listeners, iOS configuration
+- [Capacitor Haptics Plugin API](https://capacitorjs.com/docs/apis/haptics) -- impact styles, notification types
+- [Capacitor Share Plugin API](https://capacitorjs.com/docs/apis/share) -- iOS UIActivityViewController
+- [Capacitor Local Notifications Plugin API](https://capacitorjs.com/docs/apis/local-notifications) -- scheduling, permissions
+- [Capacitor Splash Screen Plugin API](https://capacitorjs.com/docs/apis/splash-screen) -- iOS storyboard config
+- [Capacitor Status Bar Plugin API](https://capacitorjs.com/docs/apis/status-bar) -- style, overlay config
+- [Capacitor Deep Links Guide](https://capacitorjs.com/docs/guides/deep-links) -- Universal Links, AASA file
+- [Capacitor Deploying to App Store](https://capacitorjs.com/docs/ios/deploying-to-app-store) -- submission steps
+- [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- 4.2 Minimum Functionality, 5.1.1(v) Account Deletion
+- [Apple Privacy Nutrition Labels](https://developer.apple.com/app-store/app-privacy-details/) -- data disclosure requirements
+- [WKWebView Service Worker Issue (Capacitor #7069)](https://github.com/ionic-team/capacitor/issues/7069) -- service workers fail in WKWebView
 
 ### MEDIUM Confidence
-- [ISSA: How Many Clients Should a Personal Trainer Have](https://www.issaonline.com/blog/post/how-many-clients-should-a-personal-trainer-have) (15-25 typical)
-- [MyPTHub: Essential Client Check-In Questions](https://www.mypthub.net/blog/essential-client-check-in-questions/)
-- [HubFit: 10 Must-Ask Check-In Questions](https://hubfit.io/blog/10-questions-for-weekly-checkins)
-- [Trainerize: Ultimate Guide to Onboarding New Fitness Clients](https://www.trainerize.com/blog/the-ultimate-guide-to-onboarding-new-fitness-clients/)
-- [TrainHeroic Coach Features](https://www.trainheroic.com/coach/)
-- [CoachRx Competitive Comparison](https://www.coachrx.app/coachrx-comparison)
+- [Supabase Push Notifications with Edge Functions](https://supabase.com/docs/guides/functions/examples/push-notifications) -- database webhook + push delivery pattern
+- [Capawesome App Update Plugin](https://capawesome.io/plugins/app-update/) -- version check and App Store redirect
+- [Capawesome Badge Plugin](https://capawesome.io/plugins/badge/) -- app icon badge management
+- [App Store Review Guidelines Checklist (NextNative)](https://nextnative.dev/blog/app-store-review-guidelines) -- 2025 rejection reasons
+- [App Store Review: Webview Apps (MobiLoud)](https://www.mobiloud.com/blog/app-store-review-guidelines-webview-wrapper) -- Guideline 4.2 compliance for webview apps
+- [Capacitor Push Notifications Guide (Capawesome)](https://capawesome.io/blog/the-push-notifications-guide-for-capacitor/) -- comprehensive setup guide
+- [Capacitor Push Notifications Guide (Devdactic)](https://devdactic.com/push-notifications-ionic-capacitor/) -- APNs token handling walkthrough
+- [Apple Policy Updates for Capacitor Apps 2025 (Capgo)](https://capgo.app/blog/apple-policy-updates-for-capacitor-apps-2025/) -- SDK requirements, Xcode 26 deadline April 2026
+- [Fitness App Push Notification Strategies (Sudor Apps)](https://www.sudorapps.com/blog/harnessing-the-power-of-push-notifications-to-elevate-your-fitness-app-ekyhz) -- retention patterns
+- [Push Notification Best Practices for Fitness (Glofox)](https://www.glofox.com/blog/driving-member-value-with-push-notifications/) -- notification trigger types
+- [Biometric Auth Plugin (Aparajita)](https://github.com/aparajita/capacitor-biometric-auth) -- Face ID/Touch ID Capacitor plugin
 
 ### LOW Confidence
-- Client roster scaling beyond 50 clients (no direct benchmark for creator-coach apps with 90k follower base; sizing is extrapolated)
+- iOS push notification opt-in rate of 51% (cited in multiple sources but exact methodology unclear)
+- Service worker + WKWebView conflict resolution via conditional VitePWA disable (pattern mentioned in forums, not officially documented by Capacitor as a recommended approach)
+- Apple's enforcement intensity on Guideline 4.2 for Capacitor apps specifically (varies by reviewer; anecdotal from Ionic Forum posts)
