@@ -100,6 +100,7 @@ interface MacroStore {
   activityLevel: ActivityLevel
   setBy: 'self' | 'coach'
   setByCoachId: string | null
+  coachMacroUpdated: boolean
 
   // Actions
   addRecentFood: (food: RecentFood) => void
@@ -125,6 +126,7 @@ interface MacroStore {
   isPerfectDay: () => boolean
   setSavedMeals: (meals: SavedMeal[]) => void
   setCoachTargets: (targets: MacroTargets, coachId: string) => void
+  dismissCoachMacroUpdated: () => void
   setActivityLevel: (level: ActivityLevel) => void
   resetMacros: () => void
   exportData: () => string
@@ -166,6 +168,7 @@ export const useMacroStore = create<MacroStore>()(
       activityLevel: 'moderate',
       setBy: 'self',
       setByCoachId: null,
+      coachMacroUpdated: false,
 
       addRecentFood: (food) => {
         set((state) => {
@@ -527,10 +530,13 @@ export const useMacroStore = create<MacroStore>()(
           targets,
           setBy: 'coach',
           setByCoachId: coachId,
+          coachMacroUpdated: true,
         })
         // Regenerate meal plan with new targets
         get().generateMealPlan()
       },
+
+      dismissCoachMacroUpdated: () => set({ coachMacroUpdated: false }),
 
       setActivityLevel: (level) => set({ activityLevel: level }),
 

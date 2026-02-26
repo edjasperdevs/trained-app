@@ -9,7 +9,6 @@ import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
-import { LABELS } from '@/design/constants'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -29,6 +28,7 @@ export function Macros() {
   const favoriteFoods = useMacroStore((state) => state.favoriteFoods)
   const activityLevel = useMacroStore((state) => state.activityLevel)
   const setBy = useMacroStore((state) => state.setBy)
+  const coachMacroUpdated = useMacroStore((state) => state.coachMacroUpdated)
   // Subscribe to dailyLogs so derived values (progress, todayMeals) re-compute on change
   useMacroStore((state) => state.dailyLogs)
   const savedMeals = useMacroStore((state) => state.savedMeals)
@@ -56,11 +56,56 @@ export function Macros() {
     { id: 'daily', label: 'Daily' },
     { id: 'log', label: 'Meals' },
     { id: 'meals', label: 'Saved' },
-    { id: 'calculator', label: 'Calc' }
+    ...(setBy !== 'coach' ? [{ id: 'calculator' as TabType, label: 'Calc' }] : [])
   ]
+
+  const dismissCoachUpdate = () => {
+    useMacroStore.getState().dismissCoachMacroUpdated()
+  }
 
   return (
     <div data-testid="macros-screen" className="min-h-screen pb-20">
+      {/* Coach Macro Updated Modal */}
+      {coachMacroUpdated && targets && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
+          <Card className="py-0 w-full max-w-sm">
+            <CardContent className="p-6 text-center">
+              <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
+              <p className="text-lg font-bold mb-2">Macros Updated by Coach</p>
+              <p className="text-muted-foreground text-sm mb-4">
+                Your coach has set new macro targets for you.
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-left mb-6">
+                <div>
+                  <p className="text-xs text-muted-foreground">Calories</p>
+                  <p className="text-xl font-bold font-digital text-primary">{targets.calories}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Protein</p>
+                  <p className="text-xl font-bold font-digital text-primary">{targets.protein}g</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Carbs</p>
+                  <p className="text-lg font-digital">{targets.carbs}g</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Fats</p>
+                  <p className="text-lg font-digital">{targets.fats}g</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Button className="w-full" onClick={() => { dismissCoachUpdate(); setActiveTab('daily') }}>
+                  View Macros
+                </Button>
+                <Button variant="ghost" className="w-full" onClick={dismissCoachUpdate}>
+                  Dismiss
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-card pt-8 pb-4 px-5">
         <div className="flex items-center gap-2 mb-4">
@@ -68,7 +113,7 @@ export function Macros() {
           {setBy === 'coach' && (
             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
               <ShieldCheck size={12} />
-              Set by {LABELS.coach}
+              Set by Coach
             </span>
           )}
         </div>
@@ -96,6 +141,36 @@ export function Macros() {
       </div>
 
       <div className="px-5 py-6" data-sentry-mask>
+        {/* Coach-set macro targets at top */}
+        {setBy === 'coach' && targets && (
+          <Card className="py-0 border-primary/20 mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldCheck size={16} className="text-primary" />
+                <h3 className="text-sm font-semibold text-muted-foreground">YOUR TARGETS</h3>
+              </div>
+              <div className="grid grid-cols-4 gap-3 text-center">
+                <div>
+                  <p className="text-xs text-muted-foreground">Calories</p>
+                  <p className="text-lg font-bold font-digital text-primary">{targets.calories}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Protein</p>
+                  <p className="text-lg font-bold font-digital text-primary">{targets.protein}g</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Carbs</p>
+                  <p className="text-lg font-bold font-digital">{targets.carbs}g</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Fats</p>
+                  <p className="text-lg font-bold font-digital">{targets.fats}g</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {activeTab === 'daily' && (
           <DailyView
             progress={progress}
@@ -148,9 +223,9 @@ export function Macros() {
             <Card className="py-0 border-primary/20">
               <CardContent className="text-center py-8">
                 <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
-                <p className="text-lg font-bold mb-2">Macros Set by {LABELS.coach}</p>
+                <p className="text-lg font-bold mb-2">Macros Set by Coach</p>
                 <p className="text-muted-foreground text-sm mb-6">
-                  Your macro targets are managed by your {LABELS.coach.toLowerCase()}. Contact them to request changes.
+                  Your macro targets are managed by your coach. Contact them to request changes.
                 </p>
                 {targets && (
                   <div className="grid grid-cols-2 gap-4 text-left max-w-xs mx-auto">
