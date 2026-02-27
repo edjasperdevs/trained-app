@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 17 of 24 (Foundation Cleanup)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-02-27 -- Roadmap created for v2.0 (8 phases, 18 plans)
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-02-27 -- Completed 17-01 (Strip Coach Dashboard)
 
-Progress: [__________________] 0% (0/18 plans)
+Progress: [#_________________] 6% (1/18 plans)
 
 ## Performance Metrics
 
@@ -31,7 +31,8 @@ Progress: [__________________] 0% (0/18 plans)
 ### Decisions
 
 - v1.5 closed as-is; App Store submission moves to V2 Phase 24
-- Coach dashboard stripped from trained-app; lives in welltrained-coach
+- Coach dashboard stripped from trained-app; lives in welltrained-coach (17-01: code deletion complete, 4276 lines removed)
+- Coach response modal removed from client app -- responses viewed in welltrained-coach only
 - RevenueCat for iOS IAP subscriptions (pinned to v11.3.2 for Capacitor 7)
 - HealthKit via @capgo/capacitor-health for steps/sleep with manual fallback
 - "Bro" is free generalist archetype; 4 premium archetypes drive subscription conversion
@@ -53,5 +54,5 @@ Progress: [__________________] 0% (0/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Roadmap created for v2.0 -- ready to plan Phase 17
+Stopped at: Completed 17-01-PLAN.md (Strip Coach Dashboard)
 Resume file: None
