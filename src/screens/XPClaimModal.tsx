@@ -13,8 +13,8 @@ interface XPClaimModalProps {
   onClose: () => void
 }
 
-// Confetti particle component - muted colors for Trained theme
-const CONFETTI_COLORS = ['#8B1A1A', '#4A4A4A', '#2D5A27', '#8B6914', '#3A5A7A']
+// Confetti particle component - Dopamine Noir V2 palette
+const CONFETTI_COLORS = ['#C8FF00', '#A0CC00', '#D4FF33', '#A1A1AA', '#4488FF']
 
 interface ConfettiParticle {
   color: string
