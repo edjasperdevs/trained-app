@@ -4,7 +4,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ProgressBar, EmptyState } from '@/components'
-import { useWorkoutStore, useXPStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
+import { RankUpModal } from '@/components'
+import { useWorkoutStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
+import { useDPStore, DP_VALUES } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
@@ -44,8 +46,6 @@ export function Workouts() {
     getWeekWorkouts
   } = useWorkoutStore.getState()
 
-  const XP_VALUES = useXPStore((s) => s.XP_VALUES)
-  const { logDailyXP, getTodayLog } = useXPStore.getState()
   const { triggerReaction } = useAvatarStore.getState()
   const { checkAndAwardBadges, getAllBadges } = useAchievementsStore.getState()
 
@@ -59,6 +59,7 @@ export function Workouts() {
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null)
   const [editExercise, setEditExercise] = useState({ name: '', targetSets: '', targetReps: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   const todayWorkout = getTodayWorkout()
   const isCompleted = isWorkoutCompletedToday()
@@ -103,17 +104,12 @@ export function Workouts() {
     const workoutId = startMinimalWorkout(minimalNotes)
     markXPAwarded(workoutId)
 
-    // Log XP for workout
-    const todayLog = getTodayLog()
-    logDailyXP({
-      date: getLocalDateString(),
-      workout: true,
-      protein: todayLog?.protein || false,
-      calories: todayLog?.calories || false,
-      checkIn: todayLog?.checkIn || false,
-      perfectDay: todayLog?.perfectDay || false,
-      streakBonus: todayLog?.streakBonus || 0
-    })
+    // Award DP for training
+    const result = useDPStore.getState().awardDP('training')
+    if (result.rankedUp) {
+      const rankInfo = useDPStore.getState().getRankInfo()
+      setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+    }
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
@@ -130,17 +126,12 @@ export function Workouts() {
     completeWorkout(activeWorkout.id)
     markXPAwarded(activeWorkout.id)
 
-    // Log XP for workout
-    const todayLog = getTodayLog()
-    logDailyXP({
-      date: getLocalDateString(),
-      workout: true,
-      protein: todayLog?.protein || false,
-      calories: todayLog?.calories || false,
-      checkIn: todayLog?.checkIn || false,
-      perfectDay: todayLog?.perfectDay || false,
-      streakBonus: todayLog?.streakBonus || 0
-    })
+    // Award DP for training
+    const result = useDPStore.getState().awardDP('training')
+    if (result.rankedUp) {
+      const rankInfo = useDPStore.getState().getRankInfo()
+      setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+    }
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
@@ -178,17 +169,12 @@ export function Workouts() {
     endWorkoutEarly(activeWorkout.id)
     markXPAwarded(activeWorkout.id)
 
-    // Still award XP for showing up
-    const todayLog = getTodayLog()
-    logDailyXP({
-      date: getLocalDateString(),
-      workout: true,
-      protein: todayLog?.protein || false,
-      calories: todayLog?.calories || false,
-      checkIn: todayLog?.checkIn || false,
-      perfectDay: todayLog?.perfectDay || false,
-      streakBonus: todayLog?.streakBonus || 0
-    })
+    // Still award DP for showing up
+    const result = useDPStore.getState().awardDP('training')
+    if (result.rankedUp) {
+      const rankInfo = useDPStore.getState().getRankInfo()
+      setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+    }
 
     triggerReaction('checkIn')
     checkBadgesWithToast()
@@ -386,7 +372,7 @@ export function Workouts() {
                     {isCompleted && (
                       <div className="mt-3 pt-3 border-t border-border">
                         <p className="text-sm text-muted-foreground">
-                          +{XP_VALUES.WORKOUT} XP earned
+                          +{DP_VALUES.training} {LABELS.xp} earned
                         </p>
                       </div>
                     )}
@@ -585,7 +571,7 @@ export function Workouts() {
                 <EmptyState
                   icon={Dumbbell}
                   title="No workouts yet"
-                  description="Start your first workout to begin tracking progress and earning XP."
+                  description={`Start your first workout to begin tracking progress and earning ${LABELS.xp}.`}
                   action={{ label: "Start Workout", onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                 />
               )}
@@ -611,7 +597,7 @@ export function Workouts() {
               {LABELS.minimalWorkout}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {`Short on time? Log what you did instead. You'll still earn ${LABELS.xp} for staying compliant!`}
+              Short on time? Log what you did instead. You'll still earn {LABELS.xp} for staying compliant!
             </p>
 
             <Textarea
@@ -637,11 +623,21 @@ export function Workouts() {
                 onClick={handleMinimalWorkout}
                 disabled={!minimalNotes.trim() || isSubmitting}
               >
-                Log {LABELS.minimalWorkout} (+{XP_VALUES.WORKOUT} {LABELS.xp})
+                Log {LABELS.minimalWorkout} (+{DP_VALUES.training} {LABELS.xp})
               </Button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Rank Up Modal */}
+      {rankUpData && (
+        <RankUpModal
+          oldRank={rankUpData.oldRank}
+          newRank={rankUpData.newRank}
+          rankName={rankUpData.rankName}
+          onClose={() => setRankUpData(null)}
+        />
       )}
 
       {/* Exercise Editor Modal */}
@@ -1216,7 +1212,7 @@ function ActiveWorkoutView({
           disabled={!allSetsComplete || isSubmitting}
           data-testid="workouts-complete-button"
         >
-          {allSetsComplete ? 'Complete Workout (+100 XP)' : 'Complete All Sets First'}
+          {allSetsComplete ? `Complete Workout (+${DP_VALUES.training} ${LABELS.xp})` : 'Complete All Sets First'}
         </Button>
 
         {/* End Early Button */}

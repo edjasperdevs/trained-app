@@ -2,20 +2,22 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, XPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
-import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
+import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
+import { RankUpModal } from '@/components'
+import { Flame, Dumbbell, Beef, CheckCircle2, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
 import {
   useUserStore,
-  useXPStore,
+  useDPStore,
   useWorkoutStore,
   useMacroStore,
   useRemindersStore
 } from '@/stores'
+import { DP_VALUES } from '@/stores/dpStore'
 import { getStandingOrder, LABELS } from '@/design/constants'
+import { getLocalDateString, getLocalDaysDifference } from '@/lib/dateUtils'
 import { haptics } from '@/lib/haptics'
 import { cn } from '@/lib/cn'
 import { CheckInModal } from './CheckInModal'
-import { XPClaimModal } from './XPClaimModal'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 
 export function Home() {
@@ -23,25 +25,23 @@ export function Home() {
 
   // PERF-02: Use granular selectors for reactive state
   const profile = useUserStore((state) => state.profile)
-  const currentLevel = useXPStore((state) => state.currentLevel)
-  const pendingXP = useXPStore((state) => state.pendingXP)
-  const XP_VALUES = useXPStore((state) => state.XP_VALUES)
+  const currentRank = useDPStore((state) => state.currentRank)
+  const obedienceStreak = useDPStore((state) => state.obedienceStreak)
   const targets = useMacroStore((state) => state.targets)
 
   // PERF-02: Selectors for computed values that depend on state
-  const canClaimXP = useXPStore((state) => state.canClaimXP)()
   const activeReminders = useRemindersStore((state) => state.getActiveReminders)()
 
   // PERF-02: Access non-reactive functions via getState()
-  const { getTodayLog } = useXPStore.getState()
+  const { getTodayLog } = useDPStore.getState()
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore.getState()
   const { isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore.getState()
 
   const [showCheckIn, setShowCheckIn] = useState(false)
-  const [showClaimModal, setShowClaimModal] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
   const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
   const [hasCoach, setHasCoach] = useState(false)
+  const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   // Check if user is a coaching client and if weekly check-in is due
   const { hasCheckinForCurrentWeek, isCoachingClient } = useWeeklyCheckins()
@@ -60,9 +60,21 @@ export function Home() {
     return () => { cancelled = true }
   }, [hasCheckinForCurrentWeek, isCoachingClient])
 
-  // Check if user has already checked in today
+  // Streak validation on mount: reset stale streak if > 1 day since last action
+  useEffect(() => {
+    const { lastActionDate, obedienceStreak } = useDPStore.getState()
+    if (lastActionDate && obedienceStreak > 0) {
+      const today = getLocalDateString()
+      const daysDiff = getLocalDaysDifference(lastActionDate, today)
+      if (daysDiff > 1) {
+        useDPStore.setState({ obedienceStreak: 0 })
+      }
+    }
+  }, [])
+
+  // Check if user has already checked in today (training > 0 means they logged something)
   const todayLog = getTodayLog()
-  const hasCheckedInToday = todayLog?.checkIn || false
+  const hasCheckedInToday = (todayLog?.total || 0) > 0
 
   const todayWorkout = getTodayWorkout()
   const workoutCompleted = isWorkoutCompletedToday()
@@ -76,11 +88,8 @@ export function Home() {
     if (!todayWorkout) {
       return getStandingOrder('rest')
     }
-    if (canClaimXP) {
-      return getStandingOrder('claim')
-    }
     return getStandingOrder('training')
-  }, [profile?.streakPaused, todayWorkout, canClaimXP])
+  }, [profile?.streakPaused, todayWorkout])
 
   // Reset justCheckedIn after animation
   useEffect(() => {
@@ -94,22 +103,17 @@ export function Home() {
   const caloriesHit = isCalorieTargetHit()
   const macroProgress = getTodayProgress()
 
-  // Calculate potential XP for today
-  const streakBonus = (profile?.currentStreak || 0) * XP_VALUES.STREAK_PER_DAY
-  const potentialXP = [
-    todayWorkout && !workoutCompleted ? XP_VALUES.WORKOUT : 0,
-    !proteinHit ? XP_VALUES.PROTEIN : 0,
-    !caloriesHit ? XP_VALUES.CALORIES : 0,
-    XP_VALUES.CHECK_IN,
-    proteinHit && caloriesHit ? XP_VALUES.PERFECT_DAY : 0,
-    streakBonus
+  // Calculate potential DP for today
+  const potentialDP = [
+    todayWorkout && !workoutCompleted ? DP_VALUES.training : 0,
+    !proteinHit ? DP_VALUES.protein : 0,
   ].reduce((a, b) => a + b, 0)
 
   const quests = [
     {
       id: 'workout',
       label: todayWorkout ? `Complete ${todayWorkout.name}` : 'Recovery Day',
-      xp: todayWorkout ? XP_VALUES.WORKOUT : 0,
+      dp: todayWorkout ? DP_VALUES.training : 0,
       completed: workoutCompleted || !todayWorkout,
       icon: Dumbbell,
       isRest: !todayWorkout
@@ -117,21 +121,14 @@ export function Home() {
     {
       id: 'protein',
       label: `Hit Protein (${targets?.protein || 0}g)`,
-      xp: XP_VALUES.PROTEIN,
+      dp: DP_VALUES.protein,
       completed: proteinHit,
       icon: Beef
     },
     {
-      id: 'calories',
-      label: `Hit Calories (${targets?.calories.toLocaleString() || 0})`,
-      xp: XP_VALUES.CALORIES,
-      completed: caloriesHit,
-      icon: Zap
-    },
-    {
-      id: 'checkin',
+      id: 'report',
       label: LABELS.checkIn,
-      xp: XP_VALUES.CHECK_IN,
+      dp: 0,
       completed: hasCheckedInToday,
       icon: CheckCircle2
     }
@@ -150,7 +147,7 @@ export function Home() {
               {profile?.username || 'Trainee'}
             </h1>
           </div>
-          {profile?.currentStreak ? (
+          {obedienceStreak > 0 ? (
             <div data-testid="home-streak-display"><StreakBadge /></div>
           ) : null}
         </div>
@@ -205,7 +202,7 @@ export function Home() {
                       Daily Report Pending
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {`Complete your ${LABELS.checkIn.toLowerCase()} to earn ${LABELS.xp}`}
+                      Complete your daily report to earn {LABELS.xp}
                     </p>
                   </div>
                   <div className="animate-bounce">
@@ -231,7 +228,7 @@ export function Home() {
                       Report Submitted.
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      +{todayLog?.total || 0} {LABELS.xp} earned
+                      +{todayLog?.total || 0} {LABELS.xp} earned today
                     </p>
                   </div>
                 </div>
@@ -240,16 +237,16 @@ export function Home() {
           </div>
         )}
 
-        {/* Avatar & XP Section */}
+        {/* Avatar & Rank Section */}
         <Card className="py-0 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
           <CardContent className="p-4 relative">
             <div className="flex items-start gap-6">
               <div data-testid="home-level-display">
-                <Avatar size="lg" showMood showLevel level={currentLevel} />
+                <Avatar size="lg" showMood showLevel level={currentRank} />
               </div>
               <div className="flex-1" data-testid="home-xp-display">
-                <XPDisplay showPending />
+                <DPDisplay />
               </div>
             </div>
           </CardContent>
@@ -257,36 +254,6 @@ export function Home() {
 
         {/* Weekly Summary */}
         <WeeklySummary />
-
-        {/* Weekly XP Claim Banner */}
-        {canClaimXP && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-            <Card
-              className="py-0 cursor-pointer border-l-[3px] border-l-warning"
-              onClick={() => setShowClaimModal(true)}
-              data-testid="home-claim-xp-button"
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Gift size={28} className="text-warning" />
-                    <div>
-                      <p className="font-bold text-base">
-                        Reward Ready
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {pendingXP} {LABELS.xp} awaiting claim
-                      </p>
-                    </div>
-                  </div>
-                  <Button variant="secondary">
-                    CLAIM
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* Streak Calendar */}
         <StreakDisplay />
@@ -317,7 +284,7 @@ export function Home() {
               {LABELS.dailyQuests}
             </h2>
             <span className="text-sm text-muted-foreground font-mono">
-              +{potentialXP} {LABELS.xp} possible
+              +{potentialDP} {LABELS.xp} possible
             </span>
           </div>
 
@@ -348,12 +315,12 @@ export function Home() {
                           {quest.label}
                         </p>
                       </div>
-                      {quest.xp > 0 && !quest.isRest && (
+                      {quest.dp > 0 && !quest.isRest && (
                         <span className={cn(
                           'text-sm font-mono font-bold',
                           quest.completed ? 'text-success' : 'text-primary'
                         )}>
-                          +{quest.xp} {LABELS.xp}
+                          +{quest.dp} {LABELS.xp}
                         </span>
                       )}
                     </div>
@@ -362,8 +329,8 @@ export function Home() {
               </div>
             ))}
 
-            {/* Streak Bonus */}
-            {profile?.currentStreak ? (
+            {/* Streak Display */}
+            {obedienceStreak > 0 ? (
               <Card className="py-0 bg-warning/10 border-warning/20">
                 <CardContent className="p-3">
                   <div className="flex items-center gap-3">
@@ -371,11 +338,8 @@ export function Home() {
                       <Flame size={18} className="text-warning" />
                     </div>
                     <div className="flex-1">
-                      <p>Obedience Bonus ({profile.currentStreak} days)</p>
+                      <p>{LABELS.streak}: {obedienceStreak} days</p>
                     </div>
-                    <span className="text-sm font-mono font-bold text-warning">
-                      +{streakBonus} {LABELS.xp}
-                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -463,8 +427,7 @@ export function Home() {
                     Daily Report Complete
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    +{todayLog?.total || 0} {LABELS.xp} earned
-                    {pendingXP > 0 && ` • ${pendingXP} ${LABELS.xp} pending claim`}
+                    +{todayLog?.total || 0} {LABELS.xp} earned today
                   </p>
                 </div>
               </div>
@@ -499,11 +462,15 @@ export function Home() {
         }}
       />
 
-      {/* XP Claim Modal */}
-      <XPClaimModal
-        isOpen={showClaimModal}
-        onClose={() => setShowClaimModal(false)}
-      />
+      {/* Rank Up Modal */}
+      {rankUpData && (
+        <RankUpModal
+          oldRank={rankUpData.oldRank}
+          newRank={rankUpData.newRank}
+          rankName={rankUpData.rankName}
+          onClose={() => setRankUpData(null)}
+        />
+      )}
 
     </div>
   )

@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react'
-import { BadgeUnlockModal } from '@/components'
+import { BadgeUnlockModal, RankUpModal } from '@/components'
 import {
   useUserStore,
-  useXPStore,
+  useDPStore,
   useWorkoutStore,
   useMacroStore,
   useAvatarStore,
   useAchievementsStore
 } from '@/stores'
+import { DP_VALUES, RANKS } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
-import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
-import { Dumbbell, Beef, Zap, CheckCircle2, Star, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
+import { Dumbbell, Beef, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -23,31 +23,27 @@ interface CheckInModalProps {
 interface CheckInData {
   workout: boolean
   protein: boolean
-  calories: boolean
-  checkIn: boolean
 }
 
 export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
-  const profile = useUserStore((state) => state.profile)
   const updateStreak = useUserStore((state) => state.updateStreak)
-  const { logDailyXP, XP_VALUES } = useXPStore()
+  const obedienceStreak = useDPStore((state) => state.obedienceStreak)
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
-  const { isProteinTargetHit, isCalorieTargetHit } = useMacroStore()
+  const { isProteinTargetHit } = useMacroStore()
   const { triggerReaction } = useAvatarStore()
 
   const [data, setData] = useState<CheckInData>({
     workout: false,
     protein: false,
-    calories: false,
-    checkIn: true
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [earnedXP, setEarnedXP] = useState(0)
-  const [xpAnimations, setXpAnimations] = useState<{ id: number; amount: number; label: string }[]>([])
+  const [earnedDP, setEarnedDP] = useState(0)
+  const [dpAnimations, setDpAnimations] = useState<{ id: number; amount: number; label: string }[]>([])
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([])
   const [showBadgeModal, setShowBadgeModal] = useState(false)
+  const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
 
@@ -60,68 +56,60 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       setData({
         workout: workoutCompleted,
         protein: isProteinTargetHit(),
-        calories: isCalorieTargetHit(),
-        checkIn: true
       })
       setSubmitted(false)
-      setEarnedXP(0)
-      setXpAnimations([])
+      setEarnedDP(0)
+      setDpAnimations([])
       setUnlockedBadges([])
       setShowBadgeModal(false)
+      setRankUpData(null)
     }
   }, [isOpen])
 
-  const streakBonus = ((profile?.currentStreak || 0) + 1) * XP_VALUES.STREAK_PER_DAY
-  const perfectDay = data.protein && data.calories
-
-  const calculateXP = () => {
+  const calculateDP = () => {
     let total = 0
-    if (todayWorkout && data.workout) total += XP_VALUES.WORKOUT
-    if (data.protein) total += XP_VALUES.PROTEIN
-    if (data.calories) total += XP_VALUES.CALORIES
-    if (data.checkIn) total += XP_VALUES.CHECK_IN
-    if (perfectDay) total += XP_VALUES.PERFECT_DAY
-    total += streakBonus
+    // Only count DP for things not yet awarded today
+    const todayLog = useDPStore.getState().getTodayLog()
+    if (todayWorkout && data.workout && !(todayLog && todayLog.training > 0)) total += DP_VALUES.training
+    if (data.protein && !(todayLog && todayLog.protein > 0)) total += DP_VALUES.protein
     return total
   }
 
   const handleSubmit = () => {
     if (isSubmitting) return
     setIsSubmitting(true)
-    const totalXP = calculateXP()
     const animations: { id: number; amount: number; label: string }[] = []
+    let totalDP = 0
+    let lastRankUp: { rankedUp: boolean; newRank: number } | null = null
 
-    // Build animation sequence
-    let delay = 0
-    if (todayWorkout && data.workout) {
-      animations.push({ id: delay++, amount: XP_VALUES.WORKOUT, label: 'Workout' })
-    }
-    if (data.protein) {
-      animations.push({ id: delay++, amount: XP_VALUES.PROTEIN, label: 'Protein' })
-    }
-    if (data.calories) {
-      animations.push({ id: delay++, amount: XP_VALUES.CALORIES, label: 'Calories' })
-    }
-    if (data.checkIn) {
-      animations.push({ id: delay++, amount: XP_VALUES.CHECK_IN, label: 'Check-In' })
-    }
-    if (perfectDay) {
-      animations.push({ id: delay++, amount: XP_VALUES.PERFECT_DAY, label: 'Perfect Day!' })
-    }
-    if (streakBonus > 0) {
-      animations.push({ id: delay++, amount: streakBonus, label: 'Streak Bonus' })
+    // Check what's already been awarded today
+    const todayLog = useDPStore.getState().getTodayLog()
+
+    // Award training DP if workout was done and not already awarded
+    if (todayWorkout && data.workout && !(todayLog && todayLog.training > 0)) {
+      const result = useDPStore.getState().awardDP('training')
+      totalDP += result.dpAwarded
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Training' })
+      if (result.rankedUp) lastRankUp = result
     }
 
-    // Log the XP
-    logDailyXP({
-      date: getLocalDateString(),
-      workout: todayWorkout ? data.workout : false,
-      protein: data.protein,
-      calories: data.calories,
-      checkIn: data.checkIn,
-      perfectDay,
-      streakBonus
-    })
+    // Award protein DP if protein target hit and not already awarded
+    if (data.protein && !(todayLog && todayLog.protein > 0)) {
+      const result = useDPStore.getState().awardDP('protein')
+      totalDP += result.dpAwarded
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Protein Target' })
+      if (result.rankedUp) lastRankUp = result
+    }
+
+    // Handle rank-up
+    if (lastRankUp && lastRankUp.rankedUp) {
+      const rankEntry = RANKS.find(r => r.rank === lastRankUp!.newRank)
+      setRankUpData({
+        oldRank: lastRankUp.newRank - 1,
+        newRank: lastRankUp.newRank,
+        rankName: rankEntry?.name || 'Unknown'
+      })
+    }
 
     // Update streak
     updateStreak(true)
@@ -130,11 +118,11 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     triggerReaction('checkIn')
 
     // Track analytics
-    analytics.checkInCompleted((profile?.currentStreak || 0) + 1)
+    analytics.checkInCompleted(obedienceStreak + 1)
 
     setSubmitted(true)
-    setEarnedXP(totalXP)
-    setXpAnimations(animations)
+    setEarnedDP(totalDP)
+    setDpAnimations(animations)
 
     // Check for new badges after a delay
     const badgeCheckDelay = animations.length * 150 + 800
@@ -187,7 +175,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 {todayWorkout ? (
                   <QuestCheckbox
                     label={`Completed ${todayWorkout.name}`}
-                    xp={XP_VALUES.WORKOUT}
+                    xp={DP_VALUES.training}
                     checked={data.workout}
                     onChange={(v) => setData(d => ({ ...d, workout: v }))}
                     icon={Dumbbell}
@@ -204,69 +192,30 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 {/* Protein */}
                 <QuestCheckbox
                   label="Hit Protein Target"
-                  xp={XP_VALUES.PROTEIN}
+                  xp={DP_VALUES.protein}
                   checked={data.protein}
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
                   icon={Beef}
                   xpLabel={LABELS.xp}
                 />
 
-                {/* Calories */}
-                <QuestCheckbox
-                  label="Hit Calorie Target"
-                  xp={XP_VALUES.CALORIES}
-                  checked={data.calories}
-                  onChange={(v) => setData(d => ({ ...d, calories: v }))}
-                  icon={Zap}
-                  xpLabel={LABELS.xp}
-                />
-
-                {/* Check-in (always checked) */}
-                <QuestCheckbox
-                  label={LABELS.checkIn}
-                  xp={XP_VALUES.CHECK_IN}
-                  checked={data.checkIn}
-                  onChange={() => {}}
-                  icon={CheckCircle2}
-                  disabled
-                  xpLabel={LABELS.xp}
-                />
-
-                {/* Perfect Day Bonus */}
-                {perfectDay && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-success/10 border border-success/30 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="flex items-center gap-3">
-                      <Star size={20} className="text-success" />
-                      <span className="text-success font-semibold text-sm">
-                        Full Compliance Bonus!
-                      </span>
-                    </div>
-                    <span className="text-success font-mono font-bold">
-                      +{XP_VALUES.PERFECT_DAY} {LABELS.xp}
-                    </span>
-                  </div>
-                )}
-
-                {/* Streak Bonus */}
-                {profile?.currentStreak !== undefined && (
+                {/* Streak Info */}
+                {obedienceStreak > 0 && (
                   <div data-testid="checkin-streak-display" className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
                     <div className="flex items-center gap-3">
                       <Flame size={20} className="text-warning" />
-                      <span>Obedience Bonus ({(profile?.currentStreak || 0) + 1} days)</span>
+                      <span>{LABELS.streak}: {obedienceStreak} days</span>
                     </div>
-                    <span className="text-warning font-mono font-bold">
-                      +{streakBonus} {LABELS.xp}
-                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Total XP Preview */}
+              {/* Total DP Preview */}
               <div className="bg-muted p-4 mb-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Total {LABELS.xp}</span>
                   <span className="text-2xl font-bold font-mono text-primary">
-                    +{calculateXP()} {LABELS.xp}
+                    +{calculateDP()} {LABELS.xp}
                   </span>
                 </div>
               </div>
@@ -289,9 +238,9 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               Report Accepted.
             </h2>
 
-            {/* XP Breakdown */}
+            {/* DP Breakdown */}
             <div className="space-y-2 my-6 relative">
-              {xpAnimations.map((anim, index) => (
+              {dpAnimations.map((anim, index) => (
                 <div
                   key={anim.id}
                   className="flex items-center justify-between bg-muted px-4 py-2 rounded-lg animate-in fade-in slide-in-from-left-8 duration-300"
@@ -308,14 +257,11 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
             {/* Total */}
             <div
               className="p-6 mb-6 bg-primary/10 rounded-lg border border-primary/30 animate-in fade-in zoom-in-90 duration-500"
-              style={{ animationDelay: `${xpAnimations.length * 150 + 300}ms` }}
+              style={{ animationDelay: `${dpAnimations.length * 150 + 300}ms` }}
             >
               <p className="text-muted-foreground mb-1">Total Earned</p>
               <p className="text-4xl font-bold font-mono text-primary">
-                +{earnedXP} {LABELS.xp}
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Pending until weekly claim
+                +{earnedDP} {LABELS.xp}
               </p>
             </div>
 
@@ -331,6 +277,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
         <BadgeUnlockModal
           badgeIds={unlockedBadges}
           onClose={() => setShowBadgeModal(false)}
+        />
+      )}
+
+      {/* Rank Up Modal */}
+      {rankUpData && (
+        <RankUpModal
+          oldRank={rankUpData.oldRank}
+          newRank={rankUpData.newRank}
+          rankName={rankUpData.rankName}
+          onClose={() => setRankUpData(null)}
         />
       )}
     </div>
