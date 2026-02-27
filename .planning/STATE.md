@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 17 of 24 (Foundation Cleanup)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-02-27 -- Completed 17-01 (Strip Coach Dashboard)
+Phase: 17 of 24 (Foundation Cleanup) -- COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase complete
+Last activity: 2026-02-27 -- Completed 17-02 (Dopamine Noir V2 Design Tokens)
 
-Progress: [#_________________] 6% (1/18 plans)
+Progress: [##________________] 11% (2/18 plans)
 
 ## Performance Metrics
 
@@ -37,6 +37,8 @@ Progress: [#_________________] 6% (1/18 plans)
 - HealthKit via @capgo/capacitor-health for steps/sleep with manual fallback
 - "Bro" is free generalist archetype; 4 premium archetypes drive subscription conversion
 - Lime signal #C8FF00 replaces red #D55550 as primary brand color
+- Dopamine Noir V2 color system fully applied: all CSS tokens, confetti, mask-icon updated (17-02)
+- Border/input (#2A2A2A) kept distinct from card (#26282B) for visible card boundaries
 
 ### Pending Todos
 
@@ -54,5 +56,5 @@ Progress: [#_________________] 6% (1/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 17-01-PLAN.md (Strip Coach Dashboard)
+Stopped at: Completed 17-02-PLAN.md (Dopamine Noir V2 Design Tokens) -- Phase 17 complete
 Resume file: None

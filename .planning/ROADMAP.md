@@ -16,7 +16,7 @@
 
 ### Phases
 
-- [ ] **Phase 17: Foundation Cleanup** - Strip coach dashboard and migrate to Dopamine Noir V2 design tokens
+- [x] **Phase 17: Foundation Cleanup** - Strip coach dashboard and migrate to Dopamine Noir V2 design tokens
 - [ ] **Phase 18: Gamification Engine** - Discipline Points store, 15-rank progression, rank-up celebrations, Obedience Streak
 - [ ] **Phase 19: Subscriptions** - RevenueCat integration, paywall, premium entitlement gating, webhook backend
 - [ ] **Phase 20: Health Tracking** - HealthKit steps and sleep with manual fallback, DP awards for health actions
@@ -41,7 +41,7 @@
 
 Plans:
 - [x] 17-01-PLAN.md — Coach code removal (delete 7 coach-only files, fix imports/exports, clean shared files, trim useWeeklyCheckins)
-- [ ] 17-02-PLAN.md — Dopamine Noir V2 design token migration (CSS tokens, hard-coded colors, visual verification)
+- [x] 17-02-PLAN.md — Dopamine Noir V2 design token migration (CSS tokens, hard-coded colors, visual verification)
 
 ### Phase 18: Gamification Engine
 **Goal**: Users earn Discipline Points for daily actions and progress through a 15-rank system with visible progression and celebration -- the core motivation loop that replaces XP/levels
@@ -231,7 +231,7 @@ Plans:
 | 14. Remote Push Notifications | v1.5 | 3/3 | Complete | 2026-02-22 |
 | 15. Local Notifications + Engagement | v1.5 | 2/2 | Complete | 2026-02-22 |
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
-| 17. Foundation Cleanup | v2.0 | 1/2 | In progress | - |
+| 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 0/2 | Not started | - |
 | 19. Subscriptions | v2.0 | 0/3 | Not started | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
