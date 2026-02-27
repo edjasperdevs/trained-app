@@ -1,902 +1,755 @@
-# Domain Pitfalls: Capacitor iOS Native Wrapping
+# Domain Pitfalls: V2 Revamp -- RevenueCat, HealthKit, Gamification Overhaul, Design System, Coach Stripping
 
-**Domain:** Wrapping existing React + Vite + Zustand + Supabase PWA with Capacitor for iOS App Store distribution, push notifications (APNs), native haptics, and native file sharing
-**Researched:** 2026-02-21
-**Existing Codebase:** Trained fitness gamification PWA
+**Domain:** Adding freemium subscriptions (RevenueCat iOS IAP), HealthKit steps/sleep integration, XP-to-DP gamification migration, Dopamine Noir V2 design system, and stripping ~4,600 lines of coach dashboard from an existing Capacitor 7 fitness app
+**Researched:** 2026-02-27
+**Existing Codebase:** Trained v1.5 -- React 18 + TypeScript + Vite + Zustand (localStorage) + Supabase + Capacitor 7.5 + Tailwind v4 + shadcn/ui
+**Overall Confidence:** HIGH (verified against official docs, GitHub issues, and codebase inspection)
 
 ---
 
 ## Table of Contents
 
-### Critical Pitfalls (cause rewrites or App Store rejection)
-1. [Service Worker Conflicts in Capacitor WebView](#1-service-worker-conflicts-in-capacitor-webview)
-2. [localStorage Data Eviction by iOS](#2-localstorage-data-eviction-by-ios)
-3. [App Store Rejection Under Guideline 4.2 (Minimum Functionality)](#3-app-store-rejection-under-guideline-42-minimum-functionality)
-4. [Push Notification Permission Is One-Shot on iOS](#4-push-notification-permission-is-one-shot-on-ios)
-5. [Supabase Auth Redirect Broken in Capacitor WebView](#5-supabase-auth-redirect-broken-in-capacitor-webview)
-6. [window.confirm Dialogs Silently Fail in WKWebView](#6-windowconfirm-dialogs-silently-fail-in-wkwebview)
+### Critical Pitfalls (cause App Store rejection, data loss, or rewrites)
+1. [RevenueCat SDK Initialization Race Condition](#1-revenuecat-sdk-initialization-race-condition)
+2. [Missing Restore Purchases Button -- Guaranteed Rejection](#2-missing-restore-purchases-button----guaranteed-rejection)
+3. [Apple Guideline 3.1.2 Subscription Transparency Violations](#3-apple-guideline-312-subscription-transparency-violations)
+4. [XP-to-DP Data Migration Destroys Existing User Progress](#4-xp-to-dp-data-migration-destroys-existing-user-progress)
+5. [Zustand localStorage Key Rename Wipes Persisted State](#5-zustand-localstorage-key-rename-wipes-persisted-state)
+6. [HealthKit Permission Is Irrevocable from App -- No Re-prompt](#6-healthkit-permission-is-irrevocable-from-app----no-re-prompt)
+7. [Coach Code Stripping Breaks Sync and Import Graph](#7-coach-code-stripping-breaks-sync-and-import-graph)
+8. [Apple Review Cannot Test Subscription -- Products Not Fetchable](#8-apple-review-cannot-test-subscription----products-not-fetchable)
 
-### Moderate Pitfalls (cause bugs or degraded UX)
-7. [WKWebView White Screen After Background Memory Pressure](#7-wkwebview-white-screen-after-background-memory-pressure)
-8. [Plausible Analytics Script Fails in capacitor:// Scheme](#8-plausible-analytics-script-fails-in-capacitor-scheme)
-9. [Data Export via Blob URL / Anchor Click Broken on iOS](#9-data-export-via-blob-url--anchor-click-broken-on-ios)
-10. [Vite Build Pipeline Misconfiguration](#10-vite-build-pipeline-misconfiguration)
-11. [APNs Token vs FCM Token Confusion](#11-apns-token-vs-fcm-token-confusion)
-12. [iOS Keyboard Pushes WebView and Misaligns Touch Targets](#12-ios-keyboard-pushes-webview-and-misaligns-touch-targets)
-13. [Scroll Bounce and Overscroll on iOS 16+](#13-scroll-bounce-and-overscroll-on-ios-16)
+### Moderate Pitfalls (cause bugs, degraded UX, or conversion loss)
+9. [HealthKit Background Delivery Silently Stops](#9-healthkit-background-delivery-silently-stops)
+10. [HealthKit Data Gaps Indistinguishable from Permission Denial](#10-healthkit-data-gaps-indistinguishable-from-permission-denial)
+11. [Design System Color Swap Misses Hardcoded Values](#11-design-system-color-swap-misses-hardcoded-values)
+12. [Paywall Shown Too Early Kills Conversion](#12-paywall-shown-too-early-kills-conversion)
+13. [RevenueCat Capacitor Plugin Version Mismatch with Capacitor 7](#13-revenuecat-capacitor-plugin-version-mismatch-with-capacitor-7)
+14. [Supabase Schema Migration for DP Tables Breaks RLS](#14-supabase-schema-migration-for-dp-tables-breaks-rls)
+15. [Entitlements File Missing HealthKit and IAP Capabilities](#15-entitlements-file-missing-healthkit-and-iap-capabilities)
 
-### Minor Pitfalls (cause friction or polish issues)
-14. [Missing viewport-fit=cover for Notch/Dynamic Island](#14-missing-viewport-fitcover-for-notchdynamic-island)
-15. [navigator.vibrate No-Op -- Need Capacitor Haptics Plugin](#15-navigatorvibrate-no-op----need-capacitor-haptics-plugin)
-16. [Universal Links Configuration Fragility](#16-universal-links-configuration-fragility)
-17. [Splash Screen and App Icon Sizing Requirements](#17-splash-screen-and-app-icon-sizing-requirements)
-18. [iOS Swipe-Back Gesture Does Not Work With BrowserRouter](#18-ios-swipe-back-gesture-does-not-work-with-browserrouter)
-19. [Live Reload server.url Left in Production Config](#19-live-reload-serverurl-left-in-production-config)
-20. [Capacitor Plugin Version Mismatches](#20-capacitor-plugin-version-mismatches)
+### Minor Pitfalls (cause friction, polish issues, or tech debt)
+16. [Sleep Data Requires Activity Permission Scope -- Not Obvious](#16-sleep-data-requires-activity-permission-scope----not-obvious)
+17. [PrivacyInfo.xcprivacy Must Declare HealthKit and Purchase APIs](#17-privacyinfoxcprivacy-must-declare-healthkit-and-purchase-apis)
+18. [Archetype DP Modifiers Create Balance Exploits](#18-archetype-dp-modifiers-create-balance-exploits)
+19. [XP-Named CSS Tokens and Components Linger After Rename](#19-xp-named-css-tokens-and-components-linger-after-rename)
+20. [StoreKit 2 Only Available iOS 16+ -- Older Devices Fall Back](#20-storekit-2-only-available-ios-16----older-devices-fall-back)
 
 ---
 
 ## Critical Pitfalls
 
-### 1. Service Worker Conflicts in Capacitor WebView
+### 1. RevenueCat SDK Initialization Race Condition
 
-**Severity:** CRITICAL
-**Phase:** Initial Capacitor Setup
-**Confidence:** HIGH (verified via Capacitor GitHub issues [#7069](https://github.com/ionic-team/capacitor/issues/7069), [#580](https://github.com/ionic-team/capacitor/issues/580), [#4122](https://github.com/ionic-team/capacitor/issues/4122))
+**What goes wrong:** RevenueCat's `Purchases.configure()` must be called exactly once, early in the app lifecycle, BEFORE any purchase or entitlement check. In a Capacitor app, the WebView loads the React app which initializes auth, sync, and routing simultaneously. If any component checks `customerInfo.entitlements` before `configure()` resolves, it throws or returns empty entitlements -- making premium users see the paywall and free users see premium content.
 
-**What goes wrong:** Capacitor serves assets via the `capacitor://localhost` custom scheme on iOS. WKWebView does not support service workers on custom schemes. The existing `vite-plugin-pwa` with Workbox (precache + runtime caching for USDA, Open Food Facts, and Supabase APIs) will attempt to register a service worker that silently fails or throws errors. The `UpdatePrompt` component (`useRegisterSW` from `virtual:pwa-register/react`) will break because service worker registration returns undefined.
-
-**Why it happens:** WKWebView only supports service workers for domains listed in `WKAppBoundDomains` (iOS 14+), and even then only for `https://` URLs, not custom schemes like `capacitor://`. The PWA is designed to work offline via service worker caching, but Capacitor apps ship all assets in the native bundle -- they do not need a service worker for offline access.
+**Why it happens:** The current app initializes auth in `useEffect` within `AppContent`, and multiple systems (sync, coach data pull, badge updates) fire in parallel. Adding a `Purchases.configure()` call that must complete before entitlement checks creates an ordering dependency that doesn't exist today.
 
 **Consequences:**
-- Console errors on every app launch from failed SW registration
-- `UpdatePrompt` component throws or shows stale "update available" prompts
-- Runtime caching for food search APIs (USDA, Open Food Facts) stops working
-- Supabase API caching via Workbox NetworkFirst strategy stops working
-- Potential app crash if SW registration error is unhandled
-
-**Trained-specific impact:** The `vite.config.ts` has `registerType: 'prompt'` and extensive `workbox.runtimeCaching` for 3 API domains. The `UpdatePrompt.tsx` component calls `useRegisterSW()` which will fail in Capacitor.
+- Premium users see paywall on every launch (entitlements not loaded yet)
+- Free users briefly see premium content (race to opposite direction)
+- Apple reviewer sees broken purchase flow -- rejection under Guideline 2.1 (App Completeness)
 
 **Prevention:**
-1. Conditionally disable `vite-plugin-pwa` for Capacitor builds using an environment variable:
-   ```typescript
-   // vite.config.ts
-   const isCapacitor = process.env.CAPACITOR_BUILD === 'true'
+- Configure RevenueCat in a dedicated initialization step that completes BEFORE React renders the main app tree. Use a loading gate pattern: show splash/skeleton until both auth AND RevenueCat are initialized.
+- Create a `subscriptionStore` (Zustand) that caches the latest entitlement state in localStorage so the app has a "last known" subscription status immediately, then updates asynchronously from RevenueCat.
+- Never call `Purchases.getCustomerInfo()` or check entitlements until `configure()` has resolved.
 
-   plugins: [
-     // Only include PWA plugin for web builds
-     !isCapacitor && VitePWA({ ... }),
-   ].filter(Boolean)
-   ```
-2. Guard `UpdatePrompt` component:
-   ```typescript
-   // Check if running in Capacitor
-   import { Capacitor } from '@capacitor/core'
+**Detection:** If the paywall flashes on launch for a subscriber, or premium content flashes for a free user, the race condition exists.
 
-   export function UpdatePrompt() {
-     if (Capacitor.isNativePlatform()) return null
-     // ... existing SW logic
-   }
-   ```
-3. For runtime API caching lost in native builds, rely on Capacitor's native HTTP plugin or implement app-level caching in Zustand/memory for food search results.
-4. Add `CAPACITOR_BUILD=true` to the native build script in `package.json`:
-   ```json
-   "build:native": "CAPACITOR_BUILD=true vite build"
-   ```
+**V2 Phase:** Subscription/RevenueCat integration phase. Must be addressed in the initial RevenueCat setup, not bolted on later.
 
-**Detection:** App launches with console error `navigator.serviceWorker is not defined` or `Failed to register service worker`.
+**Confidence:** HIGH -- documented in RevenueCat Capacitor docs and community issues.
 
 ---
 
-### 2. localStorage Data Eviction by iOS
+### 2. Missing Restore Purchases Button -- Guaranteed Rejection
 
-**Severity:** CRITICAL
-**Phase:** Data Persistence Migration
-**Confidence:** HIGH (verified via [Apple Developer Forums](https://developer.apple.com/forums/thread/742037), [Capacitor Storage docs](https://capacitorjs.com/docs/guides/storage), [Capacitor issue #636](https://github.com/ionic-team/capacitor/issues/636))
+**What goes wrong:** Apple requires a visible "Restore Purchases" button that calls `Purchases.restoreTransactions()`. If the reviewer cannot find it, the app is rejected under Guideline 3.1.1. This is the single most common subscription-related rejection reason according to RevenueCat's own documentation.
 
-**What goes wrong:** iOS will reclaim localStorage data from WKWebView when the device is under storage pressure. All 8 Zustand persisted stores (user, xp, macros, workouts, achievements, reminders, avatar, access) use `persist` middleware writing to `localStorage`. Users lose all their progress, workout logs, macro tracking data, XP, and achievements without warning.
+**Why it happens:** Developers build the paywall, test purchase flow, but forget to add restore functionality. Or they add it in Settings but the reviewer doesn't navigate there.
 
-**Why it happens:** WKWebView's localStorage is treated as "website data" by iOS, subject to the same eviction policies as Safari. Unlike native app storage (UserDefaults, CoreData, SQLite), localStorage is not guaranteed to persist. The OS can purge it during low-storage conditions, after extended periods of non-use, or during iOS updates.
-
-**Consequences:**
-- Complete loss of user training history, streak data, XP progress, and avatar evolution
-- Users see the onboarding flow again after data eviction
-- For authenticated users: local data gone but server data intact, creating a confusing state
-- For offline-only users (no Supabase account): permanent, irrecoverable data loss
-- The 90-day pruning in xpStore, macroStore, workoutStore becomes irrelevant because iOS evicts the entire store
-
-**Trained-specific impact:** The app has 8 Zustand stores with `persist` middleware, ALL writing to localStorage. The stores contain critical user data: workout logs, macro daily logs, XP/level progress, achievement unlocks, avatar evolution state. For synced users, server has a backup, but for offline-only users this is catastrophic.
+**Consequences:** App Store rejection. The fix is trivial but the rejection adds 1-2 weeks to the review cycle.
 
 **Prevention:**
-1. Replace Zustand's localStorage persistence with Capacitor Preferences plugin for native builds:
-   ```typescript
-   import { Preferences } from '@capacitor/preferences'
-   import { Capacitor } from '@capacitor/core'
+- Place "Restore Purchases" button on BOTH the paywall screen AND in Settings.
+- After restore completes, close the paywall and show confirmation that the subscription was restored.
+- Test the restore flow with sandbox accounts before submission.
+- Add a note in App Review Information telling the reviewer where to find the restore button.
 
-   const capacitorStorage = {
-     getItem: async (name: string) => {
-       const { value } = await Preferences.get({ key: name })
-       return value
-     },
-     setItem: async (name: string, value: string) => {
-       await Preferences.set({ key: name, value })
-     },
-     removeItem: async (name: string) => {
-       await Preferences.remove({ key: name })
-     },
-   }
+**Detection:** If you can't find "Restore Purchases" without searching, neither can the reviewer.
 
-   // Use in Zustand persist config
-   persist(storeCreator, {
-     name: 'store-name',
-     storage: Capacitor.isNativePlatform()
-       ? createJSONStorage(() => capacitorStorage)
-       : createJSONStorage(() => localStorage),
-   })
-   ```
-2. Capacitor Preferences uses iOS UserDefaults under the hood, which is not subject to web data eviction.
-3. Keep localStorage for web PWA builds (no change to existing behavior).
-4. Consider migrating larger datasets (workout logs, macro logs) to SQLite via `@capacitor-community/sqlite` if they exceed ~1MB.
-5. On first Capacitor launch, attempt to read existing localStorage and migrate to Preferences (one-time migration for users who had the PWA installed).
+**V2 Phase:** Paywall UI phase. Must be a checklist item on the paywall component itself.
 
-**Detection:** Users report "all my data is gone" after not opening the app for a while, or after iOS update, or after device runs low on storage.
+**Confidence:** HIGH -- RevenueCat's App Store rejection guide lists this as #1 cause.
+
+**Sources:**
+- [RevenueCat App Store Rejections Guide](https://www.revenuecat.com/docs/test-and-launch/app-store-rejections)
+- [RevenueCat Community: Restore Purchases Rejection](https://community.revenuecat.com/sdks-51/we-get-rejected-from-apple-store-review-about-restore-purchases-693)
 
 ---
 
-### 3. App Store Rejection Under Guideline 4.2 (Minimum Functionality)
+### 3. Apple Guideline 3.1.2 Subscription Transparency Violations
 
-**Severity:** CRITICAL
-**Phase:** App Store Submission
-**Confidence:** HIGH (verified via [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/), [Apple Developer Forums](https://developer.apple.com/forums/thread/82714), [mobiloud analysis](https://www.mobiloud.com/blog/app-store-review-guidelines-webview-wrapper))
+**What goes wrong:** Apple requires auto-renewable subscriptions to clearly display: (a) subscription price, (b) billing period, (c) "subscriptions auto-renew unless cancelled," (d) how to cancel, and (e) link to terms of service and privacy policy. Missing ANY of these triggers rejection under Guideline 3.1.2.
 
-**What goes wrong:** Apple rejects apps under Guideline 4.2.2 that are essentially "web clippings" -- a WebView wrapping a website with no native integration. The rejection message states the app does not provide enough native functionality to differentiate it from the mobile web experience.
+**Why it happens:** Developers focus on the purchase CTA and paywall design, treating the legal text as an afterthought. Apple reviewers check every word.
 
-**Why it happens:** Apple's review team distinguishes between "lazy wrappers" (load a URL, do nothing else) and legitimate hybrid apps. A lazy wrapper has: no push notifications, no offline handling beyond SW, no native UI elements, no device API integration, and crashes to white screen without internet. Apple wants apps that justify their existence as native apps rather than bookmarks.
+**Consequences:** Rejection, often with a vague message citing "3.1.2" with no specific fix -- requiring multiple resubmissions to guess which element was missing.
 
-**Consequences:**
-- App rejected, cannot ship to App Store
-- Must re-submit after adding native features, losing 1-2+ weeks per review cycle
-- Repeated rejections can flag the developer account
+**Prevention -- Subscription Paywall Checklist:**
+- [ ] Price displayed in local currency (RevenueCat provides this via `product.priceString`)
+- [ ] Billing period stated explicitly ("$X.XX/month" or "$X.XX/year")
+- [ ] "Payment will be charged to your Apple ID account at confirmation of purchase"
+- [ ] "Subscription automatically renews unless it is canceled at least 24 hours before the end of the current period"
+- [ ] "Your account will be charged for renewal within 24 hours prior to the end of the current period"
+- [ ] "You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase"
+- [ ] Link to Terms of Service
+- [ ] Link to Privacy Policy (already exists at `/privacy`)
+- [ ] Free trial terms if offered: "X days free, then $Y.YY/period"
+- [ ] "Cancel anytime" must be accurate -- no lock-in language
 
-**Trained-specific advantages:** The app already has legitimate native value propositions (fitness tracking, gamification, coach features). The risk is in the implementation -- if the reviewer sees a WebView with no native integration, the content does not matter.
+**Detection:** Have someone who has never seen the app attempt to understand exactly what they're paying for from the paywall alone.
 
-**Prevention (things that demonstrate "native app" to reviewers):**
-1. **Push notifications** (the most important signal) -- implement coach notification delivery, daily check-in reminders, workout reminders via APNs
-2. **Native haptics** via `@capacitor/haptics` (replaces the no-op `navigator.vibrate`)
-3. **Native share sheet** via `@capacitor/share` for data export (replaces Blob/anchor download)
-4. **Native splash screen** via `@capacitor/splash-screen`
-5. **Status bar control** via `@capacitor/status-bar`
-6. **App icon with proper iOS sizing** (1024x1024 for App Store, all required sizes in asset catalog)
-7. **Offline functionality** -- app works without network since assets are bundled (demonstrate this in review notes)
-8. **Native dialogs** via `@capacitor/dialog` (replace `window.confirm`)
-9. In the App Store review notes, explicitly call out: push notifications, offline capability, native haptics, native sharing, coach/client real-time features
+**V2 Phase:** Paywall UI phase. Build this text into the paywall component template from day one.
 
-**Detection:** Rejection email citing Guideline 4.2 - Design - Minimum Functionality.
+**Confidence:** HIGH -- directly from Apple App Store Review Guidelines 3.1.2 and RevenueCat documentation.
 
----
-
-### 4. Push Notification Permission Is One-Shot on iOS
-
-**Severity:** CRITICAL
-**Phase:** Push Notification Implementation
-**Confidence:** HIGH (verified via [Apple Developer Documentation](https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications), [Capacitor Push Notifications docs](https://capacitorjs.com/docs/apis/push-notifications))
-
-**What goes wrong:** On iOS, `requestPermission()` for notifications presents a system dialog exactly once. If the user taps "Don't Allow," the permission transitions to `.denied` permanently. Calling `requestPermission()` again immediately returns `denied` with no dialog shown. The app cannot re-prompt. The user must manually navigate to Settings > Notifications > YourApp to re-enable.
-
-**Why it happens:** iOS treats notification permission as a one-time user decision to prevent apps from nagging users repeatedly. The permission states are: `.notDetermined` (never asked), `.authorized`, `.denied` (permanent), `.provisional`, and `.ephemeral`.
-
-**Consequences:**
-- If prompted too early (e.g., on first launch before user understands the value), user denies and never receives push notifications
-- Coach notifications (new workout assigned, check-in feedback) never delivered
-- No way to programmatically re-prompt -- must show custom UI directing to Settings app
-- Lost engagement channel for the entire lifetime of the install
-
-**Trained-specific impact:** Push notifications are the primary reason for the native app (coach-to-client notifications). If a user denies on first prompt, the coach feature's notification delivery is permanently broken for that user without manual Settings intervention.
-
-**Prevention:**
-1. **Never prompt on first launch.** Wait for a contextual moment where the value is clear:
-   - After completing onboarding and seeing the dashboard
-   - When a coach assigns them their first workout ("Get notified when your coach sends you a new workout?")
-   - When they visit Settings and toggle a "Notifications" preference
-2. **Show a pre-permission screen** (a custom UI explaining what notifications will be used for) before calling the system API. Only call `PushNotifications.requestPermissions()` after the user taps "Enable Notifications" on your custom screen.
-3. **Check permission status first** before requesting:
-   ```typescript
-   const status = await PushNotifications.checkPermissions()
-   if (status.receive === 'prompt') {
-     // Show pre-permission UI, then request
-   } else if (status.receive === 'denied') {
-     // Show "Go to Settings" guidance
-   }
-   ```
-4. **Handle the denied state gracefully** with a UI that explains how to enable in Settings and provides a deep link to the app's notification settings:
-   ```typescript
-   import { NativeSettings } from 'capacitor-native-settings'
-   NativeSettings.openIOS({ option: 'application' })
-   ```
-5. **Consider provisional notifications** (iOS 12+) as a soft-ask alternative -- they deliver to Notification Center without a prompt, but silently (no banner, no sound). Good for non-urgent notifications.
-
-**Detection:** User reports "I never get notifications" -- check permission status on their device.
+**Sources:**
+- [Apple Auto-renewable Subscriptions](https://developer.apple.com/app-store/subscriptions/)
+- [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+- [Adapty: App Store Review Guidelines 2026](https://adapty.io/blog/how-to-pass-app-store-review/)
 
 ---
 
-### 5. Supabase Auth Redirect Broken in Capacitor WebView
+### 4. XP-to-DP Data Migration Destroys Existing User Progress
 
-**Severity:** CRITICAL
-**Phase:** Auth Integration
-**Confidence:** HIGH (verified via [Supabase Native Mobile Deep Linking docs](https://supabase.com/docs/guides/auth/native-mobile-deep-linking), [supabase/discussions#11548](https://github.com/orgs/supabase/discussions/11548))
+**What goes wrong:** The current system stores XP state in Zustand localStorage under the key `gamify-gains-xp` with fields `totalXP`, `currentLevel` (0-99), `pendingXP`, `weeklyHistory`, and `dailyLogs`. The V2 system replaces this with Discipline Points (DP) and a 15-rank system with completely different progression curves. If the migration is not handled, existing users lose all progress on update. If the migration formula is wrong, users land at inappropriate ranks.
 
-**What goes wrong:** The Supabase client is configured with `detectSessionInUrl: true`, which works in browsers by reading the `#access_token=...` fragment from the URL after OAuth/magic link redirects. In Capacitor, the redirect URL (`https://app.welltrained.fitness/...`) opens in the system browser (Safari), not in the app's WebView. The token fragment never reaches the Capacitor app, so the user authenticates in Safari but the app remains logged out.
-
-**Why it happens:** Capacitor apps run in a WKWebView with a custom scheme (`capacitor://localhost`). When Supabase redirects after authentication, it redirects to the web URL. Without Universal Links or a custom URL scheme configured, the redirect stays in Safari. Even with Universal Links, the `#fragment` portion of the URL is not sent to the server (it's client-side only), creating a chicken-and-egg problem.
+**Why it happens:** The XP and DP systems have fundamentally different scales:
+- Current XP: 99 levels, progressive curve starting at 100 XP/level, capping at 2,500 XP/level
+- New DP: 15 ranks, ~24-27 week mastery curve, different earning actions and values
+- There is no clean mathematical mapping between the two -- a level 30 XP user might be rank 4 or rank 8 depending on the conversion formula
 
 **Consequences:**
-- Magic link sign-in opens Safari, user authenticates, but the app stays on the login screen
-- OAuth flows (if added later) redirect to Safari and never return to the app
-- Password reset links open in Safari instead of the app
-- Session detection fails entirely for native builds
-
-**Trained-specific impact:** The app uses `detectSessionInUrl: true` in `src/lib/supabase.ts`. The Auth screen flow depends on Supabase session detection via URL fragments. This is fundamentally incompatible with Capacitor without modification.
+- Users who earned weeks of XP see "Rank 1, 0 DP" -- feels like a reset, causes churn
+- Users mapped to too-high ranks hit a progression wall (already "mastered" content)
+- Supabase `user_xp` table still contains old data that doesn't match client state
+- `xp_awarded` boolean on `workout_logs` becomes meaningless
 
 **Prevention:**
-1. **Set up Universal Links** for `app.welltrained.fitness` with an `apple-app-site-association` file hosted on the domain:
-   ```json
-   {
-     "applinks": {
-       "apps": [],
-       "details": [{
-         "appID": "TEAM_ID.com.welltrained.fitness",
-         "paths": ["/auth/callback", "/auth/confirm"]
-       }]
-     }
-   }
-   ```
-2. **Add the `@capacitor/app` listener** to capture incoming URLs:
-   ```typescript
-   import { App } from '@capacitor/app'
+- Write an explicit migration function that runs once on first launch of V2
+- Migration should read `gamify-gains-xp` from localStorage, calculate equivalent DP based on a percentage-of-max approach (e.g., if user was at 30% of max XP progression, place them at 30% of max DP progression)
+- Set a `migration_version` flag in localStorage to ensure migration runs exactly once
+- Create a Supabase migration to add DP columns alongside (not replacing) XP columns, allowing rollback
+- Show a "Welcome to V2" screen explaining the new system so users understand the number change
+- Log the migration event (old XP, old level, new DP, new rank) to Sentry for debugging
 
-   App.addListener('appUrlOpen', ({ url }) => {
-     // Extract tokens from URL and set Supabase session
-     const hashParams = new URL(url).hash
-     if (hashParams.includes('access_token')) {
-       supabase.auth.setSession({
-         access_token: extractParam(hashParams, 'access_token'),
-         refresh_token: extractParam(hashParams, 'refresh_token'),
-       })
-     }
-   })
-   ```
-3. **Configure Supabase redirect URLs** in the Supabase dashboard to include both:
-   - `https://app.welltrained.fitness/auth/callback` (web)
-   - The Universal Link URL that routes to the app
-4. **Use PKCE flow** (`flowType: 'pkce'` in Supabase client options) for native apps -- it's more secure and handles the redirect exchange better than the implicit flow.
-5. **Consider email+password auth as primary** for the native app (avoids redirect issues entirely). Magic links and OAuth can be secondary.
+**Detection:** If any user's rank after migration feels wrong compared to their history, the formula needs adjustment. Test with edge cases: brand new user (0 XP), moderate user (level 15), power user (level 50+).
 
-**Detection:** User taps magic link in email, Safari opens, user sees "logged in" in Safari, switches back to app, still sees login screen.
+**V2 Phase:** Gamification system phase. Must be implemented BEFORE the DP earning system, as it establishes initial state.
+
+**Confidence:** HIGH -- verified by inspecting `xpStore.ts` (line 301: persist key `gamify-gains-xp`) and `sync.ts` (line 706: `syncXPToCloud` pushes to `user_xp` table).
 
 ---
 
-### 6. window.confirm Dialogs Silently Fail in WKWebView
+### 5. Zustand localStorage Key Rename Wipes Persisted State
 
-**Severity:** CRITICAL
-**Phase:** UI Migration
-**Confidence:** HIGH (verified via [webapp2app.com](https://www.webapp2app.com/2018/06/11/javascript-dialogs-like-alert-confirm-and-prompt-in-ios-webview-apps/), [Capacitor Dialog docs](https://capacitorjs.com/docs/apis/dialog))
+**What goes wrong:** Zustand's `persist` middleware identifies stored state by the `name` property. If you rename the store (e.g., `gamify-gains-xp` to `trained-dp` or `welltrained-dp`), Zustand treats it as a brand new store with no data. ALL existing persisted state is lost silently -- no error, no warning, just empty defaults.
 
-**What goes wrong:** `window.confirm()` calls may not display in WKWebView or may display inconsistently depending on the Capacitor version and iOS version. The WKWebView requires a `WKUIDelegate` implementing `runJavaScriptConfirmPanelWithMessage` to show confirm dialogs. While Capacitor's bridge sets this up, there are edge cases where the dialog silently returns `false` or does not appear, especially during transitions or when the WebView is not the key window.
+**Why it happens:** The V2 rebrand from "Gamify Gains" to "WellTrained" naturally leads developers to rename persist keys. The current keys are: `gamify-gains-xp`, `gamify-gains-avatar`, `gamify-gains-achievements` (found in `devSeed.ts` line 828). Renaming these without migration loses ALL local data.
 
-**Why it happens:** WKWebView's JavaScript dialog support is delegated to native UIKit via the `WKUIDelegate` protocol. Unlike Safari, the WebView does not automatically handle `window.confirm`. Capacitor implements the delegate, but edge cases exist around timing and focus states.
-
-**Consequences:** The app has **10 `window.confirm` calls** across 6 files:
-- `Settings.tsx`: "Are you sure? This will delete ALL your progress..." -- if confirm silently returns false, user cannot reset progress
-- `Coach.tsx`: 3 confirms for releasing macros, deleting templates, removing assignments -- coaches cannot manage clients
-- `Workouts.tsx`: 2 confirms for ending workout and resetting exercises
-- `Macros.tsx`: 2 confirms for deleting meal entries and saved meals
-- `Onboarding.tsx`: 1 confirm for skipping setup
-- `WorkoutAssigner.tsx`: 1 confirm for replacing assigned workout
-
-If any of these silently return `false`, the user action is blocked with no feedback.
+**Consequences:**
+- XP/DP progress lost (even if migration function exists, it can't find the old data)
+- Avatar state lost
+- Achievement badges lost
+- User appears as a brand new user despite having history
+- If the user was offline when updating, their local-only data is permanently gone
 
 **Prevention:**
-1. **Replace ALL `window.confirm` calls with `@capacitor/dialog`** on native platforms:
-   ```typescript
-   import { Dialog } from '@capacitor/dialog'
-   import { Capacitor } from '@capacitor/core'
+- Use Zustand's built-in `version` + `migrate` pattern: increment the `version` number and provide a `migrate` function that reads from the old persist key
+- OR: Keep the old persist key names and transform data in-place. The key name is cosmetic -- there is no technical reason to rename it.
+- If you must rename: write a one-time migration in the persist config that reads `localStorage.getItem('gamify-gains-xp')`, parses it, transforms the data, and returns the new state shape
+- Test the migration path: manually set old localStorage data, then load the new app version
 
-   export async function confirmAction(message: string): Promise<boolean> {
-     if (Capacitor.isNativePlatform()) {
-       const { value } = await Dialog.confirm({
-         title: 'Confirm',
-         message,
-       })
-       return value
-     }
-     return window.confirm(message)
-   }
-   ```
-2. This changes confirms from synchronous to async -- each call site needs to be updated from `if (window.confirm(...))` to `if (await confirmAction(...))`.
-3. Create a shared utility and search-replace all 10 instances systematically.
-4. Test each confirmation flow on a real iOS device (simulator may behave differently).
+**Detection:** After updating, check `localStorage` in DevTools. If the old key still exists AND the new key has empty/default values, the migration failed.
 
-**Detection:** User taps "Delete" on a meal, nothing happens. No dialog appears, no deletion occurs.
+**V2 Phase:** Gamification system phase. Address BEFORE any store restructuring. This is a pre-requisite for Pitfall #4.
+
+**Confidence:** HIGH -- verified with Zustand persist docs and confirmed current key names in codebase.
+
+**Sources:**
+- [Zustand Discussion: Best way to run a migration on first persist](https://github.com/pmndrs/zustand/discussions/1717)
+- [How to migrate Zustand local storage store to a new version](https://dev.to/diballesteros/how-to-migrate-zustand-local-storage-store-to-a-new-version-njp)
+
+---
+
+### 6. HealthKit Permission Is Irrevocable from App -- No Re-prompt
+
+**What goes wrong:** Unlike camera or notification permissions, HealthKit authorization can ONLY be requested once per data type. If the user denies access (or dismisses the dialog), the app cannot show the authorization sheet again. The app also CANNOT distinguish between "denied" and "never asked" for read permissions -- `authorizationStatus` for read types returns `.notDetermined` even after denial (Apple's privacy design).
+
+**Why it happens:** Apple treats health data with extreme privacy protection. The authorization request is shown exactly once per data type. After that, the user must go to Settings > Health > [App Name] to re-enable access.
+
+**Consequences:**
+- User denies HealthKit on first prompt -> steps/sleep tracking permanently broken unless they manually visit Settings
+- App cannot detect the denial to show helpful guidance
+- If the permission prompt fires at the wrong time (e.g., during onboarding before the user understands why), they'll deny it instinctively
+
+**Prevention:**
+- Show a pre-permission screen explaining WHY the app needs HealthKit access BEFORE calling `requestAuthorization()`. Use a "soft ask" pattern: "WellTrained tracks your steps and sleep to earn Discipline Points. Tap Continue to connect to Apple Health." Then only call the real iOS permission when they tap Continue.
+- If HealthKit returns no data, show a banner: "Not seeing your steps? Check Settings > Health > WellTrained to enable access."
+- Always implement manual entry as a first-class fallback, not an afterthought. The manual entry UI should be just as polished as the HealthKit-powered UI.
+- Request ONLY the specific data types needed (steps, sleep analysis) -- not broad access. Requesting unnecessary types triggers Apple review scrutiny.
+
+**Detection:** If a user reports "steps always show 0" and they have an Apple Watch, they likely denied HealthKit. The app cannot programmatically confirm this for read permissions.
+
+**V2 Phase:** HealthKit integration phase. The pre-permission screen must be built BEFORE the native HealthKit call.
+
+**Confidence:** HIGH -- directly from Apple Developer documentation on `requestAuthorization(toShare:read:completion:)`.
+
+**Sources:**
+- [Apple: Authorizing Access to Health Data](https://developer.apple.com/documentation/healthkit/authorizing-access-to-health-data)
+- [Apple Developer Forums: HealthKit Authorization](https://developer.apple.com/forums/thread/99474)
+
+---
+
+### 7. Coach Code Stripping Breaks Sync and Import Graph
+
+**What goes wrong:** The coach dashboard code (~4,609 lines across 9 files) is deeply intertwined with the app's sync system, data types, and navigation. Deleting the files without surgically removing all references causes build failures, broken imports, and runtime errors. The entanglement points include:
+
+| File to Remove | Lines | Entangled With |
+|---|---|---|
+| `Coach.tsx` | 2,158 | `App.tsx` (route, lazy import, CoachGuard), `screens/index.ts` (export) |
+| `useCoachTemplates.ts` | 428 | `WorkoutAssigner.tsx` (import) |
+| `useClientRoster.ts` | 226 | `Coach.tsx` only -- clean |
+| `useClientDetails.ts` | 317 | `Coach.tsx` only -- clean |
+| `useWeeklyCheckins.ts` | 450 | `Coach.tsx`, but also used by client-side check-in flow |
+| `WorkoutAssigner.tsx` | 202 | `Coach.tsx` only -- clean |
+| `IntakeView.tsx` | 432 | `Coach.tsx` only -- clean |
+| `intakeApi.ts` | 123 | `IntakeView.tsx` only -- clean |
+| `intakeTypes.ts` | 273 | `IntakeView.tsx` only -- clean |
+
+But the dangerous entanglement is in the **sync layer** and **client-facing features that reference coach concepts:**
+- `sync.ts` `pullCoachData()` function: pulls assigned workouts, macro targets with `set_by: 'coach'`, and check-in responses -- these are CLIENT features, not coach dashboard features
+- `macroStore.ts`: `setBy: 'coach'`, `coachMacroUpdated`, `setCoachTargets()` -- client-side coach interaction
+- `Home.tsx`: coach response banner, weekly check-in due banner
+- `Workouts.tsx`: `coachNotes` display on assigned workouts
+- `Macros.tsx`: "managed by your coach" banner
+- `Settings.tsx`: coach dashboard link, coaching client check
+- `supabase.ts`: `isCoach()` helper
+- `badge.ts`: coach response badge count
+- `database.types.ts`: all coach-related type definitions
+- `devSeed.ts`: mock coach data
+
+**Why it happens:** The coach dashboard and client features that interact with a coach share the same Supabase tables and type system. You can delete the coach dashboard UI but NOT the client-side features that receive coach-set data.
+
+**Consequences:**
+- Deleting `useWeeklyCheckins.ts` breaks the client's weekly check-in submission flow
+- Deleting coach types from `database.types.ts` breaks `sync.ts`
+- Removing `pullCoachData()` means clients never receive coach-set macros or assigned workouts
+- Removing `isCoach()` breaks the Settings page coach section (which should be removed)
+- TypeScript errors cascade through the entire build
+
+**Prevention:**
+- Create a deletion plan that categorizes files as: (a) pure coach dashboard -- safe to delete, (b) shared coach/client -- must keep client portions, (c) client-facing coach interaction -- keep entirely
+- Delete in order: pure coach files first, then surgically edit shared files
+- Keep `pullCoachData()` in sync.ts -- it pulls data FOR the client, not BY the coach
+- Keep `database.types.ts` coach types -- they match the Supabase schema which hasn't changed
+- Keep `useWeeklyCheckins.ts` client-side functions (submitCheckin, hasActiveCoach) -- only remove coach-specific functions (reviewCheckin, respondToCheckin)
+- Remove from `App.tsx`: the `/coach` route, `CoachGuard` component, and the lazy `Coach` import
+- Remove from `Settings.tsx`: the "Open Coach Dashboard" section
+- Remove from `screens/index.ts`: the `Coach` export
+- Run `tsc --noEmit` after each deletion step to catch cascading errors
+- Run the full test suite after stripping
+
+**Detection:** Build failures are immediate (TypeScript catches missing imports). Runtime failures require testing the weekly check-in flow, coach-set macro display, and assigned workout display.
+
+**V2 Phase:** Coach stripping phase. Should be done EARLY (before new features add more code) but CAREFULLY (one file at a time with `tsc` validation).
+
+**Confidence:** HIGH -- verified by grepping the full codebase for coach-related imports (see research above).
+
+---
+
+### 8. Apple Review Cannot Test Subscription -- Products Not Fetchable
+
+**What goes wrong:** The app works perfectly in sandbox and TestFlight, but when Apple's reviewer runs it, `Purchases.getOfferings()` returns empty results. The reviewer sees a blank paywall or an error, and rejects under Guideline 2.1 (App Completeness). This is one of the most reported RevenueCat issues in the community.
+
+**Why it happens:** Several conditions must ALL be true for the reviewer to see products:
+1. In-app purchases must be submitted for review WITH the app binary (not separately)
+2. The subscription must have cleared "Waiting for Review" status
+3. The RevenueCat offering must be configured with the correct product IDs matching App Store Connect
+4. The app's bundle ID must match the RevenueCat project configuration
+5. The reviewer's account region must have pricing configured for the subscription
+
+**Consequences:** Rejection under 2.1 (App Completeness) -- the app "doesn't work." The fix requires resubmission, adding 1-2 weeks per cycle.
+
+**Prevention:**
+- Submit in-app purchases for review at the SAME TIME as the app binary -- Apple reviews both together
+- Handle the "no products available" case gracefully: show a retry button or informational message instead of a blank screen
+- In App Store Connect, ensure "Cleared for Sale" is checked for all subscription products
+- Ensure pricing is configured for ALL territories, not just your local one
+- Add a note in App Review Information: "To test subscriptions, use a sandbox Apple ID. The subscription is [product name] at [$X.XX/period]."
+- Test with a completely fresh sandbox account to verify the flow
+
+**Detection:** If `Purchases.getOfferings()` returns null or empty offerings in any environment, the product configuration is broken.
+
+**V2 Phase:** App Store submission phase. Must be verified BEFORE submitting for review.
+
+**Confidence:** HIGH -- extensively documented in RevenueCat community forums.
+
+**Sources:**
+- [RevenueCat: Unable to Fetch Subscription Products During App Store Review](https://community.revenuecat.com/tips-discussion-56/unable-to-fetch-subscription-products-during-app-store-review-5564)
+- [RevenueCat: Multiple iOS App Store Rejection Due to RevenueCat](https://community.revenuecat.com/general-questions-7/multiple-ios-app-store-rejection-due-to-revenue-cat-purchase-failure-there-was-a-problem-with-the-apple-store-7175)
 
 ---
 
 ## Moderate Pitfalls
 
-### 7. WKWebView White Screen After Background Memory Pressure
+### 9. HealthKit Background Delivery Silently Stops
 
-**Severity:** MODERATE (but feels critical to users)
-**Phase:** App Polish / Background Handling
-**Confidence:** HIGH (verified via [Capacitor discussion #7097](https://github.com/ionic-team/capacitor/discussions/7097), [Capacitor discussion #5260](https://github.com/ionic-team/capacitor/discussions/5260), [Apple Developer Forums](https://developer.apple.com/forums/thread/741088))
+**What goes wrong:** HealthKit background delivery (using `HKObserverQuery` + `enableBackgroundDelivery`) works initially but stops firing after a few hours on battery. The app only receives updates reliably when the phone is charging. This means step counts and sleep data can be hours stale when the user opens the app.
 
-**What goes wrong:** When the app is backgrounded and iOS reclaims memory, WKWebView's web content process is terminated. When the user returns to the app, they see a white screen. Capacitor 3.4.1+ automatically reloads the WebView via `webViewWebContentProcessDidTerminate`, but the reload takes time and shows a blank white screen with no splash screen or loading indicator.
-
-**Why it happens:** WKWebView runs its web content in a separate process from the app process. iOS can terminate this web process to free memory without killing the app itself. The native app frame remains visible but the WebView content is gone.
+**Why it happens:** iOS aggressively manages background execution. HealthKit background delivery requires:
+1. The `com.apple.developer.healthkit.background-delivery` entitlement (added in iOS 15)
+2. Observer queries set up in `application(_:didFinishLaunchingWithOptions:)` -- but Capacitor apps don't have a traditional AppDelegate hook for this
+3. The completion handler must be called in EVERY code path of the update handler -- missing it once causes iOS to stop sending updates permanently
+4. Device must be unlocked for health data to be accessible
 
 **Consequences:**
-- User backgrounds the app during a workout, opens camera, returns to app: white screen for 1-3 seconds
-- Zustand stores must re-hydrate from storage, causing a flash of default state
-- Any in-progress workout data not yet persisted to storage is lost
-- User perceives the app as "crashed"
+- Steps/sleep data is stale -- user sees yesterday's numbers
+- DP calculation based on steps is incorrect at time of check-in
+- Users think the feature is broken
 
 **Prevention:**
-1. **Persist in-progress workout state aggressively** -- the workoutStore should write to persistent storage on every set completion, not just at workout end
-2. **Add a native splash screen overlay** that shows during WebView reload:
-   ```swift
-   // In AppDelegate or a Capacitor plugin
-   func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-     showSplashOverlay()
-     webView.reload()
-   }
-   ```
-3. **Use Capacitor's `SplashScreen.show()`** on `App.addListener('appStateChange')` when transitioning to background, so the splash covers the white screen on resume
-4. **Track background entry time** using UserDefaults (not in-memory variables, which are lost when the web process terminates):
-   ```typescript
-   App.addListener('appStateChange', ({ isActive }) => {
-     if (!isActive) {
-       Preferences.set({ key: 'backgroundedAt', value: Date.now().toString() })
-     }
-   })
-   ```
+- Do NOT rely on background delivery for a Capacitor app. Instead, query HealthKit for fresh data on app foreground (already have the `appStateChange` listener in `App.tsx`).
+- Query HealthKit data for "today" every time the app becomes active, and for "last night" sleep data on morning launch.
+- Cache the last successful HealthKit read timestamp so you know how stale the data is.
+- Show "Last updated: X minutes ago" on the steps/sleep display so users understand the data might not be real-time.
+- If the background delivery entitlement is added later, it requires a native Swift plugin or modification to the Capacitor iOS project's AppDelegate -- this is feasible but adds native code complexity.
 
-**Detection:** White flash when returning to the app after using other memory-intensive apps (camera, games).
+**Detection:** If step counts don't update for 2+ hours while the phone is on battery, background delivery is not working.
+
+**V2 Phase:** HealthKit integration phase. Design the architecture around foreground-only reads from the start.
+
+**Confidence:** HIGH -- documented in Apple Developer Forums and multiple developer blogs.
+
+**Sources:**
+- [Apple: HealthKit Background Delivery Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.background-delivery)
+- [Apple Developer Forums: HKObserverQuery Background Delivery](https://developer.apple.com/forums/thread/690974)
+- [Apple Developer Forums: Background Delivery Stops](https://developer.apple.com/forums/thread/801627)
 
 ---
 
-### 8. Plausible Analytics Script Fails in capacitor:// Scheme
+### 10. HealthKit Data Gaps Indistinguishable from Permission Denial
 
-**Severity:** MODERATE
-**Phase:** Analytics Integration
-**Confidence:** MEDIUM (inferred from scheme behavior + [iOS ITP behavior](https://www.thinktecture.com/en/ios/wkwebview-itp-ios-14/))
+**What goes wrong:** When HealthKit returns zero steps for a day, the app cannot determine whether: (a) the user didn't wear their device, (b) the user denied permission, (c) the user doesn't have an Apple Watch, or (d) there was a sync issue. Apple intentionally does not expose read authorization status for privacy -- `authorizationStatus(for:)` returns `.notDetermined` for read types even after denial.
 
-**What goes wrong:** The Plausible script tag (`<script defer data-domain="app.welltrained.fitness" src="https://plausible.io/js/script.js">`) loads from a CDN. In Capacitor's WKWebView, the page origin is `capacitor://localhost`, not `https://app.welltrained.fitness`. The Plausible script uses `document.location` to determine the domain and sends pageviews attributed to `capacitor://localhost` or simply fails due to cross-origin restrictions. iOS ITP (Intelligent Tracking Prevention) in WKWebView may also block the script entirely.
-
-**Why it happens:** WKWebView has stricter privacy controls than Safari. Cross-origin script loading from `capacitor://` to `https://plausible.io` may be blocked. Even if the script loads, it reports the wrong domain.
+**Why it happens:** Apple's privacy-first design means apps cannot know if health data access was denied -- only whether the user has been asked. This prevents apps from inferring health conditions from permission patterns.
 
 **Consequences:**
-- No analytics data from native app users
-- Or analytics data polluted with `capacitor://localhost` as the domain
-- Cannot distinguish web vs native app users in Plausible dashboard
-
-**Trained-specific impact:** The app has 25+ custom analytics events in `src/lib/analytics.ts` plus automatic pageview tracking. All of these stop working or misreport in the native app.
+- App shows "0 steps" which could mean "no device" or "denied access" -- confusing
+- DP calculations award 0 points for steps on days the user simply didn't wear their watch
+- If the gamification system penalizes missed days, users with data gaps are unfairly punished
+- Support burden: "Why does it say 0 steps? I walked 10,000 today!"
 
 **Prevention:**
-1. **Use Plausible's Events API** server-side instead of the client-side script for native builds:
-   ```typescript
-   if (Capacitor.isNativePlatform()) {
-     // Use Plausible Events API directly
-     fetch('https://plausible.io/api/event', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({
-         name: event,
-         url: `app://welltrained.fitness${window.location.pathname}`,
-         domain: 'app.welltrained.fitness',
-         props,
-       }),
-     })
-   }
-   ```
-2. **Conditionally load the Plausible script** -- only include the `<script>` tag in web builds, not in the native app's `index.html`.
-3. **Add a platform dimension** to events so web and native users can be distinguished.
+- Never show raw "0 steps" -- instead show "No step data available" with a contextual help link
+- Track whether the user has EVER successfully received HealthKit data. If yes and now getting 0, it's likely a data gap, not a permission issue. If never, it's likely a permission or device issue.
+- Store a `healthKitConnected: boolean` flag after the first successful read
+- Do NOT make DP calculation dependent on having HealthKit data -- always allow manual entry to fill gaps
+- Consider a "sync steps" button that re-queries HealthKit, giving users agency
+- When awarding DP for steps, use "DP earned from steps: [X]" with a manual override option
 
-**Detection:** Plausible dashboard shows zero users despite active native installs, or shows traffic from `capacitor://localhost`.
+**Detection:** If users report confusion about step data, or DP feels unfair, the gap handling is insufficient.
+
+**V2 Phase:** HealthKit integration phase. Must design the zero-data state UX alongside the happy path.
+
+**Confidence:** HIGH -- verified with Apple documentation: "For privacy, results are the same as if authorization were denied."
+
+**Sources:**
+- [Apple: Authorizing Access to Health Data](https://developer.apple.com/documentation/healthkit/authorizing-access-to-health-data)
+- [MyDataHelps: HealthKit Troubleshooting](https://support.mydatahelps.org/hc/en-us/articles/4407854940435-Apple-HealthKit-Troubleshooting-Connection-and-Data-Issues)
 
 ---
 
-### 9. Data Export via Blob URL / Anchor Click Broken on iOS
+### 11. Design System Color Swap Misses Hardcoded Values
 
-**Severity:** MODERATE
-**Phase:** File Sharing Migration
-**Confidence:** HIGH (verified via [Capacitor Filesystem docs](https://capacitorjs.com/docs/apis/filesystem), [Capacitor Share docs](https://capacitorjs.com/docs/apis/share), [Capacitor issue #6132](https://github.com/ionic-team/capacitor/issues/6132))
+**What goes wrong:** The V2 design system changes the primary color from red (#D55550) to lime (#C8FF00). The CSS variable system in `index.css` has 45+ color references including `--primary`, `--color-primary-hover`, `--color-primary-muted`, `--color-xp-bar`, `--color-streak-active`, `--shadow-glow`, `--shadow-glow-intense`, and legacy aliases. Updating the CSS variables is the "right" approach, but grep found 238 occurrences of `#D55550`, `#E0605A`, or `primary` across 42 `.tsx`/`.ts` files. Some of these are hardcoded hex values, not CSS variable references.
 
-**What goes wrong:** The Settings screen exports data by creating a Blob, generating an object URL via `URL.createObjectURL()`, creating an anchor element with `download` attribute, programmatically clicking it, then revoking the URL. This pattern does not work in WKWebView. The `download` attribute on anchors is not reliably supported in WKWebView, and `URL.createObjectURL` + programmatic click may silently fail or open the blob in a new tab instead of downloading.
-
-**Why it happens:** WKWebView does not fully implement the HTML5 download attribute. Blob URLs created via `URL.createObjectURL` behave differently than in a browser -- the WebView may try to navigate to the blob URL instead of downloading it.
+**Why it happens:** Over 5 milestones of development, some components use inline styles, some use Tailwind utilities referencing the variable, some use hardcoded hex in SVGs, canvas draws, or animation keyframes. The CSS variable system centralizes most colors, but not all.
 
 **Consequences:**
-- Users tap "Export Data" and nothing happens (or app navigates to a data:// URL showing raw JSON)
-- No way to back up data from the native app
-- File import via `<input type="file">` with FileReader may work but has its own iOS quirks
-
-**Trained-specific impact:** `Settings.tsx` lines 182-197 use the exact Blob + anchor + click pattern that breaks. The import flow (lines 268-278) using FileReader may also have issues with file selection in WKWebView.
+- Some UI elements remain red while the rest of the app is lime -- looks broken
+- Shadow glow effects use `rgba(213, 85, 80, ...)` which is hardcoded red -- won't change with variables
+- `capacitor.config.ts` has `iconColor: '#D4443B'` for notifications -- a different red entirely
+- Chart colors (`--chart-1`) reference the old primary
+- Skeleton loading states and error states may retain old colors
 
 **Prevention:**
-1. **Use Capacitor Filesystem + Share plugins** for native export:
-   ```typescript
-   import { Filesystem, Directory } from '@capacitor/filesystem'
-   import { Share } from '@capacitor/share'
+- Run a comprehensive grep for ALL red-spectrum hex values: `#D55550`, `#E0605A`, `#D4443B`, `#C13A33`, `rgba(213, 85, 80`
+- Categorize each occurrence as: (a) CSS variable reference (will auto-update), (b) hardcoded value that needs manual update, (c) intentional non-primary red (e.g., error state) that should stay
+- Update `capacitor.config.ts` `iconColor` to the new lime color
+- Update `--shadow-glow` and `--shadow-glow-intense` in `index.css` to use the new primary's RGBA
+- Consider that lime on dark (#C8FF00 on #0A0A0A) has different contrast properties than red on dark -- verify WCAG AA compliance for all text-on-primary combinations
+- Lime (#C8FF00) as a foreground text color has very different readability than red -- `--primary-foreground` may need to change from #FFFFFF to #000000
 
-   if (Capacitor.isNativePlatform()) {
-     const fileName = `trained-backup-${getLocalDateString()}.json`
-     await Filesystem.writeFile({
-       path: fileName,
-       data: dataStr, // JSON string, not Blob
-       directory: Directory.Cache,
-     })
-     const uri = await Filesystem.getUri({
-       path: fileName,
-       directory: Directory.Cache,
-     })
-     await Share.share({
-       title: 'Trained Backup',
-       url: uri.uri,
-     })
-   } else {
-     // Existing Blob + anchor pattern for web
-   }
-   ```
-2. **For file import**, the `<input type="file">` element should work in Capacitor's WKWebView, but test on real devices. FileReader's `readAsText` is reliable.
-3. The Share plugin opens the native iOS share sheet, letting users save to Files, AirDrop, email, etc. -- much better UX than a file download.
+**Detection:** Visual regression testing. Take screenshots of every screen before and after the color swap. Any remaining red is a miss (unless it's an error/destructive state).
 
-**Detection:** User taps "Export Data," nothing visible happens, no file appears.
+**V2 Phase:** Design system phase. Must happen BEFORE any new component development so new code uses the correct colors.
+
+**Confidence:** HIGH -- verified by grep across the codebase (238 occurrences in 42 files).
 
 ---
 
-### 10. Vite Build Pipeline Misconfiguration
+### 12. Paywall Shown Too Early Kills Conversion
 
-**Severity:** MODERATE
-**Phase:** Build Pipeline Setup
-**Confidence:** HIGH (verified via [Capacitor docs](https://capacitorjs.com/docs/getting-started), [Capacitor workflow docs](https://capacitorjs.com/docs/basics/workflow))
+**What goes wrong:** Showing the subscription paywall before the user has experienced value from the free tier causes immediate churn. Industry data from RevenueCat's 2025 State of Subscription Apps report shows freemium apps with aggressive early paywalls convert at 2.18% median, while apps that let users experience value first convert at 6-8%.
 
-**What goes wrong:** Multiple configuration mismatches between Vite's output and Capacitor's expectations:
-- `webDir` in `capacitor.config.ts` must point to `dist` (Vite's default output), but may be misconfigured to `build` (CRA convention)
-- `npx cap sync` copies the `dist` folder to the native project -- if `npm run build` was not run first, it copies stale or missing assets
-- Sentry source map upload (`sentryVitePlugin`) runs during build and deletes `.map` files from `dist` -- this is fine, but if the build order is wrong, Capacitor copies incomplete assets
-- The `@` path alias (`resolve.alias`) works in Vite but may cause issues if native build tools try to resolve these paths
+**Why it happens:** Business pressure to monetize quickly, combined with the desire to gate premium features (archetypes, Protocol Orders) behind the paywall immediately.
 
 **Consequences:**
-- Xcode build succeeds but app shows blank page (wrong webDir)
-- App shows old version of the code (stale dist from previous build)
-- Source maps missing for native crash reports
+- Users who haven't completed a single workout see "pay to unlock" -- immediate uninstall
+- App Store ratings drop from users who feel "bait-and-switched"
+- Apple reviewers may flag the app under Guideline 3.1.1 if the free tier feels too limited
 
 **Prevention:**
-1. **Set `webDir: 'dist'` in `capacitor.config.ts`** explicitly:
-   ```typescript
-   const config: CapacitorConfig = {
-     appId: 'com.welltrained.fitness',
-     appName: 'WellTrained',
-     webDir: 'dist',
-   }
-   ```
-2. **Add a combined build+sync script** to `package.json`:
-   ```json
-   "build:ios": "CAPACITOR_BUILD=true vite build && npx cap sync ios",
-   "build:android": "CAPACITOR_BUILD=true vite build && npx cap sync android"
-   ```
-3. **Run `npx cap doctor`** after setup to verify configuration
-4. **Never run `npx cap sync` without building first** -- make it a habit to always use the combined script
+- The free tier (Bro archetype) must deliver genuine value: full workout logging, macro tracking, check-ins, basic DP earning, and rank progression
+- Gate premium features (Himbo/Brute/Pup/Bull archetypes, Protocol Orders, DP modifiers) behind the paywall, but let users SEE them with a lock icon
+- Show the paywall contextually: when a user tries to select a premium archetype, when they view Protocol Orders, when they hit a natural upgrade moment (e.g., reaching Rank 3)
+- Never interrupt a user's current action with a paywall -- wait for them to request a premium feature
+- Consider a 7-day free trial to let users experience premium before committing (RevenueCat data shows longer trials correlate with 45.7% conversion from trial to paid)
 
-**Detection:** `npx cap sync` warns "The web directory (dist) must contain an index.html" or Xcode build shows old content.
+**Detection:** Track paywall impression-to-conversion rate. If below 3%, the paywall is either too aggressive or poorly timed.
+
+**V2 Phase:** Paywall UX phase. Must be designed alongside the feature gating architecture.
+
+**Confidence:** MEDIUM -- based on RevenueCat aggregate data, specific conversion rates will vary.
+
+**Sources:**
+- [RevenueCat: State of Subscription Apps 2025](https://www.revenuecat.com/state-of-subscription-apps-2025/)
+- [RevenueCat: How Top Apps Approach Paywalls](https://www.revenuecat.com/blog/growth/how-top-apps-approach-paywalls/)
+- [Apphud: Design High-Converting Subscription App Paywalls](https://apphud.com/blog/design-high-converting-subscription-app-paywalls)
 
 ---
 
-### 11. APNs Token vs FCM Token Confusion
+### 13. RevenueCat Capacitor Plugin Version Mismatch with Capacitor 7
 
-**Severity:** MODERATE
-**Phase:** Push Notification Backend
-**Confidence:** HIGH (verified via [Capacitor Push Notifications docs](https://capacitorjs.com/docs/apis/push-notifications), [Capacitor issue #1749](https://github.com/ionic-team/capacitor/issues/1749))
+**What goes wrong:** The app runs Capacitor 7.5.0. The RevenueCat Capacitor plugin (`@revenuecat/purchases-capacitor`) has jumped from version 9.x (Capacitor 6) to version 12.x (current). The peer dependency requirements may not explicitly list `@capacitor/core@^7.0.0`, causing npm install warnings or build failures. Additionally, the plugin requires Swift >= 5.0 on the native side.
 
-**What goes wrong:** On iOS, `@capacitor/push-notifications` returns the raw APNs device token in the `registration` event. On Android, it returns the FCM token. Developers often store this token in the database assuming it's an FCM token and try to send via Firebase Cloud Messaging, which fails for iOS tokens unless FCM-APNs integration is configured.
-
-**Why it happens:** The Capacitor plugin abstracts the registration but the token format differs by platform. The documentation is confusing because it shows a single `registration` event handler for both platforms.
+**Why it happens:** RevenueCat's Capacitor plugin version numbering follows the underlying RevenueCat SDK version, not the Capacitor version. Version 12.1.3 was released 2026-02-19, but its peer dependency matrix for Capacitor 7 specifically is not clearly documented in npm metadata.
 
 **Consequences:**
-- Push notifications silently fail to deliver on iOS
-- Backend sends to FCM with an APNs token, gets "InvalidRegistration" error
-- Coach assigns a workout, client never gets notified
+- `npm install` warns about unmet peer dependencies
+- Native iOS build fails if Swift version is incompatible
+- Runtime crashes if the Capacitor bridge version doesn't match
 
 **Prevention:**
-1. **Decide on a push delivery strategy early:**
-   - **Option A: FCM for both platforms** -- configure APNs key in Firebase Console, use FCM SDK (`@capacitor-firebase/messaging`), which returns FCM tokens on both platforms
-   - **Option B: Supabase Edge Functions + direct APNs** -- use Supabase to send push notifications directly to APNs (no Firebase dependency), store the APNs token directly
-   - **Option C: Third-party service** (OneSignal, Pusher) -- handles both platforms transparently
-2. **Store the platform alongside the token** in the database:
-   ```typescript
-   PushNotifications.addListener('registration', (token) => {
-     await supabase.from('push_tokens').upsert({
-       user_id: userId,
-       token: token.value,
-       platform: Capacitor.getPlatform(), // 'ios' | 'android' | 'web'
-     })
-   })
-   ```
-3. **For Trained, recommend Option B** (Supabase Edge Functions + APNs) since the backend is already Supabase and adding Firebase creates unnecessary complexity. Use Supabase's `pg_net` or Edge Functions to send directly to APNs using the APNs HTTP/2 API with a .p8 key.
+- Check the exact peer dependency of `@revenuecat/purchases-capacitor@latest` against `@capacitor/core@7.5.0` before installing
+- Pin the RevenueCat plugin version in `package.json` to avoid surprise breaking updates
+- After installing, run `npx cap sync ios` and verify the Xcode build succeeds before writing any TypeScript code
+- If the current version doesn't support Capacitor 7, check if version 10.x or 11.x does -- the version numbering jumps may include Capacitor 7 support
+- Test on a real device, not just simulator, since StoreKit behaves differently
 
-**Detection:** Tokens are stored in the database but `push-send` Edge Function returns errors or notifications never arrive.
+**Detection:** npm install warnings, Xcode build errors mentioning `RevenueCat` or `Purchases`, or runtime `PurchasesError` on app launch.
+
+**V2 Phase:** RevenueCat integration phase. Resolve before writing any subscription code.
+
+**Confidence:** MEDIUM -- npm shows v12.1.3 but exact Capacitor 7 peer dependency not confirmed in search results. The plugin IS actively maintained, so support is likely present.
+
+**Sources:**
+- [@revenuecat/purchases-capacitor on npm](https://www.npmjs.com/package/@revenuecat/purchases-capacitor)
+- [RevenueCat purchases-capacitor GitHub](https://github.com/RevenueCat/purchases-capacitor)
 
 ---
 
-### 12. iOS Keyboard Pushes WebView and Misaligns Touch Targets
+### 14. Supabase Schema Migration for DP Tables Breaks RLS
 
-**Severity:** MODERATE
-**Phase:** UI Polish
-**Confidence:** HIGH (verified via [Capacitor issue #1366](https://github.com/ionic-team/capacitor/issues/1366), [Capacitor Keyboard docs](https://capacitorjs.com/docs/apis/keyboard))
+**What goes wrong:** The V2 gamification system requires new Supabase tables (e.g., `user_dp`, `dp_logs`, `ranks`, `archetypes`, `protocol_orders`). The existing `user_xp` and `xp_logs` tables have RLS policies that reference `coach_clients` for coach read access. If new tables are created without matching RLS policies, or if old tables are modified without updating dependent views (`coach_client_summary`), the migration fails silently or creates security holes.
 
-**What goes wrong:** When the iOS keyboard opens, WKWebView resizes or scrolls to accommodate it. This can cause the entire page to "jump up and down" when focusing an input, and after the keyboard dismisses, touch targets may be offset from their visual position (tap at position Y but the hit target is at Y-300px).
-
-**Why it happens:** WKWebView reports incorrect bottom insets during keyboard show/hide transitions. The viewport resize behavior differs from Safari's. Combined with React's virtual DOM reconciliation, this can leave the layout in an inconsistent state.
+**Why it happens:** The `coach_client_summary` view joins `user_xp`, and RLS policies on `user_xp` reference the `coach_clients` table. Creating `user_dp` alongside `user_xp` means both tables need RLS, and the view may need updating (even though we're stripping the coach dashboard, the tables and policies should remain consistent).
 
 **Consequences:**
-- Meal logging inputs (Macros screen) jump around when entering calorie values
-- Workout set inputs (weight/reps) cause the screen to bounce
-- Coach notes textarea in check-in review causes layout shifts
-- After dismissing keyboard, buttons may not respond to taps in the correct position
-
-**Trained-specific impact:** The app is input-heavy: macro logging (multiple number inputs per meal), workout logging (weight/reps per set), coach notes, onboarding form. Every input-heavy screen is affected.
+- New tables without RLS = any authenticated user can read/write any other user's DP data
+- Broken view = coach_client_summary query fails, which could affect sync
+- Migration rollback impossible if old tables are dropped
 
 **Prevention:**
-1. **Install `@capacitor/keyboard` plugin** and configure:
-   ```typescript
-   import { Keyboard, KeyboardResize } from '@capacitor/keyboard'
+- Create new DP tables ALONGSIDE existing XP tables -- don't drop XP tables in the same migration
+- Copy the RLS policy pattern from `user_xp` to `user_dp`: "Users manage own data" + "Coaches can read client data"
+- Update `coach_client_summary` view to reference `user_dp` instead of (or alongside) `user_xp`
+- Write the Supabase migration as a single transaction so it either fully applies or fully rolls back
+- Test the migration on a Supabase branch/staging environment before production
+- Update `delete-account` Edge Function to include new tables in its cleanup cascade (currently references `user_xp`)
 
-   // Use 'none' to prevent WebView resize, handle manually
-   Keyboard.setResizeMode({ mode: KeyboardResize.None })
+**Detection:** Run `SELECT * FROM user_dp` as a non-owner in Supabase SQL Editor -- if it returns data, RLS is missing.
 
-   // Or use 'ionic' mode which adds padding instead of resizing
-   Keyboard.setResizeMode({ mode: KeyboardResize.Ionic })
-   ```
-2. **Listen for keyboard events** to adjust layout:
-   ```typescript
-   Keyboard.addListener('keyboardWillShow', (info) => {
-     document.documentElement.style.setProperty('--keyboard-height', `${info.keyboardHeight}px`)
-   })
-   Keyboard.addListener('keyboardWillHide', () => {
-     document.documentElement.style.setProperty('--keyboard-height', '0px')
-   })
-   ```
-3. **Add `inputmode="decimal"` or `inputmode="numeric"`** to number inputs to show the appropriate keyboard (numeric pad instead of full keyboard reduces screen real estate impact)
-4. **Use `scrollIntoView({ block: 'center' })`** on focus to position inputs well above the keyboard
+**V2 Phase:** Database migration phase. Should happen early, before the app code references new tables.
 
-**Detection:** Inputs jump or "bounce" when focused; tapping a button after dismissing the keyboard does nothing.
+**Confidence:** HIGH -- verified by reading the existing schema and RLS policies in `supabase/schema.sql`.
 
 ---
 
-### 13. Scroll Bounce and Overscroll on iOS 16+
+### 15. Entitlements File Missing HealthKit and IAP Capabilities
 
-**Severity:** MODERATE
-**Phase:** UI Polish
-**Confidence:** HIGH (verified via [Capacitor issue #5907](https://github.com/ionic-team/capacitor/issues/5907))
+**What goes wrong:** The current `App.entitlements` file only contains `com.apple.developer.associated-domains` (for deep linking) and `aps-environment` (for push notifications). Adding HealthKit and In-App Purchase requires additional entitlements that must be configured both in Xcode AND in the Apple Developer portal.
 
-**What goes wrong:** iOS 16+ WKWebView shows rubber-band bounce (overscroll) at the top and bottom of scrollable content, even when the Capacitor config sets `allowsBackForwardNavigationGestures: false`. The app's dark background (#0a0a0a) reveals a white or gray overscroll area, breaking the visual design.
-
-**Why it happens:** WKWebView's `UIScrollView` has `bounces` enabled by default. The `alwaysBounceVertical` property and the standard `bounces` property do not always behave consistently across iOS versions.
+**Why it happens:** Capacitor plugins handle JavaScript-side integration but DO NOT automatically add iOS entitlements. The developer must manually:
+1. Enable "HealthKit" capability in Xcode target > Signing & Capabilities
+2. Enable "In-App Purchase" capability in Xcode
+3. Add `com.apple.developer.healthkit` entitlement
+4. Add `com.apple.developer.healthkit.background-delivery` if using background delivery
+5. Enable these capabilities in the Apple Developer portal's App ID configuration
 
 **Consequences:**
-- Pull-down at top of screen shows white/gray area above the app content
-- Scroll past bottom shows white/gray area below
-- Looks unpolished and non-native
-- On dark-themed apps like Trained (background #0a0a0a), the contrast is jarring
+- HealthKit calls fail silently or throw "not available" errors
+- StoreKit purchase calls fail with "products not available"
+- App Store submission fails with "Invalid Binary" if entitlements don't match provisioning profile
 
-**Prevention:**
-1. **Set `overscroll-behavior: none`** in CSS:
-   ```css
-   html, body {
-     overscroll-behavior: none;
-   }
-   ```
-2. **Configure in `capacitor.config.ts`:**
-   ```typescript
-   ios: {
-     backgroundColor: '#0a0a0a', // Match app background
-     scrollEnabled: false, // Disable if not needed at root level
-   }
-   ```
-3. **Set the WKWebView background color** to match the app theme so any overscroll area is the same color:
-   ```swift
-   // In AppDelegate.swift
-   webView?.scrollView.backgroundColor = UIColor(red: 0.04, green: 0.04, blue: 0.04, alpha: 1.0)
-   ```
-4. Apply `overscroll-behavior: none` specifically to the root scroll container, not just `body`
+**Prevention -- Entitlements Checklist:**
+- [ ] Enable "HealthKit" in Xcode Signing & Capabilities
+- [ ] Enable "In-App Purchase" in Xcode Signing & Capabilities
+- [ ] Verify `App.entitlements` contains `com.apple.developer.healthkit` = true
+- [ ] Add `NSHealthShareUsageDescription` to `Info.plist` (required -- rejection without it)
+- [ ] Add `NSHealthUpdateUsageDescription` to `Info.plist` if writing any data
+- [ ] In Apple Developer portal: enable HealthKit and In-App Purchase for the App ID
+- [ ] Re-generate provisioning profiles after enabling capabilities
+- [ ] Run `npx cap sync ios` after any native configuration changes
+- [ ] Verify with a real device build (simulator doesn't support StoreKit sandbox properly)
 
-**Detection:** Pull down on the Dashboard screen reveals a white band above the content.
+**Detection:** Xcode build warnings about missing entitlements, or runtime errors "HealthKit not available" on a device that has HealthKit.
+
+**V2 Phase:** Project setup phase -- must be done before any HealthKit or RevenueCat code.
+
+**Confidence:** HIGH -- verified by inspecting current `App.entitlements` which is missing both capabilities.
 
 ---
 
 ## Minor Pitfalls
 
-### 14. Missing viewport-fit=cover for Notch/Dynamic Island
+### 16. Sleep Data Requires Activity Permission Scope -- Not Obvious
 
-**Severity:** MINOR (but looks unprofessional)
-**Phase:** Initial Capacitor Setup
-**Confidence:** HIGH (verified via [CSS-Tricks](https://css-tricks.com/the-notch-and-css/), [Capacitor Status Bar docs](https://capacitorjs.com/docs/apis/status-bar))
+**What goes wrong:** The `@perfood/capacitor-healthkit` plugin groups sleep data under the `activity` permission scope, not a separate `sleep` scope. Developers request permission for `steps` but forget that `activity` (which includes sleep) is a separate authorization request.
 
-**What goes wrong:** The current `index.html` meta viewport tag is:
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-```
-This does NOT include `viewport-fit=cover`. Without it, the app content is inset from the edges on notched iPhones (X, 11, 12, 13, 14, 15) and Dynamic Island devices (14 Pro, 15 Pro, 16). The app appears in a "letterboxed" area with black bars at the top and bottom.
+**Why it happens:** HealthKit data types are categorized differently than you'd expect. Sleep analysis is an `HKCategoryType`, not an `HKQuantityType` like steps. The Capacitor plugin abstracts this but the permission scoping can be confusing.
 
-**Trained-specific note:** The app already uses `env(safe-area-inset-bottom)` and `env(safe-area-inset-top)` in `src/index.css` (lines 218, 222), which is correct. But these CSS environment variables only have non-zero values when `viewport-fit=cover` is set.
+**Consequences:** Steps work but sleep data returns empty -- looks like a bug but is a permissions issue.
 
 **Prevention:**
-1. **Update the viewport meta tag:**
-   ```html
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-   ```
-2. Verify that the existing `env(safe-area-inset-*)` padding in `index.css` properly handles the notch/home indicator areas after this change
-3. This change is safe for the web PWA too -- it's a no-op on non-notched devices and in browsers
+- Request both `steps` and `activity` (or `sleepAnalysis` depending on the plugin) in the `requestAuthorization` call
+- Query sleep data specifically using `HKCategoryTypeIdentifier.sleepAnalysis` sample type
+- Verify both data types are returning data in development before assuming the integration works
 
-**Detection:** App appears with black bars at top/bottom on notched iPhones instead of extending edge-to-edge.
+**Detection:** Steps populate but sleep shows empty/zero.
+
+**V2 Phase:** HealthKit integration phase.
+
+**Confidence:** MEDIUM -- based on plugin documentation; exact API may vary with plugin version.
+
+**Sources:**
+- [@perfood/capacitor-healthkit GitHub](https://github.com/perfood/capacitor-healthkit)
 
 ---
 
-### 15. navigator.vibrate No-Op -- Need Capacitor Haptics Plugin
+### 17. PrivacyInfo.xcprivacy Must Declare HealthKit and Purchase APIs
 
-**Severity:** MINOR
-**Phase:** Native Features Integration
-**Confidence:** HIGH (established in project memory: "navigator.vibrate() has 0% iOS Safari support")
+**What goes wrong:** The app already has a `PrivacyInfo.xcprivacy` Apple privacy manifest (added in v1.5). Adding HealthKit and RevenueCat introduces new API usage that must be declared in this manifest and in the App Store privacy nutrition labels.
 
-**What goes wrong:** The existing `src/lib/haptics.ts` uses `navigator.vibrate()`, which has zero support on iOS (Safari and WKWebView). The `canVibrate` check returns `false` and all haptic feedback is silently skipped. The Capacitor native app has the same problem unless replaced with the native Haptics plugin.
+**Why it happens:** Apple requires privacy manifests for apps using certain APIs. HealthKit data is "Health & Fitness" data. RevenueCat may access the device's advertising identifier or purchase history.
 
-**Trained-specific impact:** The app has 5 haptic patterns (light, medium, success, heavy, error) used across workout completion, XP claims, check-ins, and achievement unlocks. None of them fire on iOS.
+**Consequences:** Inaccurate privacy labels are a top rejection reason in 2025-2026. Apple flags apps where SDK usage doesn't match declared privacy practices.
 
 **Prevention:**
-1. **Replace with `@capacitor/haptics`:**
-   ```typescript
-   import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
-   import { Capacitor } from '@capacitor/core'
+- Update `PrivacyInfo.xcprivacy` to declare HealthKit data collection (health, fitness)
+- Update App Store Connect privacy nutrition labels to include "Health & Fitness" data
+- Check RevenueCat's privacy manifest documentation for any additional required declarations
+- Declare that health data is collected for "App Functionality" (not advertising/tracking)
 
-   export const haptics = {
-     light: () => Capacitor.isNativePlatform()
-       ? Haptics.impact({ style: ImpactStyle.Light })
-       : canVibrate && navigator.vibrate(10),
+**Detection:** App Store submission validation error mentioning privacy manifest, or rejection citing inaccurate privacy labels.
 
-     medium: () => Capacitor.isNativePlatform()
-       ? Haptics.impact({ style: ImpactStyle.Medium })
-       : canVibrate && navigator.vibrate(25),
+**V2 Phase:** App Store submission phase. Update the manifest when adding each new capability.
 
-     success: () => Capacitor.isNativePlatform()
-       ? Haptics.notification({ type: NotificationType.Success })
-       : canVibrate && navigator.vibrate([15, 50, 30]),
+**Confidence:** HIGH -- Apple enforces this strictly as of 2025.
 
-     heavy: () => Capacitor.isNativePlatform()
-       ? Haptics.impact({ style: ImpactStyle.Heavy })
-       : canVibrate && navigator.vibrate(50),
-
-     error: () => Capacitor.isNativePlatform()
-       ? Haptics.notification({ type: NotificationType.Error })
-       : canVibrate && navigator.vibrate([50, 30, 50]),
-   }
-   ```
-2. The Capacitor Haptics plugin uses the Taptic Engine on iOS -- real, satisfying haptic feedback instead of the no-op vibrate.
-3. Keep the `navigator.vibrate` fallback for Android web/PWA users.
-
-**Detection:** No tactile feedback on any interaction on iOS. (Already the case in PWA -- this pitfall is about not forgetting to fix it for native.)
+**Sources:**
+- [Apple: NSHealthShareUsageDescription](https://developer.apple.com/documentation/BundleResources/Information-Property-List/NSHealthShareUsageDescription)
+- [Twinr: Apple App Store Rejection Reasons 2025](https://twinr.dev/blogs/apple-app-store-rejection-reasons-2025/)
 
 ---
 
-### 16. Universal Links Configuration Fragility
+### 18. Archetype DP Modifiers Create Balance Exploits
 
-**Severity:** MINOR (until it breaks auth)
-**Phase:** Deep Linking Setup
-**Confidence:** HIGH (verified via [Capacitor Deep Links guide](https://capacitorjs.com/docs/guides/deep-links), [Apple Developer docs](https://developer.apple.com/documentation/xcode/supporting-associated-domains))
+**What goes wrong:** The V2 spec includes 5 archetypes with DP modifiers (e.g., Bull archetype earns more DP for heavy lifts, Pup earns more for cardio). If the modifiers are unbalanced, users will pick the archetype with the highest total DP earning rate regardless of their actual training style, making the "personalization" feature into a min-maxing game.
 
-**What goes wrong:** Universal Links require a precise chain: (1) `apple-app-site-association` (AASA) file hosted at `https://app.welltrained.fitness/.well-known/apple-app-site-association` with correct MIME type, (2) Associated Domains entitlement in Xcode (`applinks:app.welltrained.fitness`), (3) matching Team ID + Bundle ID in the AASA file, and (4) the AASA file must be accessible without redirects. If ANY link in this chain is wrong, Universal Links silently fail -- no error, no fallback, links just open in Safari.
-
-**Why it happens:** Apple's AASA validation happens at app install time, is cached by the CDN, and only refreshes periodically. There's no way to force a refresh. The AASA file must be served with `Content-Type: application/json` (not `application/pkcs7-mime` which was the old format). Vercel's routing may interfere with serving the `.well-known` directory.
+**Why it happens:** Gamification systems are notoriously hard to balance before real user data exists. The modifiers interact with all DP-earning actions (workout, steps, macros, sleep, check-in), creating a complex matrix.
 
 **Consequences:**
-- Auth magic links open in Safari instead of the app
-- Coach share links don't open the app
-- Deep links to specific workouts don't work
+- One archetype dominates (everyone picks it) -- defeats personalization purpose
+- Users who picked "wrong" archetype feel punished when they see others ranking up faster
+- Rebalancing after launch requires retroactive DP adjustments or a reset
 
 **Prevention:**
-1. **Host AASA file on Vercel** with proper configuration (add `vercel.json` route rule):
-   ```json
-   {
-     "routes": [{
-       "src": "/.well-known/apple-app-site-association",
-       "headers": { "Content-Type": "application/json" }
-     }]
-   }
-   ```
-2. **Verify with Apple's validator:** `https://app-site-association.cdn-apple.com/a/v1/app.welltrained.fitness`
-3. **Test on a real device** (not simulator) -- Universal Links do not work in the iOS Simulator
-4. **Remember:** Universal Links only work when the user taps a link from another app (Safari, Mail, Messages). They do NOT work when typed directly into Safari's URL bar.
-5. **Chrome as default browser breaks Universal Links** on iOS -- this is a known iOS limitation. Document this for users.
+- Keep modifiers small (e.g., +10% for favored action, not +50%)
+- Ensure ALL archetypes have the same theoretical maximum DP per day assuming perfect adherence
+- Modifiers should shift WHERE DP comes from, not HOW MUCH total
+- Launch with flat DP (no modifiers) and add modifiers in a later update after collecting real usage data
+- If launching with modifiers, run a simulation: for each archetype, calculate DP earned over a typical week with average adherence
 
-**Detection:** Magic link in email opens Safari instead of the app. Verify by checking `https://app-site-association.cdn-apple.com/a/v1/app.welltrained.fitness` returns valid JSON.
+**Detection:** If analytics show >60% of users picking one archetype, it's unbalanced.
+
+**V2 Phase:** Gamification system phase. Consider deferring modifiers to post-launch.
+
+**Confidence:** MEDIUM -- this is a game design concern, not a technical one. Evidence is from gamification best practices, not verified technical documentation.
 
 ---
 
-### 17. Splash Screen and App Icon Sizing Requirements
+### 19. XP-Named CSS Tokens and Components Linger After Rename
 
-**Severity:** MINOR (but blocks submission)
-**Phase:** App Store Preparation
-**Confidence:** HIGH (verified via [Capacitor assets docs](https://capacitorjs.com/docs/guides/splash-screens-and-icons), [capacitor-assets tool](https://github.com/ionic-team/capacitor-assets))
+**What goes wrong:** After renaming XP to DP conceptually, CSS custom properties (`--color-xp-bar`, `--color-xp-bar-bg`), component names (`XPDisplay.tsx`, `XPClaimModal.tsx`, `xpStore.ts`), analytics events, and Supabase columns (`xp_awarded`, `total_xp`, `current_level`) still reference "XP." This creates confusion for developers, inconsistent naming, and potential bugs if some code checks for "xp" in strings.
 
-**What goes wrong:** iOS requires very specific icon and splash screen sizes. A single wrong size or missing variant causes Xcode build warnings or App Store Connect upload failures. Required: 1024x1024 app icon (no alpha channel, no rounded corners -- Apple adds the rounding), splash screen source at least 2732x2732.
+**Why it happens:** Renaming is tedious and easy to miss. The Supabase schema rename is particularly risky because it requires a migration.
 
-**Common mistakes:**
-- Icon PNG has transparency/alpha channel -- App Store Connect rejects
-- Icon has pre-applied rounded corners -- looks double-rounded on device
-- Splash screen image has important content at edges -- gets cropped on different aspect ratios
-- Missing required icon sizes in the asset catalog
+**Consequences:**
+- Developer confusion: "Is this the old system or new system?"
+- Supabase columns named `xp_awarded` storing DP values -- semantic mismatch
+- Analytics events referencing "XP" when the user-facing term is "DP"
+- Old component names in code reviews cause misunderstanding
 
 **Prevention:**
-1. **Use `@capacitor/assets`** to auto-generate all sizes:
-   ```bash
-   npx @capacitor/assets generate --iconBackgroundColor '#0a0a0a' --splashBackgroundColor '#0a0a0a'
-   ```
-2. Provide source files:
-   - `assets/icon-only.png` (1024x1024, no alpha, no rounded corners)
-   - `assets/splash.png` (2732x2732, center the logo, keep critical content in the center 1000x1000 safe zone)
-   - `assets/splash-dark.png` (for dark mode splash)
-3. **Verify in Xcode:** Open `ios/App/App/Assets.xcassets` and confirm no yellow warning triangles
+- Rename TypeScript files and exports in the V2 gamification phase (XPDisplay -> DPDisplay, xpStore -> dpStore, XPClaimModal -> DPClaimModal)
+- Keep Supabase column names as-is (renaming columns is risky) but alias them in the query layer
+- OR create new `user_dp` table with correct names and deprecate `user_xp`
+- Update analytics event names (`XP Claimed` -> `DP Claimed`)
+- Use `// V2: renamed from XP` comments where old names persist for backward compatibility
 
-**Detection:** App Store Connect upload fails with "Invalid Icon" error, or Xcode shows yellow warnings in the asset catalog.
+**Detection:** Search for "xp" (case-insensitive) in the codebase after migration -- any remaining references should be intentional.
+
+**V2 Phase:** Gamification system phase. Rename alongside the functional rewrite.
+
+**Confidence:** HIGH -- verified by finding all XP-named entities in the codebase.
 
 ---
 
-### 18. iOS Swipe-Back Gesture Does Not Work With BrowserRouter
+### 20. StoreKit 2 Only Available iOS 16+ -- Older Devices Fall Back
 
-**Severity:** MINOR (UX polish issue)
-**Phase:** Navigation Polish
-**Confidence:** MEDIUM (based on [Capacitor discussion #3137](https://github.com/ionic-team/capacitor/discussions/3137), community reports)
+**What goes wrong:** RevenueCat uses StoreKit 2 by default on iOS 16+ but falls back to StoreKit 1 on older versions. If the app's minimum deployment target includes iOS 15 (which Capacitor 7 supports), some users will use the older StoreKit 1 path which has different behavior for subscription management, receipt validation, and sandbox testing.
 
-**What goes wrong:** iOS users expect to swipe from the left edge to go back. With `BrowserRouter` and React Router v6, the native swipe-back gesture is tied to WKWebView's browser history, not React Router's navigation stack. Swiping back may navigate to an unexpected route, cause a blank page (if the browser history is out of sync with React Router), or navigate out of the SPA entirely.
+**Why it happens:** StoreKit 2 is a complete rewrite of Apple's purchase APIs with better async/await support, but it's not backward-compatible.
 
-**Trained-specific impact:** The app uses `BrowserRouter` in `main.tsx`. Navigation between screens (Dashboard, Workouts, Macros, etc.) uses React Router. The bottom nav provides navigation but users may expect iOS swipe-back to work between screens.
-
-**Prevention:**
-1. **Disable WKWebView's swipe navigation** in `capacitor.config.ts`:
-   ```typescript
-   ios: {
-     allowsBackForwardNavigationGestures: false,
-   }
-   ```
-2. This prevents the confusing partial-swipe-then-white-screen behavior.
-3. The bottom tab navigation is the primary nav pattern for Trained, so swipe-back is not critical.
-4. For screens that DO have back buttons (coach client detail, settings sub-screens), the in-app back button is sufficient.
-
-**Detection:** User swipes from left edge, sees a white flash or navigates to an unexpected screen.
-
----
-
-### 19. Live Reload server.url Left in Production Config
-
-**Severity:** MINOR (but catastrophic if shipped)
-**Phase:** Build Pipeline
-**Confidence:** HIGH (verified via [Capacitor discussion #1478](https://github.com/ionic-team/capacitor/discussions/1478))
-
-**What goes wrong:** During development, you configure `capacitor.config.ts` with a `server.url` pointing to your local Vite dev server (`http://192.168.1.x:5173`). If this is not removed before the production build, the App Store release will try to load from a development machine's IP address. The app shows a blank screen or connection error for every user.
+**Consequences:**
+- Different purchase behavior on iOS 15 vs iOS 16+ devices
+- Testing must cover both StoreKit paths
+- Some RevenueCat features (like Customer Center) may only work with StoreKit 2
 
 **Prevention:**
-1. **Never hardcode `server.url` in `capacitor.config.ts`** -- use environment-based configuration:
-   ```typescript
-   const config: CapacitorConfig = {
-     appId: 'com.welltrained.fitness',
-     appName: 'WellTrained',
-     webDir: 'dist',
-     server: process.env.CAPACITOR_LIVE_RELOAD ? {
-       url: process.env.CAPACITOR_DEV_URL || 'http://localhost:5173',
-       cleartext: true,
-     } : undefined,
-   }
-   ```
-2. **Add a CI check** that verifies `capacitor.config.ts` does not contain a `server.url` in production builds
-3. **Add a pre-build validation script** that fails if server.url is present
+- Set the minimum deployment target to iOS 16 if the user base supports it (iOS 16 covers 95%+ of active devices as of 2026)
+- If supporting iOS 15, test the purchase flow on both an iOS 15 and iOS 16+ device
+- RevenueCat abstracts most differences, but edge cases exist around subscription status checking
 
-**Detection:** App Store build shows white screen; all users affected.
+**Detection:** Purchase failures on older devices that work fine on newer ones.
 
----
+**V2 Phase:** RevenueCat integration phase. Decide the minimum iOS version at project setup.
 
-### 20. Capacitor Plugin Version Mismatches
+**Confidence:** MEDIUM -- RevenueCat handles most abstraction, but edge cases are possible.
 
-**Severity:** MINOR (but blocks builds)
-**Phase:** Initial Setup
-**Confidence:** HIGH (verified via [Capacitor docs](https://capacitorjs.com/docs/getting-started), community reports)
-
-**What goes wrong:** Capacitor core and plugins must all be on the same major version. Installing `@capacitor/core@7` but `@capacitor/push-notifications@6` causes type errors, runtime crashes, or silent failures. The Capacitor ecosystem recently transitioned from v6 to v7, and many tutorials/examples mix versions.
-
-**Prevention:**
-1. **Pin all Capacitor packages to the same major version:**
-   ```bash
-   npm install @capacitor/core@latest @capacitor/cli@latest
-   npm install @capacitor/ios@latest
-   npm install @capacitor/push-notifications@latest @capacitor/haptics@latest \
-     @capacitor/dialog@latest @capacitor/share@latest @capacitor/filesystem@latest \
-     @capacitor/preferences@latest @capacitor/splash-screen@latest \
-     @capacitor/status-bar@latest @capacitor/keyboard@latest @capacitor/app@latest
-   ```
-2. **Run `npx cap doctor`** after any plugin install to verify version compatibility
-3. **Use `npm ls @capacitor/core`** to verify no duplicate versions in the dependency tree
-
-**Detection:** TypeScript errors about incompatible types, or runtime error `Cannot read property 'Plugins' of undefined`.
+**Sources:**
+- [RevenueCat: StoreKit 2 and Older iOS Versions](https://www.revenuecat.com/blog/engineering/ios-in-app-subscription-tutorial-with-storekit-2-and-swift/)
 
 ---
 
 ## Phase-Specific Warnings
 
-| Phase Topic | Likely Pitfall | Severity | Mitigation |
-|-------------|---------------|----------|------------|
-| Initial Capacitor setup | Service worker conflicts (#1), viewport-fit missing (#14), plugin version mismatches (#20) | CRITICAL/MINOR | Disable PWA plugin for native builds, add viewport-fit=cover, pin versions |
-| Data persistence | localStorage eviction (#2) | CRITICAL | Migrate Zustand persistence to Capacitor Preferences on native |
-| Auth integration | Supabase redirect broken (#5) | CRITICAL | Universal Links + appUrlOpen listener + PKCE flow |
-| Push notifications | One-shot permission (#4), APNs token confusion (#11) | CRITICAL/MOD | Pre-permission UI, decide FCM vs direct APNs early |
-| UI migration | window.confirm fails (#6), keyboard issues (#12), scroll bounce (#13) | CRITICAL/MOD | Replace all confirms with Dialog plugin, configure Keyboard plugin |
-| Native features | Haptics no-op (#15), export broken (#9) | MINOR/MOD | Replace navigator.vibrate with Haptics plugin, use Filesystem+Share |
-| Analytics | Plausible fails in WebView (#8) | MODERATE | Use Events API or conditional script loading |
-| Background handling | White screen after memory pressure (#7) | MODERATE | Aggressive state persistence, splash overlay on resume |
-| Deep linking | Universal Links fragility (#16) | MINOR | AASA file on Vercel, real-device testing |
-| App Store submission | Guideline 4.2 rejection (#3) | CRITICAL | Native features + detailed review notes |
-| Build pipeline | Live reload URL in prod (#19), webDir misconfiguration (#10) | MINOR/MOD | Environment-based config, combined build+sync scripts |
-| Navigation | Swipe-back gesture mismatch (#18) | MINOR | Disable WKWebView swipe navigation |
-| App assets | Splash screen / icon sizing (#17) | MINOR | Use @capacitor/assets generator |
+| V2 Phase | Likely Pitfall | Severity | Mitigation |
+|----------|---------------|----------|------------|
+| **Project Setup** | Missing entitlements for HealthKit + IAP (#15) | Critical | Entitlements checklist before writing any code |
+| **Coach Stripping** | Breaking sync/imports (#7) | Critical | Delete pure-coach files first, keep client-facing coach interaction, validate with `tsc` after each file |
+| **Coach Stripping** | Orphaned coach types in database.types.ts | Minor | Keep them -- they match the Supabase schema |
+| **Design System** | Color swap misses hardcoded values (#11) | Moderate | Comprehensive grep for all red-spectrum hex values |
+| **Design System** | Lime on dark fails WCAG for text (#11) | Moderate | Test every text-on-primary combination for 4.5:1 contrast |
+| **Gamification (DP/Ranks)** | localStorage key rename wipes data (#5) | Critical | Use Zustand migrate pattern, NOT key rename |
+| **Gamification (DP/Ranks)** | XP-to-DP migration formula wrong (#4) | Critical | Percentage-of-max approach with edge case testing |
+| **Gamification (DP/Ranks)** | Archetype balance exploits (#18) | Minor | Launch with flat DP or small modifiers |
+| **HealthKit** | Permission denied cannot be re-prompted (#6) | Critical | Pre-permission screen with soft ask pattern |
+| **HealthKit** | Data gaps look like bugs (#10) | Moderate | Track `healthKitConnected` flag, always support manual entry |
+| **HealthKit** | Background delivery unreliable (#9) | Moderate | Query on foreground only, don't depend on background updates |
+| **RevenueCat** | SDK init race condition (#1) | Critical | Loading gate pattern: splash until auth + RC both ready |
+| **RevenueCat** | Plugin version vs Capacitor 7 (#13) | Moderate | Verify peer deps before writing code |
+| **Paywall** | Missing restore button (#2) | Critical | Add to paywall AND settings |
+| **Paywall** | Missing subscription legal text (#3) | Critical | Use the 10-item checklist |
+| **Paywall** | Paywall too early (#12) | Moderate | Gate premium features, don't block core UX |
+| **App Store Submission** | Products not fetchable by reviewer (#8) | Critical | Submit IAP with binary, handle empty offerings gracefully |
+| **App Store Submission** | Privacy manifest outdated (#17) | Minor | Update when adding each new capability |
+| **Database Migration** | New tables without RLS (#14) | Moderate | Copy RLS pattern from existing tables, test with non-owner |
 
 ---
 
-## Integration Pitfall Matrix: Existing Modules vs Capacitor
+## Apple App Store Review Checklist for V2 Submission
 
-This maps each existing Trained module to its specific Capacitor integration risks.
+This consolidates all Apple-specific requirements discovered during research:
 
-| Existing Module | Files Affected | Capacitor Pitfall | Priority |
-|----------------|----------------|-------------------|----------|
-| `vite-plugin-pwa` + Workbox | `vite.config.ts`, `UpdatePrompt.tsx` | SW fails in WKWebView (#1) | Must fix before first build |
-| Zustand `persist` (8 stores) | All files in `src/stores/` | localStorage eviction (#2) | Must fix before launch |
-| `supabase.ts` (`detectSessionInUrl`) | `src/lib/supabase.ts`, `Auth.tsx` | Redirect broken (#5) | Must fix before launch |
-| `window.confirm` (10 calls) | 6 files across screens | Silently fails (#6) | Must fix before launch |
-| `haptics.ts` (`navigator.vibrate`) | `src/lib/haptics.ts` | No-op on iOS (#15) | Should fix (UX win) |
-| Settings export (Blob+anchor) | `src/screens/Settings.tsx:182-197` | Download broken (#9) | Should fix (feature broken) |
-| Settings import (FileReader) | `src/screens/Settings.tsx:268-278` | Likely works, needs testing | Test on device |
-| Plausible script tag | `index.html:32` | Wrong domain / blocked (#8) | Should fix (analytics gap) |
-| `BrowserRouter` | `src/main.tsx` | Swipe-back mismatch (#18) | Nice to fix |
-| `index.css` safe area insets | `src/index.css:218,222` | Need viewport-fit=cover (#14) | Must fix (already half-done) |
-| Sentry | `vite.config.ts`, `src/lib/sentry.ts` | Source maps need Capacitor config | Verify works |
+### Subscriptions (Guideline 3.1.1 / 3.1.2)
+- [ ] Restore Purchases button on paywall screen
+- [ ] Restore Purchases button in Settings
+- [ ] Price in local currency displayed on paywall
+- [ ] Billing period stated explicitly
+- [ ] Auto-renewal disclaimer text
+- [ ] Cancellation instructions text
+- [ ] Link to Terms of Service
+- [ ] Link to Privacy Policy
+- [ ] Free trial terms (if applicable)
+- [ ] "Cancel anytime" language
+- [ ] Subscriptions submitted for review WITH app binary
+- [ ] All territories have pricing configured
+- [ ] Empty offerings handled gracefully (retry/fallback UI)
+
+### HealthKit (Guideline 5.1.3 / 27.5)
+- [ ] `NSHealthShareUsageDescription` in Info.plist
+- [ ] `NSHealthUpdateUsageDescription` in Info.plist (if writing data)
+- [ ] HealthKit entitlement in App.entitlements
+- [ ] HealthKit enabled in Apple Developer portal App ID
+- [ ] App provides core health/fitness functionality (not peripheral use)
+- [ ] Health data NOT used for advertising or sold to third parties
+
+### Privacy (Guideline 5.1.1 / 5.1.2)
+- [ ] PrivacyInfo.xcprivacy updated for HealthKit + purchases
+- [ ] App Store privacy nutrition labels include Health & Fitness data
+- [ ] Privacy policy covers health data collection and usage
+
+### General (Guideline 2.1 / 4.0)
+- [ ] All features work during review (no broken purchase flows)
+- [ ] Demo account credentials provided in App Review Information
+- [ ] Notes for reviewer explaining how to test subscription
+- [ ] Screenshots match actual app UI (no red if app is now lime)
+- [ ] App works on reviewer's device (test on multiple iOS versions)
 
 ---
 
 ## Sources
 
 ### Official Documentation
-- [Capacitor Push Notifications Plugin](https://capacitorjs.com/docs/apis/push-notifications)
-- [Capacitor Storage Guide](https://capacitorjs.com/docs/guides/storage)
-- [Capacitor Deep Links Guide](https://capacitorjs.com/docs/guides/deep-links)
-- [Capacitor Dialog Plugin](https://capacitorjs.com/docs/apis/dialog)
-- [Capacitor Keyboard Plugin](https://capacitorjs.com/docs/apis/keyboard)
-- [Capacitor Splash Screens and Icons](https://capacitorjs.com/docs/guides/splash-screens-and-icons)
-- [Capacitor Live Reload](https://capacitorjs.com/docs/guides/live-reload)
 - [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
-- [Apple: Asking Permission for Notifications](https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications)
-- [Supabase Native Mobile Deep Linking](https://supabase.com/docs/guides/auth/native-mobile-deep-linking)
+- [Apple Auto-renewable Subscriptions](https://developer.apple.com/app-store/subscriptions/)
+- [Apple HealthKit: Authorizing Access](https://developer.apple.com/documentation/healthkit/authorizing-access-to-health-data)
+- [Apple HealthKit Background Delivery Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.background-delivery)
+- [Apple NSHealthShareUsageDescription](https://developer.apple.com/documentation/BundleResources/Information-Property-List/NSHealthShareUsageDescription)
 
-### GitHub Issues and Discussions (HIGH confidence)
-- [Capacitor #7069: Service workers fail to register on iOS](https://github.com/ionic-team/capacitor/issues/7069)
-- [Capacitor #4122: App-Bound Domains for Service Workers](https://github.com/ionic-team/capacitor/issues/4122)
-- [Capacitor #7097: iOS white screen after background](https://github.com/ionic-team/capacitor/discussions/7097)
-- [Capacitor #5260: WKWebView memory pressure handling](https://github.com/ionic-team/capacitor/discussions/5260)
-- [Capacitor #1366: WebView jumps with keyboard](https://github.com/ionic-team/capacitor/issues/1366)
-- [Capacitor #5907: WKWebView bouncing on iOS 16](https://github.com/ionic-team/capacitor/issues/5907)
-- [Capacitor #1749: APNs token vs FCM token](https://github.com/ionic-team/capacitor/issues/1749)
-- [Capacitor #636: localStorage lost on reboot](https://github.com/ionic-team/capacitor/issues/636)
-- [Supabase #11548: OAuth redirects with Capacitor](https://github.com/orgs/supabase/discussions/11548)
-- [Capacitor #6132: CapacitorHttp Blob upload fails](https://github.com/ionic-team/capacitor/issues/6132)
+### RevenueCat
+- [RevenueCat Capacitor Installation](https://www.revenuecat.com/docs/getting-started/installation/capacitor)
+- [RevenueCat App Store Rejections Guide](https://www.revenuecat.com/docs/test-and-launch/app-store-rejections)
+- [RevenueCat State of Subscription Apps 2025](https://www.revenuecat.com/state-of-subscription-apps-2025/)
+- [@revenuecat/purchases-capacitor npm](https://www.npmjs.com/package/@revenuecat/purchases-capacitor)
+- [RevenueCat purchases-capacitor GitHub](https://github.com/RevenueCat/purchases-capacitor)
 
-### Community / Analysis (MEDIUM confidence)
-- [Apple Developer Forums: localStorage lost in WKWebView](https://developer.apple.com/forums/thread/742037)
-- [Apple Developer Forums: Notification requestPermission always denied](https://developer.apple.com/forums/thread/725619)
-- [mobiloud: App Store Review Guidelines for WebView Apps](https://www.mobiloud.com/blog/app-store-review-guidelines-webview-wrapper)
-- [capgo: Apple Policy Updates for Capacitor Apps 2025](https://capgo.app/blog/apple-policy-updates-for-capacitor-apps-2025/)
-- [Thinktecture: iOS 14 ITP in WKWebView](https://www.thinktecture.com/en/ios/wkwebview-itp-ios-14/)
-- [webapp2app: JavaScript dialogs in iOS WebView](https://www.webapp2app.com/2018/06/11/javascript-dialogs-like-alert-confirm-and-prompt-in-ios-webview-apps/)
-- [Zustand #2418: Capacitor Preferences with persist](https://github.com/pmndrs/zustand/discussions/2418)
+### HealthKit Plugins
+- [@perfood/capacitor-healthkit GitHub](https://github.com/perfood/capacitor-healthkit)
+- [@perfood/capacitor-healthkit npm](https://www.npmjs.com/package/@perfood/capacitor-healthkit)
+
+### Zustand Migration
+- [Zustand: Best way to run migration on first persist](https://github.com/pmndrs/zustand/discussions/1717)
+- [How to migrate Zustand local storage store](https://dev.to/diballesteros/how-to-migrate-zustand-local-storage-store-to-a-new-version-njp)
+
+### Community / Analysis
+- [RevenueCat Community: Restore Purchases Rejection](https://community.revenuecat.com/sdks-51/we-get-rejected-from-apple-store-review-about-restore-purchases-693)
+- [RevenueCat Community: Products Not Fetchable During Review](https://community.revenuecat.com/tips-discussion-56/unable-to-fetch-subscription-products-during-app-store-review-5564)
+- [Apple Developer Forums: Background Delivery Issues](https://developer.apple.com/forums/thread/801627)
+- [Adapty: App Store Review Guidelines 2026](https://adapty.io/blog/how-to-pass-app-store-review/)
+- [Apphud: Design High-Converting Paywalls](https://apphud.com/blog/design-high-converting-subscription-app-paywalls)
