@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useSyncStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
@@ -12,25 +12,11 @@ import { scheduleAllNotifications } from '@/lib/notifications'
 import { updateBadge } from '@/lib/badge'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useRemindersStore } from '@/stores/remindersStore'
-import { isCoach } from '@/lib/supabase'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
 import { Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
-
-// Coach route guard — eagerly imported, checks role before loading Coach chunk
-function CoachGuard({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<'loading' | 'authorized' | 'denied'>('loading')
-
-  useEffect(() => {
-    isCoach().then(result => setStatus(result ? 'authorized' : 'denied'))
-  }, [])
-
-  if (status === 'loading') return <HomeSkeleton />
-  if (status === 'denied') return <Navigate to="/" replace />
-  return <>{children}</>
-}
 
 // Lazy-loaded route components
 const Onboarding = lazy(() => import('@/screens/Onboarding').then(m => ({ default: m.Onboarding })))
@@ -39,7 +25,6 @@ const Workouts = lazy(() => import('@/screens/Workouts').then(m => ({ default: m
 const Macros = lazy(() => import('@/screens/Macros').then(m => ({ default: m.Macros })))
 const AvatarScreen = lazy(() => import('@/screens/AvatarScreen').then(m => ({ default: m.AvatarScreen })))
 const Settings = lazy(() => import('@/screens/Settings').then(m => ({ default: m.Settings })))
-const Coach = lazy(() => import('@/screens/Coach').then(m => ({ default: m.Coach })))
 const Achievements = lazy(() => import('@/screens/Achievements').then(m => ({ default: m.Achievements })))
 const WeeklyCheckIn = lazy(() => import('@/screens/WeeklyCheckIn').then(m => ({ default: m.WeeklyCheckIn })))
 const ResetPassword = lazy(() => import('@/screens/ResetPassword').then(m => ({ default: m.ResetPassword })))
@@ -51,7 +36,6 @@ function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initialize)
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
-  const location = useLocation()
   const navigate = useNavigate()
   const pushPermissionRequested = useRef(false)
 
@@ -223,15 +207,12 @@ function AppContent() {
     )
   }
 
-  const isCoachRoute = location.pathname === '/coach'
-
   // If not authenticated, show auth screen
   if (!devBypass && !user) {
     return (
       <>
         <ToastContainer />
         <SentryRoutes>
-          <Route path="/coach" element={<Auth defaultMode="login" />} />
           <Route path="/auth" element={<Auth defaultMode="login" />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
@@ -241,8 +222,8 @@ function AppContent() {
     )
   }
 
-  // If authenticated but onboarding not complete, show onboarding (coach route bypasses)
-  if (!devBypass && (!profile || !profile.onboardingComplete) && !isCoachRoute) {
+  // If authenticated but onboarding not complete, show onboarding
+  if (!devBypass && (!profile || !profile.onboardingComplete)) {
     return (
       <>
         <ToastContainer />
@@ -266,7 +247,6 @@ function AppContent() {
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
           <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/coach" element={<CoachGuard><Suspense fallback={<HomeSkeleton />}><Coach /></Suspense></CoachGuard>} />
           <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
           <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />

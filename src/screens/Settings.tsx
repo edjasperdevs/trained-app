@@ -30,7 +30,7 @@ import {
 import { LABELS } from '@/design/constants'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { friendlyError } from '@/lib/errors'
-import { isCoach as checkIsCoach, getSupabaseClient } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 import { scheduleAllNotifications } from '@/lib/notifications'
 import { getLocalDateString } from '@/lib/dateUtils'
 import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidXPState, isValidDailyLog, isArray } from '@/lib/validation'
@@ -73,14 +73,12 @@ export function Settings() {
   const [weightInput, setWeightInput] = useState('')
   const [goalWeightInput, setGoalWeightInput] = useState('')
   const [showWeightChart, setShowWeightChart] = useState(false)
-  const [isCoach, setIsCoach] = useState(false)
   const [hasCoach, setHasCoach] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (user) {
-      checkIsCoach().then(setIsCoach)
       // Check if user is a coaching client (for weekly check-in notification visibility)
       getSupabaseClient().from('coach_clients').select('id').eq('client_id', user.id).eq('status', 'active').maybeSingle()
         .then(({ data }) => setHasCoach(data !== null))
@@ -908,26 +906,6 @@ export function Settings() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Coach Dashboard */}
-        {isCoach && (
-          <Card className="py-0 border-primary/30">
-            <CardContent className="p-4">
-              <h3 className="text-sm font-semibold text-primary mb-4 uppercase tracking-wider">
-                Dom/me Mode
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {`You have ${LABELS.coach.toLowerCase()} privileges. View and manage your ${LABELS.client.toLowerCase()}s from the dashboard.`}
-              </p>
-              <Button
-                className="w-full"
-                onClick={() => navigate('/coach')}
-              >
-                Open {LABELS.coachDashboard}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Account */}
         <Card className="py-0">

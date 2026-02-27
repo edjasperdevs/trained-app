@@ -38,19 +38,3 @@ export const getUser = async () => {
   const { data: { user } } = await client.auth.getUser()
   return user
 }
-
-// Helper to check if user is a coach
-export const isCoach = async (): Promise<boolean> => {
-  if (!_supabase) return false
-  const user = await getUser()
-  if (!user) return false
-
-  const client = getSupabaseClient()
-  const { data } = await client
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  return data?.role === 'coach'
-}
