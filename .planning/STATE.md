@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 18 of 24 (Gamification Engine)
-Plan: 1 of 2 in current phase (18-01 complete)
-Status: In progress
-Last activity: 2026-02-27 -- Completed 18-01 (dpStore Core)
+Phase: 18 of 24 (Gamification Engine) -- COMPLETE
+Plan: 2 of 2 in current phase (18-02 complete)
+Status: Phase 18 complete, ready for Phase 19
+Last activity: 2026-02-27 -- Completed 18-02 (Gamification UI)
 
-Progress: [###_______________] 17% (3/18 plans)
+Progress: [####______________] 22% (4/18 plans)
 
 ## Performance Metrics
 
@@ -31,6 +31,7 @@ Progress: [###_______________] 17% (3/18 plans)
 | 17-01 | Strip Coach Dashboard | 4min | 2 | 8 |
 | 17-02 | Dopamine Noir V2 Design Tokens | 5min | 2 | 6 |
 | 18-01 | dpStore Core | 8min | 2 | 11 |
+| 18-02 | Gamification UI | 11min | 2 | 9 |
 
 ## Accumulated Context
 
@@ -49,6 +50,10 @@ Progress: [###_______________] 17% (3/18 plans)
 - V2 weekly claim reminder disabled (DP accrues immediately, no claim gate)
 - Settings export format v2 with dp section; V1 xp import preserved as legacy fallback
 - Onboarding no longer initializes xpStore -- dpStore starts at rank 1 by default
+- RankUpModal auto-closes after 3 seconds with tap-to-dismiss and local notification
+- CheckInModal prevents double-counting DP by checking todayLog before awarding
+- Home streak validation resets stale streaks on mount (gap > 1 day)
+- getAvatarStage() exported from AvatarScreen for Phase 23 avatar SVG wiring
 
 ### Pending Todos
 
@@ -66,5 +71,5 @@ Progress: [###_______________] 17% (3/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 18-01-PLAN.md (dpStore Core) -- Plan 18-02 next
+Stopped at: Completed 18-02-PLAN.md (Gamification UI) -- Phase 18 complete, Phase 19 next
 Resume file: None

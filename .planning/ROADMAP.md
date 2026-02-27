@@ -17,7 +17,7 @@
 ### Phases
 
 - [x] **Phase 17: Foundation Cleanup** - Strip coach dashboard and migrate to Dopamine Noir V2 design tokens
-- [ ] **Phase 18: Gamification Engine** - Discipline Points store, 15-rank progression, rank-up celebrations, Obedience Streak
+- [x] **Phase 18: Gamification Engine** - Discipline Points store, 15-rank progression, rank-up celebrations, Obedience Streak
 - [ ] **Phase 19: Subscriptions** - RevenueCat integration, paywall, premium entitlement gating, webhook backend
 - [ ] **Phase 20: Health Tracking** - HealthKit steps and sleep with manual fallback, DP awards for health actions
 - [ ] **Phase 21: Archetypes** - 5-archetype system with DP modifiers, premium gating, onboarding integration
@@ -56,7 +56,7 @@ Plans:
 
 Plans:
 - [x] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
-- [ ] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
+- [x] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
 
 ### Phase 19: Subscriptions
 **Goal**: The app has a working freemium model -- free users see a compelling paywall, subscribers unlock premium features, and subscription state persists reliably across sessions and app restarts
