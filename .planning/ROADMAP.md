@@ -52,11 +52,11 @@ Plans:
   2. User can see their current rank name, cumulative DP total, and a progress bar toward the next rank on the home screen
   3. When a user accumulates enough DP to reach a new rank, a celebration animation plays and a notification appears
   4. User maintains an Obedience Streak counter by completing at least one core action daily, visible on the home screen
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 18-01: dpStore replacing xpStore (DP accrual, rank calculation, Zustand persist migration from XP)
-- [ ] 18-02: Rank progression UI and rank-up celebration (home screen display, progress bar, animation)
+- [ ] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
+- [ ] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
 
 ### Phase 19: Subscriptions
 **Goal**: The app has a working freemium model -- free users see a compelling paywall, subscribers unlock premium features, and subscription state persists reliably across sessions and app restarts
@@ -232,7 +232,7 @@ Plans:
 | 15. Local Notifications + Engagement | v1.5 | 2/2 | Complete | 2026-02-22 |
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
 | 17. Foundation Cleanup | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 18. Gamification Engine | v2.0 | 0/2 | Not started | - |
+| 18. Gamification Engine | v2.0 | 0/2 | Planned | - |
 | 19. Subscriptions | v2.0 | 0/3 | Not started | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
