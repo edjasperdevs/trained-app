@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ProgressBar, MealBuilder, EmptyState, FoodSearch } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
+import { useDPStore } from '@/stores/dpStore'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
@@ -179,6 +180,7 @@ export function Macros() {
             caloriesHit={isCalorieTargetHit()}
             onLogNamedMeal={(name, macros) => {
               logNamedMeal(name, macros)
+              useDPStore.getState().awardDP('meal')
               scheduleSync()
             }}
             onAddRecentFood={addRecentFood}
@@ -198,6 +200,7 @@ export function Macros() {
             onToggleFavorite={toggleFavoriteFood}
             onLogMeal={(name, macros) => {
               logNamedMeal(name, macros)
+              useDPStore.getState().awardDP('meal')
               scheduleSync()
             }}
             onSaveMeal={saveMeal}
@@ -212,6 +215,7 @@ export function Macros() {
             savedMeals={savedMeals}
             onLogNamedMeal={(name, macros) => {
               logNamedMeal(name, macros)
+              useDPStore.getState().awardDP('meal')
               scheduleSync()
             }}
             onToggleFavorite={toggleFavoriteFood}

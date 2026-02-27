@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useUserStore } from './userStore'
 import { useWorkoutStore } from './workoutStore'
-import { useXPStore } from './xpStore'
+import { useDPStore } from './dpStore'
 import { useMacroStore } from './macroStore'
 
 export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary'
@@ -182,46 +182,46 @@ const createBadges = (): Badge[] => [
     }
   },
 
-  // Level badges
+  // Rank badges (V2: mapped from levels to 15-rank system)
   {
     id: 'level-5',
     name: 'Rising',
-    description: 'Reach level 5',
+    description: 'Reach rank 3 (Trainee)',
     icon: 'ArrowUp',
     rarity: 'common',
     category: 'level',
-    requirement: 5,
-    checkProgress: () => useXPStore.getState().currentLevel
+    requirement: 3,
+    checkProgress: () => useDPStore.getState().currentRank
   },
   {
     id: 'level-10',
     name: 'Established',
-    description: 'Reach level 10',
+    description: 'Reach rank 5 (Committed)',
     icon: 'Star',
     rarity: 'rare',
     category: 'level',
-    requirement: 10,
-    checkProgress: () => useXPStore.getState().currentLevel
+    requirement: 5,
+    checkProgress: () => useDPStore.getState().currentRank
   },
   {
     id: 'level-25',
     name: 'Veteran',
-    description: 'Reach level 25',
+    description: 'Reach rank 8 (Conditioned)',
     icon: 'Gem',
     rarity: 'epic',
     category: 'level',
-    requirement: 25,
-    checkProgress: () => useXPStore.getState().currentLevel
+    requirement: 8,
+    checkProgress: () => useDPStore.getState().currentRank
   },
   {
     id: 'level-50',
     name: 'Elite',
-    description: 'Reach level 50',
+    description: 'Reach rank 12 (Tempered)',
     icon: 'Crown',
     rarity: 'legendary',
     category: 'level',
-    requirement: 50,
-    checkProgress: () => useXPStore.getState().currentLevel
+    requirement: 12,
+    checkProgress: () => useDPStore.getState().currentRank
   },
 
   // Special badges
@@ -243,7 +243,7 @@ const createBadges = (): Badge[] => [
     rarity: 'common',
     category: 'special',
     requirement: 1,
-    checkProgress: () => useXPStore.getState().dailyLogs.filter(l => l.checkIn).length
+    checkProgress: () => useDPStore.getState().dailyLogs.filter(l => l.training > 0 || l.meals > 0 || l.protein > 0).length
   }
 ]
 

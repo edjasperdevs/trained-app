@@ -1,6 +1,6 @@
 import { Badge } from '@capawesome/capacitor-badge'
 import { isNative } from '@/lib/platform'
-import { useXPStore } from '@/stores/xpStore'
+import { useDPStore } from '@/stores/dpStore'
 
 /**
  * Update the app icon badge count based on pending actions.
@@ -29,9 +29,9 @@ export async function updateBadge(): Promise<void> {
 export function computePendingActions(): number {
   let count = 0
 
-  // Check if daily check-in is pending
-  const todayLog = useXPStore.getState().getTodayLog()
-  if (!todayLog || !todayLog.checkIn) {
+  // Check if daily check-in is pending (V2: any DP action counts)
+  const todayLog = useDPStore.getState().getTodayLog()
+  if (!todayLog || (todayLog.training === 0 && todayLog.meals === 0 && todayLog.protein === 0)) {
     count++
   }
 

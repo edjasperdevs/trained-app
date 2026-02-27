@@ -14,6 +14,7 @@ import { Share } from '@capacitor/share'
 import {
   useUserStore,
   useXPStore,
+  useDPStore,
   useMacroStore,
   useWorkoutStore,
   useAvatarStore,
@@ -171,23 +172,24 @@ export function Settings() {
   const handleExport = async () => {
     // Gather all data from stores
     const userData = useUserStore.getState()
-    const xpData = useXPStore.getState()
+    const dpData = useDPStore.getState()
     const macroData = useMacroStore.getState()
     const workoutData = useWorkoutStore.getState()
     const avatarData = useAvatarStore.getState()
 
     const exportObj = {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       user: userData.profile,
       weightHistory: userData.weightHistory,
-      xp: {
-        totalXP: xpData.totalXP,
-        currentLevel: xpData.currentLevel,
-        pendingXP: xpData.pendingXP,
-        weeklyHistory: xpData.weeklyHistory,
-        dailyLogs: xpData.dailyLogs,
-        lastClaimDate: xpData.lastClaimDate
+      dp: {
+        totalDP: dpData.totalDP,
+        currentRank: dpData.currentRank,
+        obedienceStreak: dpData.obedienceStreak,
+        longestObedienceStreak: dpData.longestObedienceStreak,
+        lastActionDate: dpData.lastActionDate,
+        lastCelebratedRank: dpData.lastCelebratedRank,
+        dailyLogs: dpData.dailyLogs,
       },
       macros: {
         targets: macroData.targets,
@@ -295,7 +297,19 @@ export function Settings() {
       if (parsed.user) {
         useUserStore.getState().setProfile(parsed.user)
       }
-      if (parsed.xp) {
+      if (parsed.dp && isObject(parsed.dp)) {
+        const dp = parsed.dp as Record<string, unknown>
+        useDPStore.setState({
+          totalDP: (dp.totalDP as number) || 0,
+          currentRank: (dp.currentRank as number) || 1,
+          obedienceStreak: (dp.obedienceStreak as number) || 0,
+          longestObedienceStreak: (dp.longestObedienceStreak as number) || 0,
+          lastActionDate: (dp.lastActionDate as string | null) || null,
+          lastCelebratedRank: (dp.lastCelebratedRank as number) || 1,
+          dailyLogs: (dp.dailyLogs as []) || [],
+        })
+      } else if (parsed.xp) {
+        // Legacy V1 import: ignore xp data (no migration path from XP to DP)
         useXPStore.getState().importData(JSON.stringify({ xp: parsed.xp }))
       }
       if (parsed.macros) {
@@ -337,7 +351,7 @@ export function Settings() {
     if (await confirmAction('Are you sure? This will delete ALL your progress and cannot be undone.', 'Delete Progress')) {
       try {
         useUserStore.getState().resetProgress()
-        useXPStore.getState().resetXP()
+        useDPStore.getState().resetDP()
         useMacroStore.getState().resetMacros()
         useWorkoutStore.getState().resetWorkouts()
         useAvatarStore.getState().resetAvatar()
@@ -365,7 +379,7 @@ export function Settings() {
 
         // Clear all local stores
         useUserStore.getState().resetProgress()
-        useXPStore.getState().resetXP()
+        useDPStore.getState().resetDP()
         useMacroStore.getState().resetMacros()
         useWorkoutStore.getState().resetWorkouts()
         useAvatarStore.getState().resetAvatar()

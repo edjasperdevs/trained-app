@@ -20,7 +20,6 @@ import {
   useWorkoutStore,
   useMacroStore,
   useAvatarStore,
-  useXPStore,
   FitnessLevel,
   TrainingDays,
   Goal,
@@ -111,7 +110,6 @@ export function Onboarding() {
   const { setPlan } = useWorkoutStore()
   const { calculateMacros } = useMacroStore()
   const { setBaseCharacter } = useAvatarStore()
-  const { completeOnboarding: completeXPOnboarding } = useXPStore()
 
   // Load saved progress on mount
   const savedProgress = loadSavedProgress()
@@ -158,8 +156,7 @@ export function Onboarding() {
     setBaseCharacter(data.avatarBase)
     completeOnboarding()
 
-    // Trigger level up from 0 to 1
-    completeXPOnboarding()
+    // V2: dpStore starts at rank 1 with 0 DP by default — no onboarding call needed
 
     // Track analytics
     analytics.onboardingCompleted(data.trainingDaysPerWeek)
@@ -192,7 +189,6 @@ export function Onboarding() {
     calculateMacros(finalData.weight, finalData.height, finalData.age, finalData.gender, finalData.goal, 'moderate')
     setBaseCharacter(finalData.avatarBase)
     completeOnboarding()
-    completeXPOnboarding()
 
     navigate('/')
   }

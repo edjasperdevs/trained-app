@@ -79,7 +79,7 @@ async function withRetryResult<T>(
 import { useUserStore } from '@/stores/userStore'
 import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
-import { useXPStore } from '@/stores/xpStore'
+import { useDPStore } from '@/stores/dpStore'
 // import { useAvatarStore } from '@/stores/avatarStore' // Disabled until table created
 import type { Json, PrescribedExercise } from './database.types'
 import type { User } from '@supabase/supabase-js'
@@ -703,16 +703,17 @@ export async function syncXPToCloud() {
   const { data: { user } } = await client.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  const xpState = useXPStore.getState()
+  // V2: Read from dpStore, map to existing user_xp table columns
+  const dpState = useDPStore.getState()
 
   const { error } = await client
     .from('user_xp')
     .upsert({
       user_id: user.id,
-      total_xp: xpState.totalXP,
-      current_level: xpState.currentLevel,
-      pending_xp: xpState.pendingXP,
-      last_claim_date: xpState.lastClaimDate
+      total_xp: dpState.totalDP,
+      current_level: dpState.currentRank,
+      pending_xp: 0,           // V2 has no pending concept
+      last_claim_date: null     // V2 has no weekly claim
     }, {
       onConflict: 'user_id'
     })

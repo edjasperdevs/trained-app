@@ -6,7 +6,7 @@ import { toast } from './toastStore'
 import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
 import { removeDeviceToken } from '@/lib/push'
 import { useUserStore } from './userStore'
-import { useXPStore } from './xpStore'
+import { useDPStore } from './dpStore'
 import { useMacroStore } from './macroStore'
 import { useWorkoutStore } from './workoutStore'
 import { useAvatarStore } from './avatarStore'
@@ -165,7 +165,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     // Clear all persisted stores to prevent data leakage on shared devices
     useUserStore.getState().resetProgress()
-    useXPStore.getState().resetXP()
+    useDPStore.getState().resetDP()
     useMacroStore.getState().resetMacros()
     useWorkoutStore.getState().resetWorkouts()
     useAvatarStore.getState().resetAvatar()

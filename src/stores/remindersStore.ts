@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useMacroStore } from './macroStore'
 import { useWorkoutStore } from './workoutStore'
-import { useXPStore } from './xpStore'
+import { useDPStore } from './dpStore'
 import { getLocalDateString } from '../lib/dateUtils'
 
 export interface NotificationTimePreference {
@@ -170,19 +170,15 @@ export const useRemindersStore = create<RemindersStore>()(
         const today = getLocalDateString()
         if (lastDismissDate === today && dismissedToday.includes('checkIn')) return false
 
-        const todayLog = useXPStore.getState().getTodayLog()
-        return !todayLog?.checkIn
+        // V2: check if any DP action was performed today (training > 0 or protein > 0)
+        const todayLog = useDPStore.getState().getTodayLog()
+        return !todayLog || (todayLog.training === 0 && todayLog.protein === 0 && todayLog.meals === 0)
       },
 
       shouldShowClaimXPReminder: () => {
-        const { preferences, dismissedToday, lastDismissDate } = get()
-        if (!preferences.claimXP) return false
-
-        const today = getLocalDateString()
-        if (lastDismissDate === today && dismissedToday.includes('claimXP')) return false
-
-        // Check if the weekly cooldown has passed and there's pending XP
-        return useXPStore.getState().canClaimXP()
+        // V2: DP accrues immediately -- no weekly claim gate
+        // Keep the reminder structure but always return false
+        return false
       },
 
       shouldShowWorkoutReminder: () => {
