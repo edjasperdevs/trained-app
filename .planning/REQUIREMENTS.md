@@ -1,7 +1,7 @@
 # Requirements: WellTrained V2
 
 **Defined:** 2026-02-27
-**Core Value:** Daily discipline earns visible rank progression — the app makes consistency feel like leveling up
+**Core Value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
 
 ## v2.0 Requirements
 
@@ -17,7 +17,7 @@
 ### Gamification
 
 - [ ] **GAME-01**: User earns Discipline Points (DP) for daily actions: training (+50), tracked meals (+15), 10k+ steps (+10), hit protein target (+25), 7h+ sleep (+10)
-- [ ] **GAME-02**: User progresses through 15 named ranks (Initiate → Master) based on cumulative DP thresholds
+- [ ] **GAME-02**: User progresses through 15 named ranks (Initiate -> Master) based on cumulative DP thresholds
 - [ ] **GAME-03**: User selects one of 5 archetypes during onboarding (Bro is free; Himbo, Brute, Pup, Bull are premium)
 - [ ] **GAME-04**: Selected archetype applies DP bonus modifiers to specific actions
 - [ ] **GAME-05**: User maintains an Obedience Streak by completing at least one core action daily
@@ -100,7 +100,7 @@
 | Android / Play Store | iOS only for V2, reduces scope |
 | Light mode | Dark-only brand identity |
 | Community leaderboard | Potential V3, not needed for launch |
-| Streak multiplier | Spec says "future phase" — deferred to v2.1 |
+| Streak multiplier | Spec says "future phase" -- deferred to v2.1 |
 | Custom themes / icons | Premium feature deferred to post-launch |
 | AI workout generation | Coach expertise is the product |
 | Multi-coach / teams | Single-coach app |
@@ -112,13 +112,59 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| DESIGN-01 | Phase 17 | Pending |
+| DESIGN-02 | Phase 17 | Pending |
+| DESIGN-03 | Phase 17 | Pending |
+| DESIGN-04 | Phase 17 | Pending |
+| DESIGN-05 | Phase 17 | Pending |
+| DESIGN-06 | Phase 17 | Pending |
+| GAME-01 | Phase 18 | Pending |
+| GAME-02 | Phase 18 | Pending |
+| GAME-03 | Phase 21 | Pending |
+| GAME-04 | Phase 21 | Pending |
+| GAME-05 | Phase 18 | Pending |
+| GAME-06 | Phase 22 | Pending |
+| GAME-07 | Phase 22 | Pending |
+| GAME-08 | Phase 18 | Pending |
+| GAME-09 | Phase 18 | Pending |
+| AVATAR-01 | Phase 23 | Pending |
+| AVATAR-02 | Phase 23 | Pending |
+| AVATAR-03 | Phase 23 | Pending |
+| HEALTH-01 | Phase 20 | Pending |
+| HEALTH-02 | Phase 20 | Pending |
+| HEALTH-03 | Phase 20 | Pending |
+| HEALTH-04 | Phase 20 | Pending |
+| HEALTH-05 | Phase 20 | Pending |
+| HEALTH-06 | Phase 20 | Pending |
+| HEALTH-07 | Phase 20 | Pending |
+| SUB-01 | Phase 19 | Pending |
+| SUB-02 | Phase 19 | Pending |
+| SUB-03 | Phase 19 | Pending |
+| SUB-04 | Phase 19 | Pending |
+| SUB-05 | Phase 19 | Pending |
+| SUB-06 | Phase 19 | Pending |
+| SUB-07 | Phase 19 | Pending |
+| STRIP-01 | Phase 17 | Pending |
+| STRIP-02 | Phase 17 | Pending |
+| STRIP-03 | Phase 17 | Pending |
+| STRIP-04 | Phase 17 | Pending |
+| STRIP-05 | Phase 17 | Pending |
+| STRIP-06 | Phase 17 | Pending |
+| STRIP-07 | Phase 17 | Pending |
+| DATA-01 | Phase 24 | Pending |
+| DATA-02 | Phase 24 | Pending |
+| DATA-03 | Phase 24 | Pending |
+| DATA-04 | Phase 24 | Pending |
+| LAUNCH-01 | Phase 24 | Pending |
+| LAUNCH-02 | Phase 24 | Pending |
+| LAUNCH-03 | Phase 24 | Pending |
+| LAUNCH-04 | Phase 24 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 37 total
-- Mapped to phases: 0
-- Unmapped: 37 ⚠️
+- v2.0 requirements: 47 total
+- Mapped to phases: 47
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27*
-*Last updated: 2026-02-27 after initial definition*
+*Last updated: 2026-02-27 -- traceability populated during roadmap creation*
