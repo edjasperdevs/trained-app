@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, XPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
-import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck, MessageSquare } from 'lucide-react'
+import { Flame, Dumbbell, Beef, Zap, CheckCircle2, Gift, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
 import {
   useUserStore,
   useXPStore,
@@ -14,7 +14,6 @@ import {
 import { getStandingOrder, LABELS } from '@/design/constants'
 import { haptics } from '@/lib/haptics'
 import { cn } from '@/lib/cn'
-import { getTimeAgo } from '@/lib/dateUtils'
 import { CheckInModal } from './CheckInModal'
 import { XPClaimModal } from './XPClaimModal'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
@@ -43,14 +42,6 @@ export function Home() {
   const [justCheckedIn, setJustCheckedIn] = useState(false)
   const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
   const [hasCoach, setHasCoach] = useState(false)
-  const [showCoachResponse, setShowCoachResponse] = useState(false)
-  const [latestCheckinInfo, setLatestCheckinInfo] = useState<{
-    id: string
-    week_of: string
-    status: 'submitted' | 'reviewed'
-    coach_response: string | null
-    reviewed_at: string | null
-  } | null>(null)
 
   // Check if user is a coaching client and if weekly check-in is due
   const { hasCheckinForCurrentWeek, isCoachingClient } = useWeeklyCheckins()
@@ -68,21 +59,6 @@ export function Home() {
     }).catch(() => { /* offline — leave coach features hidden */ })
     return () => { cancelled = true }
   }, [hasCheckinForCurrentWeek, isCoachingClient])
-
-  // Read latest check-in info from localStorage (populated by pullCoachData)
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('trained-latest-checkin')
-      if (stored) {
-        setLatestCheckinInfo(JSON.parse(stored))
-      }
-    } catch {
-      // Ignore parse errors
-    }
-  }, [])
-
-  // Determine if coach has reviewed latest check-in
-  const hasCoachResponse = latestCheckinInfo?.status === 'reviewed' && latestCheckinInfo.coach_response !== null
 
   // Check if user has already checked in today
   const todayLog = getTodayLog()
@@ -189,33 +165,8 @@ export function Home() {
           <ReminderList maxReminders={2} excludeTypes={['checkIn']} />
         )}
 
-        {/* Coach Reviewed Check-in Banner (priority 1 - coaching clients only) */}
-        {hasCoach && hasCoachResponse && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-            <Card
-              className="py-0 cursor-pointer border-l-[3px] border-l-success"
-              onClick={() => setShowCoachResponse(true)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <MessageSquare size={28} className="text-success" />
-                  <div className="flex-1">
-                    <p className="font-bold text-base">
-                      Coach Reviewed Your Check-in
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Tap to read your coach's response
-                    </p>
-                  </div>
-                  <ChevronRight size={20} className="text-success" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Weekly Check-in Due Banner (priority 2 - coaching clients only, when no coach response) */}
-        {hasCoach && !hasCoachResponse && weeklyCheckinDue === true && (
+        {/* Weekly Check-in Due Banner (coaching clients only) */}
+        {hasCoach && weeklyCheckinDue === true && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
             <Card
               className="py-0 cursor-pointer border-l-[3px] border-l-secondary"
@@ -554,33 +505,6 @@ export function Home() {
         onClose={() => setShowClaimModal(false)}
       />
 
-      {/* Coach Response Modal */}
-      {showCoachResponse && latestCheckinInfo?.coach_response && (
-        <div role="dialog" aria-modal="true" aria-label="Coach response" className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
-          <div className="bg-card rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[85vh] overflow-auto p-6 animate-in slide-in-from-bottom duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Coach Response</h2>
-              <button
-                onClick={() => setShowCoachResponse(false)}
-                aria-label="Close coach response"
-                className="text-muted-foreground hover:text-foreground text-2xl leading-none"
-              >
-                &times;
-              </button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Week of {latestCheckinInfo.week_of}
-              {latestCheckinInfo.reviewed_at && ` - Reviewed ${getTimeAgo(latestCheckinInfo.reviewed_at)}`}
-            </p>
-            <div className="bg-background rounded-lg p-4">
-              <p className="text-foreground whitespace-pre-wrap">{latestCheckinInfo.coach_response}</p>
-            </div>
-            <Button className="w-full mt-4" onClick={() => setShowCoachResponse(false)}>
-              Got It
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

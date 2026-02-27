@@ -19,9 +19,6 @@ const navItems: NavItem[] = [
 export function Navigation() {
   const location = useLocation()
 
-  // Hide navigation on standalone routes
-  if (location.pathname === '/coach') return null
-
   return (
     <nav aria-label="Main navigation" data-testid="navigation" className="fixed bottom-0 left-0 right-0 bg-background border-t border-border safe-bottom z-50">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto">

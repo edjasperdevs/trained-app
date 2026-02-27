@@ -84,7 +84,4 @@ export const analytics = {
   signupCompleted: () => trackEvent('Signup Completed'),
   loginCompleted: () => trackEvent('Login Completed'),
 
-  // Coach events
-  coachDashboardViewed: () => trackEvent('Coach Dashboard Viewed'),
-  clientViewed: () => trackEvent('Client Viewed'),
 }

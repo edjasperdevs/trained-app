@@ -6,7 +6,7 @@ import { getLocalDateString } from '@/lib/dateUtils'
 
 const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
 
-// Cache pattern (matches useCoachTemplates)
+// Cache pattern for check-in data
 const checkinCache = new Map<string, { data: WeeklyCheckin[]; fetchedAt: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
@@ -30,15 +30,7 @@ export function getCurrentMonday(): string {
   return getLocalDateString(monday)
 }
 
-/** Pending check-in with client info attached (for coach view) */
-export interface PendingCheckin extends WeeklyCheckin {
-  client_username: string | null
-  client_email: string | null
-}
-
 export function useWeeklyCheckins() {
-  const [pendingCheckins, setPendingCheckins] = useState<PendingCheckin[]>([])
-  const [clientCheckins, setClientCheckins] = useState<WeeklyCheckin[]>([])
   const [myCheckins, setMyCheckins] = useState<WeeklyCheckin[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -265,177 +257,7 @@ export function useWeeklyCheckins() {
     }
   }, [])
 
-  // ==========================================
-  // Coach functions
-  // ==========================================
-
-  const fetchPendingCheckins = useCallback(async (): Promise<PendingCheckin[]> => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      if (devBypass) {
-        const pending = devCheckins
-          .filter(c => c.status === 'submitted')
-          .sort((a, b) => a.created_at.localeCompare(b.created_at))
-          .map(c => {
-            // Attach mock client info
-            const clientNames: Record<string, { username: string; email: string }> = {
-              'mock-client-sarah': { username: 'SarahLifts', email: 'sarah@example.com' },
-              'mock-client-mike': { username: 'MikeG', email: 'mike@example.com' },
-              'mock-client-jake': { username: 'JakeR', email: 'jake@example.com' },
-            }
-            const info = clientNames[c.client_id] || { username: null, email: null }
-            return {
-              ...c,
-              client_username: info.username,
-              client_email: info.email,
-            }
-          })
-        if (mountedRef.current) {
-          setPendingCheckins(pending)
-        }
-        return pending
-      }
-
-      const client = getSupabaseClient()
-
-      const { data, error: fetchError } = await client
-        .from('weekly_checkins')
-        .select(`
-          *,
-          profiles!weekly_checkins_client_id_fkey(username, email)
-        `)
-        .eq('status', 'submitted')
-        .order('created_at', { ascending: true })
-
-      if (fetchError) throw fetchError
-
-      const result: PendingCheckin[] = (data || []).map((row: Record<string, unknown>) => {
-        const profiles = row.profiles as { username: string | null; email: string | null } | null
-        return {
-          ...(row as unknown as WeeklyCheckin),
-          client_username: profiles?.username || null,
-          client_email: profiles?.email || null,
-        }
-      })
-
-      if (mountedRef.current) {
-        setPendingCheckins(result)
-      }
-      return result
-    } catch (err) {
-      console.error('Error fetching pending check-ins:', err)
-      if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : 'Failed to load pending check-ins')
-      }
-      return []
-    } finally {
-      if (mountedRef.current) {
-        setIsLoading(false)
-      }
-    }
-  }, [])
-
-  const fetchClientCheckins = useCallback(async (clientId: string): Promise<WeeklyCheckin[]> => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      if (devBypass) {
-        const checkins = devCheckins
-          .filter(c => c.client_id === clientId)
-          .sort((a, b) => b.week_of.localeCompare(a.week_of))
-        if (mountedRef.current) {
-          setClientCheckins(checkins)
-        }
-        return checkins
-      }
-
-      const client = getSupabaseClient()
-
-      // Check cache
-      const cacheKey = `client-${clientId}`
-      const cached = checkinCache.get(cacheKey)
-      if (cached && isCacheValid(cached.fetchedAt)) {
-        if (mountedRef.current) {
-          setClientCheckins(cached.data)
-        }
-        return cached.data
-      }
-
-      const { data, error: fetchError } = await client
-        .from('weekly_checkins')
-        .select('*')
-        .eq('client_id', clientId)
-        .order('week_of', { ascending: false })
-
-      if (fetchError) throw fetchError
-
-      const result = (data || []) as WeeklyCheckin[]
-      checkinCache.set(cacheKey, { data: result, fetchedAt: Date.now() })
-
-      if (mountedRef.current) {
-        setClientCheckins(result)
-      }
-      return result
-    } catch (err) {
-      console.error('Error fetching client check-ins:', err)
-      if (mountedRef.current) {
-        setError(err instanceof Error ? err.message : 'Failed to load client check-ins')
-      }
-      return []
-    } finally {
-      if (mountedRef.current) {
-        setIsLoading(false)
-      }
-    }
-  }, [])
-
-  const submitReview = useCallback(async (
-    checkinId: string,
-    coachResponse: string
-  ): Promise<{ error: string | null }> => {
-    try {
-      if (devBypass) {
-        const idx = devCheckins.findIndex(c => c.id === checkinId)
-        if (idx !== -1) {
-          devCheckins[idx] = {
-            ...devCheckins[idx],
-            status: 'reviewed',
-            coach_response: coachResponse,
-            reviewed_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        }
-        return { error: null }
-      }
-
-      const client = getSupabaseClient()
-
-      const { error: updateError } = await client
-        .from('weekly_checkins')
-        .update({
-          coach_response: coachResponse,
-          status: 'reviewed' as const,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq('id', checkinId)
-
-      if (updateError) return { error: updateError.message }
-
-      // Invalidate all caches (pending list + client-specific)
-      checkinCache.clear()
-      return { error: null }
-    } catch (err) {
-      console.error('Error submitting review:', err)
-      return { error: err instanceof Error ? err.message : 'Failed to submit review' }
-    }
-  }, [])
-
   return {
-    pendingCheckins,
-    clientCheckins,
     myCheckins,
     isLoading,
     error,
@@ -443,8 +265,5 @@ export function useWeeklyCheckins() {
     fetchMyCheckins,
     hasCheckinForCurrentWeek,
     isCoachingClient,
-    fetchPendingCheckins,
-    fetchClientCheckins,
-    submitReview,
   }
 }
