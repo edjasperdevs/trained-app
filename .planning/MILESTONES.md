@@ -1,5 +1,28 @@
 # Project Milestones: Trained
 
+## v1.5 Native iOS App (Closed: 2026-02-27)
+
+**Delivered:** Capacitor iOS shell wrapping existing React app with native haptics, dialogs, file sharing, push notifications (direct APNs), local notification reminders, deep linking for password reset, app lifecycle events, privacy policy, and Apple privacy manifest. App Store submission paused pending Apple Developer account approval.
+
+**Phases completed:** 11-16 (12 plans, 16-03/16-04 incomplete — Apple approval pending)
+
+**Key accomplishments:**
+
+- Capacitor 7.5 iOS shell with conditional service worker disabling for native builds
+- Replaced all window.confirm() with async @capacitor/dialog on native
+- Direct APNs push via Supabase Edge Function (no Firebase) with 50-min JWT cache
+- Local notifications for workout, meals, check-in reminders with per-day targeting
+- Deep linking via Apple App Site Association for password reset flow
+- Sharp-based asset generation pipeline for icons and splash screens
+- Account deletion Edge Function with 13-table cascading cleanup
+- In-app privacy policy and PrivacyInfo.xcprivacy manifest
+
+**Note:** Closed as-is. App Store submission (remaining 16-03/16-04 work) moves to V2 launch phase.
+
+**What's next:** V2 revamp — new design system, DP/rank progression, archetypes, freemium model.
+
+---
+
 ## v1.4 Intake Dashboard (Shipped: 2026-02-21)
 
 **Delivered:** Intake submissions dashboard integrated into Coach section — 4th "Intake" segment with submission browsing, filtering by status, full detail views with collapsible sections and photo gallery, coach notes, status management, and manual client-submission linking via client detail Intake tab. All archive components restyled to shadcn/ui + CVA patterns.

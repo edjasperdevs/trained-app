@@ -1,12 +1,12 @@
-# Trained
+# WellTrained
 
 ## What This Is
 
-Trained is a fitness gamification PWA (React 18 + TypeScript + Vite + Zustand + Supabase) targeting ~90k followers. It combines workout logging, macro tracking, XP/leveling, streaks, avatar evolution, and achievement badges in a premium dark aesthetic. The app includes a full coaching platform where the sole coach can invite clients, manage their workout programs and macro targets, and review structured weekly check-ins — all from a dedicated `/coach` route.
+WellTrained is a fitness gamification app (React 18 + TypeScript + Vite + Zustand + Supabase + Capacitor) that turns daily training, nutrition, and recovery habits into an RPG-style progression system. Users earn Discipline Points (DP) for completing real-world actions, rank up through a 15-tier system, and evolve a visual avatar. The app targets the WellTrained brand's ~90k audience with a premium "Dopamine Noir" dark aesthetic and a freemium subscription model.
 
 ## Core Value
 
-**The coach can manage every client's training from one place — programs, macros, check-ins — and clients see their personalized plans without friction.** The coach dashboard is the command center; the client app is the delivery mechanism.
+**Daily discipline earns visible rank progression — the app makes consistency feel like leveling up.** Every workout, meal tracked, step walked, and hour slept pushes users toward the next rank, and the subscription unlocks deeper personalization.
 
 ## Requirements
 
@@ -18,9 +18,7 @@ Previous milestones delivered:
 - ✓ Onboarding flow (10-step wizard with progress indicator) — existing
 - ✓ Workout logging (exercises, sets, reps, weights, history) — existing
 - ✓ Macro tracking (calories, protein, food search with fallback) — existing
-- ✓ XP/leveling system (DP, ranks, weekly claim ritual) — existing
-- ✓ Streak system (daily check-in, grace period/safe word) — existing
-- ✓ Avatar evolution (13 stages, mood system) — existing
+- ✓ Streak system (daily check-in, grace period) — existing
 - ✓ Achievement badges (20+ badges, unlock animations) — existing
 - ✓ Offline-first with cloud sync (Zustand + Supabase) — existing
 - ✓ PWA support (prompt-based updates, runtime caching) — existing
@@ -30,115 +28,101 @@ Previous milestones delivered:
 - ✓ Plausible analytics (22 custom events) — v1.0
 - ✓ WCAG AA color contrast compliance — v1.0
 - ✓ Premium dark aesthetic (Tailwind v4, shadcn/ui, CVA variants) — v1.1
-- ✓ Single-theme codebase (GYG removed, 394 ternaries resolved) — v1.1
-- ✓ Animation refinement (critically damped springs, no playful motion) — v1.1
-- ✓ "What's New" update prompt for returning users — v1.1
-- ✓ E2E test suite with Playwright (7 critical user journeys, 10 tests) — v1.2
-- ✓ Existing test suite repaired and passing (139 tests) — v1.2
-- ✓ Funnel analytics (3 funnels: activation, habit formation, daily engagement) — v1.2
-- ✓ Engagement tracking (22 Plausible events across all screens) — v1.2
-- ✓ Performance monitoring (Sentry Core Web Vitals, page load tracing) — v1.2
-- ✓ Session replay with PII masking (health/fitness data protected) — v1.2
-- ✓ Source map upload for readable production stack traces — v1.2
-- ✓ Coach route protection with lazy-loaded dashboard — v1.3
-- ✓ Directional sync (pushClientData/pullCoachData) with data ownership model — v1.3
-- ✓ Email invitation system with auto-link on signup — v1.3
-- ✓ Paginated client roster with server-side search and drill-down detail views — v1.3
-- ✓ Coach macro management with "Set by Coach" indicator and locked calculator — v1.3
-- ✓ Workout programming: template builder, assignment, prescribed-vs-actual comparison — v1.3
-- ✓ Structured weekly check-ins with 16-field form, auto-data, coach review, response viewing — v1.3
-- ✓ Intake submissions dashboard (4th Coach segment, detail views, photo gallery, coach notes) — v1.4
-- ✓ Manual client-submission linking with Intake tab in client detail modal — v1.4
-- ✓ Archive components restyled to shadcn/ui + CVA patterns — v1.4
+- ✓ Single-theme codebase — v1.1
+- ✓ Animation refinement (critically damped springs) — v1.1
+- ✓ E2E test suite with Playwright (7 critical journeys) — v1.2
+- ✓ 139 unit tests passing — v1.2
+- ✓ Funnel analytics + engagement tracking — v1.2
+- ✓ Performance monitoring (Sentry Core Web Vitals, session replay) — v1.2
+- ✓ Capacitor iOS shell with native haptics, dialogs, file sharing — v1.5
+- ✓ Push notifications (APNs direct, daily reminders, coach triggers) — v1.5
+- ✓ Local notifications (workout, meals, check-in reminders) — v1.5
+- ✓ Deep linking for password reset — v1.5
+- ✓ App lifecycle events (foreground sync) — v1.5
+- ✓ Privacy policy + Apple privacy manifest — v1.5
+- ✓ Account deletion with cascading cleanup — v1.5
 
 ### Active
 
-**Current Milestone: v1.5 Native iOS App**
+**Current Milestone: v2.0 WellTrained V2**
 
-**Goal:** Wrap the PWA with Capacitor and ship to the iOS App Store for 90k-audience credibility, adding real push notifications for reminders and coach actions.
+**Goal:** Complete app revamp — new "Dopamine Noir V2" design system, Discipline Points/15-rank progression replacing XP/levels, archetype system, HealthKit integration, freemium subscription via RevenueCat, and coach dashboard stripped (moved to separate welltrained-coach app).
 
 **Target features:**
-- Capacitor iOS shell wrapping existing React app in native WebView
-- Push notifications: daily reminders (workout, meals, check-in) + coach action triggers (macro update, workout assignment, check-in response)
-- Native iOS haptics replacing no-op navigator.vibrate
-- Native file sharing replacing Blob download hack
-- App lifecycle events (background/foreground detection via Capacitor App plugin)
-- Splash screen and App Store assets
-- Deep link handling for password reset (replacing window.location.origin redirect)
-- App Store submission preparation (metadata, screenshots, review compliance)
+- Dopamine Noir V2 design system (lime signal #C8FF00, premium minimalist)
+- Discipline Points (DP) replacing XP — new earning actions and values
+- 15-rank progression system (~24-27 week mastery curve)
+- 5 archetypes (Bro free, Himbo/Brute/Pup/Bull premium) with DP modifiers
+- Evolving avatar silhouette (5 stages tied to rank milestones)
+- Obedience Streak (renamed streak with future multiplier)
+- Protocol Orders (daily/weekly quests for bonus DP)
+- Steps tracking via HealthKit with manual fallback
+- Sleep tracking via HealthKit with manual fallback
+- Freemium paywall (RevenueCat iOS IAP subscription)
+- Strip coach dashboard (lives in welltrained-coach now)
+- App Store submission (completing what v1.5 started)
 
 ### Out of Scope
 
-- Android / Play Store — iOS only for v1.5, Android in future milestone
+- Android / Play Store — iOS only for V2
 - Light mode — dark-only
 - Marketing site — app only
-- A/B testing infrastructure — premature for launch
-- Custom analytics backend — leverage Plausible + Sentry
-- HealthKit / Apple Health integration — not needed for v1.5 scope
-- Background fitness tracking (GPS, step counter) — not needed
-- Full chat / messaging — check-in responses cover 80% of communication needs
-- Multi-coach / team features — single-coach app
+- Coach dashboard in-app — moved to separate welltrained-coach app
+- Coach messaging / chat — welltrained-coach handles communication
+- Community leaderboard — potential V3 feature
 - AI workout generation — coach expertise is the product
+- Streak multiplier — spec mentions "future phase", not V2
+- Custom themes / app icons — premium feature deferred to post-launch
+- Multi-coach / team features — single-coach app
 
 ## Context
 
 **Current State:**
-- Five milestones shipped (v1.0 launch polish, v1.1 design refresh, v1.2 pre-launch confidence, v1.3 coach dashboard, v1.4 intake dashboard)
+- Five milestones shipped (v1.0–v1.4) + v1.5 closed (App Store submission pending Apple Developer approval)
+- Capacitor iOS shell fully functional with native features
 - 139 unit tests + 10 E2E tests passing
-- Full coaching platform: invitations, roster, macro management, workout programming, weekly check-ins
-- Directional sync separates client-owned vs coach-owned data
-- 6 Supabase migrations pending application (003-007)
-- send-invite Edge Function needs deployment + Resend API key
-- Domain configured at app.welltrained.fitness (Vercel subdomain)
+- Coach dashboard (~4,500 lines) to be stripped — welltrained-coach is the separate coach app
+- Apple Developer account enrollment submitted, awaiting verification
+- Domain: app.welltrained.fitness (Vercel)
 
-**Tech Stack:**
+**V2 Spec Source:** `WellTrained V2_ Master Specification & Build Document.md` in repo root
+
+**Tech Stack (continuing):**
 - React 18 + TypeScript + Vite + Tailwind v4 + shadcn/ui + CVA
 - Zustand (localStorage persistence) + Supabase (cloud sync, Edge Functions, RLS)
+- Capacitor 7 for iOS native wrapper
 - Playwright (E2E) + Vitest (unit/component)
 - Plausible (analytics) + Sentry (monitoring)
-- Resend (transactional email via Edge Function)
 
-**Post-Deploy Manual Tasks:**
-- Apply Supabase migrations 003-007
-- Deploy send-invite Edge Function
-- Configure Resend API key in Supabase secrets
-- Configure Sentry alert rules in dashboard
-- Set SENTRY_AUTH_TOKEN/ORG/PROJECT in deploy environment
-- Verify source maps, PII masking, session replay after first deploy
+**New for V2:**
+- RevenueCat (@revenuecat/purchases-capacitor) for iOS IAP subscriptions
+- HealthKit via Capacitor plugin for steps + sleep data
+- New color system (lime signal #C8FF00 replacing red #D55550)
 
 ## Constraints
 
-- **Single coach**: Only one coach account — no multi-tenancy needed
-- **Supabase**: All backend through Supabase (auth, database, edge functions) — no separate backend
-- **Privacy**: Client data visible only to coach — clients cannot see each other
-- **Existing aesthetic**: Coach dashboard follows the same premium dark design system (shadcn/ui, CVA)
-- **iOS first**: Capacitor wrapping existing PWA — no React Native rewrite
-- **Apple Developer account**: Enrollment needed (can develop in parallel)
+- **Single coach**: Only one coach account — coach features live in welltrained-coach
+- **Supabase**: All backend through Supabase — no separate backend
+- **iOS first**: Capacitor wrapping existing React app — no React Native rewrite
+- **Apple Developer account**: Enrollment pending — blocks App Store submission but not development
+- **RevenueCat**: iOS IAP required for App Store subscriptions — no web-only payment
+- **Existing data**: Must handle migration from XP/levels → DP/ranks for any existing users
+- **HealthKit**: Requires user permission, manual entry must always work as fallback
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Playwright for E2E | Fast, reliable, multi-browser support, Microsoft-backed | ✓ Good — 10 tests covering 7 critical flows |
-| Build on Sentry + Plausible | Already integrated, avoid vendor sprawl | ✓ Good — zero new vendors added |
-| E2E over unit tests | User journey coverage more valuable pre-launch | ✓ Good — caught real integration issues |
-| No beta group | Launching to everyone at once — tests must provide confidence | — Pending (launch hasn't happened) |
-| Static seed data in E2E | Deterministic over dynamic devSeed.ts | ✓ Good — stable, reproducible tests |
-| Dual Playwright projects | Separate auth tests from bypassed tests | ✓ Good — clean isolation |
-| maskAllText: false + [data-sentry-mask] | Readable replays + PII protection | ✓ Good — minimal masking, maximum insight |
-| Coach dashboard at /coach | Single coach, Supabase-only backend, keeps existing design system | ✓ Good — 1700+ line Coach.tsx, all features integrated |
-| Directional sync (push/pull) | Prevents coach-set data from being overwritten by client sync | ✓ Good — zero data collisions across 3 coach features |
-| set_by TEXT CHECK (not enum) | Simpler than PostgreSQL enum for 2 values | ✓ Good — worked cleanly across all phases |
-| Edge Function + Resend for invites | Supabase-native, no external backend needed | ✓ Good — branded email with auto-link trigger |
-| Non-persisted assignedWorkout | Server-authoritative data fetched fresh each session | ✓ Good — no stale workout assignments |
-| localStorage for check-in status | Single read-only value doesn't need Zustand reactive state | ✓ Good — lightweight sync pattern |
-
-| Adapt archive code, not new AuthContext | trained-app has Zustand authStore + CoachGuard, archive's AuthContext/useAuth not needed | ✓ Good |
-| Manual client-submission linking | Coach manually associates submissions vs auto-match by email | ✓ Good |
-| intake_submissions/intake_photos tables pre-exist | Tables already in Supabase from marketing site — no migration needed | ✓ Good |
-| Capacitor over React Native | Preserves entire React codebase, Tailwind, routing — WebView performance fine for forms/lists | — Pending |
-| iOS only for v1.5 | Most fitness users on iPhone, reduces scope, Android deferred | — Pending |
-| Push via APNs + Supabase | Supabase Edge Functions can trigger APNs — no separate push infra | — Pending |
+| Capacitor over React Native | Preserves entire React codebase, Tailwind, routing | ✓ Good |
+| iOS only | Most fitness users on iPhone, reduces scope | — Pending |
+| Direct APNs (no Firebase) | iOS-only, Supabase Edge Functions handle delivery | ✓ Good |
+| RevenueCat for subscriptions | Handles StoreKit, receipt validation, subscription lifecycle; Capacitor plugin available | — Pending |
+| HealthKit + manual fallback | Steps/sleep from HealthKit when available, manual entry always works | — Pending |
+| Strip coach dashboard | Coach app is separate (welltrained-coach); reduces client app complexity by ~4,500 lines | — Pending |
+| Lime signal color (#C8FF00) | Premium, unique brand identity; high contrast on dark backgrounds | — Pending |
+| 15 ranks over 99 levels | Meaningful progression milestones, ~24-27 week mastery curve | — Pending |
+| 5 archetypes (1 free, 4 premium) | Personalization drives subscription conversion; Bro (generalist) is the free hook | — Pending |
+| Close v1.5 as-is | App Store submission becomes part of V2 launch phase | ✓ Good |
 
 ---
-*Last updated: 2026-02-21 — v1.5 Native iOS App started*
+*Last updated: 2026-02-27 — v2.0 WellTrained V2 started*
