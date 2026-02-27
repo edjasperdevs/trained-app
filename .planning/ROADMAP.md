@@ -37,11 +37,11 @@
   3. Weekly check-in submission flow works identically to before the coach code removal
   4. All screens use lime (#C8FF00) signal color instead of red, with dark background (#0A0A0A), and the three-font typography hierarchy (Oswald/Inter/JetBrains Mono)
   5. `tsc --noEmit` passes with zero errors after all coach code removal
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 17-01: Coach code removal (5-step ordered deletion with TypeScript validation after each step)
-- [ ] 17-02: Dopamine Noir V2 design token migration (color tokens, typography, component updates)
+- [ ] 17-01-PLAN.md — Coach code removal (delete 7 coach-only files, fix imports/exports, clean shared files, trim useWeeklyCheckins)
+- [ ] 17-02-PLAN.md — Dopamine Noir V2 design token migration (CSS tokens, hard-coded colors, visual verification)
 
 ### Phase 18: Gamification Engine
 **Goal**: Users earn Discipline Points for daily actions and progress through a 15-rank system with visible progression and celebration -- the core motivation loop that replaces XP/levels
