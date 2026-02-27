@@ -55,7 +55,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
+- [x] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
 - [ ] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
 
 ### Phase 19: Subscriptions
