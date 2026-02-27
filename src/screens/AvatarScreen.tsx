@@ -1,17 +1,25 @@
 import { Avatar } from '@/components'
-import { useAvatarStore, useXPStore, useUserStore } from '@/stores'
+import { useAvatarStore, useDPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Sword, Sparkles, Zap, Flame } from 'lucide-react'
 
+/** Map rank to avatar stage: ranks 1-3 -> stage 1, 4-7 -> stage 2, 8-11 -> stage 3, 12-14 -> stage 4, 15 -> stage 5 */
+export function getAvatarStage(rank: number): number {
+  if (rank >= 15) return 5
+  if (rank >= 12) return 4
+  if (rank >= 8) return 3
+  if (rank >= 4) return 2
+  return 1
+}
+
 export function AvatarScreen() {
   const { baseCharacter, currentMood } = useAvatarStore()
-  const { currentLevel, totalXP, getCurrentLevelProgress, getXPForNextLevel, MAX_LEVEL } = useXPStore()
-  const profile = useUserStore((state) => state.profile)
+  const { currentRank, totalDP, obedienceStreak } = useDPStore()
+  const rankInfo = useDPStore((s) => s.getRankInfo)()
 
-  const levelProgress = getCurrentLevelProgress()
-  const xpToNext = getXPForNextLevel()
+  const isMaxRank = currentRank >= 15
 
   return (
     <div data-testid="avatar-screen" className="min-h-screen pb-20">
@@ -23,7 +31,7 @@ export function AvatarScreen() {
 
         {/* Main Avatar Display */}
         <div className="flex justify-center animate-in zoom-in-90 fade-in duration-500 delay-100" data-testid="avatar-display">
-          <Avatar size="xl" showMood showLevel level={currentLevel} />
+          <Avatar size="xl" showMood showLevel level={currentRank} />
         </div>
       </div>
 
@@ -33,14 +41,14 @@ export function AvatarScreen() {
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-3xl font-bold font-mono text-primary">{currentLevel}</p>
+                <p className="text-3xl font-bold font-mono text-primary">{currentRank}</p>
                 <p className="text-xs text-muted-foreground">
                   {LABELS.level}
                 </p>
               </div>
               <div>
                 <p className="text-3xl font-bold font-mono">
-                  {totalXP.toLocaleString()}
+                  {totalDP.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Total {LABELS.xp}
@@ -48,7 +56,7 @@ export function AvatarScreen() {
               </div>
               <div>
                 <p className="text-3xl font-bold font-mono text-muted-foreground">
-                  {profile?.currentStreak || 0}
+                  {obedienceStreak}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Streak
@@ -58,22 +66,25 @@ export function AvatarScreen() {
           </CardContent>
         </Card>
 
-        {/* Level Progress */}
+        {/* Rank Progress */}
         <Card>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-bold">{LABELS.level} {currentLevel}</span>
-              {currentLevel >= MAX_LEVEL && (
+              <div>
+                <span className="font-bold">{LABELS.level} {currentRank}</span>
+                <span className="text-xs text-muted-foreground ml-2">{rankInfo.name}</span>
+              </div>
+              {isMaxRank && (
                 <span className="text-xs bg-primary-muted text-primary px-2 py-0.5 font-semibold rounded">
                   MAX
                 </span>
               )}
             </div>
-            {currentLevel < MAX_LEVEL && (
+            {!isMaxRank && (
               <>
-                <Progress value={levelProgress} />
+                <Progress value={rankInfo.progress * 100} />
                 <p className="text-xs text-muted-foreground">
-                  {xpToNext.toLocaleString()} {LABELS.xp} to next {LABELS.level.toLowerCase()}
+                  {rankInfo.dpForNext.toLocaleString()} {LABELS.xp} to next rank
                 </p>
               </>
             )}

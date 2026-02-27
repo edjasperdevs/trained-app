@@ -1,19 +1,17 @@
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { useXPStore, useWorkoutStore, useMacroStore, useUserStore } from '@/stores'
+import { useDPStore, useWorkoutStore, useMacroStore } from '@/stores'
 import { LABELS } from '@/design/constants'
-import { Dumbbell, CheckCircle2, Target, Star, Zap, Flame } from 'lucide-react'
+import { Dumbbell, Target, Zap, Flame, Utensils } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 interface WeeklyStats {
   workoutsCompleted: number
   workoutsPlanned: number
   proteinDaysHit: number
-  calorieDaysHit: number
-  perfectDays: number
-  xpEarned: number
-  currentStreak: number
-  daysLogged: number
+  mealsDaysLogged: number
+  dpEarned: number
+  obedienceStreak: number
 }
 
 function getStartOfWeek(): Date {
@@ -30,12 +28,12 @@ function getDaysSoFar(): number {
 }
 
 export function WeeklySummary() {
-  const dailyLogs = useXPStore((state) => state.dailyLogs)
+  const dailyLogs = useDPStore((state) => state.dailyLogs)
+  const obedienceStreak = useDPStore((state) => state.obedienceStreak)
   const workoutLogs = useWorkoutStore((state) => state.workoutLogs)
   const currentPlan = useWorkoutStore((state) => state.currentPlan)
   const macroLogs = useMacroStore((state) => state.dailyLogs)
   const targets = useMacroStore((state) => state.targets)
-  const profile = useUserStore((state) => state.profile)
 
   const stats: WeeklyStats = useMemo(() => {
     const startOfWeek = getStartOfWeek()
@@ -58,45 +56,25 @@ export function WeeklySummary() {
       }
     }
 
-    // Macro days hit
-    let proteinDaysHit = 0
-    let calorieDaysHit = 0
-    let perfectDays = 0
+    // Protein days hit (protein > 0 in dpStore daily log)
+    const thisWeekDPLogs = dailyLogs.filter((log) => log.date >= startStr)
+    const proteinDaysHit = thisWeekDPLogs.filter(log => log.protein > 0).length
 
-    if (targets) {
-      macroLogs
-        .filter((log) => log.date >= startStr)
-        .forEach((log) => {
-          const proteinHit = Math.abs(log.protein - targets.protein) <= 10
-          const caloriesHit = Math.abs(log.calories - targets.calories) <= 100
+    // Meal days logged (meals > 0)
+    const mealsDaysLogged = thisWeekDPLogs.filter(log => log.meals > 0).length
 
-          if (proteinHit) proteinDaysHit++
-          if (caloriesHit) calorieDaysHit++
-          if (proteinHit && caloriesHit) perfectDays++
-        })
-    }
-
-    // XP earned this week
-    const xpEarned = dailyLogs
-      .filter((log) => log.date >= startStr)
-      .reduce((sum, log) => sum + (log.total || 0), 0)
-
-    // Days logged (check-ins)
-    const daysLogged = dailyLogs.filter(
-      (log) => log.date >= startStr && log.checkIn
-    ).length
+    // DP earned this week
+    const dpEarned = thisWeekDPLogs.reduce((sum, log) => sum + (log.total || 0), 0)
 
     return {
       workoutsCompleted: thisWeekWorkouts.length,
       workoutsPlanned,
       proteinDaysHit,
-      calorieDaysHit,
-      perfectDays,
-      xpEarned,
-      currentStreak: profile?.currentStreak || 0,
-      daysLogged
+      mealsDaysLogged,
+      dpEarned,
+      obedienceStreak,
     }
-  }, [dailyLogs, workoutLogs, currentPlan, macroLogs, targets, profile])
+  }, [dailyLogs, workoutLogs, currentPlan, macroLogs, targets, obedienceStreak])
 
   const daysSoFar = getDaysSoFar()
 
@@ -122,7 +100,7 @@ export function WeeklySummary() {
         >
           <div className="flex items-center gap-2 mb-1">
             <Dumbbell size={16} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Workouts</span>
+            <span className="text-xs text-muted-foreground">Training</span>
           </div>
           <p className="text-xl font-bold font-mono">
             {stats.workoutsCompleted}
@@ -132,7 +110,7 @@ export function WeeklySummary() {
           </p>
         </div>
 
-        {/* Check-ins */}
+        {/* Meals Logged */}
         <div
           className={cn(
             'p-3 bg-muted rounded',
@@ -140,11 +118,11 @@ export function WeeklySummary() {
           )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 size={16} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Reports</span>
+            <Utensils size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Meals Logged</span>
           </div>
           <p className="text-xl font-bold font-mono">
-            {stats.daysLogged}
+            {stats.mealsDaysLogged}
             <span className="text-sm text-muted-foreground font-normal">
               /{daysSoFar}
             </span>
@@ -167,7 +145,7 @@ export function WeeklySummary() {
           </p>
         </div>
 
-        {/* Perfect Days */}
+        {/* Streak */}
         <div
           className={cn(
             'p-3 bg-muted rounded',
@@ -175,16 +153,16 @@ export function WeeklySummary() {
           )}
         >
           <div className="flex items-center gap-2 mb-1">
-            <Star size={16} className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">Full Compliance</span>
+            <Flame size={16} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">{LABELS.streak}</span>
           </div>
           <p className="text-xl font-bold font-mono text-warning">
-            {stats.perfectDays}
+            {stats.obedienceStreak}
           </p>
         </div>
       </div>
 
-      {/* XP Summary */}
+      {/* DP Summary */}
       <div
         className={cn(
           'mt-3 pt-3 border-t border-border flex items-center justify-between',
@@ -195,28 +173,10 @@ export function WeeklySummary() {
           <Zap size={16} className="text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Weekly {LABELS.xp}</span>
         </div>
-        <span className="font-bold font-mono text-secondary">
-          +{stats.xpEarned} {LABELS.xp}
+        <span className="font-bold font-mono text-primary">
+          +{stats.dpEarned} {LABELS.xp}
         </span>
       </div>
-
-      {/* Streak */}
-      {stats.currentStreak > 0 && (
-        <div
-          className={cn(
-            'mt-2 flex items-center justify-between',
-            'animate-in fade-in slide-in-from-bottom-2 duration-300 delay-300'
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <Flame size={16} className="text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{LABELS.streak}</span>
-          </div>
-          <span className="font-bold font-mono text-warning">
-            {stats.currentStreak} days
-          </span>
-        </div>
-      )}
       </CardContent>
     </Card>
   )
