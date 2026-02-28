@@ -120,8 +120,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Quest catalog with condition evaluators, questStore with deterministic rotation and completion tracking
-- [ ] 22-02-PLAN.md — ProtocolOrders UI component, Home screen integration, premium weekly quest gating
+- [x] 22-01-PLAN.md — Quest catalog with condition evaluators, questStore with deterministic rotation and completion tracking
+- [x] 22-02-PLAN.md — ProtocolOrders UI component, Home screen integration, premium weekly quest gating
 
 ### Phase 23: Avatar Evolution
 **Goal**: Users have an evolving visual avatar that grows more impressive as they rank up -- a premium visual reward that makes progression tangible
@@ -131,11 +131,11 @@ Plans:
   1. User sees their avatar silhouette prominently displayed on the home screen
   2. Avatar visually evolves at 5 rank milestones (ranks 1, 4, 8, 12, 15), with each stage looking more developed
   3. Avatar stages 3-5 are premium-gated -- free users see a locked preview with an upgrade prompt
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 23-01: Avatar component, 5-stage SVG assets, rank-to-stage mapping, premium gating
-- [ ] 23-02: Home screen avatar integration, stage transition animation, locked-preview UI
+- [ ] 23-01-PLAN.md — EvolvingAvatar component, 5-stage SVG silhouettes, LockedAvatar premium gate
+- [ ] 23-02-PLAN.md — Home screen avatar integration, AvatarScreen update, transition animations
 
 ### Phase 24: App Store Submission
 **Goal**: The app passes Apple review and is live on the App Store with V2 features, correct IAP products, and all compliance requirements met
@@ -238,6 +238,6 @@ Plans:
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
 | 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 21. Archetypes | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 22. Protocol Orders | 2/2 | Complete    | 2026-02-28 | - |
+| 22. Protocol Orders | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
