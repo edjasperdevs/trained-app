@@ -69,12 +69,13 @@ Plans:
   3. User can tap "Restore Purchases" on both the paywall and the Settings screen to recover a previous subscription
   4. Premium entitlement status persists across app restarts without requiring network calls (cached locally)
   5. User can view and manage their subscription status from the Settings screen
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 19-01-PLAN.md — RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
 - [ ] 19-02-PLAN.md — Paywall screen with legal text, restore purchases, Settings subscription management
 - [ ] 19-03-PLAN.md — handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
+- [ ] 19-04-PLAN.md — PremiumGate component and UpgradePrompt fallback for client-side feature gating
 
 ### Phase 20: Health Tracking
 **Goal**: Users can track daily steps and sleep -- automatically from HealthKit or manually -- and earn DP for meeting health thresholds
@@ -234,7 +235,7 @@ Plans:
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 19. Subscriptions | v2.0 | 0/3 | Planned | - |
+| 19. Subscriptions | v2.0 | 0/4 | Planned | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
