@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.0 Phase 19 (Subscriptions)
+**Current focus:** v2.0 Phase 20 (Health Tracking)
 
 ## Current Position
 
-Phase: 19 of 24 (Subscriptions) - COMPLETE
-Plan: 4 of 4 in current phase (19-04 complete)
-Status: Phase Complete
-Last activity: 2026-02-28 -- Completed 19-04 (Premium Feature Gating)
+Phase: 20 of 24 (Health Tracking) - IN PROGRESS
+Plan: 1 of 2 in current phase (20-01 complete)
+Status: Executing
+Last activity: 2026-02-28 -- Completed 20-01 (HealthKit Infrastructure)
 
-Progress: [#########_________] 50% (9/18 plans)
+Progress: [##########________] 55% (10/18 plans)
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Progress: [#########_________] 50% (9/18 plans)
 | 19-02 | Paywall and Terms UI | 4min | 2 | 4 |
 | 19-03 | Webhook and Subscriptions Table | 2min | 2 | 2 |
 | 19-04 | Premium Feature Gating | 2min | 2 | 3 |
+| 20-01 | HealthKit Infrastructure | 5min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Progress: [#########_________] 50% (9/18 plans)
 - [Phase 19]: Bearer token auth for webhook (REVENUECAT_WEBHOOK_SECRET), not Supabase JWT
 - [Phase 19]: UNIQUE(user_id) on subscriptions table for upsert pattern - one record per user
 - [Phase 19-04]: PremiumGate wrapper with web bypass (isNative check) and UpgradePrompt fallback variants
+- [Phase 20-01]: Sleep HealthKit integration deferred - @capgo/capacitor-health does not support sleep data type
+- [Phase 20-01]: readTodaySleep returns 0 - manual entry required for sleep tracking
+- [Phase 20-01]: Steps read via readSamples + manual sum (queryAggregated not available in plugin API)
 
 ### Pending Todos
 
@@ -84,5 +88,5 @@ Progress: [#########_________] 50% (9/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed Phase 19 (Subscriptions) - all 4 plans done
+Stopped at: Completed 20-01-PLAN.md (HealthKit Infrastructure)
 Resume file: None

@@ -34,13 +34,13 @@
 
 ### Health Tracking
 
-- [ ] **HEALTH-01**: User can view daily step count sourced from HealthKit
+- [x] **HEALTH-01**: User can view daily step count sourced from HealthKit
 - [ ] **HEALTH-02**: User can manually enter daily step count as fallback
-- [ ] **HEALTH-03**: User can view sleep duration sourced from HealthKit
+- [x] **HEALTH-03**: User can view sleep duration sourced from HealthKit
 - [ ] **HEALTH-04**: User can manually enter sleep duration as fallback
 - [ ] **HEALTH-05**: Steps (10k+) and sleep (7h+) thresholds trigger DP awards
-- [ ] **HEALTH-06**: App requests HealthKit permissions contextually (not during onboarding)
-- [ ] **HEALTH-07**: App handles HealthKit permission denial gracefully with manual-only fallback
+- [x] **HEALTH-06**: App requests HealthKit permissions contextually (not during onboarding)
+- [x] **HEALTH-07**: App handles HealthKit permission denial gracefully with manual-only fallback
 
 ### Subscriptions
 
@@ -130,13 +130,13 @@
 | AVATAR-01 | Phase 23 | Pending |
 | AVATAR-02 | Phase 23 | Pending |
 | AVATAR-03 | Phase 23 | Pending |
-| HEALTH-01 | Phase 20 | Pending |
+| HEALTH-01 | Phase 20 | Complete |
 | HEALTH-02 | Phase 20 | Pending |
-| HEALTH-03 | Phase 20 | Pending |
+| HEALTH-03 | Phase 20 | Complete |
 | HEALTH-04 | Phase 20 | Pending |
 | HEALTH-05 | Phase 20 | Pending |
-| HEALTH-06 | Phase 20 | Pending |
-| HEALTH-07 | Phase 20 | Pending |
+| HEALTH-06 | Phase 20 | Complete |
+| HEALTH-07 | Phase 20 | Complete |
 | SUB-01 | Phase 19 | Complete |
 | SUB-02 | Phase 19 | Complete |
 | SUB-03 | Phase 19 | Complete |
