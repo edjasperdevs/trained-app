@@ -237,7 +237,7 @@ Plans:
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
 | 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 21. Archetypes | 2/2 | Complete   | 2026-02-28 | - |
+| 21. Archetypes | 2/2 | Complete    | 2026-02-28 | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
