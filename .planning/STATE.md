@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 ## Current Position
 
 Phase: 19 of 24 (Subscriptions)
-Plan: 2 of 4 in current phase (19-02 complete)
+Plan: 3 of 4 in current phase (19-03 complete)
 Status: In Progress
-Last activity: 2026-02-28 -- Completed 19-02 (Paywall and Terms UI)
+Last activity: 2026-02-28 -- Completed 19-03 (Webhook and Subscriptions Table)
 
-Progress: [#######___________] 39% (7/18 plans)
+Progress: [########__________] 44% (8/18 plans)
 
 ## Performance Metrics
 
@@ -35,6 +35,7 @@ Progress: [#######___________] 39% (7/18 plans)
 | 18-03 | Macros Rank-Up Modal | 2min | 1 | 1 |
 | 19-01 | SDK Setup | 6min | 2 | 10 |
 | 19-02 | Paywall and Terms UI | 4min | 2 | 4 |
+| 19-03 | Webhook and Subscriptions Table | 2min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Progress: [#######___________] 39% (7/18 plans)
 - Paywall auto-redirects to home if isPremium is true (19-02)
 - Purchase cancellation handled silently, no error toast (19-02)
 - Settings subscription section guarded with isNative() (19-02)
+- [Phase 19]: Bearer token auth for webhook (REVENUECAT_WEBHOOK_SECRET), not Supabase JWT
+- [Phase 19]: UNIQUE(user_id) on subscriptions table for upsert pattern - one record per user
 
 ### Pending Todos
 
@@ -79,5 +82,5 @@ Progress: [#######___________] 39% (7/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 19-02-PLAN.md (Paywall and Terms UI)
+Stopped at: Completed 19-03-PLAN.md (Webhook and Subscriptions Table)
 Resume file: None
