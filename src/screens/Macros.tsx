@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { ProgressBar, MealBuilder, EmptyState, FoodSearch } from '@/components'
+import { ProgressBar, MealBuilder, EmptyState, FoodSearch, RankUpModal } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
 import { useDPStore } from '@/stores/dpStore'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
@@ -22,6 +22,7 @@ type MacroProgress = {
 
 export function Macros() {
   const [activeTab, setActiveTab] = useState<TabType>('daily')
+  const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   // PERF-02: Use granular selectors for reactive state
   const targets = useMacroStore((state) => state.targets)
@@ -180,7 +181,11 @@ export function Macros() {
             caloriesHit={isCalorieTargetHit()}
             onLogNamedMeal={(name, macros) => {
               logNamedMeal(name, macros)
-              useDPStore.getState().awardDP('meal')
+              const result = useDPStore.getState().awardDP('meal')
+              if (result.rankedUp) {
+                const rankInfo = useDPStore.getState().getRankInfo()
+                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+              }
               scheduleSync()
             }}
             onAddRecentFood={addRecentFood}
@@ -200,7 +205,11 @@ export function Macros() {
             onToggleFavorite={toggleFavoriteFood}
             onLogMeal={(name, macros) => {
               logNamedMeal(name, macros)
-              useDPStore.getState().awardDP('meal')
+              const result = useDPStore.getState().awardDP('meal')
+              if (result.rankedUp) {
+                const rankInfo = useDPStore.getState().getRankInfo()
+                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+              }
               scheduleSync()
             }}
             onSaveMeal={saveMeal}
@@ -215,7 +224,11 @@ export function Macros() {
             savedMeals={savedMeals}
             onLogNamedMeal={(name, macros) => {
               logNamedMeal(name, macros)
-              useDPStore.getState().awardDP('meal')
+              const result = useDPStore.getState().awardDP('meal')
+              if (result.rankedUp) {
+                const rankInfo = useDPStore.getState().getRankInfo()
+                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+              }
               scheduleSync()
             }}
             onToggleFavorite={toggleFavoriteFood}
@@ -267,6 +280,16 @@ export function Macros() {
           )
         )}
       </div>
+
+      {/* Rank Up Modal */}
+      {rankUpData && (
+        <RankUpModal
+          oldRank={rankUpData.oldRank}
+          newRank={rankUpData.newRank}
+          rankName={rankUpData.rankName}
+          onClose={() => setRankUpData(null)}
+        />
+      )}
     </div>
   )
 }
