@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 20 of 24 (Health Tracking) - IN PROGRESS
-Plan: 1 of 2 in current phase (20-01 complete)
-Status: Executing
-Last activity: 2026-02-28 -- Completed 20-01 (HealthKit Infrastructure)
+Phase: 20 of 24 (Health Tracking) - COMPLETE
+Plan: 2 of 2 in current phase (20-02 complete)
+Status: Ready for next phase
+Last activity: 2026-02-28 -- Completed 20-02 (Health UI Components)
 
-Progress: [##########________] 55% (10/18 plans)
+Progress: [###########_______] 61% (11/18 plans)
 
 ## Performance Metrics
 
@@ -38,6 +38,7 @@ Progress: [##########________] 55% (10/18 plans)
 | 19-03 | Webhook and Subscriptions Table | 2min | 2 | 2 |
 | 19-04 | Premium Feature Gating | 2min | 2 | 3 |
 | 20-01 | HealthKit Infrastructure | 5min | 2 | 7 |
+| 20-02 | Health UI Components | 4min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -71,6 +72,9 @@ Progress: [##########________] 55% (10/18 plans)
 - [Phase 20-01]: Sleep HealthKit integration deferred - @capgo/capacitor-health does not support sleep data type
 - [Phase 20-01]: readTodaySleep returns 0 - manual entry required for sleep tracking
 - [Phase 20-01]: Steps read via readSamples + manual sum (queryAggregated not available in plugin API)
+- [Phase 20-02]: HealthPermission shown once after onboarding for iOS users with unknown permission status
+- [Phase 20-02]: HealthCard awards DP with todayLog guard (same pattern as CheckInModal)
+- [Phase 20-02]: ManualHealthEntry allows overriding HealthKit values with manual input
 
 ### Pending Todos
 
@@ -88,5 +92,5 @@ Progress: [##########________] 55% (10/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 20-01-PLAN.md (HealthKit Infrastructure)
+Stopped at: Completed 20-02-PLAN.md (Health UI Components) - Phase 20 complete
 Resume file: None
