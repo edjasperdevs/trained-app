@@ -1,10 +1,10 @@
 import { useEffect, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
-import { useUserStore, useAvatarStore, useAuthStore, useSyncStore, useSubscriptionStore } from '@/stores'
+import { useUserStore, useAvatarStore, useAuthStore, useSyncStore, useSubscriptionStore, useHealthStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { App as CapApp } from '@capacitor/app'
-import { isNative } from '@/lib/platform'
+import { isNative, isIOS } from '@/lib/platform'
 import { initDeepLinkHandler } from '@/lib/deep-link'
 import { initializeRevenueCat } from '@/lib/revenuecat'
 import { LocalNotifications } from '@capacitor/local-notifications'
@@ -32,6 +32,7 @@ const ResetPassword = lazy(() => import('@/screens/ResetPassword').then(m => ({ 
 const Privacy = lazy(() => import('@/screens/Privacy').then(m => ({ default: m.Privacy })))
 const Terms = lazy(() => import('@/screens/Terms').then(m => ({ default: m.Terms })))
 const Paywall = lazy(() => import('@/screens/Paywall').then(m => ({ default: m.Paywall })))
+const HealthPermission = lazy(() => import('@/screens/HealthPermission').then(m => ({ default: m.HealthPermission })))
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -206,6 +207,7 @@ function AppContent() {
 
   const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
   const subscriptionLoading = useSubscriptionStore((s) => s.isLoading)
+  const healthPermissionStatus = useHealthStore((s) => s.permissionStatus)
 
   // Show loading while auth initializes (skip in dev bypass)
   if (!devBypass && authLoading) {
@@ -267,13 +269,21 @@ function AppContent() {
     )
   }
 
+  // Check if iOS user needs health permission soft-ask (after onboarding complete)
+  const needsHealthPermission = isIOS() && healthPermissionStatus === 'unknown'
+
   return (
     <>
       <ToastContainer />
       <div className="relative">
         <SyncStatusIndicator />
         <SentryRoutes>
-          <Route path="/" element={<Suspense fallback={<HomeSkeleton />}><Home /></Suspense>} />
+          <Route path="/" element={
+            needsHealthPermission
+              ? <Navigate to="/health-permission" replace />
+              : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
+          } />
+          <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
           <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
           <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
           <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
