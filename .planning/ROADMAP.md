@@ -235,7 +235,7 @@ Plans:
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 19. Subscriptions | 4/4 | Complete   | 2026-02-28 | - |
+| 19. Subscriptions | 4/4 | Complete    | 2026-02-28 | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
