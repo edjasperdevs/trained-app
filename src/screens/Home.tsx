@@ -2,15 +2,16 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge } from '@/components'
-import { RankUpModal } from '@/components'
+import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal } from '@/components'
+import { HealthCard } from '@/components/HealthCard'
 import { Flame, Dumbbell, Beef, CheckCircle2, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
 import {
   useUserStore,
   useDPStore,
   useWorkoutStore,
   useMacroStore,
-  useRemindersStore
+  useRemindersStore,
+  useHealthStore
 } from '@/stores'
 import { DP_VALUES } from '@/stores/dpStore'
 import { getStandingOrder, LABELS } from '@/design/constants'
@@ -70,6 +71,11 @@ export function Home() {
         useDPStore.setState({ obedienceStreak: 0 })
       }
     }
+  }, [])
+
+  // Fetch today's health data on mount
+  useEffect(() => {
+    useHealthStore.getState().fetchTodayHealth()
   }, [])
 
   // Check if user has already checked in today (training > 0 means they logged something)
@@ -251,6 +257,9 @@ export function Home() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Health Tracking */}
+        <HealthCard />
 
         {/* Weekly Summary */}
         <WeeklySummary />
