@@ -6,6 +6,10 @@
 	<array>
 		<string>applinks:app.welltrained.fitness</string>
 	</array>
+	<key>com.apple.developer.in-app-payments</key>
+	<array>
+		<string>merchant.fitness.welltrained.app</string>
+	</array>
 	<key>aps-environment</key>
 	<string>development</string>
 </dict>

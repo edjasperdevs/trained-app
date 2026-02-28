@@ -1,11 +1,12 @@
 import { useEffect, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
-import { useUserStore, useAvatarStore, useAuthStore, useSyncStore } from '@/stores'
+import { useUserStore, useAvatarStore, useAuthStore, useSyncStore, useSubscriptionStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
 import { App as CapApp } from '@capacitor/app'
 import { isNative } from '@/lib/platform'
 import { initDeepLinkHandler } from '@/lib/deep-link'
+import { initializeRevenueCat } from '@/lib/revenuecat'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { initPushListeners, requestPushPermission } from '@/lib/push'
 import { scheduleAllNotifications } from '@/lib/notifications'
@@ -113,6 +114,17 @@ function AppContent() {
     updateBadge()
   }, [user])
 
+  // Initialize RevenueCat subscriptions after auth (native only)
+  useEffect(() => {
+    const initSubscriptions = async () => {
+      if (user && isNative()) {
+        await initializeRevenueCat(user.id)
+        await useSubscriptionStore.getState().checkEntitlements()
+      }
+    }
+    initSubscriptions()
+  }, [user])
+
   // Online/offline detection and background sync
   useEffect(() => {
     let lastHidden = 0
@@ -191,9 +203,25 @@ function AppContent() {
   }, [profile?.onboardingComplete, checkNeglected])
 
   const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
+  const subscriptionLoading = useSubscriptionStore((s) => s.isLoading)
 
   // Show loading while auth initializes (skip in dev bypass)
   if (!devBypass && authLoading) {
+    return (
+      <>
+        <ToastContainer />
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  // Show loading while subscription status initializes on native (after auth)
+  if (isNative() && subscriptionLoading && user) {
     return (
       <>
         <ToastContainer />

@@ -5,12 +5,14 @@ import { pushClientData, pullCoachData, loadAllFromCloud } from '@/lib/sync'
 import { toast } from './toastStore'
 import { captureError, setUser as sentrySetUser, clearUser as sentryClearUser } from '@/lib/sentry'
 import { removeDeviceToken } from '@/lib/push'
+import { logoutFromRevenueCat } from '@/lib/revenuecat'
 import { useUserStore } from './userStore'
 import { useDPStore } from './dpStore'
 import { useMacroStore } from './macroStore'
 import { useWorkoutStore } from './workoutStore'
 import { useAvatarStore } from './avatarStore'
 import { useAccessStore } from './accessStore'
+import { useSubscriptionStore } from './subscriptionStore'
 
 type AuthErrorCode = 'email_not_confirmed' | 'invalid_credentials' | 'not_configured' | 'unknown' | null
 
@@ -159,6 +161,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Non-blocking -- sign-out should never fail due to token removal
     }
 
+    // Log out from RevenueCat before clearing session
+    await logoutFromRevenueCat()
+
     await supabase.auth.signOut()
     set({ user: null, session: null })
     sentryClearUser()
@@ -170,6 +175,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     useWorkoutStore.getState().resetWorkouts()
     useAvatarStore.getState().resetAvatar()
     useAccessStore.getState().revokeAccess()
+    useSubscriptionStore.getState().reset()
   },
 
   resendConfirmation: async (email: string) => {
