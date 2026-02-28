@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.0 Phase 20 (Health Tracking)
+**Current focus:** v2.0 Phase 21 (Archetypes)
 
 ## Current Position
 
-Phase: 20 of 24 (Health Tracking) - COMPLETE
-Plan: 2 of 2 in current phase (20-02 complete)
-Status: Ready for next phase
-Last activity: 2026-02-28 -- Completed 20-02 (Health UI Components)
+Phase: 21 of 24 (Archetypes) - IN PROGRESS
+Plan: 1 of 2 in current phase (21-01 complete)
+Status: Executing
+Last activity: 2026-02-28 -- Completed 21-01 (Archetype Selection UI)
 
-Progress: [###########_______] 61% (11/18 plans)
+Progress: [############______] 67% (12/18 plans)
 
 ## Performance Metrics
 
@@ -39,6 +39,7 @@ Progress: [###########_______] 61% (11/18 plans)
 | 19-04 | Premium Feature Gating | 2min | 2 | 3 |
 | 20-01 | HealthKit Infrastructure | 5min | 2 | 7 |
 | 20-02 | Health UI Components | 4min | 2 | 6 |
+| 21-01 | Archetype Selection UI | 5min | 3 | 8 |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Progress: [###########_______] 61% (11/18 plans)
 - [Phase 20-02]: HealthPermission shown once after onboarding for iOS users with unknown permission status
 - [Phase 20-02]: HealthCard awards DP with todayLog guard (same pattern as CheckInModal)
 - [Phase 20-02]: ManualHealthEntry allows overriding HealthKit values with manual input
+- [Phase 21-01]: Bro is free generalist; Himbo/Brute/Pup/Bull require premium
+- [Phase 21-01]: ARCHETYPE_MODIFIERS prepared for Plan 02 DP calculation integration
+- [Phase 21-01]: Bull streak bonuses deferred to v2.1 (empty modifier for now)
 
 ### Pending Todos
 
@@ -92,5 +96,5 @@ Progress: [###########_______] 61% (11/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 20-02-PLAN.md (Health UI Components) - Phase 20 complete
+Stopped at: Completed 21-01-PLAN.md (Archetype Selection UI)
 Resume file: None

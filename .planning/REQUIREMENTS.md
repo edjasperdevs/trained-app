@@ -18,7 +18,7 @@
 
 - [ ] **GAME-01**: User earns Discipline Points (DP) for daily actions: training (+50), tracked meals (+15), 10k+ steps (+10), hit protein target (+25), 7h+ sleep (+10)
 - [ ] **GAME-02**: User progresses through 15 named ranks (Initiate -> Master) based on cumulative DP thresholds
-- [ ] **GAME-03**: User selects one of 5 archetypes during onboarding (Bro is free; Himbo, Brute, Pup, Bull are premium)
+- [x] **GAME-03**: User selects one of 5 archetypes during onboarding (Bro is free; Himbo, Brute, Pup, Bull are premium)
 - [ ] **GAME-04**: Selected archetype applies DP bonus modifiers to specific actions
 - [ ] **GAME-05**: User maintains an Obedience Streak by completing at least one core action daily
 - [ ] **GAME-06**: User receives daily Protocol Orders (quests) with bonus DP rewards
@@ -120,7 +120,7 @@
 | DESIGN-06 | Phase 17 | Pending |
 | GAME-01 | Phase 18 | Pending |
 | GAME-02 | Phase 18 | Pending |
-| GAME-03 | Phase 21 | Pending |
+| GAME-03 | Phase 21 | Complete |
 | GAME-04 | Phase 21 | Pending |
 | GAME-05 | Phase 18 | Pending |
 | GAME-06 | Phase 22 | Pending |
