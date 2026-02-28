@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 22 of 24 (Protocol Orders)
-Plan: 1 of 2 in current phase (22-01 complete)
-Status: In progress
-Last activity: 2026-02-28 -- Completed 22-01 (Quest Infrastructure)
+Phase: 22 of 24 (Protocol Orders) - COMPLETE
+Plan: 2 of 2 in current phase (22-02 complete)
+Status: Phase complete
+Last activity: 2026-02-28 -- Completed 22-02 (Protocol Orders UI)
 
-Progress: [##############____] 78% (14/18 plans)
+Progress: [###############___] 83% (15/18 plans)
 
 ## Performance Metrics
 
@@ -42,6 +42,7 @@ Progress: [##############____] 78% (14/18 plans)
 | 21-01 | Archetype Selection UI | 5min | 3 | 8 |
 | 21-02 | Archetype DP Modifiers | 2min | 2 | 4 |
 | 22-01 | Quest Infrastructure | 4min | 2 | 3 |
+| 22-02 | Protocol Orders UI | 5min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Progress: [##############____] 78% (14/18 plans)
 - [Phase 21-02]: archetype column uses text with CHECK constraint rather than enum type
 - [Phase 22]: Quest bonus DP bypasses archetype modifiers (direct totalDP add)
 - [Phase 22]: Seeded shuffle for deterministic quest rotation (date+userId for daily, weekString+userId for weekly)
+- [Phase 22-02]: Module-level store subscriptions avoid duplicate listeners on component re-render
+- [Phase 22-02]: Non-premium users see locked weekly quest preview (not hidden) to drive conversion
+- [Phase 22-02]: Streak display kept outside ProtocolOrders to maintain existing streak card styling
 
 ### Pending Todos
 
@@ -103,5 +107,5 @@ Progress: [##############____] 78% (14/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 22-01-PLAN.md (Quest Infrastructure)
+Stopped at: Completed 22-02-PLAN.md (Protocol Orders UI)
 Resume file: None
