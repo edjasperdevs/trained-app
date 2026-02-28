@@ -24,7 +24,7 @@
 - [ ] **GAME-06**: User receives daily Protocol Orders (quests) with bonus DP rewards
 - [ ] **GAME-07**: User receives weekly Protocol Orders with larger DP rewards (premium only)
 - [ ] **GAME-08**: User can view current rank, cumulative DP, and progress toward next rank
-- [ ] **GAME-09**: Rank-up triggers a celebration animation and notification
+- [x] **GAME-09**: Rank-up triggers a celebration animation and notification
 
 ### Avatar
 
@@ -126,7 +126,7 @@
 | GAME-06 | Phase 22 | Pending |
 | GAME-07 | Phase 22 | Pending |
 | GAME-08 | Phase 18 | Pending |
-| GAME-09 | Phase 18 | Pending |
+| GAME-09 | Phase 18 | Complete |
 | AVATAR-01 | Phase 23 | Pending |
 | AVATAR-02 | Phase 23 | Pending |
 | AVATAR-03 | Phase 23 | Pending |
