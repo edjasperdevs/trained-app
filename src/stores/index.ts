@@ -33,3 +33,5 @@ export { useSyncStore } from './syncStore'
 export type { SyncStatus } from './syncStore'
 
 export { useSubscriptionStore } from './subscriptionStore'
+
+export { useHealthStore } from './healthStore'

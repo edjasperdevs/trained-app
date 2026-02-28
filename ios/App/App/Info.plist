@@ -45,5 +45,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>WellTrained reads your steps and sleep data to reward you with Discipline Points for healthy habits.</string>
 </dict>
 </plist>
