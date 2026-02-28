@@ -35,3 +35,6 @@ export type { SyncStatus } from './syncStore'
 export { useSubscriptionStore } from './subscriptionStore'
 
 export { useHealthStore } from './healthStore'
+
+export { useQuestStore } from './questStore'
+export type { CompletedQuest } from './questStore'
