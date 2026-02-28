@@ -21,8 +21,8 @@
 - [x] **GAME-03**: User selects one of 5 archetypes during onboarding (Bro is free; Himbo, Brute, Pup, Bull are premium)
 - [x] **GAME-04**: Selected archetype applies DP bonus modifiers to specific actions
 - [ ] **GAME-05**: User maintains an Obedience Streak by completing at least one core action daily
-- [ ] **GAME-06**: User receives daily Protocol Orders (quests) with bonus DP rewards
-- [ ] **GAME-07**: User receives weekly Protocol Orders with larger DP rewards (premium only)
+- [x] **GAME-06**: User receives daily Protocol Orders (quests) with bonus DP rewards
+- [x] **GAME-07**: User receives weekly Protocol Orders with larger DP rewards (premium only)
 - [ ] **GAME-08**: User can view current rank, cumulative DP, and progress toward next rank
 - [x] **GAME-09**: Rank-up triggers a celebration animation and notification
 
@@ -123,8 +123,8 @@
 | GAME-03 | Phase 21 | Complete |
 | GAME-04 | Phase 21 | Complete |
 | GAME-05 | Phase 18 | Pending |
-| GAME-06 | Phase 22 | Pending |
-| GAME-07 | Phase 22 | Pending |
+| GAME-06 | Phase 22 | Complete |
+| GAME-07 | Phase 22 | Complete |
 | GAME-08 | Phase 18 | Pending |
 | GAME-09 | Phase 18 | Complete |
 | AVATAR-01 | Phase 23 | Pending |

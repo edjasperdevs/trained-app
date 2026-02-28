@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.0 Phase 21 (Archetypes)
+**Current focus:** v2.0 Phase 22 (Protocol Orders)
 
 ## Current Position
 
-Phase: 21 of 24 (Archetypes) - COMPLETE
-Plan: 2 of 2 in current phase (21-02 complete)
-Status: Ready for next phase
-Last activity: 2026-02-28 -- Completed 21-02 (Archetype DP Modifiers)
+Phase: 22 of 24 (Protocol Orders)
+Plan: 1 of 2 in current phase (22-01 complete)
+Status: In progress
+Last activity: 2026-02-28 -- Completed 22-01 (Quest Infrastructure)
 
-Progress: [#############_____] 72% (13/18 plans)
+Progress: [##############____] 78% (14/18 plans)
 
 ## Performance Metrics
 
@@ -41,6 +41,7 @@ Progress: [#############_____] 72% (13/18 plans)
 | 20-02 | Health UI Components | 4min | 2 | 6 |
 | 21-01 | Archetype Selection UI | 5min | 3 | 8 |
 | 21-02 | Archetype DP Modifiers | 2min | 2 | 4 |
+| 22-01 | Quest Infrastructure | 4min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Progress: [#############_____] 72% (13/18 plans)
 - [Phase 21-02]: Duplicated DP_VALUES in constants.ts to avoid circular import
 - [Phase 21-02]: Meal cap enforced before modifier (cap is on count, not DP value)
 - [Phase 21-02]: archetype column uses text with CHECK constraint rather than enum type
+- [Phase 22]: Quest bonus DP bypasses archetype modifiers (direct totalDP add)
+- [Phase 22]: Seeded shuffle for deterministic quest rotation (date+userId for daily, weekString+userId for weekly)
 
 ### Pending Todos
 
@@ -100,5 +103,5 @@ Progress: [#############_____] 72% (13/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 21-02-PLAN.md (Archetype DP Modifiers) - Phase 21 complete
+Stopped at: Completed 22-01-PLAN.md (Quest Infrastructure)
 Resume file: None
