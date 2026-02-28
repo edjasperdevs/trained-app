@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal } from '@/components'
+import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal, ProtocolOrders } from '@/components'
 import { HealthCard } from '@/components/HealthCard'
-import { Flame, Dumbbell, Beef, CheckCircle2, Sparkles, ChevronRight, Trophy, AlertTriangle, Check, ClipboardCheck } from 'lucide-react'
+import { useQuestStore } from '@/stores/questStore'
+import { Flame, Beef, CheckCircle2, Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck } from 'lucide-react'
 import {
   useUserStore,
   useDPStore,
@@ -13,11 +14,9 @@ import {
   useRemindersStore,
   useHealthStore
 } from '@/stores'
-import { DP_VALUES } from '@/stores/dpStore'
 import { getStandingOrder, LABELS } from '@/design/constants'
 import { getLocalDateString, getLocalDaysDifference } from '@/lib/dateUtils'
 import { haptics } from '@/lib/haptics'
-import { cn } from '@/lib/cn'
 import { CheckInModal } from './CheckInModal'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 
@@ -28,14 +27,13 @@ export function Home() {
   const profile = useUserStore((state) => state.profile)
   const currentRank = useDPStore((state) => state.currentRank)
   const obedienceStreak = useDPStore((state) => state.obedienceStreak)
-  const targets = useMacroStore((state) => state.targets)
 
   // PERF-02: Selectors for computed values that depend on state
   const activeReminders = useRemindersStore((state) => state.getActiveReminders)()
 
   // PERF-02: Access non-reactive functions via getState()
   const { getTodayLog } = useDPStore.getState()
-  const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore.getState()
+  const { getTodayWorkout } = useWorkoutStore.getState()
   const { isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore.getState()
 
   const [showCheckIn, setShowCheckIn] = useState(false)
@@ -83,7 +81,6 @@ export function Home() {
   const hasCheckedInToday = (todayLog?.total || 0) > 0
 
   const todayWorkout = getTodayWorkout()
-  const workoutCompleted = isWorkoutCompletedToday()
 
   // Get a contextual standing order/motivational message
   const message = useMemo(() => {
@@ -109,36 +106,10 @@ export function Home() {
   const caloriesHit = isCalorieTargetHit()
   const macroProgress = getTodayProgress()
 
-  // Calculate potential DP for today
-  const potentialDP = [
-    todayWorkout && !workoutCompleted ? DP_VALUES.training : 0,
-    !proteinHit ? DP_VALUES.protein : 0,
-  ].reduce((a, b) => a + b, 0)
-
-  const quests = [
-    {
-      id: 'workout',
-      label: todayWorkout ? `Complete ${todayWorkout.name}` : 'Recovery Day',
-      dp: todayWorkout ? DP_VALUES.training : 0,
-      completed: workoutCompleted || !todayWorkout,
-      icon: Dumbbell,
-      isRest: !todayWorkout
-    },
-    {
-      id: 'protein',
-      label: `Hit Protein (${targets?.protein || 0}g)`,
-      dp: DP_VALUES.protein,
-      completed: proteinHit,
-      icon: Beef
-    },
-    {
-      id: 'report',
-      label: LABELS.checkIn,
-      dp: 0,
-      completed: hasCheckedInToday,
-      icon: CheckCircle2
-    }
-  ]
+  // Check for quest completion on mount (triggers completion detection when user visits Home)
+  useEffect(() => {
+    useQuestStore.getState().checkAndCompleteQuests()
+  }, [])
 
   return (
     <div data-testid="home-screen" className="min-h-screen pb-20">
@@ -286,75 +257,24 @@ export function Home() {
           </Card>
         )}
 
-        {/* Today's Quests / Daily Assignments */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold uppercase tracking-wide">
-              {LABELS.dailyQuests}
-            </h2>
-            <span className="text-sm text-muted-foreground font-mono">
-              +{potentialDP} {LABELS.xp} possible
-            </span>
-          </div>
+        {/* Protocol Orders */}
+        <ProtocolOrders />
 
-          <div className="space-y-3">
-            {quests.map((quest, index) => (
-              <div
-                key={quest.id}
-                className="animate-in fade-in slide-in-from-left-4 duration-300"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <Card className={cn('py-0', quest.completed && 'opacity-60')}>
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          'w-8 h-8 flex items-center justify-center rounded',
-                          quest.completed ? 'bg-success/20' : 'bg-muted'
-                        )}
-                      >
-                        {quest.completed ? (
-                          <Check size={18} className="text-success" />
-                        ) : (
-                          <quest.icon size={18} className="text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className={cn(quest.completed && 'line-through text-muted-foreground')}>
-                          {quest.label}
-                        </p>
-                      </div>
-                      {quest.dp > 0 && !quest.isRest && (
-                        <span className={cn(
-                          'text-sm font-mono font-bold',
-                          quest.completed ? 'text-success' : 'text-primary'
-                        )}>
-                          +{quest.dp} {LABELS.xp}
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+        {/* Streak Display */}
+        {obedienceStreak > 0 && (
+          <Card className="py-0 bg-warning/10 border-warning/20">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 flex items-center justify-center bg-warning/20 rounded">
+                  <Flame size={18} className="text-warning" />
+                </div>
+                <div className="flex-1">
+                  <p>{LABELS.streak}: {obedienceStreak} days</p>
+                </div>
               </div>
-            ))}
-
-            {/* Streak Display */}
-            {obedienceStreak > 0 ? (
-              <Card className="py-0 bg-warning/10 border-warning/20">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-warning/20 rounded">
-                      <Flame size={18} className="text-warning" />
-                    </div>
-                    <div className="flex-1">
-                      <p>{LABELS.streak}: {obedienceStreak} days</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-          </div>
-        </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Macro Progress / Protocol Compliance */}
         <div data-sentry-mask>
