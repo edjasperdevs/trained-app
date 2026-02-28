@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getLocalDateString, getLocalDaysDifference } from '../lib/dateUtils'
+import type { Archetype } from '@/design/constants'
 
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 export type TrainingDays = 3 | 4 | 5
@@ -24,6 +25,7 @@ export interface UserProfile {
   age: number
   goal: Goal
   avatarBase: AvatarBase
+  archetype: Archetype
   createdAt: number
   currentStreak: number
   longestStreak: number
@@ -81,6 +83,7 @@ const initialProfile: UserProfile = {
   age: 25,
   goal: 'maintain',
   avatarBase: 'dominant',
+  archetype: 'bro',
   createdAt: Date.now(),
   currentStreak: 0,
   longestStreak: 0,

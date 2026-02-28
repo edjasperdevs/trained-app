@@ -1,6 +1,71 @@
 // Design constants extracted from Trained theme
 // Values copied (not imported) to decouple from theme system
 
+import type { DPAction } from '@/stores/dpStore'
+
+// Archetype System
+export type Archetype = 'bro' | 'himbo' | 'brute' | 'pup' | 'bull'
+
+export interface ArchetypeInfo {
+  name: string
+  tagline: string
+  icon: string // lucide-react icon name
+  isPremium: boolean
+  description: string
+  boosts: string
+}
+
+export const ARCHETYPE_INFO: Record<Archetype, ArchetypeInfo> = {
+  bro: {
+    name: 'Bro',
+    tagline: 'Balanced Discipline',
+    icon: 'User',
+    isPremium: false,
+    description: 'The well-rounded generalist. No specialty, no weakness. You earn DP through consistent effort across all disciplines.',
+    boosts: 'No modifier bonuses',
+  },
+  himbo: {
+    name: 'Himbo',
+    tagline: 'Training Obsessed',
+    icon: 'Dumbbell',
+    isPremium: true,
+    description: 'The gym is your temple. You live for the pump and the grind. Training is your primary focus.',
+    boosts: '+50% training DP',
+  },
+  brute: {
+    name: 'Brute',
+    tagline: 'Nutrition Machine',
+    icon: 'Beef',
+    isPremium: true,
+    description: 'Fuel is everything. You track every macro, every meal. Nutrition discipline defines your protocol.',
+    boosts: '+50% protein/meal DP',
+  },
+  pup: {
+    name: 'Pup',
+    tagline: 'Lifestyle Master',
+    icon: 'Heart',
+    isPremium: true,
+    description: 'Health extends beyond the gym. Steps, sleep, and daily habits are your focus areas.',
+    boosts: '+100% steps/sleep DP',
+  },
+  bull: {
+    name: 'Bull',
+    tagline: 'Consistency King',
+    icon: 'TrendingUp',
+    isPremium: true,
+    description: 'Streaks are your currency. You never break the chain. Consistency compounds your rewards.',
+    boosts: 'Streak bonuses (coming v2.1)',
+  },
+}
+
+export const ARCHETYPE_MODIFIERS: Record<Archetype, Partial<Record<DPAction, number>>> = {
+  bro: {},
+  himbo: { training: 1.5 },
+  brute: { meal: 1.5, protein: 1.5 },
+  pup: { steps: 2.0, sleep: 2.0 },
+  bull: {}, // Deferred to v2.1
+}
+
 export const LABELS = {
   xp: 'DP',
   xpFull: 'Discipline Points',

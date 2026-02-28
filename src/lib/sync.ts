@@ -178,6 +178,7 @@ export async function loadProfileFromCloud() {
       age: data.age || 25,
       goal: (data.goal || 'maintain') as 'cut' | 'recomp' | 'maintain' | 'bulk',
       avatarBase: (data.avatar_base || 'dominant') as 'dominant' | 'switch' | 'submissive',
+      archetype: ((data as Record<string, unknown>).archetype || 'bro') as 'bro' | 'himbo' | 'brute' | 'pup' | 'bull',
       currentStreak: data.current_streak || 0,
       longestStreak: data.longest_streak || 0,
       lastCheckInDate: data.last_check_in_date,
