@@ -45,12 +45,12 @@
 ### Subscriptions
 
 - [x] **SUB-01**: App integrates RevenueCat SDK for iOS in-app purchase subscriptions
-- [ ] **SUB-02**: User sees a paywall presenting subscription tiers (monthly and annual)
+- [x] **SUB-02**: User sees a paywall presenting subscription tiers (monthly and annual)
 - [ ] **SUB-03**: Premium features gated behind active subscription (specialized archetypes, avatar evolution, weekly quests, advanced analytics)
-- [ ] **SUB-04**: User can restore previous purchases
+- [x] **SUB-04**: User can restore previous purchases
 - [x] **SUB-05**: Subscription entitlement status persists across app restarts
-- [ ] **SUB-06**: Paywall displays all Apple-required subscription transparency text
-- [ ] **SUB-07**: User can manage subscription from Settings screen
+- [x] **SUB-06**: Paywall displays all Apple-required subscription transparency text
+- [x] **SUB-07**: User can manage subscription from Settings screen
 
 ### Coach Stripping
 
@@ -138,12 +138,12 @@
 | HEALTH-06 | Phase 20 | Pending |
 | HEALTH-07 | Phase 20 | Pending |
 | SUB-01 | Phase 19 | Complete |
-| SUB-02 | Phase 19 | Pending |
+| SUB-02 | Phase 19 | Complete |
 | SUB-03 | Phase 19 | Pending |
-| SUB-04 | Phase 19 | Pending |
+| SUB-04 | Phase 19 | Complete |
 | SUB-05 | Phase 19 | Complete |
-| SUB-06 | Phase 19 | Pending |
-| SUB-07 | Phase 19 | Pending |
+| SUB-06 | Phase 19 | Complete |
+| SUB-07 | Phase 19 | Complete |
 | STRIP-01 | Phase 17 | Pending |
 | STRIP-02 | Phase 17 | Pending |
 | STRIP-03 | Phase 17 | Pending |
