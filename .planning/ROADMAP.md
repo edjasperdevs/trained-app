@@ -90,8 +90,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — HealthKit plugin setup, health.ts wrapper, healthStore, iOS entitlements
-- [ ] 20-02-PLAN.md — HealthPermission soft-ask screen, HealthCard display, manual entry UI, DP awards, daily_health table
+- [x] 20-01-PLAN.md — HealthKit plugin setup, health.ts wrapper, healthStore, iOS entitlements
+- [x] 20-02-PLAN.md — HealthPermission soft-ask screen, HealthCard display, manual entry UI, DP awards, daily_health table
 
 ### Phase 21: Archetypes
 **Goal**: Users select a personal archetype that modifies how they earn DP -- free users get Bro (generalist), premium subscribers unlock 4 specialized archetypes that boost specific actions
@@ -102,11 +102,11 @@ Plans:
   2. Selected archetype applies visible DP bonus modifiers to specific actions (e.g., Himbo boosts training DP)
   3. User can change their archetype from Settings (premium archetypes require active subscription)
   4. Archetype selection and modifier effects are clearly communicated in the UI so users understand the upgrade incentive
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 21-01: Archetype data model, selection UI (onboarding + settings), premium gating
-- [ ] 21-02: DP modifier logic in dpStore, archetype visualization, Supabase profile column
+- [ ] 21-01-PLAN.md — Archetype types/constants, ArchetypeSelector/ArchetypeCard components, onboarding archetype step, Settings archetype section
+- [ ] 21-02-PLAN.md — dpStore modifier integration, getModifiedDP helper, Supabase archetype sync, profiles migration
 
 ### Phase 22: Protocol Orders
 **Goal**: Users receive rotating daily and weekly quests that award bonus DP -- an engagement layer that gives users specific goals beyond their routine
@@ -236,7 +236,7 @@ Plans:
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
-| 20. Health Tracking | 2/2 | Complete    | 2026-02-28 | - |
+| 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
