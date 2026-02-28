@@ -105,8 +105,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Archetype types/constants, ArchetypeSelector/ArchetypeCard components, onboarding archetype step, Settings archetype section
-- [ ] 21-02-PLAN.md — dpStore modifier integration, getModifiedDP helper, Supabase archetype sync, profiles migration
+- [x] 21-01-PLAN.md — Archetype types/constants, ArchetypeSelector/ArchetypeCard components, onboarding archetype step, Settings archetype section
+- [x] 21-02-PLAN.md — dpStore modifier integration, getModifiedDP helper, Supabase archetype sync, profiles migration
 
 ### Phase 22: Protocol Orders
 **Goal**: Users receive rotating daily and weekly quests that award bonus DP -- an engagement layer that gives users specific goals beyond their routine
@@ -117,11 +117,11 @@ Plans:
   2. Completing a quest objective automatically marks it done and awards the bonus DP
   3. Premium subscribers see 2 additional weekly Protocol Orders with larger DP rewards
   4. Quests rotate daily/weekly so users see fresh objectives regularly
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 22-01: questStore, quest template pool, daily/weekly rotation, progress evaluation
-- [ ] 22-02: Protocol Orders UI screen, quest completion tracking, premium weekly quest gating
+- [ ] 22-01-PLAN.md — Quest catalog with condition evaluators, questStore with deterministic rotation and completion tracking
+- [ ] 22-02-PLAN.md — ProtocolOrders UI component, Home screen integration, premium weekly quest gating
 
 ### Phase 23: Avatar Evolution
 **Goal**: Users have an evolving visual avatar that grows more impressive as they rank up -- a premium visual reward that makes progression tangible
@@ -237,7 +237,7 @@ Plans:
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
 | 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 21. Archetypes | 2/2 | Complete    | 2026-02-28 | - |
+| 21. Archetypes | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
