@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar } from '@/components'
-import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell } from 'lucide-react'
+import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { isNative } from '@/lib/platform'
@@ -22,6 +22,7 @@ import {
   useAccessStore,
   useRemindersStore,
   useAchievementsStore,
+  useSubscriptionStore,
   toast,
   DayOfWeek,
   ReminderType,
@@ -75,6 +76,24 @@ export function Settings() {
   const [goalWeightInput, setGoalWeightInput] = useState('')
   const [showWeightChart, setShowWeightChart] = useState(false)
   const [hasCoach, setHasCoach] = useState(false)
+  const [restoringPurchases, setRestoringPurchases] = useState(false)
+
+  // Subscription state (native only)
+  const isPremium = useSubscriptionStore((s) => s.isPremium)
+  const restorePurchases = useSubscriptionStore((s) => s.restorePurchases)
+
+  const handleRestorePurchases = async () => {
+    setRestoringPurchases(true)
+    const { success, error } = await restorePurchases()
+    setRestoringPurchases(false)
+    if (success) toast.success('Purchases restored')
+    else if (error) toast.error(error)
+  }
+
+  const handleManageSubscription = () => {
+    // Opens iOS App Store subscription management
+    window.open('https://apps.apple.com/account/subscriptions', '_blank')
+  }
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -489,6 +508,68 @@ export function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Subscription (native only) */}
+        {isNative() && (
+          <Card className="py-0">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4">SUBSCRIPTION</h3>
+
+              <div className="space-y-4">
+                {/* Status */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  {isPremium ? (
+                    <span className="bg-primary text-primary-foreground rounded px-2 py-0.5 text-xs font-semibold flex items-center gap-1">
+                      <Crown size={12} />
+                      Premium
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">Free</span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-2">
+                  {isPremium ? (
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={handleManageSubscription}
+                    >
+                      <ExternalLink size={16} className="mr-2" />
+                      Manage Subscription
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full"
+                      onClick={() => navigate('/paywall')}
+                    >
+                      <Crown size={16} className="mr-2" />
+                      Upgrade to Premium
+                    </Button>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={handleRestorePurchases}
+                    disabled={restoringPurchases}
+                  >
+                    {restoringPurchases ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                        Restoring...
+                      </>
+                    ) : (
+                      'Restore Purchases'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Units */}
         <Card className="py-0">
