@@ -161,7 +161,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 3/3 plans complete
+**Plans:** 1/4 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -235,7 +235,7 @@ Plans:
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 19. Subscriptions | v2.0 | 0/4 | Planned | - |
+| 19. Subscriptions | 1/4 | In Progress|  | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |

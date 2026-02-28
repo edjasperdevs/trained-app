@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.0 Phase 18 (Gamification Engine)
+**Current focus:** v2.0 Phase 19 (Subscriptions)
 
 ## Current Position
 
-Phase: 18 of 24 (Gamification Engine) -- COMPLETE
-Plan: 3 of 3 in current phase (18-03 complete)
-Status: Phase 18 complete, ready for Phase 19
-Last activity: 2026-02-28 -- Completed 18-03 (Macros Rank-Up Modal)
+Phase: 19 of 24 (Subscriptions)
+Plan: 1 of 4 in current phase (19-01 complete)
+Status: In Progress
+Last activity: 2026-02-28 -- Completed 19-01 (SDK Setup)
 
-Progress: [#####_____________] 28% (5/18 plans)
+Progress: [######____________] 33% (6/18 plans)
 
 ## Performance Metrics
 
@@ -33,6 +33,7 @@ Progress: [#####_____________] 28% (5/18 plans)
 | 18-01 | dpStore Core | 8min | 2 | 11 |
 | 18-02 | Gamification UI | 11min | 2 | 9 |
 | 18-03 | Macros Rank-Up Modal | 2min | 1 | 1 |
+| 19-01 | SDK Setup | 6min | 2 | 10 |
 
 ## Accumulated Context
 
@@ -55,6 +56,8 @@ Progress: [#####_____________] 28% (5/18 plans)
 - CheckInModal prevents double-counting DP by checking todayLog before awarding
 - Home streak validation resets stale streaks on mount (gap > 1 day)
 - getAvatarStage() exported from AvatarScreen for Phase 23 avatar SVG wiring
+- ENTITLEMENT_ID='premium' for RevenueCat -- must match dashboard config (19-01)
+- subscriptionStore only persists isPremium, not offerings/customerInfo (19-01)
 
 ### Pending Todos
 
@@ -72,5 +75,5 @@ Progress: [#####_____________] 28% (5/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 18-03-PLAN.md (Macros Rank-Up Modal) -- Phase 18 complete, Phase 19 next
+Stopped at: Completed 19-01-PLAN.md (SDK Setup)
 Resume file: None

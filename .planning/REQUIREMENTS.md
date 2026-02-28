@@ -44,11 +44,11 @@
 
 ### Subscriptions
 
-- [ ] **SUB-01**: App integrates RevenueCat SDK for iOS in-app purchase subscriptions
+- [x] **SUB-01**: App integrates RevenueCat SDK for iOS in-app purchase subscriptions
 - [ ] **SUB-02**: User sees a paywall presenting subscription tiers (monthly and annual)
 - [ ] **SUB-03**: Premium features gated behind active subscription (specialized archetypes, avatar evolution, weekly quests, advanced analytics)
 - [ ] **SUB-04**: User can restore previous purchases
-- [ ] **SUB-05**: Subscription entitlement status persists across app restarts
+- [x] **SUB-05**: Subscription entitlement status persists across app restarts
 - [ ] **SUB-06**: Paywall displays all Apple-required subscription transparency text
 - [ ] **SUB-07**: User can manage subscription from Settings screen
 
@@ -137,11 +137,11 @@
 | HEALTH-05 | Phase 20 | Pending |
 | HEALTH-06 | Phase 20 | Pending |
 | HEALTH-07 | Phase 20 | Pending |
-| SUB-01 | Phase 19 | Pending |
+| SUB-01 | Phase 19 | Complete |
 | SUB-02 | Phase 19 | Pending |
 | SUB-03 | Phase 19 | Pending |
 | SUB-04 | Phase 19 | Pending |
-| SUB-05 | Phase 19 | Pending |
+| SUB-05 | Phase 19 | Complete |
 | SUB-06 | Phase 19 | Pending |
 | SUB-07 | Phase 19 | Pending |
 | STRIP-01 | Phase 17 | Pending |
