@@ -236,7 +236,7 @@ Plans:
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
-| 20. Health Tracking | 2/2 | Complete   | 2026-02-28 | - |
+| 20. Health Tracking | 2/2 | Complete    | 2026-02-28 | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
