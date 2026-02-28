@@ -19,3 +19,5 @@ export { Skeleton, SkeletonCard, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton,
 export { NotFound } from './NotFound'
 export { EmptyState } from './EmptyState'
 export { SyncStatusIndicator } from './SyncStatusIndicator'
+export { PremiumGate } from './PremiumGate'
+export { UpgradePrompt } from './UpgradePrompt'
