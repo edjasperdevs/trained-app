@@ -20,7 +20,7 @@
 - [x] **Phase 18: Gamification Engine** - Discipline Points store, 15-rank progression, rank-up celebrations, Obedience Streak
 - [x] **Phase 19: Subscriptions** - RevenueCat integration, paywall, premium entitlement gating, webhook backend (completed 2026-02-28)
 - [x] **Phase 20: Health Tracking** - HealthKit steps and sleep with manual fallback, DP awards for health actions (completed 2026-02-28)
-- [ ] **Phase 21: Archetypes** - 5-archetype system with DP modifiers, premium gating, onboarding integration
+- [x] **Phase 21: Archetypes** - 5-archetype system with DP modifiers, premium gating, onboarding integration (completed 2026-02-28)
 - [ ] **Phase 22: Protocol Orders** - Daily and weekly quests with bonus DP rewards
 - [ ] **Phase 23: Avatar Evolution** - 5-stage evolving silhouette tied to rank milestones
 - [ ] **Phase 24: App Store Submission** - Data migration, compliance, TestFlight, App Store review
@@ -161,7 +161,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -237,7 +237,7 @@ Plans:
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
 | 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
 | 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 21. Archetypes | 1/2 | In Progress|  | - |
+| 21. Archetypes | 2/2 | Complete   | 2026-02-28 | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
 | 23. Avatar Evolution | v2.0 | 0/2 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |

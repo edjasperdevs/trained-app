@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-27)
 
 ## Current Position
 
-Phase: 21 of 24 (Archetypes) - IN PROGRESS
-Plan: 1 of 2 in current phase (21-01 complete)
-Status: Executing
-Last activity: 2026-02-28 -- Completed 21-01 (Archetype Selection UI)
+Phase: 21 of 24 (Archetypes) - COMPLETE
+Plan: 2 of 2 in current phase (21-02 complete)
+Status: Ready for next phase
+Last activity: 2026-02-28 -- Completed 21-02 (Archetype DP Modifiers)
 
-Progress: [############______] 67% (12/18 plans)
+Progress: [#############_____] 72% (13/18 plans)
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: [############______] 67% (12/18 plans)
 | 20-01 | HealthKit Infrastructure | 5min | 2 | 7 |
 | 20-02 | Health UI Components | 4min | 2 | 6 |
 | 21-01 | Archetype Selection UI | 5min | 3 | 8 |
+| 21-02 | Archetype DP Modifiers | 2min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Progress: [############______] 67% (12/18 plans)
 - [Phase 21-01]: Bro is free generalist; Himbo/Brute/Pup/Bull require premium
 - [Phase 21-01]: ARCHETYPE_MODIFIERS prepared for Plan 02 DP calculation integration
 - [Phase 21-01]: Bull streak bonuses deferred to v2.1 (empty modifier for now)
+- [Phase 21-02]: Duplicated DP_VALUES in constants.ts to avoid circular import
+- [Phase 21-02]: Meal cap enforced before modifier (cap is on count, not DP value)
+- [Phase 21-02]: archetype column uses text with CHECK constraint rather than enum type
 
 ### Pending Todos
 
@@ -96,5 +100,5 @@ Progress: [############______] 67% (12/18 plans)
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed 21-01-PLAN.md (Archetype Selection UI)
+Stopped at: Completed 21-02-PLAN.md (Archetype DP Modifiers) - Phase 21 complete
 Resume file: None
