@@ -22,6 +22,8 @@ PODS:
     - Capacitor
   - CapawesomeCapacitorBadge (7.0.1):
     - Capacitor
+  - CapgoCapacitorHealth (7.2.15):
+    - Capacitor
   - PurchasesHybridCommon (17.25.0):
     - RevenueCat (= 5.51.1)
   - RevenueCat (5.51.1)
@@ -42,6 +44,7 @@ DEPENDENCIES:
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - "CapawesomeCapacitorBadge (from `../../node_modules/@capawesome/capacitor-badge`)"
+  - "CapgoCapacitorHealth (from `../../node_modules/@capgo/capacitor-health`)"
   - "RevenuecatPurchasesCapacitor (from `../../node_modules/@revenuecat/purchases-capacitor`)"
 
 SPEC REPOS:
@@ -74,6 +77,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
   CapawesomeCapacitorBadge:
     :path: "../../node_modules/@capawesome/capacitor-badge"
+  CapgoCapacitorHealth:
+    :path: "../../node_modules/@capgo/capacitor-health"
   RevenuecatPurchasesCapacitor:
     :path: "../../node_modules/@revenuecat/purchases-capacitor"
 
@@ -90,10 +95,11 @@ SPEC CHECKSUMS:
   CapacitorSplashScreen: b3d12b4324d93ce605fe57f05a199ade7f26189e
   CapacitorStatusBar: b4bdcf487553983ffc68d81dfe1668bacb48252f
   CapawesomeCapacitorBadge: 48e5431c8b9909568ac5e5bf24163d92e1d9ed18
+  CapgoCapacitorHealth: e2f3d6a9e786c5aca34d7a70865e4f8292389df0
   PurchasesHybridCommon: 6a79a873ab52f777bfa36e9516f3fcd84d3b3428
   RevenueCat: eab035bbab271faccfef5c36eaff2a1ffef14dc0
   RevenuecatPurchasesCapacitor: 17db9f0b99ec5c4055d84af83d38bc5038f50ff2
 
-PODFILE CHECKSUM: a42bcb816aa9cee34528299390d9118d0060dda9
+PODFILE CHECKSUM: 1206613ad8b6b8fb590ca3695f58e3b41f68228d
 
 COCOAPODS: 1.9.3

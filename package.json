@@ -33,6 +33,7 @@
     "@capacitor/splash-screen": "^7.0.5",
     "@capacitor/status-bar": "^7.0.5",
     "@capawesome/capacitor-badge": "^7.0.1",
+    "@capgo/capacitor-health": "^7.2.15",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/oswald": "^5.2.8",
