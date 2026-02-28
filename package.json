@@ -36,6 +36,7 @@
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/oswald": "^5.2.8",
+    "@revenuecat/purchases-capacitor": "^11.3.2",
     "@sentry/react": "^10.38.0",
     "@supabase/supabase-js": "^2.93.3",
     "class-variance-authority": "^0.7.1",
