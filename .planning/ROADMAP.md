@@ -57,7 +57,7 @@ Plans:
 Plans:
 - [x] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
 - [x] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
-- [ ] 18-03-PLAN.md — Gap closure: Add RankUpModal handling to Macros.tsx meal-log paths
+- [x] 18-03-PLAN.md — Gap closure: Add RankUpModal handling to Macros.tsx meal-log paths
 
 ### Phase 19: Subscriptions
 **Goal**: The app has a working freemium model -- free users see a compelling paywall, subscribers unlock premium features, and subscription state persists reliably across sessions and app restarts
@@ -69,12 +69,12 @@ Plans:
   3. User can tap "Restore Purchases" on both the paywall and the Settings screen to recover a previous subscription
   4. Premium entitlement status persists across app restarts without requiring network calls (cached locally)
   5. User can view and manage their subscription status from the Settings screen
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 19-01: RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
-- [ ] 19-02: Paywall screen with legal text, restore purchases, Settings subscription management
-- [ ] 19-03: handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
+- [ ] 19-01-PLAN.md — RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
+- [ ] 19-02-PLAN.md — Paywall screen with legal text, restore purchases, Settings subscription management
+- [ ] 19-03-PLAN.md — handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
 
 ### Phase 20: Health Tracking
 **Goal**: Users can track daily steps and sleep -- automatically from HealthKit or manually -- and earn DP for meeting health thresholds
@@ -232,9 +232,9 @@ Plans:
 | 14. Remote Push Notifications | v1.5 | 3/3 | Complete | 2026-02-22 |
 | 15. Local Notifications + Engagement | v1.5 | 2/2 | Complete | 2026-02-22 |
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
-| 17. Foundation Cleanup | v2.0 | Complete    | 2026-02-27 | 2026-02-27 |
-| 18. Gamification Engine | 3/3 | Complete    | 2026-02-28 | - |
-| 19. Subscriptions | v2.0 | 0/3 | Not started | - |
+| 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
+| 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
+| 19. Subscriptions | v2.0 | 0/3 | Planned | - |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
