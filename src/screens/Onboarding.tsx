@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { ArchetypeSelector } from '@/components'
 import {
   Dumbbell,
   Sword,
@@ -20,6 +21,7 @@ import {
   useWorkoutStore,
   useMacroStore,
   useAvatarStore,
+  useSubscriptionStore,
   FitnessLevel,
   TrainingDays,
   Goal,
@@ -28,6 +30,7 @@ import {
   UnitSystem,
   DayOfWeek
 } from '@/stores'
+import type { Archetype } from '@/design/constants'
 import { getDefaultDays } from '@/stores/workoutStore'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
@@ -35,7 +38,7 @@ import { LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
 import { toDisplayWeight, toInternalWeight, toDisplayHeight, toInternalHeight, getWeightUnit } from '@/lib/units'
 
-type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'features' | 'tutorial' | 'levelup'
+type Step = 'welcome' | 'name' | 'gender' | 'fitness' | 'days' | 'schedule' | 'goal' | 'features' | 'archetype' | 'tutorial' | 'levelup'
 
 const ONBOARDING_STORAGE_KEY = 'onboarding-progress'
 
@@ -55,6 +58,7 @@ interface OnboardingData {
   age: number
   goal: Goal
   avatarBase: AvatarBase
+  archetype: Archetype
   units: UnitSystem
 }
 
@@ -101,6 +105,7 @@ const defaultOnboardingData: OnboardingData = {
   age: 25,
   goal: 'maintain',
   avatarBase: 'dominant',
+  archetype: 'bro',
   units: 'imperial'
 }
 
@@ -118,7 +123,7 @@ export function Onboarding() {
   const [_direction, setDirection] = useState(1)
   const [data, setData] = useState<OnboardingData>(savedProgress?.data || defaultOnboardingData)
 
-  const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'features', 'tutorial']
+  const steps: Step[] = ['welcome', 'name', 'gender', 'fitness', 'days', 'schedule', 'goal', 'features', 'archetype', 'tutorial']
   const currentIndex = steps.indexOf(step)
 
   // Save progress whenever step or data changes (except for evolution step)
@@ -297,6 +302,14 @@ export function Onboarding() {
           )}
           {step === 'features' && (
             <FeaturesStep
+              onNext={goNext}
+              onBack={goBack}
+            />
+          )}
+          {step === 'archetype' && (
+            <ArchetypeStep
+              value={data.archetype}
+              onChange={(v) => updateData('archetype', v)}
               onNext={goNext}
               onBack={goBack}
             />
@@ -1006,6 +1019,48 @@ function FeaturesStep({
             </div>
           )
         })}
+      </div>
+
+      <div className="flex gap-3">
+        <Button variant="ghost" onClick={onBack}>
+          Back
+        </Button>
+        <Button onClick={onNext} className="flex-1">
+          Continue
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function ArchetypeStep({
+  value,
+  onChange,
+  onNext,
+  onBack
+}: {
+  value: Archetype
+  onChange: (v: Archetype) => void
+  onNext: () => void
+  onBack: () => void
+}) {
+  const isPremium = useSubscriptionStore((s) => s.isPremium)
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-2">
+        Choose Your Archetype
+      </h2>
+      <p className="text-muted-foreground mb-6">
+        Your archetype determines how you earn bonus DP.
+      </p>
+
+      <div className="mb-6">
+        <ArchetypeSelector
+          selected={value}
+          isPremium={isPremium}
+          onSelect={onChange}
+        />
       </div>
 
       <div className="flex gap-3">

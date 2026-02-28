@@ -29,7 +29,9 @@ import {
   UnitSystem,
   NotificationPreferences
 } from '@/stores'
-import { LABELS } from '@/design/constants'
+import { LABELS, ARCHETYPE_INFO } from '@/design/constants'
+import type { Archetype } from '@/design/constants'
+import { ArchetypeSelector } from '@/components'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { friendlyError } from '@/lib/errors'
 import { getSupabaseClient } from '@/lib/supabase'
@@ -506,6 +508,28 @@ export function Settings() {
                 </p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Archetype */}
+        <Card className="py-0">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">ARCHETYPE</h3>
+            <ArchetypeSelector
+              selected={profile?.archetype || 'bro'}
+              isPremium={isPremium}
+              onSelect={(archetype: Archetype) => {
+                setProfile({ archetype })
+                toast.success(`Archetype changed to ${ARCHETYPE_INFO[archetype].name}`)
+              }}
+            />
+            {profile?.archetype && profile.archetype !== 'bro' && (
+              <div className="mt-4 p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <p className="text-sm text-primary font-medium">
+                  Active Bonus: {ARCHETYPE_INFO[profile.archetype].boosts}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
