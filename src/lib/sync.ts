@@ -134,6 +134,7 @@ export async function syncProfileToCloud() {
       age: profile.age,
       goal: profile.goal,
       avatar_base: profile.avatarBase,
+      archetype: profile.archetype || 'bro',
       current_streak: profile.currentStreak,
       longest_streak: profile.longestStreak,
       last_check_in_date: profile.lastCheckInDate,
