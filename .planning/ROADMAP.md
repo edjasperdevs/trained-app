@@ -72,10 +72,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
-- [ ] 19-02-PLAN.md — Paywall screen with legal text, restore purchases, Settings subscription management
-- [ ] 19-03-PLAN.md — handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
-- [ ] 19-04-PLAN.md — PremiumGate component and UpgradePrompt fallback for client-side feature gating
+- [x] 19-01-PLAN.md — RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
+- [x] 19-02-PLAN.md — Paywall screen with legal text, restore purchases, Settings subscription management
+- [x] 19-03-PLAN.md — handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
+- [x] 19-04-PLAN.md — PremiumGate component and UpgradePrompt fallback for client-side feature gating
 
 ### Phase 20: Health Tracking
 **Goal**: Users can track daily steps and sleep -- automatically from HealthKit or manually -- and earn DP for meeting health thresholds
@@ -87,11 +87,11 @@ Plans:
   3. User who denies HealthKit (or is on web) can manually enter steps and sleep and the app works identically
   4. User earns +10 DP when steps exceed 10,000 and +10 DP when sleep exceeds 7 hours
   5. App shows an explanatory screen before requesting HealthKit permission (soft-ask pattern), and handles denial gracefully without re-prompting
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 20-01: healthStore, HealthKit plugin setup, soft-ask permission screen, steps and sleep reading
-- [ ] 20-02: Manual entry fallback UI, DP award integration, daily_health Supabase table
+- [ ] 20-01-PLAN.md — HealthKit plugin setup, health.ts wrapper, healthStore, iOS entitlements
+- [ ] 20-02-PLAN.md — HealthPermission soft-ask screen, HealthCard display, manual entry UI, DP awards, daily_health table
 
 ### Phase 21: Archetypes
 **Goal**: Users select a personal archetype that modifies how they earn DP -- free users get Bro (generalist), premium subscribers unlock 4 specialized archetypes that boost specific actions
@@ -235,7 +235,7 @@ Plans:
 | 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
 | 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
 | 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 19. Subscriptions | 4/4 | Complete    | 2026-02-28 | - |
+| 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
 | 20. Health Tracking | v2.0 | 0/2 | Not started | - |
 | 21. Archetypes | v2.0 | 0/2 | Not started | - |
 | 22. Protocol Orders | v2.0 | 0/2 | Not started | - |
