@@ -66,6 +66,25 @@ export const ARCHETYPE_MODIFIERS: Record<Archetype, Partial<Record<DPAction, num
   bull: {}, // Deferred to v2.1
 }
 
+// DP values duplicated from dpStore to avoid circular import
+const DP_VALUES: Record<DPAction, number> = {
+  training: 50,
+  meal: 15,
+  protein: 25,
+  steps: 10,
+  sleep: 10,
+}
+
+/**
+ * Calculate modified DP for a given action and archetype.
+ * Used for UI display to show bonus DP amounts.
+ */
+export function getModifiedDP(action: DPAction, archetype: Archetype): number {
+  const base = DP_VALUES[action]
+  const modifier = ARCHETYPE_MODIFIERS[archetype]?.[action] || 1
+  return Math.round(base * modifier)
+}
+
 export const LABELS = {
   xp: 'DP',
   xpFull: 'Discipline Points',

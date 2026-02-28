@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getLocalDateString, getLocalDaysDifference } from '../lib/dateUtils'
+import { useUserStore } from './userStore'
+import { ARCHETYPE_MODIFIERS } from '@/design/constants'
 
 export type DPAction = 'training' | 'meal' | 'protein' | 'steps' | 'sleep'
 
@@ -88,7 +90,12 @@ export const useDPStore = create<DPStore>()(
       awardDP: (action: DPAction) => {
         const state = get()
         const today = getLocalDateString()
-        const dpValue = DP_VALUES[action]
+
+        // Get archetype and apply modifier
+        const archetype = useUserStore.getState().profile?.archetype || 'bro'
+        const baseDP = DP_VALUES[action]
+        const modifier = ARCHETYPE_MODIFIERS[archetype]?.[action] || 1
+        const dpValue = Math.round(baseDP * modifier)
 
         // Find or create today's log
         let todayLog = state.dailyLogs.find(log => log.date === today)
@@ -96,12 +103,12 @@ export const useDPStore = create<DPStore>()(
           todayLog = { date: today, training: 0, meals: 0, protein: 0, steps: 0, sleep: 0, total: 0 }
         }
 
-        // Check meal cap
+        // Check meal cap (enforced before modifier - cap is on count, not DP)
         if (action === 'meal' && todayLog.meals >= MEAL_CAP_PER_DAY) {
           return { dpAwarded: 0, rankedUp: false, newRank: state.currentRank }
         }
 
-        // Calculate new totalDP
+        // Calculate new totalDP with modified DP value
         const newTotalDP = state.totalDP + dpValue
         const oldRank = state.currentRank
         const newRank = calculateRank(newTotalDP)
