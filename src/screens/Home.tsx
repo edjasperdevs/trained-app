@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal, ProtocolOrders } from '@/components'
+import { EvolvingAvatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal, ProtocolOrders } from '@/components'
 import { HealthCard } from '@/components/HealthCard'
 import { useQuestStore } from '@/stores/questStore'
 import { Flame, Beef, CheckCircle2, Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck } from 'lucide-react'
@@ -25,7 +25,7 @@ export function Home() {
 
   // PERF-02: Use granular selectors for reactive state
   const profile = useUserStore((state) => state.profile)
-  const currentRank = useDPStore((state) => state.currentRank)
+  // currentRank is now read internally by EvolvingAvatar component
   const obedienceStreak = useDPStore((state) => state.obedienceStreak)
 
   // PERF-02: Selectors for computed values that depend on state
@@ -219,8 +219,8 @@ export function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
           <CardContent className="p-4 relative">
             <div className="flex items-start gap-6">
-              <div data-testid="home-level-display">
-                <Avatar size="lg" showMood showLevel level={currentRank} />
+              <div data-testid="home-level-display" className="transition-all duration-500 ease-out">
+                <EvolvingAvatar size="lg" />
               </div>
               <div className="flex-1" data-testid="home-xp-display">
                 <DPDisplay />
