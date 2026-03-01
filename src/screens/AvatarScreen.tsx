@@ -1,4 +1,4 @@
-import { Avatar } from '@/components'
+import { EvolvingAvatar } from '@/components'
 import { useAvatarStore, useDPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,7 +31,9 @@ export function AvatarScreen() {
 
         {/* Main Avatar Display */}
         <div className="flex justify-center animate-in zoom-in-90 fade-in duration-500 delay-100" data-testid="avatar-display">
-          <Avatar size="xl" showMood showLevel level={currentRank} />
+          <div className="transition-all duration-500 ease-out">
+            <EvolvingAvatar size="xl" />
+          </div>
         </div>
       </div>
 
