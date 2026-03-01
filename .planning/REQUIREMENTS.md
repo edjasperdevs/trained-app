@@ -30,7 +30,7 @@
 
 - [x] **AVATAR-01**: User has an evolving silhouette avatar that reflects rank progression
 - [x] **AVATAR-02**: Avatar changes at 5 rank milestones (stages tied to specific ranks)
-- [ ] **AVATAR-03**: Avatar is displayed prominently on the home screen
+- [x] **AVATAR-03**: Avatar is displayed prominently on the home screen
 
 ### Health Tracking
 
@@ -129,7 +129,7 @@
 | GAME-09 | Phase 18 | Complete |
 | AVATAR-01 | Phase 23 | Complete |
 | AVATAR-02 | Phase 23 | Complete |
-| AVATAR-03 | Phase 23 | Pending |
+| AVATAR-03 | Phase 23 | Complete |
 | HEALTH-01 | Phase 20 | Complete |
 | HEALTH-02 | Phase 20 | Complete |
 | HEALTH-03 | Phase 20 | Complete |
