@@ -147,12 +147,12 @@ Plans:
   3. PrivacyInfo.xcprivacy declares HealthKit and StoreKit API usage
   4. App is live on TestFlight with working sandbox purchases and HealthKit integration
   5. App is submitted to the App Store with screenshots, metadata, IAP products, and review notes
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 24-01: XP-to-DP data migration (Fresh Start messaging, xpStore cleanup, data preservation verification)
-- [ ] 24-02: PrivacyInfo.xcprivacy update, AASA Team ID, Xcode signing, TestFlight build
-- [ ] 24-03: App Store Connect metadata, screenshots, IAP product submission, review notes
+- [ ] 24-01-PLAN.md — Data migration (Fresh Start modal, xpStore cleanup, data preservation)
+- [ ] 24-02-PLAN.md — Build preparation (PrivacyInfo.xcprivacy HealthKit, AASA Team ID)
+- [ ] 24-03-PLAN.md — App Store submission (metadata, review notes, TestFlight, submission)
 
 <details>
 <summary>v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)</summary>
@@ -239,5 +239,5 @@ Plans:
 | 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 21. Archetypes | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 22. Protocol Orders | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 23. Avatar Evolution | v2.0 | Complete    | 2026-03-01 | 2026-03-01 |
+| 23. Avatar Evolution | v2.0 | 2/2 | Complete | 2026-03-01 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
