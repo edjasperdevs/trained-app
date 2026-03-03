@@ -1,19 +1,27 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
-import { corsHeaders } from "../_shared/cors.ts"
+import { getResponseHeaders, getCorsHeaders } from "../_shared/cors.ts"
+import { sanitizeErrorMessage, logError, checkMemoryRateLimit } from "../_shared/security.ts"
+import { validateMealPlan } from "../_shared/schemas.ts"
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY")
+
+// Rate limit: 5 meal plan generations per hour per user
+const RATE_LIMIT_MAX = 5
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
 
 serve(async (req) => {
     // Handle CORS
     if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+        return new Response('ok', { headers: getCorsHeaders(req) })
     }
+
+    const headers = getResponseHeaders(req)
 
     try {
         const authHeader = req.headers.get('Authorization')
         if (!authHeader) {
-            throw new Error('No authorization header')
+            throw new Error('Missing authorization header')
         }
 
         // Initialize Supabase client
@@ -26,7 +34,14 @@ serve(async (req) => {
         // Get user from auth token
         const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
         if (userError || !user) {
-            throw new Error('Unauthorized')
+            throw new Error('Not authenticated')
+        }
+
+        // Rate limiting
+        const rateLimitKey = `meal-plan:${user.id}`
+        const rateLimit = checkMemoryRateLimit(rateLimitKey, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS)
+        if (!rateLimit.allowed) {
+            throw new Error('Rate limit exceeded')
         }
 
         // Fetch user's macro targets and preferences
@@ -39,6 +54,11 @@ serve(async (req) => {
         const prefs = prefsRes.data
 
         if (!macros) {
+            throw new Error('Macro targets not set')
+        }
+
+        // Validate macro values are reasonable
+        if (macros.calories < 500 || macros.calories > 10000) {
             throw new Error('Macro targets not set')
         }
 
@@ -84,7 +104,8 @@ Constraints:
 }`
 
         if (!OPENAI_API_KEY) {
-            throw new Error('OpenAI API key missing')
+            logError('generate-meal-plan', new Error('OPENAI_API_KEY not configured'))
+            throw new Error('AI service not configured')
         }
 
         // Call OpenAI
@@ -95,7 +116,7 @@ Constraints:
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini', // or gpt-4o depending on preference
+                model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: 'Generate my daily meal plan.' }
@@ -106,24 +127,42 @@ Constraints:
         })
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("OpenAI Error:", errorText);
-            throw new Error(`OpenAI error: ${response.statusText}`);
+            const errorText = await response.text()
+            logError('generate-meal-plan', new Error('OpenAI API error'), { status: response.status, body: errorText })
+            throw new Error('AI service temporarily unavailable')
         }
 
         const aiData = await response.json()
         const content = aiData.choices[0].message.content
-        const plan = JSON.parse(content)
 
-        return new Response(JSON.stringify(plan), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        // Parse and validate the AI response
+        let rawPlan: unknown
+        try {
+            rawPlan = JSON.parse(content)
+        } catch {
+            logError('generate-meal-plan', new Error('AI returned invalid JSON'), { content })
+            throw new Error('AI service returned invalid data')
+        }
+
+        // Validate and sanitize the meal plan
+        const validationResult = validateMealPlan(rawPlan)
+        if (!validationResult.success) {
+            logError('generate-meal-plan', new Error('AI response validation failed'), {
+                error: validationResult.error,
+                rawPlan
+            })
+            throw new Error('AI service returned invalid data')
+        }
+
+        return new Response(JSON.stringify(validationResult.data), {
+            headers,
             status: 200,
         })
 
     } catch (error) {
-        console.error('Error generating meal plan:', error)
-        return new Response(JSON.stringify({ error: error.message }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        logError('generate-meal-plan', error)
+        return new Response(JSON.stringify({ error: sanitizeErrorMessage(error) }), {
+            headers,
             status: 400,
         })
     }

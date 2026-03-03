@@ -1,16 +1,39 @@
-import { corsHeaders } from '../_shared/cors.ts'
+import { getResponseHeaders, getCorsHeaders } from '../_shared/cors.ts'
+import { sanitizeErrorMessage, logError } from '../_shared/security.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+/**
+ * Sanitize user-provided text for safe inclusion in HTML emails.
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
+
+  const headers = getResponseHeaders(req)
 
   try {
     // 1. Parse submission_id from body
     const { submission_id } = await req.json()
-    if (!submission_id) throw new Error('Missing submission_id')
+    if (!submission_id || typeof submission_id !== 'string') {
+      throw new Error('Missing submission_id')
+    }
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(submission_id)) {
+      throw new Error('Invalid submission_id format')
+    }
 
     // 2. Admin client (bypasses RLS)
     const admin = createClient(
@@ -26,6 +49,7 @@ Deno.serve(async (req) => {
       .single()
 
     if (fetchError || !submission) {
+      logError('handle-intake-complete', fetchError || new Error('Submission not found'), { submission_id })
       throw new Error('Submission not found')
     }
 
@@ -33,22 +57,39 @@ Deno.serve(async (req) => {
     if (submission.status !== 'new') {
       return new Response(
         JSON.stringify({ success: true, action: 'already_processed' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers }
       )
     }
 
     // 5. Send notification email via Resend
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-    if (!RESEND_API_KEY) throw new Error('Email service not configured')
+    if (!RESEND_API_KEY) {
+      logError('handle-intake-complete', new Error('RESEND_API_KEY not configured'))
+      throw new Error('Email service not configured')
+    }
 
     const APP_URL = Deno.env.get('APP_URL') || 'https://app.welltrained.fitness'
     const EMAIL_FROM = Deno.env.get('EMAIL_FROM') || 'Trained <noreply@contact.welltrained.fitness>'
+    const COACH_EMAIL = Deno.env.get('COACH_NOTIFICATION_EMAIL') || 'coachjasper@welltrained.fitness'
+
+    // Sanitize all user-provided content
+    const safeName = escapeHtml(submission.full_name || 'Unknown')
+    const safeEmail = escapeHtml(submission.email || 'Not provided')
+    const safeGoal = escapeHtml(submission.primary_goal || 'Not specified')
+    const safeExperience = escapeHtml(submission.training_experience || 'Not specified')
+    const safeTrainingDays = submission.training_days_per_week != null
+      ? String(submission.training_days_per_week)
+      : 'Not specified'
+    const safeCommitment = submission.commitment_level != null
+      ? `${submission.commitment_level}/10`
+      : 'Not specified'
 
     const truncatedWhyNow = submission.why_now
       ? submission.why_now.length > 200
         ? submission.why_now.slice(0, 200) + '...'
         : submission.why_now
       : 'Not provided'
+    const safeWhyNow = escapeHtml(truncatedWhyNow)
 
     const emailHtml = `
 <!DOCTYPE html>
@@ -80,43 +121,43 @@ Deno.serve(async (req) => {
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Name</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.full_name}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeName}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Email</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.email}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeEmail}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Primary Goal</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.primary_goal || 'Not specified'}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeGoal}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Training Experience</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.training_experience || 'Not specified'}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeExperience}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Training Days/Week</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.training_days_per_week ?? 'Not specified'}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeTrainingDays}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;border-bottom:1px solid #2a2a4e;">
                     <span style="font-size:13px;color:#6b6b80;">Commitment Level</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${submission.commitment_level != null ? submission.commitment_level + '/10' : 'Not specified'}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;">${safeCommitment}</span>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:8px 16px;">
                     <span style="font-size:13px;color:#6b6b80;">Why Now</span><br>
-                    <span style="font-size:15px;color:#ffffff;font-weight:500;line-height:1.4;">${truncatedWhyNow}</span>
+                    <span style="font-size:15px;color:#ffffff;font-weight:500;line-height:1.4;">${safeWhyNow}</span>
                   </td>
                 </tr>
               </table>
@@ -155,31 +196,28 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: EMAIL_FROM,
-        to: ['coachjasper@welltrained.fitness'],
-        subject: `New Intake Completed — ${submission.full_name}`,
+        to: [COACH_EMAIL],
+        subject: `New Intake Completed — ${safeName}`,
         html: emailHtml,
       }),
     })
 
     if (!emailRes.ok) {
       const errBody = await emailRes.text()
-      console.error('Resend error:', errBody)
+      logError('handle-intake-complete', new Error('Resend API error'), { status: emailRes.status, body: errBody })
       throw new Error('Failed to send notification email')
     }
 
     // 6. Return success
     return new Response(
       JSON.stringify({ success: true, action: 'notification_sent' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers }
     )
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    logError('handle-intake-complete', error)
     return new Response(
-      JSON.stringify({ error: message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: sanitizeErrorMessage(error) }),
+      { status: 400, headers }
     )
   }
 })

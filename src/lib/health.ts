@@ -1,5 +1,7 @@
 import { Health } from '@capgo/capacitor-health'
+import { Device } from '@capacitor/device'
 import { isIOS } from '@/lib/platform'
+import { supabase } from '@/lib/supabase'
 
 /**
  * Check if HealthKit is available on the device.
@@ -13,6 +15,46 @@ export async function isHealthAvailable(): Promise<boolean> {
     return available
   } catch {
     return false
+  }
+}
+
+/**
+ * Record health data consent in the database for audit compliance.
+ */
+async function recordHealthConsent(authorized: boolean): Promise<void> {
+  try {
+    if (!supabase) return
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // Get device info for audit trail
+    let deviceModel = 'unknown'
+    let osVersion = 'unknown'
+    try {
+      const deviceInfo = await Device.getInfo()
+      deviceModel = deviceInfo.model || 'unknown'
+      osVersion = `${deviceInfo.platform} ${deviceInfo.osVersion || ''}`
+    } catch {
+      // Non-critical
+    }
+
+    const consentData = {
+      user_id: user.id,
+      steps_authorized: authorized,
+      consent_granted_at: authorized ? new Date().toISOString() : null,
+      consent_revoked_at: authorized ? null : new Date().toISOString(),
+      device_model: deviceModel,
+      os_version: osVersion,
+      updated_at: new Date().toISOString(),
+    }
+
+    await supabase
+      .from('health_data_consent')
+      .upsert(consentData, { onConflict: 'user_id' })
+  } catch (error) {
+    // Log but don't fail - consent recording is for audit, not blocking
+    console.error('Failed to record health consent:', error)
   }
 }
 
@@ -33,10 +75,26 @@ export async function requestHealthPermission(): Promise<boolean> {
       write: [],
     })
     // readAuthorized contains the data types that were authorized
-    return result.readAuthorized.includes('steps')
+    const authorized = result.readAuthorized.includes('steps')
+
+    // Record consent for audit compliance
+    await recordHealthConsent(authorized)
+
+    return authorized
   } catch {
+    // Record failed/denied consent
+    await recordHealthConsent(false)
     return false
   }
+}
+
+/**
+ * Revoke health data access and record the revocation.
+ * Note: This doesn't actually revoke iOS permissions (user must do that in Settings),
+ * but it records the user's intent and we stop reading data.
+ */
+export async function revokeHealthPermission(): Promise<void> {
+  await recordHealthConsent(false)
 }
 
 /**

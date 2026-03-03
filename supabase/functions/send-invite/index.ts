@@ -1,11 +1,18 @@
-import { corsHeaders } from '../_shared/cors.ts'
+import { getResponseHeaders, getCorsHeaders } from '../_shared/cors.ts'
+import { isValidEmail, sanitizeErrorMessage, logError, checkMemoryRateLimit } from '../_shared/security.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// Rate limit: 10 invites per hour per user
+const RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
+
+  const headers = getResponseHeaders(req)
 
   try {
     // 1. Authenticate caller
@@ -20,13 +27,20 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) throw new Error('Not authenticated')
 
-    // 2. Admin client (bypasses RLS)
+    // 2. Rate limiting
+    const rateLimitKey = `invite:${user.id}`
+    const rateLimit = checkMemoryRateLimit(rateLimitKey, RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS)
+    if (!rateLimit.allowed) {
+      throw new Error('Rate limit exceeded')
+    }
+
+    // 3. Admin client (bypasses RLS)
     const admin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // 3. Verify coach role and get coach email
+    // 4. Verify coach role and get coach email
     const { data: profile } = await admin
       .from('profiles')
       .select('role, email')
@@ -36,19 +50,19 @@ Deno.serve(async (req) => {
       throw new Error('Only coaches can send invites')
     }
 
-    // 4. Parse and validate email
+    // 5. Parse and validate email with RFC 5322 compliant validation
     const { email } = await req.json()
     const normalizedEmail = email?.trim().toLowerCase()
-    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    if (!isValidEmail(normalizedEmail)) {
       throw new Error('Invalid email address')
     }
 
-    // 5. Prevent self-invite
+    // 6. Prevent self-invite
     if (normalizedEmail === profile.email?.toLowerCase()) {
       throw new Error('You cannot invite yourself')
     }
 
-    // 6. Check if user already exists
+    // 7. Check if user already exists
     const { data: existingProfile } = await admin
       .from('profiles')
       .select('id')
@@ -75,15 +89,18 @@ Deno.serve(async (req) => {
         status: 'active',
       })
 
-      if (insertError) throw new Error('Failed to add client')
+      if (insertError) {
+        logError('send-invite', insertError, { userId: user.id, action: 'add_client' })
+        throw new Error('Failed to add client')
+      }
 
       return new Response(
         JSON.stringify({ success: true, action: 'added_directly' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers }
       )
     }
 
-    // 7. User does not exist -- create/update invite (upsert)
+    // 8. User does not exist -- create/update invite (upsert)
     const { data: invite, error: upsertError } = await admin
       .from('invites')
       .upsert(
@@ -98,11 +115,17 @@ Deno.serve(async (req) => {
       .select('token')
       .single()
 
-    if (upsertError) throw new Error('Failed to create invite')
+    if (upsertError) {
+      logError('send-invite', upsertError, { userId: user.id, action: 'create_invite' })
+      throw new Error('Failed to create invite')
+    }
 
-    // 8. Send email via Resend
+    // 9. Send email via Resend
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-    if (!RESEND_API_KEY) throw new Error('Email service not configured')
+    if (!RESEND_API_KEY) {
+      logError('send-invite', new Error('RESEND_API_KEY not configured'), { userId: user.id })
+      throw new Error('Email service not configured')
+    }
 
     const APP_URL = Deno.env.get('APP_URL') || 'https://app.welltrained.fitness'
     const EMAIL_FROM = Deno.env.get('EMAIL_FROM') || 'Trained <noreply@contact.welltrained.fitness>'
@@ -186,23 +209,20 @@ Deno.serve(async (req) => {
 
     if (!emailRes.ok) {
       const errBody = await emailRes.text()
-      console.error('Resend error:', errBody)
+      logError('send-invite', new Error('Resend API error'), { status: emailRes.status, body: errBody })
       throw new Error('Failed to send invite email')
     }
 
-    // 9. Return success
+    // 10. Return success
     return new Response(
       JSON.stringify({ success: true, action: 'invite_sent' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers }
     )
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    logError('send-invite', error)
     return new Response(
-      JSON.stringify({ error: message }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: sanitizeErrorMessage(error) }),
+      { status: 400, headers }
     )
   }
 })
