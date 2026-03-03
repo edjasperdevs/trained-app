@@ -3,6 +3,9 @@ import { LABELS } from '@/design/constants'
 import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Lock } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { motion } from 'framer-motion'
+import { springs } from '@/lib/animations'
+import { CountUp } from './CountUp'
 
 interface StreakDisplayProps {
   showCard?: boolean
@@ -43,7 +46,7 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
         <div className="flex items-center gap-2">
           <Flame size={18} className="text-primary" />
           <span className="font-bold">
-            {obedienceStreak} Day {LABELS.streak.split(' ').pop()}
+            <CountUp to={obedienceStreak} /> Day {LABELS.streak.split(' ').pop()}
           </span>
         </div>
       </div>
@@ -55,14 +58,19 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
           const isGraceDay = profile?.streakPaused && index === 5 // Yesterday was missed
 
           return (
-            <div key={day.date} className="flex flex-col items-center gap-1">
+            <motion.div
+              key={day.date}
+              className="flex flex-col items-center gap-1"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.05, ...springs.bouncy }}
+            >
               <span className="text-xs text-muted-foreground">
                 {day.dayLetter}
               </span>
-              <div
+              <motion.div
                 className={cn(
                   'w-8 h-8 rounded-sm flex items-center justify-center text-sm relative',
-                  isToday && hasActivity && 'animate-in zoom-in-50 duration-300',
                   hasActivity
                     ? 'bg-streak-active text-primary-foreground'
                     : isGraceDay
@@ -71,6 +79,14 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
                         ? 'bg-card border-2 border-primary border-dashed'
                         : 'bg-streak-inactive text-muted-foreground'
                 )}
+                animate={isToday && hasActivity ? {
+                  boxShadow: ['0px 0px 0px rgba(200,255,0,0)', '0px 0px 15px rgba(200,255,0,0.6)', '0px 0px 0px rgba(200,255,0,0)']
+                } : {}}
+                transition={isToday && hasActivity ? {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                } : {}}
               >
                 {hasActivity ? (
                   '\u2713'
@@ -81,8 +97,8 @@ export function StreakDisplay({ showCard = true }: StreakDisplayProps) {
                 ) : (
                   ''
                 )}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )
         })}
       </div>
@@ -110,12 +126,19 @@ export function StreakBadge() {
 
   return (
     <div className="flex flex-col items-center gap-0.5">
-      <div className="px-3 py-1.5 flex items-center gap-1.5 bg-card border border-border rounded">
-        <Flame size={18} className="text-primary" />
+      <motion.div
+        animate={{
+          boxShadow: ['0px 0px 5px rgba(200,255,0,0.1)', '0px 0px 15px rgba(200,255,0,0.4)', '0px 0px 5px rgba(200,255,0,0.1)'],
+          borderColor: ['rgba(46,48,53,1)', 'rgba(200,255,0,0.5)', 'rgba(46,48,53,1)']
+        }}
+        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+        className="px-3 py-1.5 flex items-center gap-1.5 bg-card border rounded"
+      >
+        <Flame size={18} className="text-primary drop-shadow-[0_0_8px_rgba(200,255,0,0.8)]" />
         <span className="text-primary font-bold font-mono">
-          {obedienceStreak}
+          <CountUp to={obedienceStreak} />
         </span>
-      </div>
+      </motion.div>
       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Streak</span>
     </div>
   )

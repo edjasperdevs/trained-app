@@ -1,8 +1,11 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { haptics } from '@/lib/haptics'
 import { isNative } from '@/lib/platform'
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { ChevronRight } from 'lucide-react'
+import { Confetti } from '@/components/Confetti'
+import { springs } from '@/lib/animations'
+import { Trophy } from 'lucide-react'
 
 interface RankUpModalProps {
   oldRank: number
@@ -11,54 +14,10 @@ interface RankUpModalProps {
   onClose: () => void
 }
 
-// Dopamine Noir V2 palette
-const CONFETTI_COLORS = ['#C8FF00', '#D4FF33', '#A0CC00', '#86B300']
-
-interface ConfettiParticle {
-  color: string
-  startX: number
-  endX: number
-  rotation: number
-  duration: number
-  delay: number
-}
-
-function Confetti({ particle }: { particle: ConfettiParticle }) {
-  return (
-    <div
-      className="absolute top-0 w-3 h-3 rounded-sm"
-      style={{
-        backgroundColor: particle.color,
-        left: `${particle.startX}%`,
-        animation: `confetti-fall ${particle.duration}s ${particle.delay}s ease-out forwards`,
-        ['--confetti-end-x' as string]: `${particle.endX - particle.startX}vw`,
-        ['--confetti-rotation' as string]: `${particle.rotation}deg`,
-      }}
-    />
-  )
-}
-
 export function RankUpModal({ oldRank, newRank, rankName, onClose }: RankUpModalProps) {
-  // Generate confetti particles
-  const confettiParticles = useMemo<ConfettiParticle[]>(() => {
-    return Array.from({ length: 25 }).map((_, i) => {
-      const startX = Math.random() * 100
-      return {
-        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-        startX,
-        endX: startX + (Math.random() - 0.5) * 50,
-        rotation: Math.random() * 720 - 360,
-        duration: 2 + Math.random(),
-        delay: i * 0.05,
-      }
-    })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Haptic feedback + local notification on mount
   useEffect(() => {
     haptics.heavy()
 
-    // Schedule local notification for rank-up (progressive enhancement)
     if (isNative()) {
       LocalNotifications.schedule({
         notifications: [{
@@ -67,84 +26,101 @@ export function RankUpModal({ oldRank, newRank, rankName, onClose }: RankUpModal
           body: `You reached ${rankName} (Rank ${newRank})!`,
           schedule: { at: new Date(Date.now() + 100) },
         }],
-      }).catch(() => {
-        // Silent fail - progressive enhancement
-      })
+      }).catch(() => { })
     }
 
-    // Auto-close after 3 seconds
-    const timer = setTimeout(onClose, 3000)
+    const timer = setTimeout(onClose, 4000)
     return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
-      {/* Inject confetti keyframes (same as XPClaimModal) */}
-      <style>{`
-        @keyframes confetti-fall {
-          0% {
-            opacity: 0.6;
-            transform: translateY(-20px) translateX(0) rotate(0deg) scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(400px) translateX(var(--confetti-end-x)) rotate(var(--confetti-rotation)) scale(0.5);
-          }
-        }
-        @keyframes pulse-scale {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-      `}</style>
+      {/* Full-screen confetti burst */}
+      <Confetti trigger={true} duration={3500} />
 
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Rank up celebration"
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center animate-in fade-in duration-200"
-        onClick={onClose}
-      >
-        {/* Confetti */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {confettiParticles.map((particle, i) => (
-            <Confetti key={i} particle={particle} />
-          ))}
-        </div>
-
-        <div
-          className="text-center p-8 max-w-sm"
-          onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Rank up celebration"
+          className="fixed inset-0 bg-background/85 backdrop-blur-md z-50 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          onClick={onClose}
         >
-          {/* RANK UP header */}
-          <h2
-            className="text-4xl font-bold text-primary font-display mb-4 animate-in zoom-in-50 duration-500"
-            style={{ animation: 'pulse-scale 2s ease-in-out infinite' }}
+          <motion.div
+            className="text-center p-8 max-w-sm w-full mx-6"
+            initial={{ scale: 0.7, opacity: 0, y: 30 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={springs.bouncy}
+            onClick={(e) => e.stopPropagation()}
           >
-            RANK UP
-          </h2>
+            {/* Trophy icon */}
+            <motion.div
+              className="mx-auto mb-6 w-20 h-20 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center"
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.2, 1] }}
+              transition={{ duration: 0.6, times: [0, 0.6, 1], delay: 0.1 }}
+            >
+              <Trophy size={40} className="text-primary" />
+            </motion.div>
 
-          {/* Rank name */}
-          <p className="text-3xl font-bold text-primary font-display mb-6 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
-            {rankName}
-          </p>
+            {/* RANK UP label */}
+            <motion.p
+              className="text-xs font-bold tracking-[0.3em] text-primary/70 uppercase mb-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, ...springs.default }}
+            >
+              Rank Up
+            </motion.p>
 
-          {/* Rank transition */}
-          <div className="flex items-center justify-center gap-4 animate-in fade-in zoom-in-50 duration-500 delay-300">
-            <span className="text-2xl text-muted-foreground font-mono">
-              Rank {oldRank}
-            </span>
-            <ChevronRight size={24} className="text-primary" />
-            <span className="text-3xl font-bold font-mono text-primary">
-              Rank {newRank}
-            </span>
-          </div>
+            {/* New rank name — big headline */}
+            <motion.h2
+              className="text-5xl font-black text-primary font-display mb-3 leading-none"
+              initial={{ opacity: 0, scale: 0.8, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.4, ...springs.bouncy }}
+            >
+              {rankName.toUpperCase()}
+            </motion.h2>
 
-          {/* Dismiss hint */}
-          <p className="text-xs text-muted-foreground mt-8 animate-in fade-in duration-300 delay-500">
-            Tap to dismiss
-          </p>
-        </div>
-      </div>
+            {/* Rank number transition */}
+            <motion.div
+              className="flex items-center justify-center gap-3 mb-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              <span className="text-lg text-muted-foreground font-mono">
+                Rank {oldRank}
+              </span>
+              <motion.div
+                className="h-px flex-1 bg-primary/30"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.7, duration: 0.4 }}
+              />
+              <span className="text-2xl font-bold font-mono text-primary">
+                Rank {newRank}
+              </span>
+            </motion.div>
+
+            {/* Dismiss hint */}
+            <motion.p
+              className="text-xs text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+            >
+              Tap to dismiss
+            </motion.p>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
     </>
   )
 }

@@ -1,6 +1,7 @@
 import { useDPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { ProgressBar } from './ProgressBar'
+import { CountUp } from './CountUp'
 import { cn } from '@/lib/cn'
 
 interface DPDisplayProps {
@@ -48,7 +49,7 @@ export function DPDisplay({ compact = false }: DPDisplayProps) {
 
       {/* Total DP */}
       <p className={cn('font-mono text-primary text-sm mb-3')}>
-        {totalDP.toLocaleString()} {LABELS.xp}
+        <CountUp to={totalDP} /> {LABELS.xp}
       </p>
 
       {/* Progress Bar */}

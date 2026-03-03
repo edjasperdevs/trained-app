@@ -38,3 +38,6 @@ export { useHealthStore } from './healthStore'
 
 export { useQuestStore } from './questStore'
 export type { CompletedQuest } from './questStore'
+
+export { useMealPlanStore } from './mealPlanStore'
+export type { FoodPreferences, AIMeal, AIMealPlan } from './mealPlanStore'

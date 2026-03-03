@@ -1,5 +1,6 @@
-import { useEffect, useRef, lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef, lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
 import { withSentryReactRouterV6Routing } from '@/lib/sentry'
 import { useUserStore, useAvatarStore, useAuthStore, useSyncStore, useSubscriptionStore, useHealthStore } from '@/stores'
 import { flushPendingSync, pullCoachData } from '@/lib/sync'
@@ -14,7 +15,7 @@ import { updateBadge } from '@/lib/badge'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useRemindersStore } from '@/stores/remindersStore'
 import { analytics } from '@/lib/analytics'
-import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { Auth } from '@/screens'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
@@ -33,6 +34,8 @@ const Privacy = lazy(() => import('@/screens/Privacy').then(m => ({ default: m.P
 const Terms = lazy(() => import('@/screens/Terms').then(m => ({ default: m.Terms })))
 const Paywall = lazy(() => import('@/screens/Paywall').then(m => ({ default: m.Paywall })))
 const HealthPermission = lazy(() => import('@/screens/HealthPermission').then(m => ({ default: m.HealthPermission })))
+const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
+
 
 function AppContent() {
   const profile = useUserStore((state) => state.profile)
@@ -41,6 +44,15 @@ function AppContent() {
   const authLoading = useAuthStore((state) => state.isLoading)
   const user = useAuthStore((state) => state.user)
   const navigate = useNavigate()
+  const location = useLocation()
+  const { showDPToast, toasts, removeToast } = useDPToasts()
+
+  // Expose DP toast via window so dpStore can call it without circular imports
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ; (window as any).__dpToastFn = showDPToast
+    return () => { (window as any).__dpToastFn = undefined }
+  }, [showDPToast])
   const pushPermissionRequested = useRef(false)
 
   // Initialize auth on app load
@@ -275,29 +287,33 @@ function AppContent() {
   return (
     <>
       <ToastContainer />
+      <DPToastContainer toasts={toasts} onRemove={removeToast} />
       <div className="relative">
         <SyncStatusIndicator />
-        <SentryRoutes>
-          <Route path="/" element={
-            needsHealthPermission
-              ? <Navigate to="/health-permission" replace />
-              : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
-          } />
-          <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
-          <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
-          <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
-          <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
-          <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-          <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
-          <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
-          <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
-          <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
-          <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-          <Route path="/paywall" element={<Suspense fallback={<HomeSkeleton />}><Paywall /></Suspense>} />
-          <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
-          {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
-          <Route path="*" element={<NotFound />} />
-        </SentryRoutes>
+        <AnimatePresence mode="wait" initial={false}>
+          <SentryRoutes location={location} key={location.pathname}>
+            <Route path="/" element={
+              needsHealthPermission
+                ? <Navigate to="/health-permission" replace />
+                : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
+            } />
+            <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
+            <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
+            <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
+            <Route path="/protocol-ai" element={<Suspense fallback={<MacrosSkeleton />}><MealPlanScreen /></Suspense>} />
+            <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
+            <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
+            <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+            <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
+            <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+            <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
+            <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
+            <Route path="/paywall" element={<Suspense fallback={<HomeSkeleton />}><Paywall /></Suspense>} />
+            <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
+            {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
+            <Route path="*" element={<NotFound />} />
+          </SentryRoutes>
+        </AnimatePresence>
         <Navigation />
       </div>
     </>
@@ -305,10 +321,13 @@ function AppContent() {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true)
+
   return (
     <ErrorBoundary>
       <AppContent />
       <UpdatePrompt />
+      {showSplash && <AnimatedSplashScreen onComplete={() => setShowSplash(false)} />}
     </ErrorBoundary>
   )
 }

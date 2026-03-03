@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import App from './App'
 import '@fontsource-variable/inter'
 import '@fontsource-variable/oswald'
@@ -14,8 +15,8 @@ initSentry()
 // Expose dev seed utilities on window in dev mode
 if (import.meta.env.DEV) {
   import('./lib/devSeed').then(({ seedTestData, clearTestData }) => {
-    ;(window as any).seedTestData = seedTestData
-    ;(window as any).clearTestData = clearTestData
+    ; (window as any).seedTestData = seedTestData
+      ; (window as any).clearTestData = clearTestData
     console.log('🔧 Dev tools: seedTestData() / clearTestData()')
   })
 }
@@ -32,9 +33,11 @@ if (legacyTheme) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary fallback={<ErrorFallback />}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </MotionConfig>
     </ErrorBoundary>
   </React.StrictMode>,
 )

@@ -19,3 +19,4 @@ export {
 } from './sync'
 export { friendlyError } from './errors'
 export { haptics } from './haptics'
+export { MacroCalculator } from './formulas'

@@ -1,6 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { motion } from 'framer-motion'
+import { haptics } from '@/lib/haptics'
 
 interface NavItem {
   path: string
@@ -33,20 +35,34 @@ export function Navigation() {
               aria-current={isActive ? 'page' : undefined}
               data-testid={`nav-${item.label.toLowerCase()}`}
               className="flex flex-col items-center justify-center w-16 h-full relative"
+              onClick={() => {
+                if (!isActive) {
+                  haptics.light()
+                }
+              }}
             >
               {isActive && (
-                <div className="absolute -top-0.5 h-0.5 bg-primary w-10 rounded-full" />
+                <motion.div
+                  layoutId="nav-indicator"
+                  className="absolute -top-[1px] h-[3px] bg-primary w-10 rounded-full"
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                />
               )}
-              <item.icon
-                size={22}
-                strokeWidth={isActive ? 2 : 1.5}
-                className={cn(
-                  'transition-colors duration-150',
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                )}
-              />
+              <motion.div
+                whileTap={{ scale: 0.85 }}
+                className="flex items-center justify-center"
+              >
+                <item.icon
+                  size={24}
+                  strokeWidth={isActive ? 2.5 : 2}
+                  className={cn(
+                    'transition-colors duration-200',
+                    isActive ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                />
+              </motion.div>
               <span className={cn(
-                'text-[10px] mt-0.5 transition-colors duration-150 font-medium',
+                'text-[10px] mt-1 transition-colors duration-200 font-medium',
                 isActive ? 'text-primary' : 'text-muted-foreground'
               )}>
                 {item.label}

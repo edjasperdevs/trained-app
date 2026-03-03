@@ -2,14 +2,17 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { ProgressBar, MealBuilder, EmptyState, FoodSearch, RankUpModal } from '@/components'
+import { MealBuilder, EmptyState, FoodSearch, RankUpModal, AnimatedPage, AnimatedRing } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
 import { useDPStore } from '@/stores/dpStore'
+import { motion } from 'framer-motion'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
+import { useNavigate } from 'react-router-dom'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
+import { springs } from '@/lib/animations'
 
 type TabType = 'daily' | 'log' | 'meals' | 'calculator'
 
@@ -21,6 +24,7 @@ type MacroProgress = {
 } | null
 
 export function Macros() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabType>('daily')
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
@@ -66,231 +70,252 @@ export function Macros() {
   }
 
   return (
-    <div data-testid="macros-screen" className="min-h-screen pb-20">
-      {/* Coach Macro Updated Modal */}
-      {coachMacroUpdated && targets && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
-          <Card className="py-0 w-full max-w-sm">
-            <CardContent className="p-6 text-center">
-              <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
-              <p className="text-lg font-bold mb-2">Macros Updated by Coach</p>
-              <p className="text-muted-foreground text-sm mb-4">
-                Your coach has set new macro targets for you.
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-left mb-6">
-                <div>
-                  <p className="text-xs text-muted-foreground">Calories</p>
-                  <p className="text-xl font-bold font-digital text-primary">{targets.calories}</p>
+    <AnimatedPage>
+      <div data-testid="macros-screen" className="min-h-screen pb-20">
+        {/* Coach Macro Updated Modal */}
+        {coachMacroUpdated && targets && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
+            <Card className="py-0 w-full max-w-sm">
+              <CardContent className="p-6 text-center">
+                <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
+                <p className="text-lg font-bold mb-2">Macros Updated by Coach</p>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Your coach has set new macro targets for you.
+                </p>
+                <div className="grid grid-cols-2 gap-3 text-left mb-6">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Calories</p>
+                    <p className="text-xl font-bold font-digital text-primary">{targets.calories}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Protein</p>
+                    <p className="text-xl font-bold font-digital text-primary">{targets.protein}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Carbs</p>
+                    <p className="text-lg font-digital">{targets.carbs}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Fats</p>
+                    <p className="text-lg font-digital">{targets.fats}g</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Protein</p>
-                  <p className="text-xl font-bold font-digital text-primary">{targets.protein}g</p>
+                <div className="space-y-2">
+                  <Button className="w-full" onClick={() => { dismissCoachUpdate(); setActiveTab('daily') }}>
+                    View Macros
+                  </Button>
+                  <Button variant="ghost" className="w-full" onClick={dismissCoachUpdate}>
+                    Dismiss
+                  </Button>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Carbs</p>
-                  <p className="text-lg font-digital">{targets.carbs}g</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Fats</p>
-                  <p className="text-lg font-digital">{targets.fats}g</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Button className="w-full" onClick={() => { dismissCoachUpdate(); setActiveTab('daily') }}>
-                  View Macros
-                </Button>
-                <Button variant="ghost" className="w-full" onClick={dismissCoachUpdate}>
-                  Dismiss
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-      {/* Header */}
-      <div className="bg-card pt-8 pb-4 px-5">
-        <div className="flex items-center gap-2 mb-4">
-          <h1 className="text-2xl font-bold">Macros</h1>
-          {setBy === 'coach' && (
-            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              <ShieldCheck size={12} />
-              Set by Coach
-            </span>
+        {/* Header */}
+        <motion.div
+          className="bg-card pt-8 pb-4 px-5"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={springs.smooth}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold">Macros</h1>
+              {setBy === 'coach' && (
+                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                  <ShieldCheck size={12} />
+                  Set by Coach
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => navigate('/protocol-ai')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold border border-primary/20"
+            >
+              <Zap size={14} className="fill-current" /> Protocol AI
+            </button>
+          </div>
+
+          {/* Tabs with sliding indicator */}
+          <div className="flex gap-2 relative" role="tablist" aria-label="Macro views">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`tabpanel-${tab.id}`}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  'relative flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors z-10',
+                  activeTab === tab.id ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="macros-tab-indicator"
+                    className="absolute inset-0 bg-primary rounded-lg"
+                    style={{ zIndex: -1 }}
+                    transition={springs.snappy}
+                  />
+                )}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        <div className="px-5 py-6" data-sentry-mask>
+          {/* Coach-set macro targets at top */}
+          {setBy === 'coach' && targets && (
+            <Card className="py-0 border-primary/20 mb-6">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <ShieldCheck size={16} className="text-primary" />
+                  <h3 className="text-sm font-semibold text-muted-foreground">YOUR TARGETS</h3>
+                </div>
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Calories</p>
+                    <p className="text-lg font-bold font-digital text-primary">{targets.calories}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Protein</p>
+                    <p className="text-lg font-bold font-digital text-primary">{targets.protein}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Carbs</p>
+                    <p className="text-lg font-bold font-digital">{targets.carbs}g</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Fats</p>
+                    <p className="text-lg font-bold font-digital">{targets.fats}g</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeTab === 'daily' && (
+            <DailyView
+              progress={progress}
+              targets={targets}
+              proteinHit={isProteinTargetHit()}
+              caloriesHit={isCalorieTargetHit()}
+              onLogNamedMeal={(name, macros) => {
+                logNamedMeal(name, macros)
+                const result = useDPStore.getState().awardDP('meal')
+                if (result.rankedUp) {
+                  const rankInfo = useDPStore.getState().getRankInfo()
+                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+                }
+                scheduleSync()
+              }}
+              onAddRecentFood={addRecentFood}
+              recentFoods={recentFoods}
+              favoriteFoods={favoriteFoods}
+              onToggleFavorite={toggleFavoriteFood}
+              todayMeals={todayMeals}
+              onDeleteMeal={deleteLoggedMeal}
+              onSetupTargets={() => setActiveTab('calculator')}
+            />
+          )}
+
+          {activeTab === 'log' && (
+            <LogMealView
+              savedMeals={savedMeals}
+              favoriteFoods={favoriteFoods}
+              onToggleFavorite={toggleFavoriteFood}
+              onLogMeal={(name, macros) => {
+                logNamedMeal(name, macros)
+                const result = useDPStore.getState().awardDP('meal')
+                if (result.rankedUp) {
+                  const rankInfo = useDPStore.getState().getRankInfo()
+                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+                }
+                scheduleSync()
+              }}
+              onSaveMeal={saveMeal}
+              onDeleteSavedMeal={deleteSavedMeal}
+            />
+          )}
+
+          {activeTab === 'meals' && (
+            <SavedView
+              favoriteFoods={favoriteFoods}
+              recentFoods={recentFoods}
+              savedMeals={savedMeals}
+              onLogNamedMeal={(name, macros) => {
+                logNamedMeal(name, macros)
+                const result = useDPStore.getState().awardDP('meal')
+                if (result.rankedUp) {
+                  const rankInfo = useDPStore.getState().getRankInfo()
+                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+                }
+                scheduleSync()
+              }}
+              onToggleFavorite={toggleFavoriteFood}
+            />
+          )}
+
+          {activeTab === 'calculator' && (
+            setBy === 'coach' ? (
+              <Card className="py-0 border-primary/20">
+                <CardContent className="text-center py-8">
+                  <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
+                  <p className="text-lg font-bold mb-2">Macros Set by Coach</p>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    Your macro targets are managed by your coach. Contact them to request changes.
+                  </p>
+                  {targets && (
+                    <div className="grid grid-cols-2 gap-4 text-left max-w-xs mx-auto">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Calories</p>
+                        <p className="text-2xl font-bold font-digital text-primary">{targets.calories}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Protein</p>
+                        <p className="text-2xl font-bold font-digital text-primary">{targets.protein}g</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Carbs</p>
+                        <p className="text-lg font-digital">{targets.carbs}g</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Fats</p>
+                        <p className="text-lg font-digital">{targets.fats}g</p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <CalculatorView
+                currentWeight={profile?.weight || 150}
+                currentHeight={profile?.height || 70}
+                currentAge={profile?.age || 30}
+                currentGender={profile?.gender || 'male'}
+                currentGoal={profile?.goal || 'maintain'}
+                currentActivity={activityLevel}
+                targets={targets}
+                onCalculate={calculateMacros}
+              />
+            )
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2" role="tablist" aria-label="Macro views">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`tabpanel-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors',
-                activeTab === tab.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="px-5 py-6" data-sentry-mask>
-        {/* Coach-set macro targets at top */}
-        {setBy === 'coach' && targets && (
-          <Card className="py-0 border-primary/20 mb-6">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldCheck size={16} className="text-primary" />
-                <h3 className="text-sm font-semibold text-muted-foreground">YOUR TARGETS</h3>
-              </div>
-              <div className="grid grid-cols-4 gap-3 text-center">
-                <div>
-                  <p className="text-xs text-muted-foreground">Calories</p>
-                  <p className="text-lg font-bold font-digital text-primary">{targets.calories}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Protein</p>
-                  <p className="text-lg font-bold font-digital text-primary">{targets.protein}g</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Carbs</p>
-                  <p className="text-lg font-bold font-digital">{targets.carbs}g</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Fats</p>
-                  <p className="text-lg font-bold font-digital">{targets.fats}g</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'daily' && (
-          <DailyView
-            progress={progress}
-            targets={targets}
-            proteinHit={isProteinTargetHit()}
-            caloriesHit={isCalorieTargetHit()}
-            onLogNamedMeal={(name, macros) => {
-              logNamedMeal(name, macros)
-              const result = useDPStore.getState().awardDP('meal')
-              if (result.rankedUp) {
-                const rankInfo = useDPStore.getState().getRankInfo()
-                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-              }
-              scheduleSync()
-            }}
-            onAddRecentFood={addRecentFood}
-            recentFoods={recentFoods}
-            favoriteFoods={favoriteFoods}
-            onToggleFavorite={toggleFavoriteFood}
-            todayMeals={todayMeals}
-            onDeleteMeal={deleteLoggedMeal}
-            onSetupTargets={() => setActiveTab('calculator')}
+        {/* Rank Up Modal */}
+        {rankUpData && (
+          <RankUpModal
+            oldRank={rankUpData.oldRank}
+            newRank={rankUpData.newRank}
+            rankName={rankUpData.rankName}
+            onClose={() => setRankUpData(null)}
           />
-        )}
-
-        {activeTab === 'log' && (
-          <LogMealView
-            savedMeals={savedMeals}
-            favoriteFoods={favoriteFoods}
-            onToggleFavorite={toggleFavoriteFood}
-            onLogMeal={(name, macros) => {
-              logNamedMeal(name, macros)
-              const result = useDPStore.getState().awardDP('meal')
-              if (result.rankedUp) {
-                const rankInfo = useDPStore.getState().getRankInfo()
-                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-              }
-              scheduleSync()
-            }}
-            onSaveMeal={saveMeal}
-            onDeleteSavedMeal={deleteSavedMeal}
-          />
-        )}
-
-        {activeTab === 'meals' && (
-          <SavedView
-            favoriteFoods={favoriteFoods}
-            recentFoods={recentFoods}
-            savedMeals={savedMeals}
-            onLogNamedMeal={(name, macros) => {
-              logNamedMeal(name, macros)
-              const result = useDPStore.getState().awardDP('meal')
-              if (result.rankedUp) {
-                const rankInfo = useDPStore.getState().getRankInfo()
-                setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-              }
-              scheduleSync()
-            }}
-            onToggleFavorite={toggleFavoriteFood}
-          />
-        )}
-
-        {activeTab === 'calculator' && (
-          setBy === 'coach' ? (
-            <Card className="py-0 border-primary/20">
-              <CardContent className="text-center py-8">
-                <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
-                <p className="text-lg font-bold mb-2">Macros Set by Coach</p>
-                <p className="text-muted-foreground text-sm mb-6">
-                  Your macro targets are managed by your coach. Contact them to request changes.
-                </p>
-                {targets && (
-                  <div className="grid grid-cols-2 gap-4 text-left max-w-xs mx-auto">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Calories</p>
-                      <p className="text-2xl font-bold font-digital text-primary">{targets.calories}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Protein</p>
-                      <p className="text-2xl font-bold font-digital text-primary">{targets.protein}g</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Carbs</p>
-                      <p className="text-lg font-digital">{targets.carbs}g</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Fats</p>
-                      <p className="text-lg font-digital">{targets.fats}g</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <CalculatorView
-              currentWeight={profile?.weight || 150}
-              currentHeight={profile?.height || 70}
-              currentAge={profile?.age || 30}
-              currentGender={profile?.gender || 'male'}
-              currentGoal={profile?.goal || 'maintain'}
-              currentActivity={activityLevel}
-              targets={targets}
-              onCalculate={calculateMacros}
-            />
-          )
         )}
       </div>
-
-      {/* Rank Up Modal */}
-      {rankUpData && (
-        <RankUpModal
-          oldRank={rankUpData.oldRank}
-          newRank={rankUpData.newRank}
-          rankName={rankUpData.rankName}
-          onClose={() => setRankUpData(null)}
-        />
-      )}
-    </div>
+    </AnimatedPage>
   )
 }
 
@@ -390,56 +415,38 @@ function DailyView({
 
   return (
     <div className="space-y-6">
-      {/* Main Progress Rings */}
-      <div className="grid grid-cols-2 gap-4">
-        <div data-testid="macros-protein-display">
-          <MacroRing
+      {/* Hero Card: Stats Grid */}
+      <div className="bg-surface-dark border border-neutral-800 rounded-2xl p-6 shadow-lg shadow-black/50">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-8">
+          <AnimatedRing
+            percentage={progress.protein.percentage}
             label="Protein"
             current={progress.protein.current}
             target={progress.protein.target}
-            unit="g"
-            color="cyan"
-            hit={proteinHit}
+            subLabel="g"
           />
-        </div>
-        <div data-testid="macros-calories-display">
-          <MacroRing
+          <AnimatedRing
+            percentage={progress.calories.percentage}
             label="Calories"
             current={progress.calories.current}
             target={progress.calories.target}
-            unit=""
-            color="purple"
-            hit={caloriesHit}
+          />
+          <AnimatedRing
+            percentage={progress.carbs.percentage}
+            label="Carbs"
+            current={progress.carbs.current}
+            target={progress.carbs.target}
+            subLabel="g"
+          />
+          <AnimatedRing
+            percentage={progress.fats.percentage}
+            label="Fats"
+            current={progress.fats.current}
+            target={progress.fats.target}
+            subLabel="g"
           />
         </div>
       </div>
-
-      {/* Secondary Macros */}
-      <Card className="py-0">
-        <CardContent className="p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4">MACRONUTRIENTS</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Carbs</span>
-                <span className="font-digital">
-                  {progress.carbs.current}g / {progress.carbs.target}g
-                </span>
-              </div>
-              <ProgressBar progress={progress.carbs.percentage} color="primary" size="sm" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Fats</span>
-                <span className="font-digital">
-                  {progress.fats.current}g / {progress.fats.target}g
-                </span>
-              </div>
-              <ProgressBar progress={progress.fats.percentage} color="secondary" size="sm" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Quick Log */}
       <Card className="py-0">
@@ -671,41 +678,41 @@ function DailyView({
                   }
                   const isFav = favoriteFoods.some(f => f.id === meal.id)
                   return (
-                  <div
-                    key={meal.id}
-                    className="flex items-center justify-between bg-card rounded-lg p-3"
-                    data-testid="macros-meal-entry"
-                  >
-                    <button
-                      onClick={() => onToggleFavorite(asFavorite)}
-                      aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
-                      className="shrink-0 p-1 mr-2"
+                    <div
+                      key={meal.id}
+                      className="flex items-center justify-between bg-card rounded-lg p-3"
+                      data-testid="macros-meal-entry"
                     >
-                      <Heart
-                        size={16}
-                        className={cn(
-                          isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
-                        )}
-                      />
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{meal.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
-                      </p>
+                      <button
+                        onClick={() => onToggleFavorite(asFavorite)}
+                        aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
+                        className="shrink-0 p-1 mr-2"
+                      >
+                        <Heart
+                          size={16}
+                          className={cn(
+                            isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
+                          )}
+                        />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm">{meal.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
+                        </p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (await confirmAction('Delete this meal entry?', 'Delete Entry')) {
+                            onDeleteMeal(meal.id)
+                          }
+                        }}
+                        aria-label={`Delete ${meal.name}`}
+                        className="text-muted-foreground hover:text-destructive p-1"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <button
-                      onClick={async () => {
-                        if (await confirmAction('Delete this meal entry?', 'Delete Entry')) {
-                          onDeleteMeal(meal.id)
-                        }
-                      }}
-                      aria-label={`Delete ${meal.name}`}
-                      className="text-muted-foreground hover:text-destructive p-1"
-                    >
-                      ✕
-                    </button>
-                  </div>
                   )
                 })}
               </div>
@@ -716,70 +723,6 @@ function DailyView({
     </div>
   )
 }
-
-function MacroRing({
-  label,
-  current,
-  target,
-  unit,
-  color,
-  hit
-}: {
-  label: string
-  current: number
-  target: number
-  unit: string
-  color: 'cyan' | 'purple'
-  hit: boolean
-}) {
-  const percentage = Math.min((current / target) * 100, 100)
-  const circumference = 2 * Math.PI * 45
-  const strokeDashoffset = circumference - (percentage / 100) * circumference
-
-  const colorClass = hit ? 'stroke-success' : color === 'cyan' ? 'stroke-primary' : 'stroke-secondary'
-
-  return (
-    <Card className="py-0">
-      <CardContent className="flex flex-col items-center py-4">
-        <div className="relative w-28 h-28">
-          <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="8"
-              className="text-card"
-            />
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              strokeWidth="8"
-              strokeLinecap="round"
-              className={colorClass}
-              style={{
-                strokeDasharray: circumference,
-                strokeDashoffset,
-                transition: 'stroke-dashoffset 1s ease-out'
-              }}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold font-digital">{current}</span>
-            <span className="text-xs text-muted-foreground">{unit}</span>
-          </div>
-        </div>
-        <p className="mt-2 font-semibold">{label}</p>
-        <p className="text-xs text-muted-foreground">{target > 0 ? `of ${target}${unit}` : 'No target set'}</p>
-        {hit && <span className="text-xs text-success mt-1">Target Hit!</span>}
-      </CardContent>
-    </Card>
-  )
-}
-
 function SavedView({
   favoriteFoods,
   recentFoods,

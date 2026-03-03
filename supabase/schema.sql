@@ -643,3 +643,58 @@ CREATE TRIGGER workout_templates_updated_at
 CREATE TRIGGER assigned_workouts_updated_at
   BEFORE UPDATE ON assigned_workouts
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- AI Meal Planning Tables
+CREATE TABLE IF NOT EXISTS public.user_food_preferences (
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE PRIMARY KEY,
+    cuisines TEXT[] DEFAULT '{}',
+    dietary_restrictions TEXT[] DEFAULT '{}',
+    liked_foods TEXT[] DEFAULT '{}',
+    disliked_foods TEXT[] DEFAULT '{}',
+    allergies TEXT[] DEFAULT '{}',
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.ai_meal_plans (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    meals JSONB NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'active',
+    user_rating INTEGER,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    UNIQUE(user_id, date)
+);
+
+CREATE TABLE IF NOT EXISTS public.meal_plan_feedback (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    plan_id UUID NOT NULL REFERENCES public.ai_meal_plans(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    meal_index INTEGER NOT NULL,
+    feedback_type TEXT NOT NULL,
+    comments TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+ALTER TABLE public.user_food_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_meal_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.meal_plan_feedback ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own food preferences" ON public.user_food_preferences FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own food preferences" ON public.user_food_preferences FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own food preferences" ON public.user_food_preferences FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own meal plans" ON public.ai_meal_plans FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own meal plans" ON public.ai_meal_plans FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own meal plans" ON public.ai_meal_plans FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own meal plans" ON public.ai_meal_plans FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own meal plan feedback" ON public.meal_plan_feedback FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own meal plan feedback" ON public.meal_plan_feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own meal plan feedback" ON public.meal_plan_feedback FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own meal plan feedback" ON public.meal_plan_feedback FOR DELETE USING (auth.uid() = user_id);
+
+CREATE TRIGGER user_food_preferences_updated_at BEFORE UPDATE ON user_food_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER ai_meal_plans_updated_at BEFORE UPDATE ON ai_meal_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at();

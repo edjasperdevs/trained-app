@@ -1,7 +1,12 @@
-import { useAvatarStore } from '@/stores'
+import { useAvatarStore, useDPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
 import { cn } from '@/lib/cn'
-import { Sword, Wand2, Moon, LucideIcon } from 'lucide-react'
+import {
+  Sword, Swords, ShieldAlert, Flame, Crown,
+  Wand2, Zap, Sparkles, Orbit,
+  Moon, CloudLightning, Tornado, Waves,
+  LucideIcon
+} from 'lucide-react'
 
 interface AvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -17,11 +22,28 @@ const sizeClasses = {
   xl: { container: 'w-48 h-48', icon: 80 }
 }
 
-// Character base icon representations
-const CHARACTER_BASES: Record<string, { icon: LucideIcon; color: string }> = {
-  dominant: { icon: Sword, color: 'text-destructive' },
-  switch: { icon: Wand2, color: 'text-primary' },
-  submissive: { icon: Moon, color: 'text-info' }
+// Character base icon representations per stage (1-5)
+const CHARACTER_STAGES: Record<string, { icons: LucideIcon[]; color: string }> = {
+  dominant: {
+    icons: [Sword, Swords, ShieldAlert, Flame, Crown],
+    color: 'text-destructive'
+  },
+  switch: {
+    icons: [Wand2, Zap, Sparkles, Orbit, Crown],
+    color: 'text-primary'
+  },
+  submissive: {
+    icons: [Moon, CloudLightning, Tornado, Waves, Crown],
+    color: 'text-info'
+  }
+}
+
+function getStageForRank(rank: number): number {
+  if (rank < 4) return 0 // Stage 1
+  if (rank < 8) return 1 // Stage 2
+  if (rank < 12) return 2 // Stage 3
+  if (rank < 15) return 3 // Stage 4
+  return 4 // Stage 5
 }
 
 // Mood CSS classes
@@ -40,9 +62,13 @@ export function Avatar({
   level
 }: AvatarProps) {
   const { currentMood, baseCharacter, recentReaction } = useAvatarStore()
+  const { currentRank } = useDPStore()
 
   const iconSize = sizeClasses[size].icon
-  const CharacterIcon = CHARACTER_BASES[baseCharacter]?.icon || Sword
+  const stage = getStageForRank(currentRank)
+  const characterDef = CHARACTER_STAGES[baseCharacter] || CHARACTER_STAGES.dominant
+  const CharacterIcon = characterDef.icons[stage]
+
 
   return (
     <div className="relative inline-flex flex-col items-center">
@@ -56,7 +82,7 @@ export function Avatar({
       >
         <CharacterIcon
           size={iconSize}
-          className={CHARACTER_BASES[baseCharacter]?.color || 'text-muted-foreground'}
+          className={characterDef.color}
         />
       </div>
 

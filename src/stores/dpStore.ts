@@ -4,6 +4,16 @@ import { getLocalDateString, getLocalDaysDifference } from '../lib/dateUtils'
 import { useUserStore } from './userStore'
 import { ARCHETYPE_MODIFIERS } from '@/design/constants'
 
+// Lazy import to avoid circular dep — App.tsx exports this after mount
+function getGlobalShowDPToast() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (window as any).__dpToastFn as ((amount: number, action: string) => void) | undefined
+  } catch {
+    return undefined
+  }
+}
+
 export type DPAction = 'training' | 'meal' | 'protein' | 'steps' | 'sleep'
 
 export const DP_VALUES: Record<DPAction, number> = {
@@ -14,22 +24,24 @@ export const DP_VALUES: Record<DPAction, number> = {
   sleep: 10,
 }
 
+// Master spec rank table — ~24-27 weeks to Master rank at consistent daily activity
 export const RANKS = [
-  { rank: 1,  name: 'Initiate',    threshold: 0 },
-  { rank: 2,  name: 'Novice',      threshold: 200 },
-  { rank: 3,  name: 'Trainee',     threshold: 500 },
-  { rank: 4,  name: 'Disciplined', threshold: 1000 },
-  { rank: 5,  name: 'Committed',   threshold: 2000 },
-  { rank: 6,  name: 'Devoted',     threshold: 3500 },
-  { rank: 7,  name: 'Obedient',    threshold: 5500 },
-  { rank: 8,  name: 'Conditioned', threshold: 8000 },
-  { rank: 9,  name: 'Hardened',    threshold: 11000 },
-  { rank: 10, name: 'Proven',      threshold: 15000 },
-  { rank: 11, name: 'Forged',      threshold: 20000 },
-  { rank: 12, name: 'Tempered',    threshold: 27000 },
-  { rank: 13, name: 'Dominant',    threshold: 36000 },
-  { rank: 14, name: 'Elite',       threshold: 48000 },
-  { rank: 15, name: 'Master',      threshold: 65000 },
+  { rank: 0, name: 'Uninitiated', threshold: 0 },
+  { rank: 1, name: 'Initiate', threshold: 250 },
+  { rank: 2, name: 'Compliant', threshold: 750 },
+  { rank: 3, name: 'Obedient', threshold: 1500 },
+  { rank: 4, name: 'Disciplined', threshold: 2250 },
+  { rank: 5, name: 'Conditioned', threshold: 3000 },
+  { rank: 6, name: 'Proven', threshold: 3750 },
+  { rank: 7, name: 'Hardened', threshold: 4750 },
+  { rank: 8, name: 'Forged', threshold: 5750 },
+  { rank: 9, name: 'Trusted', threshold: 6750 },
+  { rank: 10, name: 'Enforcer', threshold: 7750 },
+  { rank: 11, name: 'Seasoned', threshold: 9000 },
+  { rank: 12, name: 'Elite', threshold: 10250 },
+  { rank: 13, name: 'Apex', threshold: 11500 },
+  { rank: 14, name: 'Sovereign', threshold: 13000 },
+  { rank: 15, name: 'Master', threshold: 14750 },
 ]
 
 const MEAL_CAP_PER_DAY = 3
@@ -74,11 +86,11 @@ function calculateRank(totalDP: number): number {
 
 const INITIAL_STATE = {
   totalDP: 0,
-  currentRank: 1,
+  currentRank: 0,
   obedienceStreak: 0,
   longestObedienceStreak: 0,
   lastActionDate: null as string | null,
-  lastCelebratedRank: 1,
+  lastCelebratedRank: 0,
   dailyLogs: [] as DailyDP[],
 }
 
@@ -161,6 +173,11 @@ export const useDPStore = create<DPStore>()(
           obedienceStreak: newStreak,
           longestObedienceStreak: newLongestStreak,
         })
+
+        // Fire DP toast notification
+        try {
+          getGlobalShowDPToast()?.(dpValue, action)
+        } catch { /* non-critical */ }
 
         return { dpAwarded: dpValue, rankedUp, newRank }
       },
