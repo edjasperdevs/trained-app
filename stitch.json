@@ -1,0 +1,58 @@
+{
+    "projectId": "4137572301609334881",
+    "projectName": "WellTrained V2 — Dopamine Noir",
+    "projectUrl": "https://stitch.withgoogle.com/projects/4137572301609334881",
+    "screens": {
+        "onboarding": {
+            "splash_v2": {
+                "screenId": "b8534ce61ce34b1f88b8c7c30207990b",
+                "title": "Cinematic Welcome Splash",
+                "note": "Primary splash — regenerated with max visual drama"
+            },
+            "create_account": {
+                "screenId": "ca57734d106141b0a43f8e4323b03499",
+                "title": "WellTrained Create Account"
+            },
+            "step_1_profile": {
+                "screenId": "1f37b128f3a84d8aaaabdc16c5b7bfa0",
+                "title": "Profile Setup Step 1 of 4"
+            },
+            "step_2_archetype": {
+                "screenId": "d04991d010684f108cb8d7927493f3c5",
+                "title": "Archetype Selection Step 2 of 4",
+                "note": "Himbo, Brute, Pup, Bull + Bro (free)"
+            },
+            "step_3_macros": {
+                "screenId": "ad5efabbd6d64679bd640a266381001f",
+                "title": "Macro Protocol Calculation Step 3 of 4"
+            },
+            "step_4_initiation": {
+                "screenId": "f14f83e41b744e22b4b50251eeb8fc55",
+                "title": "The Protocol Initiation — You're In (Step 4 of 4)",
+                "note": "Most cinematic screen — ENTER THE PROTOCOL CTA"
+            }
+        },
+        "main_app": {
+            "home_dashboard": {
+                "screenId": "af5690b889224a688467d7dbabab2c59",
+                "title": "WellTrained Dashboard"
+            },
+            "workouts": {
+                "screenId": "877e0e39e5a54373a9e8ee370bca2748",
+                "title": "WellTrained Workout Tracker"
+            },
+            "macros": {
+                "screenId": "8356818574564f4fb40c9f3686e56aa4",
+                "title": "WellTrained Nutrition Daily View"
+            },
+            "avatar_rank": {
+                "screenId": "e6e59e0745d04096bf03ea29e5034ac8",
+                "title": "WellTrained Rank Protocol"
+            },
+            "achievements": {
+                "screenId": "18cf15e817fc4be88736fcc4777903b9",
+                "title": "WellTrained Achievements — Marks of Devotion"
+            }
+        }
+    }
+}
