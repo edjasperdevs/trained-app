@@ -1,8 +1,8 @@
 /**
  * EvolvingAvatar Component
  *
- * Displays an evolving avatar silhouette that changes based on user rank.
- * Integrates with dpStore for rank and subscriptionStore for premium status.
+ * Displays an evolving avatar image that changes based on user rank and archetype.
+ * Integrates with dpStore for rank, userStore for archetype, and subscriptionStore for premium status.
  *
  * Stage progression:
  * - Stage 1: Ranks 1-3 (free)
@@ -14,10 +14,10 @@
  * Non-premium users see a locked preview for stages 3-5.
  */
 
-import { useDPStore, useSubscriptionStore } from '@/stores'
+import { useDPStore, useSubscriptionStore, useUserStore } from '@/stores'
 import { getAvatarStage } from '@/screens/AvatarScreen'
-import { Stage1, Stage2, Stage3, Stage4, Stage5 } from './AvatarStages'
 import { LockedAvatar } from './LockedAvatar'
+import { getAvatarImage } from '@/assets/avatars'
 
 interface EvolvingAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -25,14 +25,21 @@ interface EvolvingAvatarProps {
   showLocked?: boolean
 }
 
-const STAGE_COMPONENTS = [Stage1, Stage2, Stage3, Stage4, Stage5]
+const SIZE_MAP = {
+  sm: 64,
+  md: 96,
+  lg: 128,
+  xl: 192,
+}
+
 const PREMIUM_STAGES = [3, 4, 5]
 
 export function EvolvingAvatar({ size = 'md', showLocked = true }: EvolvingAvatarProps) {
   const currentRank = useDPStore((s) => s.currentRank)
   const isPremium = useSubscriptionStore((s) => s.isPremium)
+  const archetype = useUserStore((s) => s.profile?.archetype) || 'bro'
 
-  const stage = getAvatarStage(currentRank)
+  const stage = getAvatarStage(currentRank) as 1 | 2 | 3 | 4 | 5
   const isPremiumStage = PREMIUM_STAGES.includes(stage)
 
   // Show locked preview for non-premium users on premium stages
@@ -40,7 +47,16 @@ export function EvolvingAvatar({ size = 'md', showLocked = true }: EvolvingAvata
     return <LockedAvatar stage={stage as 3 | 4 | 5} size={size} />
   }
 
-  // Render the appropriate stage component
-  const StageComponent = STAGE_COMPONENTS[stage - 1]
-  return <StageComponent size={size} />
+  const dimension = SIZE_MAP[size]
+  const avatarSrc = getAvatarImage(archetype, stage)
+
+  return (
+    <img
+      src={avatarSrc}
+      alt={`${archetype} avatar - Stage ${stage}`}
+      width={dimension}
+      height={dimension}
+      className="object-contain"
+    />
+  )
 }
