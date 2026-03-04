@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom' // Disabled for v1 - Protocol AI
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { springs } from '@/lib/animations'
@@ -24,7 +24,7 @@ type MacroProgress = {
 } | null
 
 export function Macros() {
-  const navigate = useNavigate()
+  // const navigate = useNavigate() // Disabled for v1 - Protocol AI
   const [activeTab, setActiveTab] = useState<TabType>('daily')
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
