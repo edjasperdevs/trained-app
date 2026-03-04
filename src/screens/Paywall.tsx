@@ -15,6 +15,17 @@ export function Paywall() {
 
   const [purchasing, setPurchasing] = useState<'monthly' | 'annual' | null>(null)
   const [restoring, setRestoring] = useState(false)
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false)
+
+  // Timeout for loading offerings - if they don't load in 5s, show skip option
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!offerings?.current?.monthly && !offerings?.current?.annual) {
+        setLoadingTimedOut(true)
+      }
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [offerings])
 
   // Redirect to home if already premium
   useEffect(() => {
@@ -183,10 +194,29 @@ export function Paywall() {
           {/* No offerings available */}
           {!monthly && !annual && (
             <div className="bg-[#26282B]/60 border border-white/5 rounded-2xl p-8 text-center backdrop-blur-md">
-              <Loader2 className="animate-spin text-primary mx-auto mb-3" />
-              <p className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold">
-                Analyzing Market Segments...
-              </p>
+              {loadingTimedOut ? (
+                <>
+                  <p className="text-white text-sm font-bold mb-2">
+                    Subscription options unavailable
+                  </p>
+                  <p className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold mb-4">
+                    Please check your connection and try again later
+                  </p>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="text-primary text-xs font-bold uppercase tracking-wider"
+                  >
+                    Continue to App
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Loader2 className="animate-spin text-primary mx-auto mb-3" />
+                  <p className="text-muted-foreground text-[10px] uppercase tracking-widest font-bold">
+                    Loading subscription options...
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>

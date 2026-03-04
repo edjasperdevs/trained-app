@@ -1,5 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2A2A2A" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#121212" stop-opacity="0.95" />
+    </linearGradient>
+    
+    <linearGradient id="wtGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#A0A0A0" stop-opacity="0.8" />
+    </linearGradient>
+
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  {/* Background */}
   <rect width="512" height="512" rx="102" fill="#0a0a0a"/>
-  <text x="155" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="260" font-weight="800" fill="#FFFFFF">W</text>
-  <text x="320" y="350" font-family="system-ui, -apple-system, sans-serif" font-size="260" font-weight="800" fill="#D55550">T</text>
+
+  <g transform="translate(56, 56) scale(4)">
+    {/* Outer Neon Border */}
+    <path
+      d="M50 5 L90 27.5 L90 72.5 L50 95 L10 72.5 L10 27.5 Z"
+      stroke="#b7ff00"
+      stroke-width="1.5"
+      filter="url(#neonGlow)"
+      fill="none"
+    />
+
+    {/* Glass Hexagon Base */}
+    <path
+      d="M50 6.5 L88.5 28.25 L88.5 71.75 L50 93.5 L11.5 71.75 L11.5 28.25 Z"
+      fill="url(#glassGradient)"
+    />
+
+    {/* WT Monogram */}
+    <g transform="translate(2, -1)">
+       <path 
+        d="M25 35 L33 35 L38 65 L43 35 L51 35 L43 75 L33 75 Z" 
+        fill="url(#wtGradient)"
+       />
+       <path 
+        d="M48 35 L75 35 L75 43 L66 43 L66 75 L56 75 L56 43 L48 43 Z" 
+        fill="url(#wtGradient)"
+       />
+    </g>
+  </g>
 </svg>

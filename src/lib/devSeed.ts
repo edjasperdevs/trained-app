@@ -515,8 +515,389 @@ export function clearTestData() {
   const keys = [
     'gamify-gains-user', 'gamify-gains-workouts', 'gamify-gains-macros',
     'gamify-gains-xp', 'gamify-gains-avatar', 'gamify-gains-achievements',
-    'gamify-gains-access', 'gamify-gains-reminders',
+    'gamify-gains-access', 'gamify-gains-reminders', 'gamify-gains-dp',
+    'gamify-gains-subscription',
   ]
   keys.forEach(k => localStorage.removeItem(k))
   console.log('🗑️ All test data cleared. Reload the page.')
+}
+
+// --- Test Personas for Manual QA Testing ---
+
+type TestPersona = 'newbie' | 'veteran' | 'premium_himbo' | 'premium_brute' |
+  'premium_pup' | 'premium_bull' | 'female_user' | 'metric_user' |
+  'streak_master' | 'struggling'
+
+interface PersonaConfig {
+  username: string
+  gender: 'male' | 'female'
+  archetype: 'bro' | 'himbo' | 'brute' | 'pup' | 'bull'
+  goal: 'cut' | 'bulk' | 'maintain' | 'recomp'
+  units: 'imperial' | 'metric'
+  trainingDays: 3 | 4 | 5
+  weight: number // in lbs (internal)
+  height: number // in inches (internal)
+  age: number
+  totalDP: number
+  currentStreak: number
+  longestStreak: number
+  isPremium: boolean
+  workoutCount: number
+  daysActive: number
+  badgeCount: number
+}
+
+const PERSONA_CONFIGS: Record<TestPersona, PersonaConfig> = {
+  newbie: {
+    username: 'NewRecruit',
+    gender: 'male',
+    archetype: 'bro',
+    goal: 'maintain',
+    units: 'imperial',
+    trainingDays: 3,
+    weight: 170,
+    height: 69,
+    age: 25,
+    totalDP: 150,
+    currentStreak: 2,
+    longestStreak: 2,
+    isPremium: false,
+    workoutCount: 2,
+    daysActive: 3,
+    badgeCount: 2,
+  },
+  veteran: {
+    username: 'VeteranTrainee',
+    gender: 'male',
+    archetype: 'bro',
+    goal: 'recomp',
+    units: 'imperial',
+    trainingDays: 4,
+    weight: 185,
+    height: 71,
+    age: 32,
+    totalDP: 6200,
+    currentStreak: 14,
+    longestStreak: 28,
+    isPremium: false,
+    workoutCount: 45,
+    daysActive: 60,
+    badgeCount: 12,
+  },
+  premium_himbo: {
+    username: 'GymBro_Elite',
+    gender: 'male',
+    archetype: 'himbo',
+    goal: 'bulk',
+    units: 'imperial',
+    trainingDays: 5,
+    weight: 195,
+    height: 72,
+    age: 27,
+    totalDP: 3500,
+    currentStreak: 10,
+    longestStreak: 21,
+    isPremium: true,
+    workoutCount: 30,
+    daysActive: 35,
+    badgeCount: 8,
+  },
+  premium_brute: {
+    username: 'MacroMaster',
+    gender: 'male',
+    archetype: 'brute',
+    goal: 'cut',
+    units: 'metric',
+    trainingDays: 4,
+    weight: 200,
+    height: 70,
+    age: 29,
+    totalDP: 4100,
+    currentStreak: 7,
+    longestStreak: 14,
+    isPremium: true,
+    workoutCount: 25,
+    daysActive: 40,
+    badgeCount: 9,
+  },
+  premium_pup: {
+    username: 'CardioKing',
+    gender: 'male',
+    archetype: 'pup',
+    goal: 'maintain',
+    units: 'metric',
+    trainingDays: 3,
+    weight: 165,
+    height: 68,
+    age: 26,
+    totalDP: 2800,
+    currentStreak: 12,
+    longestStreak: 18,
+    isPremium: true,
+    workoutCount: 18,
+    daysActive: 30,
+    badgeCount: 7,
+  },
+  premium_bull: {
+    username: 'ConsistencyChamp',
+    gender: 'male',
+    archetype: 'bull',
+    goal: 'bulk',
+    units: 'imperial',
+    trainingDays: 5,
+    weight: 210,
+    height: 74,
+    age: 30,
+    totalDP: 5000,
+    currentStreak: 21,
+    longestStreak: 35,
+    isPremium: true,
+    workoutCount: 40,
+    daysActive: 50,
+    badgeCount: 11,
+  },
+  female_user: {
+    username: 'FitQueen',
+    gender: 'female',
+    archetype: 'bro',
+    goal: 'cut',
+    units: 'imperial',
+    trainingDays: 4,
+    weight: 140,
+    height: 64,
+    age: 28,
+    totalDP: 1800,
+    currentStreak: 5,
+    longestStreak: 12,
+    isPremium: false,
+    workoutCount: 15,
+    daysActive: 25,
+    badgeCount: 6,
+  },
+  metric_user: {
+    username: 'MetricMike',
+    gender: 'male',
+    archetype: 'bro',
+    goal: 'bulk',
+    units: 'metric',
+    trainingDays: 4,
+    weight: 176, // ~80kg
+    height: 71, // ~180cm
+    age: 24,
+    totalDP: 2500,
+    currentStreak: 8,
+    longestStreak: 15,
+    isPremium: false,
+    workoutCount: 20,
+    daysActive: 28,
+    badgeCount: 7,
+  },
+  streak_master: {
+    username: 'StreakLegend',
+    gender: 'male',
+    archetype: 'bro',
+    goal: 'maintain',
+    units: 'imperial',
+    trainingDays: 4,
+    weight: 180,
+    height: 70,
+    age: 35,
+    totalDP: 8500,
+    currentStreak: 45,
+    longestStreak: 45,
+    isPremium: false,
+    workoutCount: 55,
+    daysActive: 75,
+    badgeCount: 15,
+  },
+  struggling: {
+    username: 'GettingBackUp',
+    gender: 'male',
+    archetype: 'bro',
+    goal: 'cut',
+    units: 'imperial',
+    trainingDays: 3,
+    weight: 195,
+    height: 69,
+    age: 31,
+    totalDP: 900,
+    currentStreak: 0,
+    longestStreak: 7,
+    isPremium: false,
+    workoutCount: 8,
+    daysActive: 20,
+    badgeCount: 3,
+  },
+}
+
+// Calculate rank from total DP
+function getRankFromDP(totalDP: number): number {
+  const thresholds = [0, 250, 750, 1500, 2250, 3000, 3750, 4750, 5750, 6750, 7750, 9000, 10250, 11500, 13000, 14750]
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (totalDP >= thresholds[i]) return i
+  }
+  return 0
+}
+
+function buildPersonaUserStore(config: PersonaConfig) {
+  const weightHistory = Array.from({ length: Math.min(config.daysActive, 30) }, (_, i) => ({
+    date: toISO(daysAgo(Math.min(config.daysActive, 30) - 1 - i)),
+    weight: config.weight + (Math.random() * 2 - 1),
+  })).map(e => ({ ...e, weight: Math.round(e.weight * 10) / 10 }))
+
+  return {
+    state: {
+      profile: {
+        username: config.username,
+        gender: config.gender,
+        fitnessLevel: config.trainingDays === 5 ? 'advanced' : config.trainingDays === 4 ? 'intermediate' : 'beginner',
+        trainingDaysPerWeek: config.trainingDays,
+        weight: config.weight,
+        height: config.height,
+        age: config.age,
+        goal: config.goal,
+        avatarBase: 'dominant' as const,
+        archetype: config.archetype,
+        createdAt: daysAgo(config.daysActive).getTime(),
+        currentStreak: config.currentStreak,
+        longestStreak: config.longestStreak,
+        lastCheckInDate: config.currentStreak > 0 ? toISO(today) : toISO(daysAgo(3)),
+        streakPaused: config.currentStreak === 0 && config.longestStreak > 0,
+        onboardingComplete: true,
+        units: config.units,
+        goalWeight: config.goal === 'cut' ? config.weight - 15 : config.goal === 'bulk' ? config.weight + 10 : undefined,
+      },
+      weightHistory,
+    },
+    version: 0,
+  }
+}
+
+function buildPersonaDPStore(config: PersonaConfig) {
+  const rank = getRankFromDP(config.totalDP)
+  return {
+    state: {
+      totalDP: config.totalDP,
+      currentRank: rank,
+      obedienceStreak: config.currentStreak,
+      longestStreak: config.longestStreak,
+      lastActionDate: config.currentStreak > 0 ? toISO(today) : toISO(daysAgo(3)),
+      dailyLog: {
+        date: toISO(today),
+        training: 0,
+        meals: 0,
+        protein: 0,
+        steps: 0,
+        sleep: 0,
+      },
+    },
+    version: 0,
+  }
+}
+
+function buildPersonaSubscriptionStore(config: PersonaConfig) {
+  return {
+    state: {
+      isPremium: config.isPremium,
+      entitlementId: config.isPremium ? 'premium' : null,
+      purchaseDate: config.isPremium ? daysAgo(config.daysActive).toISOString() : null,
+      expirationDate: config.isPremium ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null,
+    },
+    version: 0,
+  }
+}
+
+function buildPersonaAchievements(config: PersonaConfig) {
+  const badges: { badgeId: string; earnedAt: number }[] = []
+
+  // Always earned for active users
+  if (config.workoutCount >= 1) badges.push({ badgeId: 'first-rep', earnedAt: daysAgo(config.daysActive - 1).getTime() })
+  if (config.daysActive >= 1) badges.push({ badgeId: 'day-one', earnedAt: daysAgo(config.daysActive).getTime() })
+
+  // Streak badges
+  if (config.longestStreak >= 7) badges.push({ badgeId: 'iron-will', earnedAt: daysAgo(config.daysActive - 7).getTime() })
+  if (config.longestStreak >= 30) badges.push({ badgeId: 'relentless', earnedAt: daysAgo(config.daysActive - 30).getTime() })
+
+  // Workout badges
+  if (config.workoutCount >= 10) badges.push({ badgeId: 'warming-up', earnedAt: daysAgo(config.daysActive - 14).getTime() })
+  if (config.workoutCount >= 25) badges.push({ badgeId: 'building-momentum', earnedAt: daysAgo(config.daysActive - 30).getTime() })
+  if (config.workoutCount >= 50) badges.push({ badgeId: 'battle-tested', earnedAt: daysAgo(config.daysActive - 50).getTime() })
+
+  // Rank badges
+  const rank = getRankFromDP(config.totalDP)
+  if (rank >= 3) badges.push({ badgeId: 'rising', earnedAt: daysAgo(Math.floor(config.daysActive * 0.3)).getTime() })
+  if (rank >= 5) badges.push({ badgeId: 'established', earnedAt: daysAgo(Math.floor(config.daysActive * 0.5)).getTime() })
+  if (rank >= 8) badges.push({ badgeId: 'veteran', earnedAt: daysAgo(Math.floor(config.daysActive * 0.8)).getTime() })
+
+  return {
+    state: {
+      earnedBadges: badges.slice(0, config.badgeCount),
+      lastChecked: Date.now(),
+    },
+    version: 0,
+  }
+}
+
+export function seedPersona(persona: TestPersona) {
+  const config = PERSONA_CONFIGS[persona]
+  if (!config) {
+    console.error(`❌ Unknown persona: ${persona}`)
+    console.log('Available personas:', Object.keys(PERSONA_CONFIGS).join(', '))
+    return
+  }
+
+  clearTestData()
+
+  const userStore = buildPersonaUserStore(config)
+  const dpStore = buildPersonaDPStore(config)
+  const subscriptionStore = buildPersonaSubscriptionStore(config)
+  const achievements = buildPersonaAchievements(config)
+
+  localStorage.setItem('gamify-gains-user', JSON.stringify(userStore))
+  localStorage.setItem('gamify-gains-dp', JSON.stringify(dpStore))
+  localStorage.setItem('gamify-gains-subscription', JSON.stringify(subscriptionStore))
+  localStorage.setItem('gamify-gains-achievements', JSON.stringify(achievements))
+  localStorage.setItem('gamify-gains-avatar', JSON.stringify({
+    state: {
+      baseCharacter: 'dominant',
+      currentMood: config.currentStreak > 0 ? 'happy' : 'sad',
+      accessories: [],
+      lastInteraction: Date.now(),
+      recentReaction: null,
+    },
+    version: 0,
+  }))
+  localStorage.setItem('gamify-gains-access', JSON.stringify({
+    state: {
+      hasAccess: true,
+      licenseKey: `TEST-${persona.toUpperCase()}`,
+      accessGrantedAt: daysAgo(config.daysActive).toISOString(),
+      email: `${persona}@test.welltrained.app`,
+      instanceId: `test-${persona}`,
+    },
+    version: 2,
+  }))
+  localStorage.setItem('gamify-gains-reminders', JSON.stringify(remindersStore))
+
+  const rank = getRankFromDP(config.totalDP)
+  console.log(`✅ Seeded persona: ${persona}`)
+  console.log(`   Username: ${config.username}`)
+  console.log(`   Archetype: ${config.archetype} ${config.isPremium ? '(PREMIUM)' : '(FREE)'}`)
+  console.log(`   Goal: ${config.goal} | Units: ${config.units}`)
+  console.log(`   Rank: ${rank} | DP: ${config.totalDP}`)
+  console.log(`   Streak: ${config.currentStreak} (best: ${config.longestStreak})`)
+  console.log(`   Workouts: ${config.workoutCount} | Days active: ${config.daysActive}`)
+  console.log('   Reload the page to see changes.')
+}
+
+export function listPersonas() {
+  console.log('📋 Available test personas:\n')
+  Object.entries(PERSONA_CONFIGS).forEach(([name, config]) => {
+    const rank = getRankFromDP(config.totalDP)
+    console.log(`  ${name}`)
+    console.log(`    ${config.archetype.toUpperCase()} | ${config.goal} | ${config.units}`)
+    console.log(`    Rank ${rank} | ${config.totalDP} DP | Streak: ${config.currentStreak}`)
+    console.log(`    ${config.isPremium ? '💎 Premium' : '🆓 Free'}\n`)
+  })
+  console.log('Usage: seedPersona("persona_name")')
 }

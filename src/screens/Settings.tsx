@@ -78,6 +78,23 @@ export function Settings() {
   const [goalWeightInput, setGoalWeightInput] = useState('')
   const [showWeightChart, setShowWeightChart] = useState(false)
   const [hasCoach, setHasCoach] = useState(false)
+  const [debugTapCount, setDebugTapCount] = useState(0)
+  const debugTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Secret debug mode access - tap version 7 times
+  const handleVersionTap = () => {
+    setDebugTapCount((prev) => {
+      const newCount = prev + 1
+      if (newCount >= 7) {
+        navigate('/debug')
+        return 0
+      }
+      // Reset after 2 seconds of no taps
+      if (debugTapTimerRef.current) clearTimeout(debugTapTimerRef.current)
+      debugTapTimerRef.current = setTimeout(() => setDebugTapCount(0), 2000)
+      return newCount
+    })
+  }
   const [restoringPurchases, setRestoringPurchases] = useState(false)
 
   // Subscription state (native only)
@@ -1079,7 +1096,12 @@ export function Settings() {
               <p className="text-sm font-heading font-semibold">
                 <span className="text-white">Well</span><span className="text-primary">Trained</span>
               </p>
-              <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+              <p
+                className="text-xs text-muted-foreground cursor-default select-none"
+                onClick={handleVersionTap}
+              >
+                Version 1.0.0 {debugTapCount > 0 && debugTapCount < 7 && `(${7 - debugTapCount})`}
+              </p>
               <button
                 onClick={() => navigate('/privacy')}
                 className="text-xs text-primary mt-2"

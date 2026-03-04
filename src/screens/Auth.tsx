@@ -4,10 +4,10 @@ import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
+import { Logo } from '@/components'
+import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 type AuthMode = 'splash' | 'login' | 'signup' | 'forgot'
-
-import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 // Removed AthleteSilhouette
 
@@ -222,13 +222,15 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
           style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,255,0,0.08) 0%, transparent 70%)' }}
         />
 
-        {/* Avatar — upper 55% of screen */}
-        <div className="flex-1 flex items-end justify-center px-4 pb-0" style={{ maxHeight: '58vh' }}>
-          <div className="w-full max-w-[400px] flex items-end justify-center">
+        {/* Avatar — upper section */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pt-10">
+          <Logo size="xl" className="mb-10" />
+
+          <div className="w-full max-w-[340px] opacity-40 mix-blend-screen scale-90 translate-y-4">
             <img
               src={heroWelcomeImg}
               alt="The Protocol Archetypes"
-              className="w-full h-auto object-contain object-bottom drop-shadow-2xl opacity-90 mix-blend-screen"
+              className="w-full h-auto object-contain object-bottom"
             />
           </div>
         </div>
@@ -283,7 +285,7 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
   const isSignUp = mode === 'signup'
 
   return (
-    <div data-testid="auth-screen" className="min-h-screen flex flex-col bg-[#0A0A0A] px-6 pt-12 pb-10">
+    <div data-testid="auth-screen" className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#0A0A0A] px-6 pt-12 pb-10">
       {/* Back to splash */}
       <button
         onClick={() => { setMode('splash'); setError(''); setSuccess('') }}
@@ -335,7 +337,7 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 flex-1">
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 w-full max-w-full">
         <NoirInput
           label="Email Address"
           id="email"

@@ -150,7 +150,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       onClick={() => onClose(false)}
     >
       <div
-        className="w-full max-w-md bg-card max-h-[90vh] flex flex-col rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
+        className="w-full max-w-md bg-card max-h-[85vh] mb-20 sm:mb-0 flex flex-col rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
         data-testid="checkin-modal"
       >
@@ -222,7 +222,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
             </div>
 
             <div className="p-6 pt-3 border-t border-border">
-              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button" disabled={isSubmitting}>
+              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button" disabled={isSubmitting || (!data.workout && !data.protein)}>
                 Submit Report
               </Button>
             </div>

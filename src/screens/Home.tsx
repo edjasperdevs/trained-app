@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { EvolvingAvatar, DPDisplay, ProgressBar, ReminderList, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal, ProtocolOrders, AnimatedPage, StaggerList, StaggerItem } from '@/components'
+import { EvolvingAvatar, DPDisplay, ProgressBar, WeeklySummary, NearestBadges, StreakDisplay, StreakBadge, RankUpModal, ProtocolOrders, AnimatedPage, StaggerList, StaggerItem } from '@/components'
 import { HealthCard } from '@/components/HealthCard'
 import { useQuestStore } from '@/stores/questStore'
 import { motion } from 'framer-motion'
@@ -14,7 +14,6 @@ import {
   useDPStore,
   useWorkoutStore,
   useMacroStore,
-  useRemindersStore,
   useHealthStore
 } from '@/stores'
 import { getStandingOrder, LABELS } from '@/design/constants'
@@ -30,9 +29,6 @@ export function Home() {
   const profile = useUserStore((state) => state.profile)
   // currentRank is now read internally by EvolvingAvatar component
   const obedienceStreak = useDPStore((state) => state.obedienceStreak)
-
-  // PERF-02: Selectors for computed values that depend on state
-  const activeReminders = useRemindersStore((state) => state.getActiveReminders)()
 
   // PERF-02: Access non-reactive functions via getState()
   const { getTodayLog } = useDPStore.getState()
@@ -119,7 +115,7 @@ export function Home() {
       <div data-testid="home-screen" className="min-h-screen pb-20">
         {/* Header */}
         <motion.div
-          className="bg-card pt-8 pb-6 px-5"
+          className="bg-card pt-14 pb-6 px-5"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springs.smooth}
@@ -150,11 +146,6 @@ export function Home() {
 
         {/* Global Action Items (Stays above tabs) */}
         <div className="px-5 pt-6 space-y-4">
-          {/* Active Reminders */}
-          {activeReminders.filter(r => r.type !== 'checkIn').length > 0 && !hasCheckedInToday && (
-            <ReminderList maxReminders={2} excludeTypes={['checkIn']} />
-          )}
-
           {/* Weekly Check-in Due Banner (coaching clients only) */}
           {hasCoach && weeklyCheckinDue === true && (
             <Card
@@ -235,11 +226,11 @@ export function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
             <div className="p-5 relative z-10">
-              <div className="flex items-start gap-6">
+              <div className="flex items-center gap-6">
                 <div data-testid="home-level-display" className="drop-shadow-[0_0_15px_rgba(200,255,0,0.3)]">
                   <EvolvingAvatar size="lg" />
                 </div>
-                <div className="flex-1" data-testid="home-xp-display">
+                <div className="flex-1 text-center" data-testid="home-xp-display">
                   <DPDisplay />
                 </div>
               </div>
@@ -250,16 +241,16 @@ export function Home() {
         {/* Tabbed Interface */}
         <div className="px-5 pt-8">
           <Tabs defaultValue="today" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-[#1A1C1E]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-1.5 h-14 shadow-inner">
-              <TabsTrigger value="today" className="gap-2 h-11 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
+            <TabsList className="grid w-full grid-cols-3 mb-8 bg-[#1A1C1E]/80 backdrop-blur-xl border border-white/5 rounded-2xl p-2 h-16 shadow-inner">
+              <TabsTrigger value="today" className="flex items-center justify-center gap-2 h-12 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
                 <Target size={18} />
                 <span className="text-sm">Today</span>
               </TabsTrigger>
-              <TabsTrigger value="health" className="gap-2 h-11 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
+              <TabsTrigger value="health" className="flex items-center justify-center gap-2 h-12 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
                 <Activity size={18} />
                 <span className="text-sm">Health</span>
               </TabsTrigger>
-              <TabsTrigger value="stats" className="gap-2 h-11 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
+              <TabsTrigger value="stats" className="flex items-center justify-center gap-2 h-12 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:font-bold data-[state=active]:shadow-none transition-all duration-300">
                 <LineChart size={18} />
                 <span className="text-sm">Stats</span>
               </TabsTrigger>

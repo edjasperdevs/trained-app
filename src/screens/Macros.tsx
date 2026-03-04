@@ -130,12 +130,14 @@ export function Macros() {
                 </span>
               )}
             </div>
+            {/* Protocol AI button - disabled for v1
             <button
               onClick={() => navigate('/protocol-ai')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold border border-primary/20"
             >
               <Zap size={14} className="fill-current" /> Protocol AI
             </button>
+            */}
           </div>
 
           {/* Tabs with sliding indicator */}

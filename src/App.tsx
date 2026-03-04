@@ -34,6 +34,7 @@ const Privacy = lazy(() => import('@/screens/Privacy').then(m => ({ default: m.P
 const Terms = lazy(() => import('@/screens/Terms').then(m => ({ default: m.Terms })))
 const Paywall = lazy(() => import('@/screens/Paywall').then(m => ({ default: m.Paywall })))
 const HealthPermission = lazy(() => import('@/screens/HealthPermission').then(m => ({ default: m.HealthPermission })))
+const DebugScreen = lazy(() => import('@/screens/DebugScreen').then(m => ({ default: m.DebugScreen })))
 // TODO: Re-enable for v2 launch
 // const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
 
@@ -311,6 +312,7 @@ function AppContent() {
             <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
             <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
             <Route path="/paywall" element={<Suspense fallback={<HomeSkeleton />}><Paywall /></Suspense>} />
+            <Route path="/debug" element={<Suspense fallback={<HomeSkeleton />}><DebugScreen /></Suspense>} />
             <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
             {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
             <Route path="*" element={<NotFound />} />
