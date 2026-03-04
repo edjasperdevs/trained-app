@@ -23,6 +23,7 @@ import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { cn } from '@/lib/cn'
 import { MacroCalculator } from '@/lib'
+import heroWelcomeImg from '@/assets/hero-welcome.png'
 import { Activity, ShieldHalf, Zap, Dumbbell } from 'lucide-react'
 import { toDisplayWeight, toInternalWeight, toDisplayHeight, toInternalHeight, getWeightUnit } from '@/lib/units'
 
@@ -287,57 +288,70 @@ export function Onboarding() {
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="-mx-5 -mt-8 min-h-screen flex flex-col bg-[#0A0A0A] relative overflow-hidden">
-      {/* Bottom lime glow */}
-      <div className="absolute bottom-0 left-0 right-0 h-[35%] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,255,0,0.09) 0%, transparent 70%)' }}
+      {/* Background topography-like subtle grid or lines could go here */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#b7ff00 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
+
+      {/* Cinematic lime glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-radial-gradient from-primary/10 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-[45%] pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(183,255,0,0.15) 0%, transparent 70%)' }}
       />
 
-      {/* Avatar hero */}
-      <div className="flex-1 flex items-end justify-center px-16 pb-0" style={{ maxHeight: '52vh' }}>
-        <div className="w-full max-w-[180px]">
-          {/* Minimal SVG athlete silhouette */}
-          <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <ellipse cx="100" cy="296" rx="52" ry="9" fill="#C8FF00" fillOpacity="0.12" />
-            <path d="M78 220 L68 295 L80 295 L92 245 L92 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.55" />
-            <path d="M122 220 L132 295 L120 295 L108 245 L108 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.55" />
-            <rect x="66" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.35" />
-            <rect x="118" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.35" />
-            <path d="M72 140 L68 220 L132 220 L128 140 L120 130 L80 130Z" fill="#26282B" stroke="#1A1A1A" strokeWidth="0.5" />
-            <path d="M72 140 L68 220" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.45" />
-            <path d="M128 140 L132 220" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.45" />
-            <path d="M72 140 L48 195 L58 200 L80 155 L80 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.55" />
-            <path d="M128 140 L152 195 L142 200 L120 155 L120 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.55" />
-            <path d="M48 195 L58 200" stroke="#C8FF00" strokeWidth="2" strokeOpacity="0.8" />
-            <path d="M152 195 L142 200" stroke="#C8FF00" strokeWidth="2" strokeOpacity="0.8" />
-            <path d="M66 138 Q76 130 86 138" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.9" />
-            <path d="M114 138 Q124 130 134 138" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.9" />
-            <rect x="91" y="108" width="18" height="24" rx="4" fill="#26282B" />
-            <ellipse cx="100" cy="96" rx="22" ry="26" fill="#26282B" stroke="#1A1A1A" strokeWidth="0.5" />
-            <path d="M82 84 Q100 68 118 84" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.7" />
-          </svg>
-        </div>
+      {/* Hero Content */}
+      <div className="flex-1 flex flex-col items-center justify-center pt-20 px-6 z-10">
+        {/* Hero athlete silhouette */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          className="relative w-full max-w-[280px] aspect-[4/5] mb-12"
+        >
+          {/* Neon Glow beneath silhouette */}
+          <div className="absolute inset-x-0 bottom-10 h-20 bg-primary/20 blur-3xl rounded-full" />
+
+          <img
+            src={heroWelcomeImg}
+            alt="Hero Athlete"
+            className="w-full h-full object-contain drop-shadow-[0_0_25px_rgba(183,255,0,0.5)]"
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="text-center"
+        >
+          <h1
+            className="text-6xl font-black text-[#FAFAFA] tracking-tighter leading-none mb-2"
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
+            WELL<span className="text-primary italic">TRAINED</span>
+          </h1>
+          <p className="text-primary font-heading font-bold text-lg tracking-[0.25em] uppercase mb-4">
+            INITIATE THE PROTOCOL
+          </p>
+          <p className="text-[#A1A1AA] text-sm max-w-xs mx-auto mb-10 leading-relaxed">
+            The ultimate discipline for the ultimate rank. Establish your baseline, unlock your archetype, and evolve.
+          </p>
+        </motion.div>
       </div>
 
-      {/* Brand + CTA */}
-      <div className="px-6 pb-10 pt-4">
-        <h1
-          className="text-5xl font-black text-[#FAFAFA] tracking-tight leading-none"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
-        >
-          WELLTRAINED
-        </h1>
-        <div className="h-px bg-[#C8FF00] my-4 w-full" />
-        <p className="text-[#A1A1AA] text-xs tracking-[0.2em] uppercase mb-8">
-          The Protocol. The Discipline. The Rank.
-        </p>
+      {/* CTA Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="px-6 pb-12 z-20"
+      >
         <button
           onClick={onNext}
-          className="w-full py-4 rounded-xl font-black text-[#0A0A0A] text-sm tracking-widest uppercase bg-[#C8FF00] hover:bg-[#D4FF33] active:bg-[#B6E800] transition-all duration-150"
+          className="w-full py-5 rounded-2xl font-black text-[#0A0A0A] text-base tracking-[0.1em] uppercase bg-primary hover:bg-[#D4FF33] active:bg-[#B6E800] transition-all duration-200 shadow-[0_0_30px_rgba(183,255,0,0.4)] hover:shadow-[0_0_40px_rgba(183,255,0,0.6)]"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
           START SETUP
         </button>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -373,138 +387,167 @@ export function ProfileStep({
   const isValid = data.username.trim().length > 0 && data.weight > 0 && data.height > 0 && data.age > 0
 
   return (
-    <div className="flex flex-col h-full relative animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold uppercase tracking-tight text-[#FAFAFA] mb-2" style={{ fontFamily: "'Oswald', sans-serif" }}>
-          Build Your Profile
+    <div className="flex flex-col h-full relative">
+      <div className="mb-8">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-1">Step 1 of 4</p>
+        <h1 className="text-4xl font-black uppercase tracking-tight text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          DEFINE YOUR <span className="text-primary italic">PROTOCOL</span>
         </h1>
-        <p className="text-[#A1A1AA] text-sm leading-relaxed">
-          Your stats help us calculate your baseline macros and personalize your workout plan.
-        </p>
+        <div className="h-1 w-12 bg-primary mt-2 rounded-full" />
       </div>
 
-      <div className="flex flex-col gap-5 flex-1">
-        {/* Name */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider ml-1">Callsign (Name)</label>
-          <Input
-            className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg focus:ring-2 focus:ring-[#C8FF00] h-12"
-            value={data.username}
-            onChange={(e) => onChange('username', e.target.value)}
-            placeholder="Enter your name"
-          />
-        </div>
-
-        {/* Gender Selection */}
-        <div className="grid grid-cols-2 gap-3 p-1 bg-[#222222] rounded-full mt-1">
-          {[{ v: 'male', l: 'MALE' }, { v: 'female', l: 'FEMALE' }].map(opt => (
-            <label key={opt.v} className="cursor-pointer relative flex items-center justify-center py-2.5 rounded-full transition-all duration-300">
-              <input
-                type="radio"
-                name="gender"
-                value={opt.v}
-                checked={data.gender === opt.v}
-                onChange={() => onChange('gender', opt.v as Gender)}
-                className="peer sr-only"
-              />
-              <div className="absolute inset-0 bg-transparent peer-checked:bg-[#C8FF00] rounded-full transition-all shadow-none peer-checked:shadow-lg" />
-              <span className="relative z-10 text-[#A1A1AA] peer-checked:text-black font-bold text-sm tracking-wide">
-                {opt.l}
-              </span>
-            </label>
-          ))}
-        </div>
-
-        {/* Units Toggle */}
-        <div className="flex justify-end gap-2 mt-2">
-          <button onClick={() => onChange('units', 'imperial')} className={cn('text-xs font-bold uppercase px-3 py-1 rounded-full border', !isMetric ? 'border-[#C8FF00] text-[#C8FF00] bg-[#C8FF00]/10' : 'border-transparent text-[#A1A1AA] hover:bg-[#222222]')}>Imperial</button>
-          <button onClick={() => onChange('units', 'metric')} className={cn('text-xs font-bold uppercase px-3 py-1 rounded-full border', isMetric ? 'border-[#C8FF00] text-[#C8FF00] bg-[#C8FF00]/10' : 'border-transparent text-[#A1A1AA] hover:bg-[#222222]')}>Metric</button>
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider ml-1">Age</label>
+      <div className="space-y-6 flex-1">
+        {/* Callsign Input */}
+        <div className="relative group">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-2 block">Callsign (Identity)</label>
+          <div className="relative overflow-hidden rounded-2xl bg-[#26282B]/60 backdrop-blur-xl border border-white/5 group-focus-within:border-primary/50 transition-all shadow-xl">
             <Input
-              type="number"
-              className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg h-12 font-mono tabular-nums"
-              value={data.age || ''}
-              onChange={(e) => onChange('age', Number(e.target.value))}
+              className="w-full bg-transparent border-0 px-5 py-7 text-white text-xl placeholder:text-white/10 focus:ring-0 h-14 font-heading font-black uppercase"
+              value={data.username}
+              onChange={(e) => onChange('username', e.target.value)}
+              placeholder="Enter Callsign"
             />
           </div>
-          <div className="flex flex-col gap-2 flex-1">
-            <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider ml-1">Weight</label>
-            <div className="relative group">
-              <Input
+        </div>
+
+        {/* Binary Choices Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Gender */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Gender Bias</label>
+            <div className="flex p-1 bg-[#26282B]/60 backdrop-blur-xl rounded-2xl border border-white/5 h-12">
+              {[{ v: 'male', l: 'MALE' }, { v: 'female', l: 'FEMALE' }].map(opt => (
+                <label key={opt.v} className="flex-1 cursor-pointer relative flex items-center justify-center rounded-xl transition-all duration-300">
+                  <input
+                    type="radio"
+                    name="gender"
+                    value={opt.v}
+                    checked={data.gender === opt.v}
+                    onChange={() => onChange('gender', opt.v as Gender)}
+                    className="peer sr-only"
+                  />
+                  <div className="absolute inset-0 bg-transparent peer-checked:bg-primary rounded-xl transition-all shadow-lg" />
+                  <span className="relative z-10 text-muted-foreground peer-checked:text-black font-black text-[10px] tracking-wider italic">
+                    {opt.l}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Units */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Unit Metric</label>
+            <div className="flex p-1 bg-[#26282B]/60 backdrop-blur-xl rounded-2xl border border-white/5 h-12">
+              {[{ v: 'imperial', l: 'IMP' }, { v: 'metric', l: 'MET' }].map(opt => (
+                <label key={opt.v} className="flex-1 cursor-pointer relative flex items-center justify-center rounded-xl transition-all duration-300">
+                  <input
+                    type="radio"
+                    name="units"
+                    value={opt.v}
+                    checked={data.units === opt.v}
+                    onChange={() => onChange('units', opt.v as UnitSystem)}
+                    className="peer sr-only"
+                  />
+                  <div className="absolute inset-0 bg-transparent peer-checked:bg-primary rounded-xl transition-all shadow-lg" />
+                  <span className="relative z-10 text-muted-foreground peer-checked:text-black font-black text-[10px] tracking-wider italic">
+                    {opt.l}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Solar Cycles (Age)</label>
+            <div className="bg-[#26282B]/60 backdrop-blur-xl rounded-2xl border border-white/5 p-1 h-12 flex items-center px-4">
+              <input
                 type="number"
-                className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg h-12 font-mono tabular-nums pr-12"
+                className="w-full bg-transparent border-0 text-white text-lg font-mono tabular-nums focus:ring-0"
+                value={data.age || ''}
+                onChange={(e) => onChange('age', Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Mass ({getWeightUnit(data.units)})</label>
+            <div className="bg-[#26282B]/60 backdrop-blur-xl rounded-2xl border border-white/5 p-1 h-12 flex items-center px-4">
+              <input
+                type="number"
+                className="w-full bg-transparent border-0 text-white text-lg font-mono tabular-nums focus:ring-0"
                 value={displayWeight || ''}
                 onChange={(e) => handleWeightChange(Number(e.target.value))}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">{getWeightUnit(data.units)}</span>
             </div>
           </div>
         </div>
 
         {/* Height */}
-        <div className="flex flex-col gap-2 mb-2">
-          <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider ml-1">Height</label>
-          {isMetric ? (
-            <div className="relative group">
-              <Input
-                type="number"
-                className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg h-12 font-mono tabular-nums pr-12"
-                value={displayHeight || ''}
-                onChange={(e) => handleHeightChangeMetric(Number(e.target.value))}
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">cm</span>
-            </div>
-          ) : (
-            <div className="flex gap-4">
-              <div className="relative flex-1 group">
-                <Input type="number" value={feet || ''} onChange={(e) => handleHeightImperial(Number(e.target.value) * 12 + inches)} className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg h-12 font-mono tabular-nums pr-12" />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">ft</span>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Elevation (Height)</label>
+          <div className="bg-[#26282B]/60 backdrop-blur-xl rounded-2xl border border-white/5 p-4">
+            {isMetric ? (
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  className="flex-1 bg-transparent border-0 text-white text-lg font-mono tabular-nums focus:ring-0"
+                  value={displayHeight || ''}
+                  onChange={(e) => handleHeightChangeMetric(Number(e.target.value))}
+                />
+                <span className="text-muted-foreground font-mono text-xs">CM</span>
               </div>
-              <div className="relative flex-1 group">
-                <Input type="number" value={inches || ''} onChange={(e) => handleHeightImperial(feet * 12 + Number(e.target.value))} className="w-full bg-[#222222] border-0 rounded-xl px-4 py-4 text-white text-lg h-12 font-mono tabular-nums pr-12" max={11} />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] font-mono text-sm">in</span>
+            ) : (
+              <div className="flex gap-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <input type="number" value={feet || ''} onChange={(e) => handleHeightImperial(Number(e.target.value) * 12 + inches)} className="w-full bg-transparent border-0 text-white text-lg font-mono tabular-nums focus:ring-0" />
+                  <span className="text-muted-foreground font-mono text-xs text-right">FT</span>
+                </div>
+                <div className="flex items-center gap-2 flex-1">
+                  <input type="number" value={inches || ''} onChange={(e) => handleHeightImperial(feet * 12 + Number(e.target.value))} className="w-full bg-transparent border-0 text-white text-lg font-mono tabular-nums focus:ring-0" max={11} />
+                  <span className="text-muted-foreground font-mono text-xs">IN</span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Goal */}
-        <div className="flex flex-col gap-2 mb-4">
-          <label className="text-xs font-bold text-[#A1A1AA] uppercase tracking-wider ml-1">Primary Goal</label>
-          <div className="flex p-1 bg-[#222222] rounded-xl h-14">
-            {[{ v: 'cut', l: 'Cut' }, { v: 'maintain', l: 'Maintain' }, { v: 'bulk', l: 'Build' }].map(opt => (
-              <label key={opt.v} className="flex-1 cursor-pointer relative flex items-center justify-center rounded-lg transition-all duration-200">
-                <input
-                  type="radio"
-                  name="goal"
-                  value={opt.v}
-                  checked={data.goal === opt.v}
-                  onChange={() => onChange('goal', opt.v as Goal)}
-                  className="peer sr-only"
-                />
-                <div className="absolute inset-0 bg-transparent peer-checked:bg-[#C8FF00] rounded-lg transition-all m-1 shadow-none peer-checked:shadow-sm" />
-                <span className="relative z-10 text-[#A1A1AA] peer-checked:text-black font-semibold text-sm">
-                  {opt.l}
-                </span>
-              </label>
-            ))}
+        {/* Goal Selection Card */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Priority Objective</label>
+          <div className="grid grid-cols-3 gap-2">
+            {[{ v: 'cut', l: 'LEAN' }, { v: 'maintain', l: 'STABLE' }, { v: 'bulk', l: 'MASS' }].map(opt => {
+              const active = data.goal === opt.v;
+              return (
+                <button
+                  key={opt.v}
+                  onClick={() => onChange('goal', opt.v as Goal)}
+                  className={cn(
+                    "h-16 rounded-2xl border flex flex-col items-center justify-center transition-all",
+                    active
+                      ? "bg-primary/20 border-primary shadow-[0_0_15px_rgba(183,255,0,0.2)]"
+                      : "bg-[#26282B]/60 border-white/5 grayscale"
+                  )}
+                >
+                  <span className={cn("text-[10px] font-black italic mb-0.5", active ? "text-primary" : "text-muted-foreground")}>{opt.l}</span>
+                  <div className={cn("w-1 h-1 rounded-full", active ? "bg-primary animate-pulse" : "bg-transparent")} />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      <div className="flex gap-3 mt-8">
-        <Button variant="ghost" onClick={onBack} size="lg">Back</Button>
+      <div className="flex gap-4 mt-10">
+        <Button variant="ghost" onClick={onBack} size="lg" className="px-8 font-black uppercase text-[10px] tracking-widest hover:text-white">BACK</Button>
         <Button
           onClick={onNext}
           disabled={!isValid}
-          className="flex-1 font-bold text-[#0A0A0A] bg-[#C8FF00] hover:bg-[#D4FF33]"
-          size="lg"
+          className="flex-1 font-black text-[#0A0A0A] bg-primary hover:bg-[#D4FF33] h-14 rounded-2xl shadow-xl active:scale-95 transition-all text-xs tracking-[0.2em] uppercase italic"
         >
-          CONTINUE →
+          CONFIRM IDENTITY →
         </Button>
       </div>
     </div>
@@ -543,56 +586,70 @@ export function MacrosStep({
   }, [data.weight, data.height, data.age, data.gender, data.goal, data.activityLevel])
 
   return (
-    <div className="flex flex-col h-full relative animate-in fade-in slide-in-from-right-4 duration-300">
-      <div className="mb-6 mt-2">
-        <h1 className="text-4xl font-bold uppercase text-[#FAFAFA] mb-1" style={{ fontFamily: "'Oswald', sans-serif" }}>
-          Your Protocol
+    <div className="flex flex-col h-full relative">
+      <div className="mb-8">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-1">Step 3 of 4</p>
+        <h1 className="text-4xl font-black uppercase tracking-tight text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>
+          PROTOCOL <span className="text-primary italic">CALCULATED</span>
         </h1>
-        <p className="text-[#A1A1AA] text-sm leading-relaxed">
-          Targets calculated for your body and goal.
-        </p>
+        <div className="h-1 w-12 bg-primary mt-2 rounded-full" />
       </div>
 
-      <div className="flex mb-6">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#C8FF00] rounded text-[#0A0A0A] font-bold text-[10px] uppercase tracking-widest shadow-[0_0_15px_rgba(200,255,0,0.15)]">
-          {data.archetype} Archetype Applied
-        </div>
-      </div>
+      {/* Hero Stats Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative w-full bg-[#26282B]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-8 mb-8 shadow-2xl overflow-hidden"
+      >
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
 
-      {/* Hero Results Card */}
-      <div className="relative w-full bg-[#26282B] border border-[#2E3035] rounded-xl p-6 mb-6 shadow-xl">
-        {/* Corner Accents */}
-        <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#C8FF00] rounded-tl-lg" />
-        <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#C8FF00] rounded-tr-lg" />
-        <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#C8FF00] rounded-bl-lg" />
-        <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#C8FF00] rounded-br-lg" />
-
-        <div className="text-center mb-6">
-          <div className="text-6xl font-black text-[#C8FF00] leading-none tracking-tighter" style={{ fontFamily: "'Oswald', sans-serif" }}>
+        <div className="text-center mb-8 relative z-10">
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Total Daily Energy</div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-7xl font-black text-primary leading-none tracking-tighter drop-shadow-[0_0_20px_rgba(183,255,0,0.4)]"
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
             {Math.round(macros.calories)}
-          </div>
-          <div className="text-[#A1A1AA] font-bold uppercase tracking-widest text-[10px] mt-2">kcal / day</div>
+          </motion.div>
+          <div className="text-white/60 font-black uppercase tracking-widest text-[10px] mt-2 italic italic">kcal / Day</div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 border-t border-[#2E3035] pt-5">
-          <div className="flex flex-col items-center">
-            <span className="text-2xl font-black text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>{Math.round(macros.protein)}g</span>
-            <span className="text-[10px] text-[#A1A1AA] uppercase tracking-wider mt-1">Protein</span>
-          </div>
-          <div className="flex flex-col items-center border-x border-[#2E3035] px-2">
-            <span className="text-2xl font-black text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>{Math.round(macros.carbs)}g</span>
-            <span className="text-[10px] text-[#A1A1AA] uppercase tracking-wider mt-1">Carbs</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-2xl font-black text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>{Math.round(macros.fats)}g</span>
-            <span className="text-[10px] text-[#A1A1AA] uppercase tracking-wider mt-1">Fats</span>
+        <div className="grid grid-cols-3 gap-4 relative z-10">
+          {[
+            { label: 'Protien', val: Math.round(macros.protein), unit: 'G' },
+            { label: 'Carbs', val: Math.round(macros.carbs), unit: 'G' },
+            { label: 'Fats', val: Math.round(macros.fats), unit: 'G' }
+          ].map((m, i) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + (i * 0.1) }}
+              className="flex flex-col items-center bg-black/20 p-4 rounded-2xl border border-white/5"
+            >
+              <span className="text-2xl font-black text-[#FAFAFA]" style={{ fontFamily: "'Oswald', sans-serif" }}>{m.val}{m.unit}</span>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-widest mt-1 font-bold">{m.label}</span>
+              <div className="w-full h-1 bg-white/5 mt-3 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-primary" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-black/40 rounded-full border border-primary/20">
+            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest italic tracking-widest">Protocol 100% Optimized</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Activity Level Selection */}
-      <div className="mb-6">
-        <h3 className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest mb-3">Activity Level</h3>
+      {/* Activity Level Selector */}
+      <div className="space-y-3 mb-10">
+        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 block">Activity Bias</label>
         <div className="grid grid-cols-2 gap-3">
           {levels.map(level => {
             const isSelected = data.activityLevel === level.id
@@ -602,30 +659,28 @@ export function MacrosStep({
                 key={level.id}
                 onClick={() => onChange('activityLevel', level.id)}
                 className={cn(
-                  'text-left p-4 rounded-lg border-2 transition-all relative',
+                  'text-left p-4 rounded-2xl border transition-all relative group',
                   isSelected
-                    ? 'bg-[#C8FF00]/10 border-[#C8FF00]'
-                    : 'bg-[#1A1A1A] border-transparent opacity-70 hover:opacity-100'
+                    ? 'bg-primary/20 border-primary shadow-[0_0_15px_rgba(183,255,0,0.1)]'
+                    : 'bg-[#26282B]/30 border-white/5 opacity-60 hover:opacity-100'
                 )}
               >
-                {isSelected && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#C8FF00] shadow-[0_0_8px_rgba(200,255,0,0.8)]" />}
-                <Icon className={cn("mb-2", isSelected ? "text-[#C8FF00]" : "text-[#A1A1AA]")} size={20} />
-                <h4 className="text-[#FAFAFA] font-bold text-sm">{level.label}</h4>
-                <p className={cn("text-xs mt-1 leading-tight", isSelected ? "text-[#C8FF00]/80" : "text-[#A1A1AA]")}>{level.desc}</p>
+                <Icon className={cn("mb-2 transition-colors", isSelected ? "text-primary" : "text-muted-foreground")} size={20} />
+                <h4 className={cn("font-black text-xs uppercase tracking-wider italic", isSelected ? "text-white" : "text-muted-foreground")}>{level.label}</h4>
+                <p className={cn("text-[10px] mt-1 leading-tight font-medium", isSelected ? "text-primary/70" : "text-muted-foreground/60")}>{level.desc}</p>
               </button>
             )
           })}
         </div>
       </div>
 
-      <div className="flex gap-3 mt-auto pt-6">
-        <Button variant="ghost" onClick={onBack} size="lg">Back</Button>
+      <div className="flex gap-4 mt-auto">
+        <Button variant="ghost" onClick={onBack} size="lg" className="px-8 font-black uppercase text-[10px] tracking-widest hover:text-white">BACK</Button>
         <Button
           onClick={onNext}
-          className="flex-1 font-bold text-[#0A0A0A] bg-[#C8FF00] hover:bg-[#D4FF33]"
-          size="lg"
+          className="flex-1 font-black text-[#0A0A0A] bg-primary hover:bg-[#D4FF33] h-14 rounded-2xl shadow-xl active:scale-95 transition-all text-xs tracking-[0.2em] uppercase italic"
         >
-          LOCK IN TARGETS →
+          EMBRACE DISCIPLINE →
         </Button>
       </div>
     </div>

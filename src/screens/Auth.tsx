@@ -7,45 +7,9 @@ import { cn } from '@/lib/cn'
 
 type AuthMode = 'splash' | 'login' | 'signup' | 'forgot'
 
-// Geometric athlete silhouette SVG
-function AthleteSilhouette() {
-  return (
-    <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      {/* Subtle lime glow beneath */}
-      <ellipse cx="100" cy="295" rx="55" ry="10" fill="#C8FF00" fillOpacity="0.15" />
-      {/* Legs */}
-      <path d="M78 220 L68 295 L80 295 L92 245 L92 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.6" />
-      <path d="M122 220 L132 295 L120 295 L108 245 L108 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.6" />
-      {/* Feet glow */}
-      <rect x="66" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.4" />
-      <rect x="118" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.4" />
-      {/* Torso */}
-      <path d="M72 140 L68 220 L132 220 L128 140 L120 130 L80 130Z" fill="#26282B" stroke="#1A1A1A" strokeWidth="0.5" />
-      {/* Torso edge highlights */}
-      <path d="M72 140 L68 220" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.5" />
-      <path d="M128 140 L132 220" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.5" />
-      {/* Arms */}
-      <path d="M72 140 L48 195 L58 200 L80 155 L80 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.6" />
-      <path d="M128 140 L152 195 L142 200 L120 155 L120 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="1" strokeOpacity="0.6" />
-      {/* Forearm glow lines */}
-      <path d="M48 195 L58 200" stroke="#C8FF00" strokeWidth="2" strokeOpacity="0.8" />
-      <path d="M152 195 L142 200" stroke="#C8FF00" strokeWidth="2" strokeOpacity="0.8" />
-      {/* Shoulder caps */}
-      <ellipse cx="76" cy="138" rx="10" ry="6" fill="#C8FF00" fillOpacity="0.25" />
-      <ellipse cx="124" cy="138" rx="10" ry="6" fill="#C8FF00" fillOpacity="0.25" />
-      <path d="M66 138 Q76 130 86 138" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.9" />
-      <path d="M114 138 Q124 130 134 138" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.9" />
-      {/* Neck */}
-      <rect x="91" y="108" width="18" height="24" rx="4" fill="#26282B" stroke="#1A1A1A" strokeWidth="0.5" />
-      {/* Head */}
-      <ellipse cx="100" cy="96" rx="22" ry="26" fill="#26282B" stroke="#1A1A1A" strokeWidth="0.5" />
-      {/* Head top glow */}
-      <path d="M82 84 Q100 68 118 84" stroke="#C8FF00" strokeWidth="1.5" strokeOpacity="0.7" />
-      {/* Chest lines */}
-      <path d="M88 155 L88 185 M112 155 L112 185 M88 170 L112 170" stroke="#C8FF00" strokeWidth="0.5" strokeOpacity="0.2" />
-    </svg>
-  )
-}
+import heroWelcomeImg from '@/assets/hero-welcome.png'
+
+// Removed AthleteSilhouette
 
 function NoirInput({
   label,
@@ -259,9 +223,13 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
         />
 
         {/* Avatar — upper 55% of screen */}
-        <div className="flex-1 flex items-end justify-center px-12 pb-0" style={{ maxHeight: '58vh' }}>
-          <div className="w-full max-w-[200px]">
-            <AthleteSilhouette />
+        <div className="flex-1 flex items-end justify-center px-4 pb-0" style={{ maxHeight: '58vh' }}>
+          <div className="w-full max-w-[400px] flex items-end justify-center">
+            <img
+              src={heroWelcomeImg}
+              alt="The Protocol Archetypes"
+              className="w-full h-auto object-contain object-bottom drop-shadow-2xl opacity-90 mix-blend-screen"
+            />
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen'
 import { isNative } from '@/lib/platform'
+import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 interface AnimatedSplashScreenProps {
     onComplete: () => void
@@ -43,21 +44,14 @@ export function AnimatedSplashScreen({ onComplete }: AnimatedSplashScreenProps) 
                         }}
                         className="flex flex-col items-center"
                     >
-                        {/* Signature Avatar Logo */}
-                        <div className="w-28 h-28 mb-8">
-                            <svg viewBox="0 0 200 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_20px_rgba(200,255,0,0.35)]">
-                                <ellipse cx="100" cy="296" rx="52" ry="9" fill="#C8FF00" fillOpacity="0.25" />
-                                <path d="M78 220 L68 295 L80 295 L92 245 L92 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="2.5" strokeOpacity="1" />
-                                <path d="M122 220 L132 295 L120 295 L108 245 L108 220Z" fill="#26282B" stroke="#C8FF00" strokeWidth="2.5" strokeOpacity="1" />
-                                <rect x="66" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.8" />
-                                <rect x="118" y="292" width="16" height="5" rx="2" fill="#C8FF00" fillOpacity="0.8" />
-                                <path d="M72 140 L68 220 L132 220 L128 140 L120 130 L80 130Z" fill="#26282B" stroke="#1A1A1A" strokeWidth="3" />
-                                <path d="M72 140 L48 195 L58 200 L80 155 L80 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="2.5" strokeOpacity="1" />
-                                <path d="M128 140 L152 195 L142 200 L120 155 L120 135Z" fill="#26282B" stroke="#C8FF00" strokeWidth="2.5" strokeOpacity="1" />
-                                <rect x="91" y="108" width="18" height="24" rx="4" fill="#26282B" />
-                                <ellipse cx="100" cy="96" rx="22" ry="26" fill="#26282B" stroke="#C8FF00" strokeWidth="2.5" strokeOpacity="1" />
-                                <path d="M82 84 Q100 68 118 84" stroke="#C8FF00" strokeWidth="3" strokeOpacity="0.9" />
-                            </svg>
+                        {/* Signature Hero Image Logo */}
+                        <div className="w-48 h-48 mb-6 relative">
+                            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75" />
+                            <img
+                                src={heroWelcomeImg}
+                                alt="WellTrained Archetypes"
+                                className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(200,255,0,0.4)]"
+                            />
                         </div>
 
                         <motion.h1
