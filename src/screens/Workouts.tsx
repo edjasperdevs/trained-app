@@ -256,7 +256,7 @@ export function Workouts() {
     <div data-testid="workouts-screen" className="min-h-screen pb-20">
       <Confetti trigger={showCelebration} duration={3000} />
       {/* Header */}
-      <div className="pt-8 pb-6 px-5 bg-card">
+      <div className="pt-14 pb-6 px-5 bg-card">
         <h1 className="text-2xl font-bold mb-2">
           Training
         </h1>

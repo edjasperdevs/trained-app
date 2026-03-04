@@ -435,7 +435,7 @@ export function Settings() {
   return (
     <div data-testid="settings-screen" className="min-h-screen pb-20">
       {/* Header */}
-      <div className="pt-8 pb-6 px-5 bg-card">
+      <div className="pt-14 pb-6 px-5 bg-card">
         <h1 className="text-2xl font-bold">
           Settings
         </h1>

@@ -40,7 +40,7 @@ export function AvatarScreen() {
   return (
     <div data-testid="avatar-screen" className="min-h-screen pb-24 bg-[#0A0A0A] text-white selection:bg-primary/30">
       {/* Immersive Header & Avatar Section */}
-      <div className="relative pt-12 pb-16 px-6 overflow-hidden">
+      <div className="relative pt-14 pb-16 px-6 overflow-hidden">
         {/* Dramatic Radial Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary/20 blur-[100px] rounded-full" />
 

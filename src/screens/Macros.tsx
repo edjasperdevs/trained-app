@@ -115,7 +115,7 @@ export function Macros() {
 
         {/* Header */}
         <motion.div
-          className="bg-card pt-8 pb-4 px-5"
+          className="bg-card pt-14 pb-4 px-5"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springs.smooth}
