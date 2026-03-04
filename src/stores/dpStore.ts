@@ -240,6 +240,18 @@ export const useDPStore = create<DPStore>()(
     }),
     {
       name: 'trained-dp',
+      onRehydrateStorage: () => (state) => {
+        // Recalculate currentRank from totalDP after hydration to fix any stale rank values
+        if (state) {
+          const correctRank = calculateRank(state.totalDP)
+          if (state.currentRank !== correctRank) {
+            // Use setTimeout to defer the update until after hydration completes
+            setTimeout(() => {
+              useDPStore.setState({ currentRank: correctRank })
+            }, 0)
+          }
+        }
+      },
     }
   )
 )

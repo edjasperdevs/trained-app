@@ -723,6 +723,77 @@ export async function syncXPToCloud() {
   return { error: error?.message || null }
 }
 
+export async function loadXPFromCloud() {
+  if (!supabase) return { error: 'Not configured' }
+
+  const client = getSupabaseClient()
+  const { data: { user } } = await client.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  console.log('[Sync] Loading XP for user:', user.id)
+
+  const { data, error } = await client
+    .from('user_xp')
+    .select('total_xp, current_level')
+    .eq('user_id', user.id)
+    .single()
+
+  console.log('[Sync] XP query result:', { data, error })
+
+  if (error) {
+    // No XP record yet is not an error - user just hasn't earned any
+    if (error.code === 'PGRST116') {
+      console.log('[Sync] No XP record found for user')
+      return { error: null }
+    }
+    console.error('[Sync] XP query error:', error.message)
+    return { error: error.message }
+  }
+
+  if (data) {
+    const cloudTotalDP = data.total_xp || 0
+    const localTotalDP = useDPStore.getState().totalDP
+
+    console.log('[Sync] XP comparison - Cloud:', cloudTotalDP, 'Local:', localTotalDP)
+
+    // Always sync from cloud (cloud is source of truth for cross-device sync)
+    // This ensures switching accounts gets the correct data
+    const RANKS = [
+      { rank: 0, threshold: 0 },
+      { rank: 1, threshold: 250 },
+      { rank: 2, threshold: 750 },
+      { rank: 3, threshold: 1500 },
+      { rank: 4, threshold: 2250 },
+      { rank: 5, threshold: 3000 },
+      { rank: 6, threshold: 3750 },
+      { rank: 7, threshold: 4750 },
+      { rank: 8, threshold: 5750 },
+      { rank: 9, threshold: 6750 },
+      { rank: 10, threshold: 7750 },
+      { rank: 11, threshold: 9000 },
+      { rank: 12, threshold: 10250 },
+      { rank: 13, threshold: 11500 },
+      { rank: 14, threshold: 13000 },
+      { rank: 15, threshold: 14750 },
+    ]
+    let correctRank = 0
+    for (let i = RANKS.length - 1; i >= 0; i--) {
+      if (cloudTotalDP >= RANKS[i].threshold) {
+        correctRank = RANKS[i].rank
+        break
+      }
+    }
+
+    useDPStore.setState({
+      totalDP: cloudTotalDP,
+      currentRank: correctRank
+    })
+    console.log('[Sync] Updated DP store - totalDP:', cloudTotalDP, 'currentRank:', correctRank)
+  }
+
+  return { error: null }
+}
+
 // ==========================================
 // Avatar Sync (BUG-016 fix)
 // Note: Requires user_avatar table to be created in Supabase
@@ -940,13 +1011,14 @@ export async function syncAllToCloud() {
 export async function loadAllFromCloud() {
   // Use retry wrapper for each load operation
   // Run independent operations in parallel for better performance
-  const [profileResult, weightLogsResult, savedMealsResult, userFoodsResult, macroLogsResult, workoutLogsResult] = await Promise.all([
+  const [profileResult, weightLogsResult, savedMealsResult, userFoodsResult, macroLogsResult, workoutLogsResult, xpResult] = await Promise.all([
     withRetryResult(loadProfileFromCloud),
     withRetryResult(loadWeightLogsFromCloud),
     withRetryResult(loadSavedMealsFromCloud),
     withRetryResult(loadUserFoodsFromCloud),
     withRetryResult(loadMacroLogsFromCloud),
     withRetryResult(loadWorkoutLogsFromCloud),
+    withRetryResult(loadXPFromCloud),
   ])
 
   const results = {
@@ -956,6 +1028,7 @@ export async function loadAllFromCloud() {
     userFoods: userFoodsResult,
     macroLogs: macroLogsResult,
     workoutLogs: workoutLogsResult,
+    xp: xpResult,
   }
 
   if (import.meta.env.DEV) console.log('Load results:', results)

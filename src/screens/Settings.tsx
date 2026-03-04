@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar } from '@/components'
-import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink } from 'lucide-react'
+import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { isNative } from '@/lib/platform'
@@ -62,6 +62,8 @@ export function Settings() {
   const user = useAuthStore((state) => state.user)
   const signOut = useAuthStore((state) => state.signOut)
   const isConfigured = useAuthStore((state) => state.isConfigured)
+  const syncData = useAuthStore((state) => state.syncData)
+  const isSyncing = useAuthStore((state) => state.isSyncing)
 
   const reminderPreferences = useRemindersStore((state) => state.preferences)
   const setReminderPreference = useRemindersStore((state) => state.setPreference)
@@ -1056,6 +1058,27 @@ export function Settings() {
                 <p className="text-xs text-muted-foreground">
                   Your data syncs automatically when connected to the internet.
                 </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={async () => {
+                    await syncData()
+                    toast.success('Data synced successfully')
+                  }}
+                  disabled={isSyncing}
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Sync Now
+                    </>
+                  )}
+                </Button>
                 <Button
                   variant="ghost"
                   className="w-full"
