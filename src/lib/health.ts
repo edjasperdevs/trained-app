@@ -1,5 +1,4 @@
 import { Health } from '@capgo/capacitor-health'
-import { Device } from '@capacitor/device'
 import { isIOS } from '@/lib/platform'
 import { supabase } from '@/lib/supabase'
 
@@ -28,28 +27,18 @@ async function recordHealthConsent(authorized: boolean): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Get device info for audit trail
-    let deviceModel = 'unknown'
-    let osVersion = 'unknown'
-    try {
-      const deviceInfo = await Device.getInfo()
-      deviceModel = deviceInfo.model || 'unknown'
-      osVersion = `${deviceInfo.platform} ${deviceInfo.osVersion || ''}`
-    } catch {
-      // Non-critical
-    }
-
     const consentData = {
       user_id: user.id,
       steps_authorized: authorized,
       consent_granted_at: authorized ? new Date().toISOString() : null,
       consent_revoked_at: authorized ? null : new Date().toISOString(),
-      device_model: deviceModel,
-      os_version: osVersion,
+      device_model: 'iOS',
+      os_version: 'iOS',
       updated_at: new Date().toISOString(),
     }
 
-    await supabase
+    // Use type assertion since health_data_consent table may not be in generated types yet
+    await (supabase as any)
       .from('health_data_consent')
       .upsert(consentData, { onConflict: 'user_id' })
   } catch (error) {

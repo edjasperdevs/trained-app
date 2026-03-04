@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Info, Plus, X } from 'lucide-react'
+import { Check, Info, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { useMealPlanStore, FoodPreferences as FPType } from '@/stores/mealPlanStore'
+import { useMealPlanStore } from '@/stores/mealPlanStore'
 import { Button } from '@/components/ui/button'
 
 const COMMON_CUISINES = ['American', 'Italian', 'Mexican', 'Asian', 'Mediterranean', 'Indian', 'Vegan', 'Keto', 'Paleo']

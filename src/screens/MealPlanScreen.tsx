@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Utensils, RefreshCw, Settings, Check, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react'
 import { useMealPlanStore, AIMeal } from '@/stores/mealPlanStore'
