@@ -14,6 +14,7 @@ export const NOTIFICATION_IDS = {
   XP_CLAIM: 4,
   WEEKLY_CHECKIN: 5,
   STREAK_AT_RISK: 6,
+  REST_TIMER: 100,
 } as const
 
 /**
@@ -153,4 +154,48 @@ export async function scheduleAllNotifications(
       // Non-blocking -- scheduling may fail if permissions not granted
     }
   }
+}
+
+/**
+ * Show an immediate local notification.
+ * Useful for in-app events like rest timer completion.
+ */
+export async function showImmediateNotification(
+  title: string,
+  body: string,
+  id: number = NOTIFICATION_IDS.REST_TIMER
+): Promise<void> {
+  if (!isNative()) {
+    // Fallback to web Notification API
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body })
+    }
+    return
+  }
+
+  try {
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id,
+          title,
+          body,
+          schedule: { at: new Date(Date.now() + 100) }, // Immediate (100ms from now)
+        },
+      ],
+    })
+  } catch {
+    // Non-blocking
+  }
+}
+
+/**
+ * Show rest timer complete notification.
+ */
+export async function notifyRestTimerComplete(): Promise<void> {
+  await showImmediateNotification(
+    'Rest Complete',
+    'Time to start your next set!',
+    NOTIFICATION_IDS.REST_TIMER
+  )
 }

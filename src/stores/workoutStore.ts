@@ -77,9 +77,14 @@ interface WorkoutStore {
   currentWeek: number
   customizations: WorkoutCustomization[]
   assignedWorkout: AssignedWorkoutState | null
+  exerciseRestTimes: Record<string, number>  // exerciseName -> seconds
+  defaultRestTime: number  // fallback: 90 seconds
 
   // Actions
   setAssignedWorkout: (workout: AssignedWorkoutState | null) => void
+  setExerciseRestTime: (exerciseName: string, seconds: number) => void
+  setDefaultRestTime: (seconds: number) => void
+  getRestTimeForExercise: (exerciseName: string) => number
   setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => void
   setWorkoutDays: (days: DayOfWeek[]) => void
   getTodayWorkout: () => { type: WorkoutType; name: string; dayNumber: number } | null
@@ -392,8 +397,26 @@ export const useWorkoutStore = create<WorkoutStore>()(
       currentWeek: 1,
       customizations: [],
       assignedWorkout: null,
+      exerciseRestTimes: {},
+      defaultRestTime: 90,
 
       setAssignedWorkout: (workout) => set({ assignedWorkout: workout }),
+
+      setExerciseRestTime: (exerciseName, seconds) => {
+        set((state) => ({
+          exerciseRestTimes: {
+            ...state.exerciseRestTimes,
+            [exerciseName]: seconds
+          }
+        }))
+      },
+
+      setDefaultRestTime: (seconds) => set({ defaultRestTime: seconds }),
+
+      getRestTimeForExercise: (exerciseName) => {
+        const state = get()
+        return state.exerciseRestTimes[exerciseName] ?? state.defaultRestTime
+      },
 
       setPlan: (trainingDays: TrainingDays, selectedDays?: DayOfWeek[]) => {
         const days = selectedDays || getDefaultDays(trainingDays)
@@ -689,7 +712,9 @@ export const useWorkoutStore = create<WorkoutStore>()(
         currentPlan: null,
         workoutLogs: [],
         currentWeek: 1,
-        customizations: []
+        customizations: [],
+        exerciseRestTimes: {},
+        defaultRestTime: 90
       }),
 
       exportData: () => {
@@ -835,7 +860,11 @@ export const useWorkoutStore = create<WorkoutStore>()(
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { assignedWorkout, ...persisted } = state
-        return persisted
+        return {
+          ...persisted,
+          exerciseRestTimes: state.exerciseRestTimes,
+          defaultRestTime: state.defaultRestTime
+        }
       },
     }
   )

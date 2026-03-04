@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,13 +10,15 @@ import { useDPStore, DP_VALUES } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { haptics } from '@/lib/haptics'
+import { sounds } from '@/lib/sounds'
+import { notifyRestTimerComplete } from '@/lib/notifications'
 import { confirmAction } from '@/lib/confirm'
 import { scheduleSync } from '@/lib/sync'
 import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { motion } from 'framer-motion'
 import { springs } from '@/lib/animations'
-import { Clock, Dumbbell, ShieldCheck } from 'lucide-react'
+import { Clock, Dumbbell, ShieldCheck, Timer } from 'lucide-react'
 
 export function Workouts() {
   // PERF-02: Use granular selectors for reactive state only
@@ -880,6 +882,13 @@ export function Workouts() {
   )
 }
 
+interface RestTimerState {
+  active: boolean
+  timeRemaining: number
+  totalTime: number
+  exerciseName: string
+}
+
 function ActiveWorkoutView({
   workout,
   progress,
@@ -905,6 +914,7 @@ function ActiveWorkoutView({
   onReorderExercise: (fromIndex: number, toIndex: number) => void
   isSubmitting: boolean
 }) {
+  const { getRestTimeForExercise, setExerciseRestTime } = useWorkoutStore.getState()
   const getExerciseHistory = useWorkoutStore((state) => state.getExerciseHistory)
   const [expandedExercise, setExpandedExercise] = useState<string | null>(
     workout.exercises[0]?.id || null
@@ -912,6 +922,56 @@ function ActiveWorkoutView({
   const [showHistoryFor, setShowHistoryFor] = useState<string | null>(null)
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [newExerciseForm, setNewExerciseForm] = useState({ name: '', targetSets: '2', targetReps: '8-12' })
+  const [restTimer, setRestTimer] = useState<RestTimerState | null>(null)
+  const [showRestTimeModal, setShowRestTimeModal] = useState<string | null>(null)
+
+  // Rest timer countdown effect
+  useEffect(() => {
+    if (!restTimer?.active || restTimer.timeRemaining <= 0) return
+
+    const interval = setInterval(() => {
+      setRestTimer(prev => {
+        if (!prev || prev.timeRemaining <= 1) {
+          haptics.medium()
+          sounds.chime()
+          notifyRestTimerComplete()
+          return null
+        }
+        return { ...prev, timeRemaining: prev.timeRemaining - 1 }
+      })
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [restTimer?.active, restTimer?.timeRemaining])
+
+  const startRestTimer = (exerciseName: string) => {
+    const restTime = getRestTimeForExercise(exerciseName)
+    setRestTimer({
+      active: true,
+      timeRemaining: restTime,
+      totalTime: restTime,
+      exerciseName
+    })
+  }
+
+  const adjustRestTime = (delta: number) => {
+    setRestTimer(prev => {
+      if (!prev) return null
+      const newTime = Math.max(0, prev.timeRemaining + delta)
+      const newTotal = delta > 0 ? Math.max(prev.totalTime, newTime) : prev.totalTime
+      return { ...prev, timeRemaining: newTime, totalTime: newTotal }
+    })
+  }
+
+  const dismissRestTimer = () => {
+    setRestTimer(null)
+  }
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   // Get last workout data for an exercise
   const getLastWorkout = (exerciseName: string) => {
@@ -1014,9 +1074,21 @@ function ActiveWorkoutView({
                       <p className={`font-semibold ${isComplete ? 'text-success' : ''}`}>
                         {exercise.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {exercise.targetSets} sets × {exercise.targetReps} reps
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">
+                          {exercise.targetSets} sets × {exercise.targetReps} reps
+                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setShowRestTimeModal(exercise.name)
+                          }}
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors px-1.5 py-0.5 rounded bg-muted/50"
+                        >
+                          <Timer size={10} />
+                          {formatTime(getRestTimeForExercise(exercise.name))}
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1187,7 +1259,10 @@ function ActiveWorkoutView({
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => onCompleteSet(exercise.id, setIndex)}
+                                    onClick={() => {
+                                      onCompleteSet(exercise.id, setIndex)
+                                      startRestTimer(exercise.name)
+                                    }}
                                     data-testid="workouts-set-checkbox"
                                   >
                                     Done
@@ -1357,6 +1432,119 @@ function ActiveWorkoutView({
             </div>
 
             <ExerciseHistoryView exerciseName={showHistoryFor} />
+          </div>
+        </div>
+      )}
+
+      {/* Rest Timer Bar */}
+      {restTimer && (
+        <div
+          className="fixed bottom-20 left-0 right-0 px-4 z-40"
+          onClick={dismissRestTimer}
+        >
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={springs.bouncy}
+            className="bg-card border border-border rounded-xl p-4 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Progress bar that shrinks */}
+            <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
+              <motion.div
+                className="h-full bg-primary"
+                initial={{ width: '100%' }}
+                animate={{ width: `${(restTimer.timeRemaining / restTimer.totalTime) * 100}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            {/* Timer display and controls */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  adjustRestTime(-15)
+                }}
+                className="w-12 h-10 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-semibold text-sm transition-colors"
+              >
+                -15
+              </button>
+              <div className="text-center">
+                <span className="text-3xl font-mono font-bold text-primary">
+                  {formatTime(restTimer.timeRemaining)}
+                </span>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tap to dismiss
+                </p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  adjustRestTime(15)
+                }}
+                className="w-12 h-10 rounded-lg bg-muted hover:bg-muted/80 text-foreground font-semibold text-sm transition-colors"
+              >
+                +15
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Rest Time Settings Modal */}
+      {showRestTimeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Set rest time"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowRestTimeModal(null)}
+        >
+          <div
+            className="bg-card rounded-xl p-6 w-full max-w-sm animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Timer size={20} className="text-primary" />
+              <h2 className="text-lg font-bold">Rest Time</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Set rest time for {showRestTimeModal}
+            </p>
+
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {[60, 90, 120, 180].map((seconds) => {
+                const currentRestTime = getRestTimeForExercise(showRestTimeModal)
+                const isSelected = currentRestTime === seconds
+                return (
+                  <button
+                    key={seconds}
+                    onClick={() => {
+                      setExerciseRestTime(showRestTimeModal, seconds)
+                      setShowRestTimeModal(null)
+                    }}
+                    className={cn(
+                      'py-3 rounded-lg text-sm font-semibold transition-colors',
+                      isSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80 text-foreground'
+                    )}
+                  >
+                    {seconds < 60 ? `${seconds}s` : `${seconds / 60}m`}
+                  </button>
+                )
+              })}
+            </div>
+
+            <Button
+              variant="ghost"
+              onClick={() => setShowRestTimeModal(null)}
+              className="w-full"
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       )}
