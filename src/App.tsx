@@ -34,7 +34,8 @@ const Privacy = lazy(() => import('@/screens/Privacy').then(m => ({ default: m.P
 const Terms = lazy(() => import('@/screens/Terms').then(m => ({ default: m.Terms })))
 const Paywall = lazy(() => import('@/screens/Paywall').then(m => ({ default: m.Paywall })))
 const HealthPermission = lazy(() => import('@/screens/HealthPermission').then(m => ({ default: m.HealthPermission })))
-const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
+// TODO: Re-enable for v2 launch
+// const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
 
 
 function AppContent() {
@@ -300,7 +301,8 @@ function AppContent() {
             <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
             <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
             <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
-            <Route path="/protocol-ai" element={<Suspense fallback={<MacrosSkeleton />}><MealPlanScreen /></Suspense>} />
+            {/* TODO: Re-enable for v2 launch */}
+            {/* <Route path="/protocol-ai" element={<Suspense fallback={<MacrosSkeleton />}><MealPlanScreen /></Suspense>} />*/}
             <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
             <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
             <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
