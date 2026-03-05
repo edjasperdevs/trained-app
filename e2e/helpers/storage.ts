@@ -1,11 +1,8 @@
 /**
- * E2E localStorage seeding utilities.
+ * E2E localStorage utilities.
  *
- * Seeds Zustand persist stores in the browser before the page loads,
- * so the app hydrates with pre-authenticated state.
- *
- * Adapted from src/lib/devSeed.ts -- uses static values instead of
- * dynamic date math for deterministic test data.
+ * Provides seeding functions for tests that need custom state
+ * and cleanup functions for test isolation.
  */
 import type { Page } from '@playwright/test'
 
@@ -14,6 +11,7 @@ export const STORE_KEYS = {
   workouts: 'gamify-gains-workouts',
   macros: 'gamify-gains-macros',
   xp: 'gamify-gains-xp',
+  dp: 'trained-dp',
   avatar: 'gamify-gains-avatar',
   achievements: 'gamify-gains-achievements',
   access: 'gamify-gains-access',
@@ -23,6 +21,9 @@ export const STORE_KEYS = {
 /**
  * Seed a single Zustand persist store in localStorage.
  * Uses page.addInitScript so the data is present BEFORE any page script runs.
+ *
+ * NOTE: This only works with VITE_DEV_BYPASS=true, otherwise the app will
+ * require auth and ignore seeded data.
  */
 export async function seedStore(
   page: Page,
@@ -40,8 +41,11 @@ export async function seedStore(
 }
 
 /**
- * Seed ALL 8 Zustand stores with realistic test data.
+ * Seed ALL Zustand stores with realistic test data.
  * Must be called BEFORE page.goto() for Zustand to hydrate from localStorage.
+ *
+ * NOTE: This only works with VITE_DEV_BYPASS=true, otherwise the app will
+ * require auth and ignore seeded data.
  */
 export async function seedAllStores(page: Page) {
   // Access store -- grants access to app
@@ -64,8 +68,8 @@ export async function seedAllStores(page: Page) {
       height: 70,
       age: 28,
       goal: 'recomp',
-      avatarBase: 'dominant',
-      createdAt: 1734652800000, // 2024-12-20
+      archetype: 'bro',
+      createdAt: 1734652800000,
       currentStreak: 7,
       longestStreak: 14,
       lastCheckInDate: new Date().toISOString().split('T')[0],
@@ -188,7 +192,7 @@ export async function seedAllStores(page: Page) {
     activityLevel: 'moderate',
   }, 4)
 
-  // XP store -- some accumulated XP
+  // XP store
   await seedStore(page, STORE_KEYS.xp, {
     totalXP: 2500,
     currentLevel: 8,
@@ -213,9 +217,20 @@ export async function seedAllStores(page: Page) {
     lastClaimDate: '2025-01-08',
   }, 0)
 
+  // DP store
+  await seedStore(page, STORE_KEYS.dp, {
+    totalDP: 1800,
+    currentRank: 3,
+    obedienceStreak: 7,
+    longestObedienceStreak: 14,
+    lastActionDate: new Date().toISOString().split('T')[0],
+    lastCelebratedRank: 3,
+    dailyLogs: [],
+  }, 0)
+
   // Avatar store
   await seedStore(page, STORE_KEYS.avatar, {
-    baseCharacter: 'dominant',
+    baseCharacter: 'bro',
     currentMood: 'happy',
     accessories: [],
     lastInteraction: Date.now(),
@@ -245,11 +260,14 @@ export async function seedAllStores(page: Page) {
 }
 
 /**
- * Clear all gamify-gains-* keys from localStorage.
+ * Clear all gamify-gains-* and trained-* keys from localStorage.
+ * Use between tests for isolation.
  */
 export async function clearAllStores(page: Page) {
-  await page.addInitScript(() => {
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('gamify-gains-'))
+  await page.evaluate(() => {
+    const keys = Object.keys(localStorage).filter(
+      k => k.startsWith('gamify-gains-') || k.startsWith('trained-')
+    )
     keys.forEach(k => localStorage.removeItem(k))
   })
 }

@@ -100,7 +100,7 @@ async function injectDataAfterSignIn(
               height: 70,
               age: 28,
               goal: 'recomp',
-              avatarBase: 'dominant',
+              archetype: 'bro',
               createdAt: Date.now(),
               currentStreak: 0,
               longestStreak: 0,

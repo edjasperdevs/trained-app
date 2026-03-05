@@ -13,7 +13,6 @@ import {
   FitnessLevel,
   TrainingDays,
   Goal,
-  AvatarBase,
   Gender,
   UnitSystem
 } from '@/stores'
@@ -46,7 +45,6 @@ interface OnboardingData {
   height: number // in inches
   age: number
   goal: Goal
-  avatarBase: AvatarBase
   archetype: Archetype
   units: UnitSystem
 }
@@ -99,7 +97,6 @@ const defaultOnboardingData: OnboardingData = {
   height: 68,
   age: 25,
   goal: 'maintain',
-  avatarBase: 'dominant',
   archetype: 'bro',
   units: 'imperial'
 }
@@ -159,7 +156,7 @@ export function Onboarding() {
     initProfile(data)
     setPlan(days, selectedDays)
     calculateMacros(data.weight, data.height, data.age, data.gender, data.goal, data.activityLevel)
-    setBaseCharacter(data.avatarBase)
+    setBaseCharacter(data.archetype)
     completeOnboarding()
 
     analytics.onboardingCompleted(days)
@@ -188,7 +185,7 @@ export function Onboarding() {
     initProfile(finalData)
     setPlan(4, getDefaultDays(4)) // Default to 4 days if skipped
     calculateMacros(finalData.weight, finalData.height, finalData.age, finalData.gender, finalData.goal, finalData.activityLevel)
-    setBaseCharacter(finalData.avatarBase)
+    setBaseCharacter(finalData.archetype)
     completeOnboarding()
 
     navigate('/')
@@ -272,7 +269,6 @@ export function Onboarding() {
             {step === 'initiate' && (
               <InitiationStep
                 username={data.username}
-                avatarBase={data.avatarBase}
                 onContinue={finishInitiation}
               />
             )}
@@ -902,7 +898,6 @@ function InitiationStep({
   onContinue
 }: {
   username: string
-  avatarBase: AvatarBase
   onContinue: () => void
 }) {
   return (

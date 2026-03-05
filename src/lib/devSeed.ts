@@ -26,7 +26,7 @@ const userStore = {
       height: 70,
       age: 28,
       goal: 'recomp' as const,
-      avatarBase: 'dominant' as const,
+      archetype: 'bro' as const,
       createdAt: daysAgo(45).getTime(),
       currentStreak: 7,
       longestStreak: 14,
@@ -302,7 +302,7 @@ const xpStore = {
 // --- Avatar Store ---
 const avatarStore = {
   state: {
-    baseCharacter: 'dominant',
+    baseCharacter: 'bro',
     currentMood: 'happy',
     accessories: [],
     lastInteraction: Date.now(),
@@ -756,7 +756,6 @@ function buildPersonaUserStore(config: PersonaConfig) {
         height: config.height,
         age: config.age,
         goal: config.goal,
-        avatarBase: 'dominant' as const,
         archetype: config.archetype,
         createdAt: daysAgo(config.daysActive).getTime(),
         currentStreak: config.currentStreak,
@@ -859,7 +858,7 @@ export function seedPersona(persona: TestPersona) {
   localStorage.setItem('gamify-gains-achievements', JSON.stringify(achievements))
   localStorage.setItem('gamify-gains-avatar', JSON.stringify({
     state: {
-      baseCharacter: 'dominant',
+      baseCharacter: config.archetype,
       currentMood: config.currentStreak > 0 ? 'happy' : 'sad',
       accessories: [],
       lastInteraction: Date.now(),

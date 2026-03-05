@@ -91,7 +91,7 @@ async function seedQAAccount(email, password) {
       height: 70, // 5'10"
       age: 30,
       goal: 'recomp',
-      avatar_base: 'dominant',
+      archetype: 'bro',
       current_streak: 3,
       longest_streak: 7,
       last_check_in_date: toISO(today),

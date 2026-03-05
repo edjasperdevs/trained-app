@@ -6,7 +6,6 @@ import type { Archetype } from '@/design/constants'
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 export type TrainingDays = 3 | 4 | 5
 export type Goal = 'cut' | 'recomp' | 'maintain' | 'bulk'
-export type AvatarBase = 'dominant' | 'switch' | 'submissive'
 export type Gender = 'male' | 'female'
 export type UnitSystem = 'imperial' | 'metric'
 
@@ -24,7 +23,6 @@ export interface UserProfile {
   height: number // in inches (stored internally)
   age: number
   goal: Goal
-  avatarBase: AvatarBase
   archetype: Archetype
   createdAt: number
   currentStreak: number
@@ -82,7 +80,6 @@ const initialProfile: UserProfile = {
   height: 68, // 5'8" default
   age: 25,
   goal: 'maintain',
-  avatarBase: 'dominant',
   archetype: 'bro',
   createdAt: Date.now(),
   currentStreak: 0,

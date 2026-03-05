@@ -1,10 +1,10 @@
 import { useAvatarStore, useDPStore } from '@/stores'
 import { LABELS } from '@/design/constants'
+import type { Archetype } from '@/design/constants'
 import { cn } from '@/lib/cn'
 import {
-  Sword, Swords, ShieldAlert, Flame, Crown,
-  Wand2, Zap, Sparkles, Orbit,
-  Moon, CloudLightning, Tornado, Waves,
+  User, Dumbbell, Beef, Heart, TrendingUp,
+  Swords, ShieldAlert, Flame, Crown,
   LucideIcon
 } from 'lucide-react'
 
@@ -22,19 +22,27 @@ const sizeClasses = {
   xl: { container: 'w-48 h-48', icon: 80 }
 }
 
-// Character base icon representations per stage (1-5)
-const CHARACTER_STAGES: Record<string, { icons: LucideIcon[]; color: string }> = {
-  dominant: {
-    icons: [Sword, Swords, ShieldAlert, Flame, Crown],
-    color: 'text-destructive'
-  },
-  switch: {
-    icons: [Wand2, Zap, Sparkles, Orbit, Crown],
+// Character archetype icon representations per stage (1-5)
+const CHARACTER_STAGES: Record<Archetype, { icons: LucideIcon[]; color: string }> = {
+  bro: {
+    icons: [User, Swords, ShieldAlert, Flame, Crown],
     color: 'text-primary'
   },
-  submissive: {
-    icons: [Moon, CloudLightning, Tornado, Waves, Crown],
+  himbo: {
+    icons: [Dumbbell, Swords, ShieldAlert, Flame, Crown],
+    color: 'text-destructive'
+  },
+  brute: {
+    icons: [Beef, Swords, ShieldAlert, Flame, Crown],
+    color: 'text-warning'
+  },
+  pup: {
+    icons: [Heart, Swords, ShieldAlert, Flame, Crown],
     color: 'text-info'
+  },
+  bull: {
+    icons: [TrendingUp, Swords, ShieldAlert, Flame, Crown],
+    color: 'text-success'
   }
 }
 
@@ -66,7 +74,7 @@ export function Avatar({
 
   const iconSize = sizeClasses[size].icon
   const stage = getStageForRank(currentRank)
-  const characterDef = CHARACTER_STAGES[baseCharacter] || CHARACTER_STAGES.dominant
+  const characterDef = CHARACTER_STAGES[baseCharacter as Archetype] || CHARACTER_STAGES.bro
   const CharacterIcon = characterDef.icons[stage]
 
 

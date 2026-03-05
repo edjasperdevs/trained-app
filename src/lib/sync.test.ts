@@ -42,7 +42,7 @@ const cloudProfileRow = {
   height: 72,
   age: 30,
   goal: 'cut',
-  avatar_base: 'dominant',
+  archetype: 'bro',
   current_streak: 5,
   longest_streak: 10,
   last_check_in_date: '2024-06-01',
@@ -85,7 +85,7 @@ describe('loadProfileFromCloud', () => {
     expect(profile!.height).toBe(72)
     expect(profile!.age).toBe(30)
     expect(profile!.goal).toBe('cut')
-    expect(profile!.avatarBase).toBe('dominant')
+    expect(profile!.archetype).toBe('bro')
     expect(profile!.currentStreak).toBe(5)
     expect(profile!.longestStreak).toBe(10)
     expect(profile!.createdAt).toBe(new Date('2024-01-01T00:00:00Z').getTime())
@@ -103,7 +103,7 @@ describe('loadProfileFromCloud', () => {
         height: 68,
         age: 25,
         goal: 'maintain',
-        avatarBase: 'dominant',
+        archetype: 'bro',
         createdAt: 1000000,
         currentStreak: 0,
         longestStreak: 0,

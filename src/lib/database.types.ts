@@ -5,7 +5,7 @@ export type UserRole = 'client' | 'coach' | 'admin'
 export type Gender = 'male' | 'female'
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 export type GoalType = 'cut' | 'recomp' | 'maintain' | 'bulk'
-export type AvatarBase = 'dominant' | 'switch' | 'submissive'
+export type Archetype = 'bro' | 'himbo' | 'brute' | 'pup' | 'bull'
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active'
 export type WorkoutType = 'push' | 'pull' | 'legs' | 'upper' | 'lower' | 'rest'
 export type XPSource = 'workout' | 'protein' | 'calories' | 'checkin' | 'claim'
@@ -111,7 +111,7 @@ export interface Database {
           height: number | null
           age: number | null
           goal: GoalType | null
-          avatar_base: AvatarBase | null
+          archetype: Archetype | null
           current_streak: number
           longest_streak: number
           last_check_in_date: string | null
@@ -132,7 +132,7 @@ export interface Database {
           height?: number | null
           age?: number | null
           goal?: GoalType | null
-          avatar_base?: AvatarBase | null
+          archetype?: Archetype | null
           current_streak?: number
           longest_streak?: number
           last_check_in_date?: string | null
@@ -153,7 +153,7 @@ export interface Database {
           height?: number | null
           age?: number | null
           goal?: GoalType | null
-          avatar_base?: AvatarBase | null
+          archetype?: Archetype | null
           current_streak?: number
           longest_streak?: number
           last_check_in_date?: string | null
@@ -778,7 +778,7 @@ export interface Database {
       gender: Gender
       fitness_level: FitnessLevel
       goal_type: GoalType
-      avatar_base: AvatarBase
+      archetype: Archetype
       activity_level: ActivityLevel
       workout_type: WorkoutType
       xp_source: XPSource

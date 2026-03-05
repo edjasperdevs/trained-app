@@ -1,18 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { AvatarBase } from './userStore'
+import type { Archetype } from '@/design/constants'
 
 export type AvatarMood = 'happy' | 'neutral' | 'sad' | 'hyped' | 'neglected'
 
 interface AvatarStore {
-  baseCharacter: AvatarBase
+  baseCharacter: Archetype
   currentMood: AvatarMood
   accessories: string[]
   lastInteraction: number
   recentReaction: string | null
 
   // Actions
-  setBaseCharacter: (base: AvatarBase) => void
+  setBaseCharacter: (base: Archetype) => void
   setMood: (mood: AvatarMood) => void
   triggerReaction: (type: 'checkIn' | 'levelUp' | 'missedDay' | 'streak' | 'claim') => void
   checkNeglected: () => void
@@ -32,7 +32,7 @@ const REACTION_MESSAGES = {
 export const useAvatarStore = create<AvatarStore>()(
   persist(
     (set, get) => ({
-      baseCharacter: 'dominant',
+      baseCharacter: 'bro',
       currentMood: 'neutral',
       accessories: [],
       lastInteraction: Date.now(),
@@ -73,7 +73,7 @@ export const useAvatarStore = create<AvatarStore>()(
       },
 
       resetAvatar: () => set({
-        baseCharacter: 'dominant',
+        baseCharacter: 'bro',
         currentMood: 'neutral',
         accessories: [],
         lastInteraction: Date.now(),
@@ -97,7 +97,7 @@ export const useAvatarStore = create<AvatarStore>()(
           const parsed = JSON.parse(data)
           if (parsed.avatar) {
             set({
-              baseCharacter: parsed.avatar.baseCharacter || 'dominant',
+              baseCharacter: parsed.avatar.baseCharacter || 'bro',
               currentMood: parsed.avatar.currentMood || 'neutral',
               accessories: parsed.avatar.accessories || [],
               lastInteraction: parsed.avatar.lastInteraction || Date.now()

@@ -8,13 +8,13 @@
  * E2E-11: Offline -> online sync cycle (data persists, sync triggers)
  *
  * Tests that need custom seed data use baseTest with manual seeding.
- * Tests that work with default seeds use the seededPage fixture.
+ * Tests that work with default seeds use the authenticatedPage fixture.
  */
 import { test, expect } from '../fixtures/base'
 import { test as baseTest, expect as baseExpect } from '@playwright/test'
 import { seedAllStores, seedStore, STORE_KEYS } from '../helpers/storage'
 
-/** Inject CSS to disable animations (same as seededPage fixture) */
+/** Inject CSS to disable animations (same as authenticatedPage fixture) */
 async function disableAnimations(page: import('@playwright/test').Page) {
   await page.addInitScript(() => {
     const style = document.createElement('style')
@@ -44,9 +44,9 @@ async function waitForApp(page: import('@playwright/test').Page) {
 }
 
 test.describe('Core Journey Tests', () => {
-  // E2E-08 is inside this describe block (uses seededPage fixture).
+  // E2E-08 is inside this describe block (uses authenticatedPage fixture).
   // E2E-07, E2E-09, E2E-10 are outside (use baseTest with manual seeding).
-  // E2E-11 is also inside (uses seededPage fixture).
+  // E2E-11 is also inside (uses authenticatedPage fixture).
 })
 
 baseTest('E2E-07: workout -- start, log sets, complete workout', async ({ page }) => {
@@ -153,7 +153,7 @@ baseTest('E2E-07: workout -- start, log sets, complete workout', async ({ page }
 // ============================================================
 // E2E-08: Meal logging via recent foods
 // ============================================================
-test('E2E-08: macros -- log recent food, totals update', async ({ seededPage: page }) => {
+test('E2E-08: macros -- log recent food, totals update', async ({ authenticatedPage: page }) => {
   // Navigate to Macros
   await page.locator('[data-testid="nav-macros"]').click()
   await expect(page.locator('[data-testid="macros-screen"]')).toBeVisible({ timeout: 10000 })
@@ -219,7 +219,7 @@ baseTest('E2E-09: check-in -- complete daily check-in, maintain streak', async (
         height: 70,
         age: 28,
         goal: 'recomp',
-        avatarBase: 'dominant',
+        archetype: 'bro',
         createdAt: 1734652800000,
         currentStreak: 7,
         longestStreak: 14,
@@ -358,7 +358,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP after 7-day cooldown', async ({ pa
       height: 70,
       age: 28,
       goal: 'recomp',
-      avatarBase: 'dominant',
+      archetype: 'bro',
       createdAt: 1734652800000,
       currentStreak: 7,
       longestStreak: 14,
@@ -434,7 +434,7 @@ baseTest('E2E-10: xp claim -- claim weekly XP after 7-day cooldown', async ({ pa
 // ============================================================
 // E2E-11: Offline -> online sync cycle
 // ============================================================
-test('E2E-11: offline sync -- data persists offline, sync triggers on reconnect', async ({ seededPage: page, context }) => {
+test('E2E-11: offline sync -- data persists offline, sync triggers on reconnect', async ({ authenticatedPage: page, context }) => {
   // Mock Supabase REST endpoints for when sync triggers on reconnect
   await page.route('**/rest/v1/**', route => route.fulfill({
     status: 200,

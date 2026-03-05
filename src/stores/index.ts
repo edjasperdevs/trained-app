@@ -1,5 +1,5 @@
 export { useUserStore } from './userStore'
-export type { UserProfile, FitnessLevel, TrainingDays, Goal, AvatarBase, Gender, WeightEntry, UnitSystem } from './userStore'
+export type { UserProfile, FitnessLevel, TrainingDays, Goal, Gender, WeightEntry, UnitSystem } from './userStore'
 
 export { useAuthStore } from './authStore'
 

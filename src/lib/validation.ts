@@ -98,8 +98,8 @@ export function isValidXPState(value: unknown): boolean {
 // Avatar Validation
 // ==========================================
 
-export function isValidAvatarBase(value: unknown): value is 'dominant' | 'switch' | 'submissive' {
-  return value === 'dominant' || value === 'switch' || value === 'submissive'
+export function isValidArchetype(value: unknown): value is 'bro' | 'himbo' | 'brute' | 'pup' | 'bull' {
+  return value === 'bro' || value === 'himbo' || value === 'brute' || value === 'pup' || value === 'bull'
 }
 
 export function isValidMood(value: unknown): value is 'happy' | 'neutral' | 'sad' | 'hyped' | 'neglected' {

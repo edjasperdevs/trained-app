@@ -36,7 +36,7 @@ async function injectProfileAfterSignIn(page: Page, username: string) {
           height: 70,
           age: 28,
           goal: 'recomp',
-          avatarBase: 'dominant',
+          archetype: 'bro',
           createdAt: Date.now(),
           currentStreak: 0,
           longestStreak: 0,
@@ -165,10 +165,10 @@ test.describe('Auth and Onboarding Journeys', () => {
     // Continue
     await page.getByRole('button', { name: /continue/i }).click()
 
-    // Step 8 (Avatar): Select first avatar option (The Dom/me) and continue
+    // Step 8 (Archetype): Select first archetype option (Bro) and continue
     await expect(page.getByText('Choose your persona')).toBeVisible({ timeout: 5000 })
-    // The default selection is 'dominant' (The Dom/me) -- click it to confirm
-    await page.getByRole('button', { name: /dom\/me/i }).click()
+    // The default selection is 'bro' -- click it to confirm
+    await page.getByRole('button', { name: /bro/i }).first().click()
     await page.getByRole('button', { name: /continue/i }).click()
 
     // Step 9 (Features): Just continue
