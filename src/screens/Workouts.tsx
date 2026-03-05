@@ -289,7 +289,7 @@ export function Workouts() {
           <>
             {/* Today's Workout */}
             <div>
-              <h2 className="text-lg font-bold mb-3">Today</h2>
+              <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">Today</h2>
               {todayWorkout || hasAssignment ? (
                 <>
                   <Card className="py-0">
@@ -458,7 +458,7 @@ export function Workouts() {
             {/* Customize Workouts */}
             {currentPlan && (
               <div>
-                <h2 className="text-lg font-bold mb-3">Customize Workouts</h2>
+                <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">Customize Workouts</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {getUniqueWorkoutTypes(currentPlan.schedule).map((type) => {
                     const isCustomized = customizations.some(c => c.workoutType === type && c.exercises.length > 0)
@@ -490,7 +490,7 @@ export function Workouts() {
 
             {/* Week Overview */}
             <div>
-              <h2 className="text-sm font-heading uppercase tracking-wider text-muted-foreground mb-3">This Week</h2>
+              <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">This Week</h2>
               <div className="grid grid-cols-7 gap-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                   const workout = currentPlan?.schedule.find(s => s.day === index)
@@ -525,7 +525,7 @@ export function Workouts() {
             {/* History */}
             <div data-testid="workouts-history">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-bold">Recent Workouts</h2>
+                <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground">Recent Workouts</h2>
                 <button
                   onClick={() => setShowHistory(!showHistory)}
                   className="text-primary text-sm"
@@ -1001,32 +1001,30 @@ function ActiveWorkoutView({
   return (
     <div className="space-y-4">
       {/* Progress Header */}
-      <Card className="py-0">
-        <CardContent className="p-4">
-          {workout.assignmentId && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <ShieldCheck size={14} className="text-primary" />
-              <span className="text-xs text-primary font-medium">
-                Prescribed by Coach
-              </span>
-            </div>
-          )}
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xl font-bold capitalize">
-                {workout.assignmentId ? 'Coach Workout' : `${workout.workoutType} Day`}
-              </p>
-              <p className="text-sm text-muted-foreground">Week {workout.weekNumber}, Day {workout.dayNumber}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold font-digital text-primary">
-                {Math.round(progress)}%
-              </p>
-            </div>
+      <div className="rounded-xl bg-surface border border-border p-5">
+        {workout.assignmentId && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <ShieldCheck size={14} className="text-primary" />
+            <span className="text-xs text-primary font-medium uppercase tracking-wide">
+              Prescribed by Coach
+            </span>
           </div>
-          <ProgressBar progress={progress} color="gradient" size="lg" />
-        </CardContent>
-      </Card>
+        )}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-2xl font-heading uppercase tracking-wide">
+              {workout.assignmentId ? 'Coach Workout' : `${workout.workoutType} Day`}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">Week {workout.weekNumber}, Day {workout.dayNumber}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold font-digital text-primary">
+              {Math.round(progress)}%
+            </p>
+          </div>
+        </div>
+        <ProgressBar progress={progress} color="gradient" size="lg" />
+      </div>
 
       {/* Exercises */}
       <div className="space-y-3">
@@ -1043,7 +1041,14 @@ function ActiveWorkoutView({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: exIndex * 0.1, ...springs.bouncy }}
             >
-              <Card data-testid="workouts-exercise-card" className="py-0">
+              <div
+                data-testid="workouts-exercise-card"
+                className={cn(
+                  "rounded-xl border transition-all",
+                  isComplete ? "bg-primary/5 border-primary/30" : "bg-surface border-border",
+                  isExpanded && "shadow-[0_0_15px_rgba(212,168,83,0.1)]"
+                )}
+              >
                 <button
                   onClick={() => setExpandedExercise(isExpanded ? null : exercise.id)}
                   className="w-full p-4 flex items-center justify-between"
@@ -1058,9 +1063,12 @@ function ActiveWorkoutView({
                       >
                         ▲
                       </button>
-                      <span className={`text-sm ${isComplete ? 'text-success' : 'text-muted-foreground'}`}>
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-heading",
+                        isComplete ? "bg-primary/20 text-primary" : "bg-surface-elevated text-muted-foreground"
+                      )}>
                         {isComplete ? '✓' : exIndex + 1}
-                      </span>
+                      </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); onReorderExercise(exIndex, exIndex + 1) }}
                         className={`text-xs leading-none px-1 ${exIndex === workout.exercises.length - 1 ? 'text-muted-foreground/30 pointer-events-none' : 'text-muted-foreground hover:text-primary'}`}
@@ -1071,7 +1079,10 @@ function ActiveWorkoutView({
                       </button>
                     </div>
                     <div className="text-left">
-                      <p className={`font-semibold ${isComplete ? 'text-success' : ''}`}>
+                      <p className={cn(
+                        "font-heading uppercase tracking-wide text-sm",
+                        isComplete ? "text-primary" : "text-foreground"
+                      )}>
                         {exercise.name}
                       </p>
                       <div className="flex items-center gap-2">
@@ -1105,10 +1116,10 @@ function ActiveWorkoutView({
                   'overflow-hidden transition-all duration-300',
                   isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
                 )}>
-                  <div className="px-4 pb-4 border-t border-border pt-3">
+                  <div className="px-4 pb-4 border-t border-border/50 pt-3">
                     {/* Previous Performance */}
                     {lastWorkout && (
-                      <div className="mb-4 p-3 bg-card/50 rounded-lg border border-border/50">
+                      <div className="mb-4 p-3 bg-surface-elevated rounded-xl border border-border/50">
                         <div className="flex items-center justify-between">
                           <button
                             onClick={(e) => {
@@ -1282,7 +1293,7 @@ function ActiveWorkoutView({
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             </motion.div>
           )
         })}
@@ -1291,10 +1302,10 @@ function ActiveWorkoutView({
       {/* Add Exercise Button */}
       <button
         onClick={() => setShowAddExercise(true)}
-        className="w-full p-3 border-2 border-dashed border-border rounded-lg text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+        className="w-full p-4 border-2 border-dashed border-border rounded-xl text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
       >
         <span className="text-xl">+</span>
-        <span>Add Exercise</span>
+        <span className="uppercase tracking-wide text-sm">Add Exercise</span>
       </button>
 
       {/* Action Buttons */}
