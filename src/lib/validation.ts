@@ -82,19 +82,6 @@ export function isValidWorkoutLog(value: unknown): boolean {
 }
 
 // ==========================================
-// XP Validation
-// ==========================================
-
-export function isValidXPState(value: unknown): boolean {
-  if (!isObject(value)) return false
-  return (
-    isNumber(value.totalXP) && value.totalXP >= 0 &&
-    isNumber(value.currentLevel) && value.currentLevel >= 0 &&
-    isNumber(value.pendingXP) && value.pendingXP >= 0
-  )
-}
-
-// ==========================================
 // Avatar Validation
 // ==========================================
 

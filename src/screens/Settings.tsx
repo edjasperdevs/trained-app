@@ -13,7 +13,6 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem'
 import { Share } from '@capacitor/share'
 import {
   useUserStore,
-  useXPStore,
   useDPStore,
   useMacroStore,
   useWorkoutStore,
@@ -37,7 +36,7 @@ import { friendlyError } from '@/lib/errors'
 import { getSupabaseClient } from '@/lib/supabase'
 import { scheduleAllNotifications } from '@/lib/notifications'
 import { getLocalDateString } from '@/lib/dateUtils'
-import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidXPState, isValidDailyLog, isArray } from '@/lib/validation'
+import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidDailyLog, isArray } from '@/lib/validation'
 import { cn } from '@/lib/cn'
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
@@ -300,7 +299,7 @@ export function Settings() {
       const parsed = JSON.parse(importData)
 
       // Validate the import has expected structure
-      if (!isObject(parsed) || (!parsed.version && !parsed.user && !parsed.xp)) {
+      if (!isObject(parsed) || (!parsed.version && !parsed.user && !parsed.dp)) {
         toast.error('This doesn\'t look like a Trained backup file. Make sure you\'re importing a file exported from Trained.')
         setImportStatus('error')
         return
@@ -309,9 +308,6 @@ export function Settings() {
       // Validate individual sections before importing
       const errors: string[] = []
 
-      if (parsed.xp && !isValidXPState(parsed.xp)) {
-        errors.push('XP data')
-      }
       if (parsed.macros && isObject(parsed.macros)) {
         if (parsed.macros.targets && !isValidMacroTargets(parsed.macros.targets)) {
           errors.push('macro targets')
@@ -348,9 +344,6 @@ export function Settings() {
           lastCelebratedRank: (dp.lastCelebratedRank as number) || 1,
           dailyLogs: (dp.dailyLogs as []) || [],
         })
-      } else if (parsed.xp) {
-        // Legacy V1 import: ignore xp data (no migration path from XP to DP)
-        useXPStore.getState().importData(JSON.stringify({ xp: parsed.xp }))
       }
       if (parsed.macros) {
         useMacroStore.getState().importData(JSON.stringify({ macros: parsed.macros }))
@@ -878,7 +871,7 @@ export function Settings() {
               {([
                 { key: 'logMacros' as ReminderType, label: 'Log Protocol', description: 'When no food logged today', icon: UtensilsCrossed },
                 { key: 'checkIn' as ReminderType, label: LABELS.checkIn, description: 'When report not submitted', icon: CheckCircle2 },
-                { key: 'claimXP' as ReminderType, label: `Claim ${LABELS.xp}`, description: `When pending ${LABELS.xp} is ready to claim`, icon: Gift },
+                { key: 'claimXP' as ReminderType, label: `Weekly ${LABELS.dp}`, description: `When you have unclaimed ${LABELS.dp}`, icon: Gift },
                 { key: 'workout' as ReminderType, label: 'Training', description: 'When training scheduled but not done', icon: Dumbbell }
               ]).map(({ key, label, description, icon: Icon }) => (
                 <button
@@ -927,7 +920,7 @@ export function Settings() {
                   { key: 'checkIn' as keyof NotificationPreferences, label: LABELS.checkIn, description: 'Daily reminder at your chosen time', icon: CheckCircle2, visible: true },
                   { key: 'workout' as keyof NotificationPreferences, label: 'Training', description: 'Reminder on workout days', icon: Dumbbell, visible: true },
                   { key: 'logMacros' as keyof NotificationPreferences, label: 'Log Protocol', description: 'Evening reminder to track nutrition', icon: UtensilsCrossed, visible: true },
-                  { key: 'claimXP' as keyof NotificationPreferences, label: `Claim ${LABELS.xp}`, description: 'Sunday reminder to claim your weekly reward', icon: Gift, visible: true },
+                  { key: 'claimXP' as keyof NotificationPreferences, label: `Weekly ${LABELS.dp}`, description: 'Sunday reminder to check your weekly progress', icon: Gift, visible: true },
                   { key: 'weeklyCheckIn' as keyof NotificationPreferences, label: 'Weekly Check-in', description: 'Saturday reminder to submit your check-in', icon: CheckCircle2, visible: hasCoach },
                   { key: 'streakProtection' as keyof NotificationPreferences, label: 'Streak Protection', description: "Evening alert if you haven't checked in", icon: Bell, visible: true },
                 ]).filter(i => i.visible).map(({ key, label, description, icon: Icon }) => (

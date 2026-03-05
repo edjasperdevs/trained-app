@@ -171,10 +171,10 @@ export function WeeklySummary() {
       >
         <div className="flex items-center gap-2">
           <Zap size={16} className="text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Weekly {LABELS.xp}</span>
+          <span className="text-sm text-muted-foreground">Weekly {LABELS.dp}</span>
         </div>
         <span className="font-bold font-mono text-primary">
-          +{stats.dpEarned} {LABELS.xp}
+          +{stats.dpEarned} {LABELS.dp}
         </span>
       </div>
       </CardContent>

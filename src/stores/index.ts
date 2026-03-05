@@ -3,9 +3,6 @@ export type { UserProfile, FitnessLevel, TrainingDays, Goal, Gender, WeightEntry
 
 export { useAuthStore } from './authStore'
 
-export { useXPStore } from './xpStore'
-export type { WeeklyHistory, DailyXP } from './xpStore'
-
 export { useDPStore } from './dpStore'
 export type { DailyDP, DPAction } from './dpStore'
 

@@ -49,7 +49,7 @@ export function DPDisplay({ compact = false }: DPDisplayProps) {
 
       {/* Total DP */}
       <p className={cn('font-mono text-primary text-sm mb-3')}>
-        <CountUp to={totalDP} /> {LABELS.xp}
+        <CountUp to={totalDP} /> {LABELS.dp}
       </p>
 
       {/* Progress Bar */}
@@ -67,7 +67,7 @@ export function DPDisplay({ compact = false }: DPDisplayProps) {
       ) : (
         <div className="flex justify-between text-xs text-muted-foreground">
           <span className="font-mono">{Math.round(rankInfo.progress * 100)}%</span>
-          <span className="font-mono">{rankInfo.dpForNext.toLocaleString()} {LABELS.xp} to next rank</span>
+          <span className="font-mono">{rankInfo.dpForNext.toLocaleString()} {LABELS.dp} to next rank</span>
         </div>
       )}
     </div>

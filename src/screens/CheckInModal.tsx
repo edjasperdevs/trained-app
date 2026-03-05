@@ -253,7 +253,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                 >
                   <span>{anim.label}</span>
                   <span className="text-success font-mono font-bold">
-                    +{anim.amount} {LABELS.xp}
+                    +{anim.amount} {LABELS.dp}
                   </span>
                 </div>
               ))}
@@ -266,7 +266,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
             >
               <p className="text-muted-foreground mb-1">Total Earned</p>
               <p className="text-4xl font-bold font-mono text-primary">
-                +{earnedDP} {LABELS.xp}
+                +{earnedDP} {LABELS.dp}
               </p>
             </div>
 

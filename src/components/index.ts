@@ -1,6 +1,5 @@
 export { ProgressBar } from './ProgressBar'
 export { Avatar } from './Avatar'
-export { XPDisplay } from './XPDisplay'
 export { DPDisplay } from './DPDisplay'
 export { RankUpModal } from './RankUpModal'
 export { Navigation } from './Navigation'

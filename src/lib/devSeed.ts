@@ -231,74 +231,6 @@ const macroStore = {
   version: 2,
 }
 
-// --- XP Store ---
-function buildXPLogs() {
-  const logs = []
-  let totalXP = 0
-
-  for (let i = 30; i >= 0; i--) {
-    const isRestDay = i % 3 === 2
-    const workout = !isRestDay
-    const protein = Math.random() > 0.2
-    const calories = Math.random() > 0.3
-    const checkIn = Math.random() > 0.1
-    const perfectDay = workout && protein && calories && checkIn
-    const streakBonus = Math.min(i > 20 ? 0 : 7, 14) * 10
-
-    const dayXP =
-      (workout ? 100 : 0) +
-      (protein ? 50 : 0) +
-      (calories ? 50 : 0) +
-      (checkIn ? 25 : 0) +
-      (perfectDay ? 25 : 0) +
-      streakBonus
-
-    totalXP += dayXP
-
-    logs.push({
-      date: toISO(daysAgo(i)),
-      workout, protein, calories, checkIn, perfectDay,
-      streakBonus,
-      total: dayXP,
-      claimed: i > 0,
-    })
-  }
-
-  return { logs, totalXP }
-}
-
-const xpData = buildXPLogs()
-
-// Calculate level from XP (100 XP per level for first levels, scaling up)
-function calcLevel(totalXP: number) {
-  let level = 0
-  let xpNeeded = 100
-  let remaining = totalXP
-  while (remaining >= xpNeeded && level < 99) {
-    remaining -= xpNeeded
-    level++
-    xpNeeded = Math.floor(100 * (1 + level * 0.1))
-  }
-  return level
-}
-
-const xpStore = {
-  state: {
-    totalXP: xpData.totalXP,
-    currentLevel: calcLevel(xpData.totalXP),
-    pendingXP: xpData.logs[xpData.logs.length - 1]?.claimed ? 0 : xpData.logs[xpData.logs.length - 1]?.total || 0,
-    weeklyHistory: [
-      { weekOf: toISO(daysAgo(21)), xpEarned: 1450, levelReached: calcLevel(xpData.totalXP) - 3 },
-      { weekOf: toISO(daysAgo(14)), xpEarned: 1620, levelReached: calcLevel(xpData.totalXP) - 2 },
-      { weekOf: toISO(daysAgo(7)), xpEarned: 1580, levelReached: calcLevel(xpData.totalXP) - 1 },
-      { weekOf: toISO(daysAgo(0)), xpEarned: 820, levelReached: calcLevel(xpData.totalXP) },
-    ],
-    dailyLogs: xpData.logs,
-    lastClaimDate: toISO(daysAgo(1)),
-  },
-  version: 0,
-}
-
 // --- Avatar Store ---
 const avatarStore = {
   state: {
@@ -358,14 +290,12 @@ export function seedTestData() {
   localStorage.setItem('gamify-gains-user', JSON.stringify(userStore))
   localStorage.setItem('gamify-gains-workouts', JSON.stringify(workoutStore))
   localStorage.setItem('gamify-gains-macros', JSON.stringify(macroStore))
-  localStorage.setItem('gamify-gains-xp', JSON.stringify(xpStore))
   localStorage.setItem('gamify-gains-avatar', JSON.stringify(avatarStore))
   localStorage.setItem('gamify-gains-achievements', JSON.stringify(achievementsStore))
   localStorage.setItem('gamify-gains-access', JSON.stringify(accessStore))
   localStorage.setItem('gamify-gains-reminders', JSON.stringify(remindersStore))
 
   console.log('✅ Test data seeded!')
-  console.log(`   Level: ${calcLevel(xpData.totalXP)} | XP: ${xpData.totalXP}`)
   console.log(`   Workouts: ${workoutStore.state.workoutLogs.length}`)
   console.log(`   Macro days: ${macroStore.state.dailyLogs.length}`)
   console.log(`   Badges: ${achievementsStore.state.earnedBadges.length}`)
@@ -514,7 +444,7 @@ export function getMockWeeklyCheckins(): WeeklyCheckin[] {
 export function clearTestData() {
   const keys = [
     'gamify-gains-user', 'gamify-gains-workouts', 'gamify-gains-macros',
-    'gamify-gains-xp', 'gamify-gains-avatar', 'gamify-gains-achievements',
+    'gamify-gains-avatar', 'gamify-gains-achievements',
     'gamify-gains-access', 'gamify-gains-reminders', 'gamify-gains-dp',
     'gamify-gains-subscription',
   ]

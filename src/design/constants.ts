@@ -86,14 +86,13 @@ export function getModifiedDP(action: DPAction, archetype: Archetype): number {
 }
 
 export const LABELS = {
-  xp: 'DP',
-  xpFull: 'Discipline Points',
+  dp: 'DP',
+  dpFull: 'Discipline Points',
   level: 'Rank',
   streak: 'Streak',
   streakSaver: 'Streak Saver',
   dailyQuests: 'Daily Assignments',
   checkIn: 'Daily Report',
-  weeklyXPClaim: 'Weekly Reward',
   achievements: 'Achievements',
   reminders: 'Reminders',
   motivationalMessages: 'Standing Orders',

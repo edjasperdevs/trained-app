@@ -382,7 +382,7 @@ export function Workouts() {
                       {isCompleted && (
                         <div className="mt-3 pt-3 border-t border-border">
                           <p className="text-sm text-muted-foreground">
-                            +{DP_VALUES.training} {LABELS.xp} earned
+                            +{DP_VALUES.training} {LABELS.dp} earned
                           </p>
                         </div>
                       )}
@@ -581,7 +581,7 @@ export function Workouts() {
                 <EmptyState
                   icon={Dumbbell}
                   title="No workouts yet"
-                  description={`Start your first workout to begin tracking progress and earning ${LABELS.xp}.`}
+                  description={`Start your first workout to begin tracking progress and earning ${LABELS.dp}.`}
                   action={{ label: "Start Workout", onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                 />
               )}
@@ -607,7 +607,7 @@ export function Workouts() {
               {LABELS.minimalWorkout}
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Short on time? Log what you did instead. You'll still earn {LABELS.xp} for staying compliant!
+              Short on time? Log what you did instead. You'll still earn {LABELS.dp} for staying compliant!
             </p>
 
             <Textarea
@@ -633,7 +633,7 @@ export function Workouts() {
                 onClick={handleMinimalWorkout}
                 disabled={!minimalNotes.trim() || isSubmitting}
               >
-                Log {LABELS.minimalWorkout} (+{DP_VALUES.training} {LABELS.xp})
+                Log {LABELS.minimalWorkout} (+{DP_VALUES.training} {LABELS.dp})
               </Button>
             </div>
           </div>
@@ -1318,7 +1318,7 @@ function ActiveWorkoutView({
           disabled={!allSetsComplete || isSubmitting}
           data-testid="workouts-complete-button"
         >
-          {allSetsComplete ? `Complete Workout (+${DP_VALUES.training} ${LABELS.xp})` : 'Complete All Sets First'}
+          {allSetsComplete ? `Complete Workout (+${DP_VALUES.training} ${LABELS.dp})` : 'Complete All Sets First'}
         </Button>
 
         {/* End Early Button */}

@@ -10,7 +10,6 @@ export const STORE_KEYS = {
   user: 'gamify-gains-user',
   workouts: 'gamify-gains-workouts',
   macros: 'gamify-gains-macros',
-  xp: 'gamify-gains-xp',
   dp: 'trained-dp',
   avatar: 'gamify-gains-avatar',
   achievements: 'gamify-gains-achievements',
@@ -191,31 +190,6 @@ export async function seedAllStores(page: Page) {
     favoriteFoods: [],
     activityLevel: 'moderate',
   }, 4)
-
-  // XP store
-  await seedStore(page, STORE_KEYS.xp, {
-    totalXP: 2500,
-    currentLevel: 8,
-    pendingXP: 150,
-    weeklyHistory: [
-      { weekOf: '2025-01-01', xpEarned: 1200, levelReached: 6 },
-      { weekOf: '2025-01-08', xpEarned: 1300, levelReached: 8 },
-    ],
-    dailyLogs: [
-      {
-        date: new Date().toISOString().split('T')[0],
-        workout: false,
-        protein: false,
-        calories: false,
-        checkIn: false,
-        perfectDay: false,
-        streakBonus: 70,
-        total: 150,
-        claimed: false,
-      },
-    ],
-    lastClaimDate: '2025-01-08',
-  }, 0)
 
   // DP store
   await seedStore(page, STORE_KEYS.dp, {

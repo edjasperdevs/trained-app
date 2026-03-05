@@ -1,7 +1,7 @@
 export { Onboarding } from './Onboarding'
 export { Home } from './Home'
 export { CheckInModal } from './CheckInModal'
-export { XPClaimModal } from './XPClaimModal'
+export { WeeklyReportModal } from './WeeklyReportModal'
 export { Workouts } from './Workouts'
 export { Macros } from './Macros'
 export { AvatarScreen } from './AvatarScreen'

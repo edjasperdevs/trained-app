@@ -181,7 +181,7 @@ export function ProtocolOrders() {
                 completed ? 'text-success' : isLocked ? 'text-muted-foreground' : 'text-primary'
               )}
             >
-              +{quest.dpReward} {LABELS.xp}
+              +{quest.dpReward} {LABELS.dp}
             </span>
           </div>
         </CardContent>
