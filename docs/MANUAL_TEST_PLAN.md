@@ -8,14 +8,38 @@
 
 ## Test Account Setup
 
-Use the browser console to seed different test accounts. Each account tests specific user scenarios.
+### Cloud Test Accounts (Recommended)
 
-### How to Use Test Accounts
+These accounts have data stored in Supabase and test cross-device sync.
 
-1. Open the app in browser/simulator
-2. Open Developer Console (Cmd+Option+I)
-3. Run the appropriate seed command
-4. Refresh the page
+**Password for all:** `TestPass123!`
+
+| Email | Archetype | Rank | DP | Streak | Use Case |
+|-------|-----------|------|--------|--------|----------|
+| bro.mid@test.welltrained.app | Bro | 8 (Forged) | 6,000 | 45 | Mid-level free user |
+| bro.master@test.welltrained.app | Bro | 15 (Master) | 16,000 | 180 | Max rank free user |
+| himbo.mid@test.welltrained.app | Himbo | 7 (Hardened) | 5,000 | 21 | Mid-level premium |
+| himbo.master@test.welltrained.app | Himbo | 15 (Master) | 15,500 | 120 | Max rank premium |
+| brute.mid@test.welltrained.app | Brute | 9 (Trusted) | 7,000 | 60 | Mid-level premium |
+| brute.master@test.welltrained.app | Brute | 15 (Master) | 17,000 | 200 | Max rank premium |
+| pup.mid@test.welltrained.app | Pup | 6 (Proven) | 4,000 | 14 | Mid-level premium |
+| pup.master@test.welltrained.app | Pup | 15 (Master) | 15,000 | 90 | Max rank premium |
+| bull.mid@test.welltrained.app | Bull | 10 (Enforcer) | 8,000 | 75 | Mid-level premium |
+| bull.master@test.welltrained.app | Bull | 15 (Master) | 18,000 | 250 | Max rank premium |
+
+**Setup:** Run `scripts/create-test-accounts.sql` in Supabase SQL Editor after creating users in Authentication.
+
+**Testing with Cloud Accounts:**
+1. Sign in with test email/password
+2. Go to Settings → tap "Sync Now"
+3. Verify DP, rank, and streak load from cloud
+4. Change archetype in Settings if needed
+
+---
+
+### Local Test Personas (Console)
+
+Use the browser console to seed local-only test data. Good for quick UI testing.
 
 ```javascript
 // Import and run from console:
@@ -24,8 +48,6 @@ import('/src/lib/devSeed.ts').then(m => m.seedTestData())
 // Or for specific personas:
 import('/src/lib/devSeed.ts').then(m => m.seedPersona('newbie'))
 ```
-
-### Test Personas
 
 | Persona | Archetype | Goal | Units | Training | Rank | Use Case |
 |---------|-----------|------|-------|----------|------|----------|
@@ -39,6 +61,8 @@ import('/src/lib/devSeed.ts').then(m => m.seedPersona('newbie'))
 | `metric_user` | Bro | Bulk | Metric | 4 days | 4 | Tests unit conversions |
 | `streak_master` | Bro | Maintain | Imperial | 4 days | 10 | 30+ day streak, streak badges |
 | `struggling` | Bro | Cut | Imperial | 3 days | 2 | Broken streaks, missed days |
+
+**Note:** Local personas don't sync to cloud. Use cloud accounts for testing sync functionality.
 
 ---
 
