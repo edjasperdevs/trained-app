@@ -4,7 +4,6 @@ import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
-import { Logo } from '@/components'
 import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 type AuthMode = 'splash' | 'login' | 'signup' | 'forgot'
@@ -222,15 +221,13 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
           style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,255,0,0.08) 0%, transparent 70%)' }}
         />
 
-        {/* Avatar — upper section */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pt-10">
-          <Logo size="xl" className="mb-10" />
-
-          <div className="w-full max-w-[340px] opacity-40 mix-blend-screen scale-90 translate-y-4">
+        {/* Avatar — upper 55% of screen */}
+        <div className="flex-1 flex items-end justify-center px-4 pb-0" style={{ maxHeight: '58vh' }}>
+          <div className="w-full max-w-[400px] flex items-end justify-center">
             <img
               src={heroWelcomeImg}
               alt="The Protocol Archetypes"
-              className="w-full h-auto object-contain object-bottom"
+              className="w-full h-auto object-contain object-bottom drop-shadow-2xl opacity-90 mix-blend-screen"
             />
           </div>
         </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SplashScreen as CapSplashScreen } from '@capacitor/splash-screen'
 import { isNative } from '@/lib/platform'
-import { Logo } from './Logo'
+import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 interface AnimatedSplashScreenProps {
     onComplete: () => void
@@ -44,15 +44,15 @@ export function AnimatedSplashScreen({ onComplete }: AnimatedSplashScreenProps) 
                         }}
                         className="flex flex-col items-center"
                     >
-                        {/* Premium Glass Core Logo */}
-                        <motion.div
-                            initial={{ rotateY: 90, opacity: 0 }}
-                            animate={{ rotateY: 0, opacity: 1 }}
-                            transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
-                            className="mb-8"
-                        >
-                            <Logo size="xl" />
-                        </motion.div>
+                        {/* Signature Hero Image Logo */}
+                        <div className="w-48 h-48 mb-6 relative">
+                            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75" />
+                            <img
+                                src={heroWelcomeImg}
+                                alt="WellTrained Archetypes"
+                                className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(200,255,0,0.4)]"
+                            />
+                        </div>
 
                         <motion.h1
                             initial={{ y: 20, opacity: 0 }}
