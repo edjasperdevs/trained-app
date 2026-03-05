@@ -1,11 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { haptics } from '@/lib/haptics'
 import { isNative } from '@/lib/platform'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Confetti } from '@/components/Confetti'
+import { EvolvingAvatar } from '@/components/EvolvingAvatar'
 import { springs } from '@/lib/animations'
-import { Trophy } from 'lucide-react'
+import { useDPStore } from '@/stores'
+import { Button } from '@/components/ui/button'
+import { RANKS } from '@/stores/dpStore'
 
 interface RankUpModalProps {
   oldRank: number
@@ -14,7 +17,12 @@ interface RankUpModalProps {
   onClose: () => void
 }
 
-export function RankUpModal({ oldRank, newRank, rankName, onClose }: RankUpModalProps) {
+export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: RankUpModalProps) {
+  const [claimed, setClaimed] = useState(false)
+  const totalDP = useDPStore((s) => s.totalDP)
+  const oldRankName = RANKS[oldRank]?.name || 'Uninitiated'
+  void _newRank // Used for notification but not display
+
   useEffect(() => {
     haptics.heavy()
 
@@ -22,102 +30,143 @@ export function RankUpModal({ oldRank, newRank, rankName, onClose }: RankUpModal
       LocalNotifications.schedule({
         notifications: [{
           id: 100,
-          title: 'Rank Up!',
-          body: `You reached ${rankName} (Rank ${newRank})!`,
+          title: 'Rank Achieved!',
+          body: `You have achieved the rank of ${rankName}!`,
           schedule: { at: new Date(Date.now() + 100) },
         }],
       }).catch(() => { })
     }
+  }, [rankName])
 
-    const timer = setTimeout(onClose, 4000)
-    return () => clearTimeout(timer)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  const handleClaim = () => {
+    setClaimed(true)
+    haptics.success()
+    setTimeout(onClose, 500)
+  }
 
   return (
     <>
       {/* Full-screen confetti burst */}
-      <Confetti trigger={true} duration={3500} />
+      <Confetti trigger={true} duration={4000} />
 
       <AnimatePresence>
         <motion.div
           role="dialog"
           aria-modal="true"
           aria-label="Rank up celebration"
-          className="fixed inset-0 bg-background/85 backdrop-blur-md z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-background z-50 flex flex-col"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
-          onClick={onClose}
+          transition={{ duration: 0.3 }}
         >
-          <motion.div
-            className="text-center p-8 max-w-sm w-full mx-6"
-            initial={{ scale: 0.7, opacity: 0, y: 30 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={springs.bouncy}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Trophy icon */}
-            <motion.div
-              className="mx-auto mb-6 w-20 h-20 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center"
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{ duration: 0.6, times: [0, 0.6, 1], delay: 0.1 }}
-            >
-              <Trophy size={40} className="text-primary" />
-            </motion.div>
+          {/* Golden glow background */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[150px] rounded-full" />
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent" />
+          </div>
 
-            {/* RANK UP label */}
+          {/* Content */}
+          <div className="relative flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8">
+            {/* Header */}
             <motion.p
-              className="text-xs font-bold tracking-[0.3em] text-primary/70 uppercase mb-2"
-              initial={{ opacity: 0, y: 10 }}
+              className="text-sm font-heading uppercase tracking-[0.25em] text-primary/80 mb-8"
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, ...springs.default }}
+              transition={{ delay: 0.2, ...springs.default }}
             >
-              Rank Up
+              Rank Achieved
             </motion.p>
 
-            {/* New rank name — big headline */}
-            <motion.h2
-              className="text-5xl font-black text-primary font-display mb-3 leading-none"
-              initial={{ opacity: 0, scale: 0.8, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.4, ...springs.bouncy }}
-            >
-              {rankName.toUpperCase()}
-            </motion.h2>
-
-            {/* Rank number transition */}
+            {/* Avatar with celebration pose */}
             <motion.div
-              className="flex items-center justify-center gap-3 mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              className="relative mb-8"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3, ...springs.bouncy }}
             >
-              <span className="text-lg text-muted-foreground font-mono">
-                Rank {oldRank}
-              </span>
+              {/* Golden aura rings */}
               <motion.div
-                className="h-px flex-1 bg-primary/30"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.7, duration: 0.4 }}
+                className="absolute inset-0 rounded-full border-2 border-primary/30 scale-125"
+                initial={{ scale: 1, opacity: 0 }}
+                animate={{ scale: 1.5, opacity: [0, 0.5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 0.5 }}
               />
-              <span className="text-2xl font-bold font-mono text-primary">
-                Rank {newRank}
-              </span>
+              <motion.div
+                className="absolute inset-0 rounded-full border border-primary/20 scale-110"
+                initial={{ scale: 1, opacity: 0 }}
+                animate={{ scale: 1.3, opacity: [0, 0.3, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 0.5, delay: 0.3 }}
+              />
+
+              <EvolvingAvatar size="xl" />
             </motion.div>
 
-            {/* Dismiss hint */}
+            {/* Rank Name - Big and bold */}
+            <motion.h1
+              className="text-5xl md:text-6xl font-heading font-black text-foreground uppercase tracking-wider mb-4"
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.5, ...springs.bouncy }}
+            >
+              {rankName}
+            </motion.h1>
+
+            {/* DP earned message */}
             <motion.p
-              className="text-xs text-muted-foreground"
+              className="text-base text-muted-foreground mb-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
+              transition={{ delay: 0.7 }}
             >
-              Tap to dismiss
+              You have earned{' '}
+              <span className="text-primary font-bold font-mono">
+                {totalDP.toLocaleString()}
+              </span>{' '}
+              Discipline Points.
             </motion.p>
+
+            {/* Rank comparison boxes */}
+            <motion.div
+              className="flex items-center gap-4 w-full max-w-xs mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <div className="flex-1 bg-surface border border-border rounded-xl p-4 text-center">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                  Previous:
+                </p>
+                <p className="text-sm font-heading text-muted-foreground">
+                  {oldRankName}
+                </p>
+              </div>
+              <div className="flex-1 bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
+                <p className="text-[10px] uppercase tracking-wider text-primary mb-1">
+                  New:
+                </p>
+                <p className="text-sm font-heading text-primary font-bold">
+                  {rankName}
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Claim Button */}
+          <motion.div
+            className="px-6 pb-8 safe-bottom"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+          >
+            <Button
+              onClick={handleClaim}
+              disabled={claimed}
+              className="w-full h-14 text-lg font-heading uppercase tracking-wider"
+              size="lg"
+            >
+              {claimed ? 'Claimed!' : 'Claim Your Rank'}
+            </Button>
           </motion.div>
         </motion.div>
       </AnimatePresence>

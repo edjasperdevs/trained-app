@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { Home, Dumbbell, UtensilsCrossed, User, Settings, LucideIcon } from 'lucide-react'
+import { Home, Dumbbell, Flame, User, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { motion } from 'framer-motion'
 import { haptics } from '@/lib/haptics'
@@ -12,10 +12,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/', label: 'Home', icon: Home },
-  { path: '/workouts', label: 'Workouts', icon: Dumbbell },
-  { path: '/macros', label: 'Macros', icon: UtensilsCrossed },
-  { path: '/avatar', label: 'Avatar', icon: User },
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/workouts', label: 'Workout', icon: Dumbbell },
+  { path: '/macros', label: 'Fuel', icon: Flame },
+  { path: '/avatar', label: 'Profile', icon: User },
 ]
 
 export function Navigation() {

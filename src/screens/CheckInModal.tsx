@@ -13,7 +13,7 @@ import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
-import { Dumbbell, Beef, Flame, PartyPopper, Moon, X, Check, LucideIcon } from 'lucide-react'
+import { Flame, PartyPopper, Moon, Check } from 'lucide-react'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -146,83 +146,88 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Daily check-in"
-      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200"
+      className="fixed inset-0 bg-background z-50 flex flex-col animate-in fade-in duration-200"
       onClick={() => onClose(false)}
     >
       <div
-        className="w-full max-w-md bg-card max-h-[85vh] mb-20 sm:mb-0 flex flex-col rounded-t-xl sm:rounded-xl border border-border animate-in slide-in-from-bottom duration-300"
+        className="w-full flex-1 flex flex-col"
         onClick={(e) => e.stopPropagation()}
         data-testid="checkin-modal"
       >
         {!submitted ? (
           <>
-            <div className="overflow-y-auto flex-1 p-6 pb-0">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">
-                  {LABELS.checkIn}
-                </h2>
-                <button
-                  onClick={() => onClose(false)}
-                  aria-label="Close check-in"
-                  className="text-muted-foreground hover:text-foreground transition-colors rounded-md p-1"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+            {/* Header */}
+            <div className="pt-14 pb-6 px-6 text-center">
+              <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-primary mb-2">
+                Daily Report
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Log your compliance. Earn your DP.
+              </p>
+            </div>
 
+            <div className="flex-1 overflow-y-auto px-6">
               <div className="space-y-3 mb-6">
                 {/* Workout */}
                 {todayWorkout ? (
-                  <QuestCheckbox
-                    label={`Completed ${todayWorkout.name}`}
-                    xp={DP_VALUES.training}
+                  <ComplianceRow
+                    label="Training"
+                    sublabel={workoutCompleted ? 'Workout logged' : todayWorkout.name}
+                    dp={DP_VALUES.training}
                     checked={data.workout}
                     onChange={(v) => setData(d => ({ ...d, workout: v }))}
-                    icon={Dumbbell}
                     disabled={workoutCompleted}
-                    xpLabel={LABELS.xp}
                   />
                 ) : (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted text-muted-foreground opacity-60">
-                    <Moon size={20} />
-                    <span>Recovery Day - No training scheduled</span>
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-border">
+                    <Moon size={20} className="text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="font-heading uppercase tracking-wider text-sm text-muted-foreground">Training</p>
+                      <p className="text-xs text-muted-foreground/60">Recovery Day</p>
+                    </div>
                   </div>
                 )}
 
                 {/* Protein */}
-                <QuestCheckbox
-                  label="Hit Protein Target"
-                  xp={DP_VALUES.protein}
+                <ComplianceRow
+                  label="Protein Goal"
+                  sublabel={data.protein ? 'Target reached' : 'Hit your daily target'}
+                  dp={DP_VALUES.protein}
                   checked={data.protein}
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
-                  icon={Beef}
-                  xpLabel={LABELS.xp}
                 />
 
                 {/* Streak Info */}
                 {obedienceStreak > 0 && (
-                  <div data-testid="checkin-streak-display" className="flex items-center justify-between p-3 rounded-lg bg-warning/10 border border-warning/20">
+                  <div data-testid="checkin-streak-display" className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
                     <div className="flex items-center gap-3">
-                      <Flame size={20} className="text-warning" />
-                      <span>{LABELS.streak}: {obedienceStreak} days</span>
+                      <Flame size={20} className="text-primary" />
+                      <span className="text-sm">Current Streak</span>
                     </div>
+                    <span className="font-mono font-bold text-primary">{obedienceStreak} days</span>
                   </div>
                 )}
               </div>
-
-              {/* Total DP Preview */}
-              <div className="bg-muted p-4 mb-4 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Total {LABELS.xp}</span>
-                  <span className="text-2xl font-bold font-mono text-primary">
-                    +{calculateDP()} {LABELS.xp}
-                  </span>
-                </div>
-              </div>
             </div>
 
-            <div className="p-6 pt-3 border-t border-border">
-              <Button onClick={handleSubmit} className="w-full" size="lg" data-testid="checkin-confirm-button" disabled={isSubmitting || (!data.workout && !data.protein)}>
+            {/* Footer with total and submit */}
+            <div className="px-6 pb-8 safe-bottom">
+              {/* Total DP Preview */}
+              <div className="text-center mb-4">
+                <span className="text-muted-foreground text-sm">Today: </span>
+                <span className="text-2xl font-bold font-mono text-primary">
+                  +{calculateDP()} DP
+                </span>
+                <span className="text-muted-foreground text-sm"> earned</span>
+              </div>
+
+              <Button
+                onClick={handleSubmit}
+                className="w-full h-14 text-lg font-heading uppercase tracking-wider"
+                size="lg"
+                data-testid="checkin-confirm-button"
+                disabled={isSubmitting || (!data.workout && !data.protein)}
+              >
                 Submit Report
               </Button>
             </div>
@@ -293,22 +298,20 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   )
 }
 
-function QuestCheckbox({
+function ComplianceRow({
   label,
-  xp,
+  sublabel,
+  dp,
   checked,
   onChange,
-  icon: Icon,
-  disabled = false,
-  xpLabel = 'XP'
+  disabled = false
 }: {
   label: string
-  xp: number
+  sublabel?: string
+  dp: number
   checked: boolean
   onChange: (v: boolean) => void
-  icon: LucideIcon
   disabled?: boolean
-  xpLabel?: string
 }) {
   return (
     <button
@@ -316,30 +319,52 @@ function QuestCheckbox({
       onClick={disabled ? undefined : () => onChange(!checked)}
       role="checkbox"
       aria-checked={checked}
-      aria-label={`${label}: ${xp} ${xpLabel}`}
+      aria-label={`${label}: ${dp} DP`}
       aria-disabled={disabled}
       className={cn(
-        'flex items-center gap-3 w-full p-3 rounded-lg border text-left transition-colors',
-        disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:bg-muted/50',
-        checked ? 'border-success/50 bg-card' : 'border-border bg-card'
+        'flex items-center gap-4 w-full p-4 rounded-xl border text-left transition-all',
+        disabled ? 'cursor-default' : 'cursor-pointer',
+        checked
+          ? 'bg-surface border-primary/30'
+          : 'bg-surface border-border hover:border-border/80'
       )}
     >
+      <div className="flex-1">
+        <p className={cn(
+          'font-heading uppercase tracking-wider text-sm',
+          checked ? 'text-foreground' : 'text-foreground'
+        )}>
+          {label}
+        </p>
+        {sublabel && (
+          <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>
+        )}
+      </div>
+
+      {/* Checkbox circle */}
       <div
         aria-hidden="true"
         className={cn(
-          'w-6 h-6 border-2 flex items-center justify-center transition-all rounded',
-          checked ? 'bg-success border-success scale-100' : 'border-border scale-100'
+          'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+          checked
+            ? 'bg-primary border-primary'
+            : 'border-muted-foreground/30 bg-transparent'
         )}
       >
         {checked && (
-          <Check size={14} className="text-primary-foreground animate-in zoom-in-0 duration-150" />
+          <Check size={14} className="text-primary-foreground" />
         )}
       </div>
-      <Icon size={20} className={checked ? 'text-success' : 'text-muted-foreground'} />
-      <span className="flex-1">{label}</span>
-      <span className={cn('font-mono font-bold', checked ? 'text-success' : 'text-muted-foreground')}>
-        +{xp} {xpLabel}
-      </span>
+
+      {/* DP Badge */}
+      <div className={cn(
+        'px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all',
+        checked
+          ? 'bg-primary/20 text-primary'
+          : 'bg-surface-elevated text-muted-foreground'
+      )}>
+        +{dp} DP
+      </div>
     </button>
   )
 }
