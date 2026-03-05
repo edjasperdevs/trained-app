@@ -255,21 +255,21 @@ export function Workouts() {
   }
 
   return (
-    <div data-testid="workouts-screen" className="min-h-screen pb-20">
+    <div data-testid="workouts-screen" className="min-h-screen pb-20 bg-background">
       <Confetti trigger={showCelebration} duration={3000} />
       {/* Header */}
-      <div className="pt-14 pb-6 px-5 bg-card">
-        <h1 className="text-2xl font-bold mb-2">
-          Training
+      <div className="pt-14 pb-6 px-6 bg-background">
+        <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-primary mb-1">
+          {activeWorkout ? `${activeWorkout.workoutType} Day`.toUpperCase() : 'Training'}
         </h1>
-        {currentPlan && (
-          <p className="text-muted-foreground">
+        {currentPlan && !activeWorkout && (
+          <p className="text-sm text-muted-foreground">
             {currentPlan.trainingDays}-Day Split
           </p>
         )}
       </div>
 
-      <div className="px-5 py-6 space-y-6">
+      <div className="px-6 py-6 space-y-6">
         {/* Active Workout */}
         {activeWorkout ? (
           <ActiveWorkoutView
@@ -490,7 +490,7 @@ export function Workouts() {
 
             {/* Week Overview */}
             <div>
-              <h2 className="text-lg font-bold mb-3">This Week</h2>
+              <h2 className="text-sm font-heading uppercase tracking-wider text-muted-foreground mb-3">This Week</h2>
               <div className="grid grid-cols-7 gap-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                   const workout = currentPlan?.schedule.find(s => s.day === index)
@@ -503,16 +503,16 @@ export function Workouts() {
                     <div
                       key={index}
                       className={cn(
-                        'aspect-square rounded-lg flex flex-col items-center justify-center text-xs',
-                        isToday ? 'bg-primary/20 border border-primary' : 'bg-card',
-                        isPast && workout?.type !== 'rest' && 'opacity-60'
+                        'aspect-square rounded-xl flex flex-col items-center justify-center text-xs border',
+                        isToday ? 'bg-primary/10 border-primary/50' : 'bg-surface border-border',
+                        isPast && workout?.type !== 'rest' && 'opacity-50'
                       )}
                     >
-                      <span className="text-muted-foreground mb-1">{day}</span>
+                      <span className={cn('text-[10px] mb-1', isToday ? 'text-primary' : 'text-muted-foreground')}>{day}</span>
                       {isCoachDay ? (
-                        <ShieldCheck size={18} className="text-primary" />
+                        <ShieldCheck size={16} className="text-primary" />
                       ) : (
-                        <span className="text-lg">
+                        <span className="text-base">
                           {workout?.type === 'rest' ? '😴' : getWorkoutEmoji(workout?.type || 'rest')}
                         </span>
                       )}
