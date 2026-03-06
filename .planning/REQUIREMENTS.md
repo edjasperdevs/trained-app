@@ -168,9 +168,9 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Navigation (Onboarding)
 
-- [ ] **NAV-01**: OnboardingStack renders when onboardingComplete is false
-- [ ] **NAV-02**: MainTabNavigator renders when onboardingComplete is true
-- [ ] **NAV-03**: Onboarding flow is a separate navigation stack from main app
+- [x] **NAV-01**: OnboardingStack renders when onboardingComplete is false
+- [x] **NAV-02**: MainTabNavigator renders when onboardingComplete is true
+- [x] **NAV-03**: Onboarding flow is a separate navigation stack from main app
 
 ## Future Requirements (v2.2+)
 
@@ -325,9 +325,9 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | PROG-01 | Phase 26 | Pending |
 | PROG-02 | Phase 26 | Pending |
 | PROG-03 | Phase 26 | Pending |
-| NAV-01 | Phase 25 | Pending |
-| NAV-02 | Phase 25 | Pending |
-| NAV-03 | Phase 25 | Pending |
+| NAV-01 | Phase 25 | Complete |
+| NAV-02 | Phase 25 | Complete |
+| NAV-03 | Phase 25 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 47 total

@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 25 - Onboarding Navigation
-Plan: Not started
-Status: Roadmap created, ready for planning
-Last activity: 2026-03-06 -- v2.1 roadmap created (5 phases, 44 requirements)
+Plan: 01 complete (1/1 plans in phase)
+Status: Phase 25 complete, ready for Phase 26
+Last activity: 2026-03-06 -- Completed 25-01 OnboardingStack infrastructure
 
-Progress: [____________________] 0%
+Progress: [====________________] 20%
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Progress: [____________________] 0%
 | 22-02 | Protocol Orders UI | 5min | 2 | 3 |
 | 23-01 | Avatar Stage Components | 3min | 2 | 9 |
 | 23-02 | Screen Integration | 2min | 2 | 2 |
+| 25-01 | OnboardingStack Infrastructure | 4min | 3 | 7 |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Progress: [____________________] 0%
 - [Phase 23]: Placeholder SVG silhouettes designed for easy swap when artist assets arrive
 - [Phase 23-02]: EvolvingAvatar reads currentRank internally via dpStore subscription
 - [Phase 23-02]: Transition wrapper (duration-500 ease-out) for smooth avatar stage changes
+- [Phase 25]: [Phase 25-01]: onboarding-v2 folder used to avoid case-insensitive conflict with existing Onboarding.tsx
+- [Phase 25]: [Phase 25-01]: localStorage key welltrained-onboarding-v2 avoids conflict with existing onboarding progress
+- [Phase 25]: [Phase 25-01]: OnboardingStack URL syncs with onboardingStore.currentStep via useEffect
 
 ### Pending Todos
 
@@ -112,5 +116,5 @@ Progress: [____________________] 0%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Created v2.1 roadmap (5 phases, 44 requirements mapped)
-Resume file: None -- ready for `/gsd:plan-phase 25`
+Stopped at: Completed 25-01-PLAN.md (OnboardingStack infrastructure)
+Resume file: None -- ready for `/gsd:plan-phase 26`
