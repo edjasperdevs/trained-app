@@ -48,7 +48,11 @@ Plans:
   3. User sees Value Proposition screen with headline and three animated benefit rows explaining DP, ranks, and avatar
   4. Progress indicator shows 5 dots on screens 2-6 with current step highlighted in gold
   5. Welcome screen elements animate with staggered fade-up, CTA pulses after 2 seconds
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 26-01-PLAN.md -- Welcome screen with brand hook, animations, and navigation CTAs
+- [ ] 26-02-PLAN.md -- Value Proposition screen with benefit rows, ProgressIndicator component
 
 ### Phase 27: Profile and Goal
 **Goal**: Users provide their profile information and select their training goal -- the data collection screens that personalize the experience
