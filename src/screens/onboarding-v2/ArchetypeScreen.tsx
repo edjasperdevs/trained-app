@@ -57,8 +57,11 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
           : 'bg-[#1A1A1A] border border-[#2A2A2A]'
       }`}
     >
-      {/* Avatar container - clips at bottom, allows overflow at top */}
-      <div className="relative w-[130px] h-full flex-shrink-0">
+      {/* Avatar container - clips at bottom (card edge), allows overflow at top */}
+      <div
+        className="relative w-[130px] h-full flex-shrink-0"
+        style={{ clipPath: 'inset(-100px 0 0 0)' }}
+      >
         {/* Glow effect behind avatar */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-20 h-20 rounded-full blur-2xl opacity-70"
@@ -66,20 +69,12 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
             background: 'radial-gradient(circle, rgba(212,168,83,0.6) 0%, transparent 70%)',
           }}
         />
-        {/* Clipping container - crops waist down, head extends above */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 w-[130px] overflow-hidden z-10"
-          style={{
-            bottom: '-8px',
-            height: '150px',
-          }}
-        >
-          <img
-            src={avatarSrc}
-            alt={info.name}
-            className="w-full h-auto object-contain object-top"
-          />
-        </div>
+        {/* Avatar image - head extends above card, bottom clips at card edge */}
+        <img
+          src={avatarSrc}
+          alt={info.name}
+          className="absolute left-1/2 -translate-x-1/2 bottom-0 w-[130px] h-auto z-10"
+        />
       </div>
 
       {/* Text content - centered vertically */}
