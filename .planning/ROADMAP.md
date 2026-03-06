@@ -97,7 +97,11 @@ Plans:
   3. Skipping paywall grants 7-day free Premium trial automatically (reverse trial)
   4. User sees Welcome to Protocol screen with avatar fade-in, rank card slide-up, and "ENTER THE DISCIPLINE" CTA
   5. Tapping CTA navigates to Home tab, clears onboarding from navigation history, and sets onboardingComplete to true
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 29-01-PLAN.md -- PaywallScreen with subscription options, reverse trial on skip, premium bypass
+- [ ] 29-02-PLAN.md -- FinalScreen (Welcome to Protocol) with avatar fade-in, rank card, and entry CTA
 
 ## v2.0 WellTrained V2
 
