@@ -19,7 +19,7 @@
 
 - [x] **Phase 25: Onboarding Navigation** - OnboardingStack infrastructure and routing gate (completed 2026-03-06)
 - [x] **Phase 26: Welcome and Value** - Welcome screen with brand hook, Value Proposition with benefit rows, progress indicator (completed 2026-03-06)
-- [ ] **Phase 27: Profile and Goal** - Profile Setup (name, units, training days, fitness level) and Goal Selection (4 cards)
+- [x] **Phase 27: Profile and Goal** - Profile Setup (name, units, training days, fitness level) and Goal Selection (4 cards) (completed 2026-03-06)
 - [ ] **Phase 28: Archetype and Macros** - Archetype Selection (5 cards with premium badges) and Macro Setup (donut chart, calculated targets)
 - [ ] **Phase 29: Paywall and Entry** - Paywall with reverse trial and Welcome to Protocol cinematic entry
 
@@ -244,7 +244,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -326,6 +326,6 @@ Plans:
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 | 25. Onboarding Navigation | 1/1 | Complete    | 2026-03-06 | - |
 | 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
-| 27. Profile and Goal | 1/2 | In Progress|  | - |
+| 27. Profile and Goal | 2/2 | Complete   | 2026-03-06 | - |
 | 28. Archetype and Macros | v2.1 | 0/? | Not started | - |
 | 29. Paywall and Entry | v2.1 | 0/? | Not started | - |

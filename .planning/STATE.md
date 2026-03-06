@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 27 - Profile and Goal
-Plan: 01 complete (1/2 plans in phase)
-Status: In progress
-Last activity: 2026-03-06 -- Completed 27-01 ProfileScreen
+Plan: 02 complete (2/2 plans in phase)
+Status: Phase complete
+Last activity: 2026-03-06 -- Completed 27-02 GoalScreen
 
-Progress: [===========_________] 55%
+Progress: [============________] 60%
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [===========_________] 55%
 | 26-01 | WelcomeScreen | 2min | 2 | 3 |
 | 26-02 | ValueScreen | 3min | 3 | 5 |
 | 27-01 | ProfileScreen | 2min | 2 | 3 |
+| 27-02 | GoalScreen | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Progress: [===========_________] 55%
 - [Phase 27]: [Phase 27-01]: Gold (#D4A853) border with 8% tint for selected states
 - [Phase 27]: [Phase 27-01]: Training days chip scale-110 on selection for visual emphasis
 - [Phase 27]: [Phase 27-01]: ProgressIndicator currentStep=1 (second dot) for profile screen
+- [Phase 27]: [Phase 27-02]: ProgressIndicator currentStep=2 (third dot) for goal screen
+- [Phase 27]: [Phase 27-02]: Gold icons always visible on goal cards (not conditional on selection)
 
 ### Pending Todos
 
@@ -128,5 +131,5 @@ Progress: [===========_________] 55%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 27-01-PLAN.md (ProfileScreen)
-Resume file: None -- ready for 27-02
+Stopped at: Completed 27-02-PLAN.md (GoalScreen)
+Resume file: None -- ready for 28-01

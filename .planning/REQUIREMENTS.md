@@ -108,13 +108,13 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Goal Selection
 
-- [ ] **GOAL-01**: User sees 4 goal cards: Build Muscle, Lose Fat, Get Stronger, Improve Overall Fitness
-- [ ] **GOAL-02**: Each goal card has a gold Lucide icon and two-line label
-- [ ] **GOAL-03**: User can select one goal at a time (single selection)
-- [ ] **GOAL-04**: Selected goal card shows gold border with animation (150ms ease-out)
-- [ ] **GOAL-05**: Goal selection triggers haptic feedback
-- [ ] **GOAL-06**: CONTINUE button is disabled until a goal is selected
-- [ ] **GOAL-07**: Selected goal is stored in user profile store
+- [x] **GOAL-01**: User sees 4 goal cards: Build Muscle, Lose Fat, Get Stronger, Improve Overall Fitness
+- [x] **GOAL-02**: Each goal card has a gold Lucide icon and two-line label
+- [x] **GOAL-03**: User can select one goal at a time (single selection)
+- [x] **GOAL-04**: Selected goal card shows gold border with animation (150ms ease-out)
+- [x] **GOAL-05**: Goal selection triggers haptic feedback
+- [x] **GOAL-06**: CONTINUE button is disabled until a goal is selected
+- [x] **GOAL-07**: Selected goal is stored in user profile store
 
 ### Archetype Selection (Onboarding)
 
@@ -283,13 +283,13 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | PROF-06 | Phase 27 | Complete |
 | PROF-07 | Phase 27 | Complete |
 | PROF-08 | Phase 27 | Complete |
-| GOAL-01 | Phase 27 | Pending |
-| GOAL-02 | Phase 27 | Pending |
-| GOAL-03 | Phase 27 | Pending |
-| GOAL-04 | Phase 27 | Pending |
-| GOAL-05 | Phase 27 | Pending |
-| GOAL-06 | Phase 27 | Pending |
-| GOAL-07 | Phase 27 | Pending |
+| GOAL-01 | Phase 27 | Complete |
+| GOAL-02 | Phase 27 | Complete |
+| GOAL-03 | Phase 27 | Complete |
+| GOAL-04 | Phase 27 | Complete |
+| GOAL-05 | Phase 27 | Complete |
+| GOAL-06 | Phase 27 | Complete |
+| GOAL-07 | Phase 27 | Complete |
 | ARCH-01 | Phase 28 | Pending |
 | ARCH-02 | Phase 28 | Pending |
 | ARCH-03 | Phase 28 | Pending |
