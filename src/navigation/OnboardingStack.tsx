@@ -5,7 +5,7 @@ import { OnboardingSkeleton } from '@/components'
 import {
   WelcomeScreen,
   ValueScreen,
-  OnboardingProfile,
+  ProfileScreen,
   OnboardingGoal,
   OnboardingArchetype,
   OnboardingMacros,
@@ -28,7 +28,7 @@ export function OnboardingStack() {
       <Routes>
         <Route path="welcome" element={<WelcomeScreen />} />
         <Route path="value" element={<ValueScreen />} />
-        <Route path="profile" element={<OnboardingProfile />} />
+        <Route path="profile" element={<ProfileScreen />} />
         <Route path="goal" element={<OnboardingGoal />} />
         <Route path="archetype" element={<OnboardingArchetype />} />
         <Route path="macros" element={<OnboardingMacros />} />
