@@ -8,7 +8,81 @@
 - v1.3 Coach Dashboard (Phases 1-6, shipped 2026-02-08)
 - v1.4 Intake Dashboard (Phases 7-10, shipped 2026-02-21)
 - v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)
-- **v2.0 WellTrained V2** (Phases 17-24, in progress)
+- v2.0 WellTrained V2 (Phases 17-24, in progress)
+- **v2.1 Onboarding Redesign** (Phases 25-29, in progress)
+
+## v2.1 Onboarding Redesign
+
+**Milestone Goal:** Complete 8-screen onboarding flow with value-first approach, Obsidian styling, paywall after investment, and reverse trial for non-subscribers. Replace existing 10-step wizard with conversion-optimized journey.
+
+### Phases
+
+- [ ] **Phase 25: Onboarding Navigation** - OnboardingStack infrastructure and routing gate
+- [ ] **Phase 26: Welcome and Value** - Welcome screen with brand hook, Value Proposition with benefit rows, progress indicator
+- [ ] **Phase 27: Profile and Goal** - Profile Setup (name, units, training days, fitness level) and Goal Selection (4 cards)
+- [ ] **Phase 28: Archetype and Macros** - Archetype Selection (5 cards with premium badges) and Macro Setup (donut chart, calculated targets)
+- [ ] **Phase 29: Paywall and Entry** - Paywall with reverse trial and Welcome to Protocol cinematic entry
+
+## Phase Details
+
+### Phase 25: Onboarding Navigation
+**Goal**: The app correctly routes new users through the onboarding stack and existing users to the main tab navigator -- the foundation that all onboarding screens render within
+**Depends on**: Nothing (first phase of v2.1; uses existing routing patterns)
+**Requirements**: NAV-01, NAV-02, NAV-03
+**Success Criteria** (what must be TRUE):
+  1. User who has not completed onboarding sees OnboardingStack instead of main tabs
+  2. User who has completed onboarding sees MainTabNavigator and never sees onboarding screens
+  3. Onboarding screens can navigate forward through the 8-screen flow without affecting main app routes
+**Plans**: TBD
+
+### Phase 26: Welcome and Value
+**Goal**: Users see a compelling brand hook and understand the discipline system before entering any personal data -- the value-first screens that set the emotional context
+**Depends on**: Phase 25 (OnboardingStack must exist to render these screens)
+**Requirements**: WELC-01, WELC-02, WELC-03, WELC-04, WELC-05, VALU-01, VALU-02, VALU-03, VALU-04, PROG-01, PROG-02, PROG-03
+**Success Criteria** (what must be TRUE):
+  1. User sees Welcome screen with brand mark, wordmark, headline, and "BEGIN PROTOCOL" CTA on app launch (when not onboarded)
+  2. User can tap "Already initiated? Sign In" to navigate to sign-in screen
+  3. User sees Value Proposition screen with headline and three animated benefit rows explaining DP, ranks, and avatar
+  4. Progress indicator shows 5 dots on screens 2-6 with current step highlighted in gold
+  5. Welcome screen elements animate with staggered fade-up, CTA pulses after 2 seconds
+**Plans**: TBD
+
+### Phase 27: Profile and Goal
+**Goal**: Users provide their profile information and select their training goal -- the data collection screens that personalize the experience
+**Depends on**: Phase 26 (navigation flow must reach these screens)
+**Requirements**: PROF-01, PROF-02, PROF-03, PROF-04, PROF-05, PROF-06, PROF-07, PROF-08, GOAL-01, GOAL-02, GOAL-03, GOAL-04, GOAL-05, GOAL-06, GOAL-07
+**Success Criteria** (what must be TRUE):
+  1. User can enter name, toggle LBS/KG units, select training days (2-6), and select fitness level on Profile Setup screen
+  2. Selected chips and cards show gold border with subtle gold background tint, selections trigger haptic feedback
+  3. CONTINUE button is disabled until name has at least one character
+  4. User can select one of 4 goal cards (Build Muscle, Lose Fat, Get Stronger, Improve Fitness) with gold border animation
+  5. Selected goal is stored in user profile store for macro calculation
+**Plans**: TBD
+
+### Phase 28: Archetype and Macros
+**Goal**: Users choose their archetype specialization and see calculated macro targets -- the screens that show premium value and personalized results
+**Depends on**: Phase 27 (goal selection needed for macro calculation)
+**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, ARCH-05, ARCH-06, ARCH-07, MACR-01, MACR-02, MACR-03, MACR-04, MACR-05, MACR-06, MACR-07, MACR-08, MACR-09
+**Reference**: `Design inspo/mockups/onboarding/onboarding_05_archetype_v2.png`, `Design inspo/mockups/onboarding/onboarding_06_macros.png`
+**Success Criteria** (what must be TRUE):
+  1. User sees 5 archetype cards with Bro (FREE, selected by default), 3 premium archetypes, and Bull (COMING SOON, dimmed)
+  2. User can select any archetype including premium ones (gate happens at paywall, not here)
+  3. User sees calculated daily macro targets based on profile inputs with animated donut chart (800ms draw effect)
+  4. Three macro stat cards (protein, carbs, fat) count up from 0 after chart completes (600ms)
+  5. Calculated macros are stored in macroStore when user taps "ACCEPT MY PROTOCOL"
+**Plans**: TBD
+
+### Phase 29: Paywall and Entry
+**Goal**: Users see the premium offering and make a subscription decision, then enter the app with a cinematic welcome -- the conversion and onboarding completion screens
+**Depends on**: Phase 28 (profile data needed for paywall context, macros stored)
+**Requirements**: PAY-01, PAY-02, PAY-03, PAY-04, PAY-05, PAY-06, PAY-07, PAY-08, FINAL-01, FINAL-02, FINAL-03, FINAL-04, FINAL-05, FINAL-06, FINAL-07, FINAL-08
+**Success Criteria** (what must be TRUE):
+  1. User sees paywall with monthly option (gold border, MOST POPULAR) and annual option after completing profile setup
+  2. User can tap "START FREE TRIAL" to initiate RevenueCat purchase or "Continue with free access" to skip
+  3. Skipping paywall grants 7-day free Premium trial automatically (reverse trial)
+  4. User sees Welcome to Protocol screen with avatar fade-in, rank card slide-up, and "ENTER THE DISCIPLINE" CTA
+  5. Tapping CTA navigates to Home tab, clears onboarding from navigation history, and sets onboardingComplete to true
+**Plans**: TBD
 
 ## v2.0 WellTrained V2
 
@@ -25,8 +99,6 @@
 - [x] **Phase 23: Avatar Evolution** - 5-stage evolving silhouette tied to rank milestones (completed 2026-03-01)
 - [ ] **Phase 24: App Store Submission** - Data migration, compliance, TestFlight, App Store review
 
-## Phase Details
-
 ### Phase 17: Foundation Cleanup
 **Goal**: The codebase is stripped of all coach dashboard code and the entire app renders with the Dopamine Noir V2 color system -- every subsequent phase builds on a clean, V2-branded foundation
 **Depends on**: Nothing (first phase of v2.0)
@@ -40,8 +112,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [x] 17-01-PLAN.md — Coach code removal (delete 7 coach-only files, fix imports/exports, clean shared files, trim useWeeklyCheckins)
-- [x] 17-02-PLAN.md — Dopamine Noir V2 design token migration (CSS tokens, hard-coded colors, visual verification)
+- [x] 17-01-PLAN.md -- Coach code removal (delete 7 coach-only files, fix imports/exports, clean shared files, trim useWeeklyCheckins)
+- [x] 17-02-PLAN.md -- Dopamine Noir V2 design token migration (CSS tokens, hard-coded colors, visual verification)
 
 ### Phase 18: Gamification Engine
 **Goal**: Users earn Discipline Points for daily actions and progress through a 15-rank system with visible progression and celebration -- the core motivation loop that replaces XP/levels
@@ -55,9 +127,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [x] 18-01-PLAN.md — TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
-- [x] 18-02-PLAN.md — DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
-- [x] 18-03-PLAN.md — Gap closure: Add RankUpModal handling to Macros.tsx meal-log paths
+- [x] 18-01-PLAN.md -- TDD dpStore (DP accrual, 15-rank system, obedience streak, meal cap) + migrate all store-level xpStore consumers
+- [x] 18-02-PLAN.md -- DPDisplay and RankUpModal components, Home/Workouts/CheckInModal DP wiring, StreakDisplay/WeeklySummary/AvatarScreen migration
+- [x] 18-03-PLAN.md -- Gap closure: Add RankUpModal handling to Macros.tsx meal-log paths
 
 ### Phase 19: Subscriptions
 **Goal**: The app has a working freemium model -- free users see a compelling paywall, subscribers unlock premium features, and subscription state persists reliably across sessions and app restarts
@@ -72,10 +144,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [x] 19-01-PLAN.md — RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
-- [x] 19-02-PLAN.md — Paywall screen with legal text, restore purchases, Settings subscription management
-- [x] 19-03-PLAN.md — handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
-- [x] 19-04-PLAN.md — PremiumGate component and UpgradePrompt fallback for client-side feature gating
+- [x] 19-01-PLAN.md -- RevenueCat SDK setup, subscriptionStore, loading gate, Xcode entitlements
+- [x] 19-02-PLAN.md -- Paywall screen with legal text, restore purchases, Settings subscription management
+- [x] 19-03-PLAN.md -- handle-revenuecat-webhook Edge Function, subscriptions Supabase table, RLS policies
+- [x] 19-04-PLAN.md -- PremiumGate component and UpgradePrompt fallback for client-side feature gating
 
 ### Phase 20: Health Tracking
 **Goal**: Users can track daily steps and sleep -- automatically from HealthKit or manually -- and earn DP for meeting health thresholds
@@ -90,8 +162,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [x] 20-01-PLAN.md — HealthKit plugin setup, health.ts wrapper, healthStore, iOS entitlements
-- [x] 20-02-PLAN.md — HealthPermission soft-ask screen, HealthCard display, manual entry UI, DP awards, daily_health table
+- [x] 20-01-PLAN.md -- HealthKit plugin setup, health.ts wrapper, healthStore, iOS entitlements
+- [x] 20-02-PLAN.md -- HealthPermission soft-ask screen, HealthCard display, manual entry UI, DP awards, daily_health table
 
 ### Phase 21: Archetypes
 **Goal**: Users select a personal archetype that modifies how they earn DP -- free users get Bro (generalist), premium subscribers unlock 4 specialized archetypes that boost specific actions
@@ -105,8 +177,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [x] 21-01-PLAN.md — Archetype types/constants, ArchetypeSelector/ArchetypeCard components, onboarding archetype step, Settings archetype section
-- [x] 21-02-PLAN.md — dpStore modifier integration, getModifiedDP helper, Supabase archetype sync, profiles migration
+- [x] 21-01-PLAN.md -- Archetype types/constants, ArchetypeSelector/ArchetypeCard components, onboarding archetype step, Settings archetype section
+- [x] 21-02-PLAN.md -- dpStore modifier integration, getModifiedDP helper, Supabase archetype sync, profiles migration
 
 ### Phase 22: Protocol Orders
 **Goal**: Users receive rotating daily and weekly quests that award bonus DP -- an engagement layer that gives users specific goals beyond their routine
@@ -120,8 +192,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [x] 22-01-PLAN.md — Quest catalog with condition evaluators, questStore with deterministic rotation and completion tracking
-- [x] 22-02-PLAN.md — ProtocolOrders UI component, Home screen integration, premium weekly quest gating
+- [x] 22-01-PLAN.md -- Quest catalog with condition evaluators, questStore with deterministic rotation and completion tracking
+- [x] 22-02-PLAN.md -- ProtocolOrders UI component, Home screen integration, premium weekly quest gating
 
 ### Phase 23: Avatar Evolution
 **Goal**: Users have an evolving visual avatar that grows more impressive as they rank up -- a premium visual reward that makes progression tangible
@@ -134,8 +206,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [x] 23-01-PLAN.md — EvolvingAvatar component, 5-stage SVG silhouettes, LockedAvatar premium gate
-- [x] 23-02-PLAN.md — Home screen avatar integration, AvatarScreen update, transition animations
+- [x] 23-01-PLAN.md -- EvolvingAvatar component, 5-stage SVG silhouettes, LockedAvatar premium gate
+- [x] 23-02-PLAN.md -- Home screen avatar integration, AvatarScreen update, transition animations
 
 ### Phase 24: App Store Submission
 **Goal**: The app passes Apple review and is live on the App Store with V2 features, correct IAP products, and all compliance requirements met
@@ -150,9 +222,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — Data migration (Fresh Start modal, xpStore cleanup, data preservation)
-- [ ] 24-02-PLAN.md — Build preparation (PrivacyInfo.xcprivacy HealthKit, AASA Team ID)
-- [ ] 24-03-PLAN.md — App Store submission (metadata, review notes, TestFlight, submission)
+- [ ] 24-01-PLAN.md -- Data migration (Fresh Start modal, xpStore cleanup, data preservation)
+- [ ] 24-02-PLAN.md -- Build preparation (PrivacyInfo.xcprivacy HealthKit, AASA Team ID)
+- [ ] 24-03-PLAN.md -- App Store submission (metadata, review notes, TestFlight, submission)
 
 <details>
 <summary>v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)</summary>
@@ -223,7 +295,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 17 -> 18 -> 19 -> 20 -> 21 -> 22 -> 23 -> 24
+**Execution Order:** 25 -> 26 -> 27 -> 28 -> 29 (then 24 for App Store)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -241,3 +313,8 @@ Plans:
 | 22. Protocol Orders | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 23. Avatar Evolution | v2.0 | 2/2 | Complete | 2026-03-01 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
+| 25. Onboarding Navigation | v2.1 | 0/? | Not started | - |
+| 26. Welcome and Value | v2.1 | 0/? | Not started | - |
+| 27. Profile and Goal | v2.1 | 0/? | Not started | - |
+| 28. Archetype and Macros | v2.1 | 0/? | Not started | - |
+| 29. Paywall and Entry | v2.1 | 0/? | Not started | - |

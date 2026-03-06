@@ -266,12 +266,75 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | LAUNCH-02 | Phase 24 | Pending |
 | LAUNCH-03 | Phase 24 | Pending |
 | LAUNCH-04 | Phase 24 | Pending |
+| WELC-01 | Phase 26 | Pending |
+| WELC-02 | Phase 26 | Pending |
+| WELC-03 | Phase 26 | Pending |
+| WELC-04 | Phase 26 | Pending |
+| WELC-05 | Phase 26 | Pending |
+| VALU-01 | Phase 26 | Pending |
+| VALU-02 | Phase 26 | Pending |
+| VALU-03 | Phase 26 | Pending |
+| VALU-04 | Phase 26 | Pending |
+| PROF-01 | Phase 27 | Pending |
+| PROF-02 | Phase 27 | Pending |
+| PROF-03 | Phase 27 | Pending |
+| PROF-04 | Phase 27 | Pending |
+| PROF-05 | Phase 27 | Pending |
+| PROF-06 | Phase 27 | Pending |
+| PROF-07 | Phase 27 | Pending |
+| PROF-08 | Phase 27 | Pending |
+| GOAL-01 | Phase 27 | Pending |
+| GOAL-02 | Phase 27 | Pending |
+| GOAL-03 | Phase 27 | Pending |
+| GOAL-04 | Phase 27 | Pending |
+| GOAL-05 | Phase 27 | Pending |
+| GOAL-06 | Phase 27 | Pending |
+| GOAL-07 | Phase 27 | Pending |
+| ARCH-01 | Phase 28 | Pending |
+| ARCH-02 | Phase 28 | Pending |
+| ARCH-03 | Phase 28 | Pending |
+| ARCH-04 | Phase 28 | Pending |
+| ARCH-05 | Phase 28 | Pending |
+| ARCH-06 | Phase 28 | Pending |
+| ARCH-07 | Phase 28 | Pending |
+| MACR-01 | Phase 28 | Pending |
+| MACR-02 | Phase 28 | Pending |
+| MACR-03 | Phase 28 | Pending |
+| MACR-04 | Phase 28 | Pending |
+| MACR-05 | Phase 28 | Pending |
+| MACR-06 | Phase 28 | Pending |
+| MACR-07 | Phase 28 | Pending |
+| MACR-08 | Phase 28 | Pending |
+| MACR-09 | Phase 28 | Pending |
+| PAY-01 | Phase 29 | Pending |
+| PAY-02 | Phase 29 | Pending |
+| PAY-03 | Phase 29 | Pending |
+| PAY-04 | Phase 29 | Pending |
+| PAY-05 | Phase 29 | Pending |
+| PAY-06 | Phase 29 | Pending |
+| PAY-07 | Phase 29 | Pending |
+| PAY-08 | Phase 29 | Pending |
+| FINAL-01 | Phase 29 | Pending |
+| FINAL-02 | Phase 29 | Pending |
+| FINAL-03 | Phase 29 | Pending |
+| FINAL-04 | Phase 29 | Pending |
+| FINAL-05 | Phase 29 | Pending |
+| FINAL-06 | Phase 29 | Pending |
+| FINAL-07 | Phase 29 | Pending |
+| FINAL-08 | Phase 29 | Pending |
+| PROG-01 | Phase 26 | Pending |
+| PROG-02 | Phase 26 | Pending |
+| PROG-03 | Phase 26 | Pending |
+| NAV-01 | Phase 25 | Pending |
+| NAV-02 | Phase 25 | Pending |
+| NAV-03 | Phase 25 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
-- Mapped to phases: 47
+- v2.1 requirements: 44 total
+- Mapped to phases: 91
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1)*
-*Last updated: 2026-03-06 -- v2.1 requirements added*
+*Last updated: 2026-03-06 -- v2.1 traceability added*
