@@ -90,10 +90,10 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Value Proposition
 
-- [ ] **VALU-01**: User sees Value Proposition screen with headline "IMAGINE A FITNESS APP THAT TRAINS YOU LIKE A CHAMPION"
-- [ ] **VALU-02**: User sees three benefit rows explaining DP system, rank system, and avatar system
-- [ ] **VALU-03**: Benefit rows animate in with stagger after headline appears
-- [ ] **VALU-04**: User can tap NEXT to proceed to Profile Setup
+- [x] **VALU-01**: User sees Value Proposition screen with headline "IMAGINE A FITNESS APP THAT TRAINS YOU LIKE A CHAMPION"
+- [x] **VALU-02**: User sees three benefit rows explaining DP system, rank system, and avatar system
+- [x] **VALU-03**: Benefit rows animate in with stagger after headline appears
+- [x] **VALU-04**: User can tap NEXT to proceed to Profile Setup
 
 ### Profile Setup
 
@@ -162,9 +162,9 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Progress Indicator
 
-- [ ] **PROG-01**: 5-dot progress indicator appears on screens 2-6
-- [ ] **PROG-02**: Current step dot is highlighted (gold)
-- [ ] **PROG-03**: Completed steps show filled dots
+- [x] **PROG-01**: 5-dot progress indicator appears on screens 2-6
+- [x] **PROG-02**: Current step dot is highlighted (gold)
+- [x] **PROG-03**: Completed steps show filled dots
 
 ### Navigation (Onboarding)
 
@@ -271,10 +271,10 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | WELC-03 | Phase 26 | Complete |
 | WELC-04 | Phase 26 | Complete |
 | WELC-05 | Phase 26 | Complete |
-| VALU-01 | Phase 26 | Pending |
-| VALU-02 | Phase 26 | Pending |
-| VALU-03 | Phase 26 | Pending |
-| VALU-04 | Phase 26 | Pending |
+| VALU-01 | Phase 26 | Complete |
+| VALU-02 | Phase 26 | Complete |
+| VALU-03 | Phase 26 | Complete |
+| VALU-04 | Phase 26 | Complete |
 | PROF-01 | Phase 27 | Pending |
 | PROF-02 | Phase 27 | Pending |
 | PROF-03 | Phase 27 | Pending |
@@ -322,9 +322,9 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | FINAL-06 | Phase 29 | Pending |
 | FINAL-07 | Phase 29 | Pending |
 | FINAL-08 | Phase 29 | Pending |
-| PROG-01 | Phase 26 | Pending |
-| PROG-02 | Phase 26 | Pending |
-| PROG-03 | Phase 26 | Pending |
+| PROG-01 | Phase 26 | Complete |
+| PROG-02 | Phase 26 | Complete |
+| PROG-03 | Phase 26 | Complete |
 | NAV-01 | Phase 25 | Complete |
 | NAV-02 | Phase 25 | Complete |
 | NAV-03 | Phase 25 | Complete |
