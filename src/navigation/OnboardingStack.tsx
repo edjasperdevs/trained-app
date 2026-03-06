@@ -4,7 +4,7 @@ import { Suspense, useEffect } from 'react'
 import { OnboardingSkeleton } from '@/components'
 import {
   WelcomeScreen,
-  OnboardingValue,
+  ValueScreen,
   OnboardingProfile,
   OnboardingGoal,
   OnboardingArchetype,
@@ -27,7 +27,7 @@ export function OnboardingStack() {
     <Suspense fallback={<OnboardingSkeleton />}>
       <Routes>
         <Route path="welcome" element={<WelcomeScreen />} />
-        <Route path="value" element={<OnboardingValue />} />
+        <Route path="value" element={<ValueScreen />} />
         <Route path="profile" element={<OnboardingProfile />} />
         <Route path="goal" element={<OnboardingGoal />} />
         <Route path="archetype" element={<OnboardingArchetype />} />
