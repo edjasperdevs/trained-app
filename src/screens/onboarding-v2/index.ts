@@ -3,7 +3,6 @@ export {
   OnboardingValue,
   OnboardingProfile,
   OnboardingGoal,
-  OnboardingArchetype,
   OnboardingMacros,
   OnboardingPaywall,
   OnboardingFinal,
@@ -13,3 +12,4 @@ export { WelcomeScreen } from './WelcomeScreen'
 export { ValueScreen } from './ValueScreen'
 export { ProfileScreen } from './ProfileScreen'
 export { GoalScreen } from './GoalScreen'
+export { ArchetypeScreen } from './ArchetypeScreen'
