@@ -10,7 +10,7 @@ import {
   ArchetypeScreen,
   MacrosScreen,
   PaywallScreen,
-  OnboardingFinal,
+  FinalScreen,
 } from '@/screens/onboarding-v2'
 
 export function OnboardingStack() {
@@ -33,7 +33,7 @@ export function OnboardingStack() {
         <Route path="archetype" element={<ArchetypeScreen />} />
         <Route path="macros" element={<MacrosScreen />} />
         <Route path="paywall" element={<PaywallScreen />} />
-        <Route path="final" element={<OnboardingFinal />} />
+        <Route path="final" element={<FinalScreen />} />
         <Route path="*" element={<Navigate to="welcome" replace />} />
       </Routes>
     </Suspense>
