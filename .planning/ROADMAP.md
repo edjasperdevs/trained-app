@@ -321,7 +321,7 @@ Plans:
 | 23. Avatar Evolution | v2.0 | 2/2 | Complete | 2026-03-01 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 | 25. Onboarding Navigation | 1/1 | Complete    | 2026-03-06 | - |
-| 26. Welcome and Value | 2/2 | Complete   | 2026-03-06 | - |
+| 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
 | 27. Profile and Goal | v2.1 | 0/? | Not started | - |
 | 28. Archetype and Macros | v2.1 | 0/? | Not started | - |
 | 29. Paywall and Entry | v2.1 | 0/? | Not started | - |
