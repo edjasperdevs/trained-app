@@ -81,7 +81,11 @@ Plans:
   3. User sees calculated daily macro targets based on profile inputs with animated donut chart (800ms draw effect)
   4. Three macro stat cards (protein, carbs, fat) count up from 0 after chart completes (600ms)
   5. Calculated macros are stored in macroStore when user taps "ACCEPT MY PROTOCOL"
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 28-01-PLAN.md -- ArchetypeScreen with 5 archetype cards, badges (FREE/PREMIUM/COMING SOON), default Bro selection
+- [ ] 28-02-PLAN.md -- MacrosScreen with animated donut chart, count-up stat cards, macroStore integration
 
 ### Phase 29: Paywall and Entry
 **Goal**: Users see the premium offering and make a subscription decision, then enter the app with a cinematic welcome -- the conversion and onboarding completion screens
@@ -327,5 +331,5 @@ Plans:
 | 25. Onboarding Navigation | 1/1 | Complete    | 2026-03-06 | - |
 | 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
 | 27. Profile and Goal | 2/2 | Complete    | 2026-03-06 | - |
-| 28. Archetype and Macros | v2.1 | 0/? | Not started | - |
+| 28. Archetype and Macros | v2.1 | 0/2 | Not started | - |
 | 29. Paywall and Entry | v2.1 | 0/? | Not started | - |
