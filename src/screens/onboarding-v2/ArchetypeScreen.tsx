@@ -49,7 +49,7 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
     <button
       onClick={onSelect}
       disabled={isDisabled}
-      className={`relative flex items-center h-[120px] rounded-2xl transition-all duration-150 ease-out overflow-visible ${
+      className={`relative w-full flex items-center h-[120px] rounded-2xl transition-all duration-150 ease-out overflow-visible ${
         isDisabled ? 'opacity-50 pointer-events-none' : ''
       } ${
         isSelected
