@@ -74,7 +74,7 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
           src={avatarSrc}
           alt={info.name}
           className="absolute left-1/2 -translate-x-1/2 w-[130px] h-auto z-10"
-          style={{ bottom: '-65%' }}
+          style={{ bottom: '-75%' }}
         />
       </div>
 
