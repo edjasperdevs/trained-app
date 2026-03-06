@@ -169,80 +169,88 @@ export function ArchetypeScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col px-4 py-8 pb-safe">
-      {/* Header with back button and progress */}
-      <motion.div
-        className="flex items-center justify-between mb-8"
-        initial="hidden"
-        animate="visible"
-        variants={fadeInVariants}
-      >
-        <button
-          onClick={prevStep}
-          className="w-10 h-10 flex items-center justify-center text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
+    <div className="h-screen bg-[#0A0A0A] flex flex-col overflow-hidden">
+      {/* Fixed header section */}
+      <div className="flex-shrink-0 px-4 pt-8">
+        {/* Header with back button and progress */}
+        <motion.div
+          className="flex items-center justify-between mb-8"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInVariants}
         >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <ProgressIndicator totalSteps={5} currentStep={3} />
-        <div className="w-10" /> {/* Spacer for alignment */}
-      </motion.div>
+          <button
+            onClick={prevStep}
+            className="w-10 h-10 flex items-center justify-center text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <ProgressIndicator totalSteps={5} currentStep={3} />
+          <div className="w-10" /> {/* Spacer for alignment */}
+        </motion.div>
 
-      {/* YOUR ARCHETYPE label */}
-      <motion.p
-        className="text-[#D4A853] text-xs tracking-[0.2em] uppercase text-center mb-4"
-        initial="hidden"
-        animate="visible"
-        variants={fadeInVariants}
-      >
-        YOUR ARCHETYPE
-      </motion.p>
+        {/* YOUR ARCHETYPE label */}
+        <motion.p
+          className="text-[#D4A853] text-xs tracking-[0.2em] uppercase text-center mb-4"
+          initial="hidden"
+          animate="visible"
+          variants={fadeInVariants}
+        >
+          YOUR ARCHETYPE
+        </motion.p>
 
-      {/* Main headline */}
-      <motion.h1
-        className="text-3xl md:text-4xl font-black text-[#FAFAFA] text-center leading-tight mb-4"
-        style={{ fontFamily: "'Oswald', sans-serif" }}
-        initial="hidden"
-        animate="visible"
-        variants={headlineVariants}
-      >
-        CHOOSE YOUR DISCIPLINE
-      </motion.h1>
+        {/* Main headline */}
+        <motion.h1
+          className="text-3xl md:text-4xl font-black text-[#FAFAFA] text-center leading-tight"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+          initial="hidden"
+          animate="visible"
+          variants={headlineVariants}
+        >
+          CHOOSE YOUR DISCIPLINE
+        </motion.h1>
+      </div>
 
-      {/* Archetype cards - pt-8 allows room for avatar overflow */}
+      {/* Scrollable archetype cards */}
       <motion.div
-        className="flex flex-col gap-5 flex-1 pt-8"
+        className="flex-1 overflow-y-auto px-4 pt-8 pb-24"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        {ARCHETYPE_ORDER.map((archetype) => (
-          <motion.div key={archetype} variants={cardVariants}>
-            <ArchetypeCard
-              archetype={archetype}
-              isSelected={selectedArchetype === archetype}
-              isDisabled={archetype === 'bull'}
-              badge={getBadgeType(archetype)}
-              onSelect={() => handleSelect(archetype)}
-            />
-          </motion.div>
-        ))}
+        <div className="flex flex-col gap-5">
+          {ARCHETYPE_ORDER.map((archetype) => (
+            <motion.div key={archetype} variants={cardVariants}>
+              <ArchetypeCard
+                archetype={archetype}
+                isSelected={selectedArchetype === archetype}
+                isDisabled={archetype === 'bull'}
+                badge={getBadgeType(archetype)}
+                onSelect={() => handleSelect(archetype)}
+              />
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
 
-      {/* Bottom CTA */}
-      <motion.div
-        className="mt-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.3, ease: [0, 0, 0.2, 1] }}
-      >
-        <button
-          onClick={handleContinue}
-          className="w-full py-4 bg-[#D4A853] text-[#0A0A0A] font-bold text-lg tracking-wider rounded-lg"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
+      {/* Fixed bottom CTA with gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 pb-safe">
+        <div className="h-8 bg-gradient-to-t from-[#0A0A0A] to-transparent" />
+        <motion.div
+          className="px-4 pb-6 bg-[#0A0A0A]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.3, ease: [0, 0, 0.2, 1] }}
         >
-          CHOOSE MY ARCHETYPE
-        </button>
-      </motion.div>
+          <button
+            onClick={handleContinue}
+            className="w-full py-4 bg-[#D4A853] text-[#0A0A0A] font-bold text-lg tracking-wider rounded-lg"
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
+            CHOOSE MY ARCHETYPE
+          </button>
+        </motion.div>
+      </div>
     </div>
   )
 }
