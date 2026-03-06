@@ -1,6 +1,6 @@
 # Requirements: WellTrained
 
-**Defined:** 2026-02-27 (v2.0), 2026-03-06 (v2.1)
+**Defined:** 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2)
 **Core Value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
 
 ## v2.0 Requirements
@@ -172,7 +172,66 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 - [x] **NAV-02**: MainTabNavigator renders when onboardingComplete is true
 - [x] **NAV-03**: Onboarding flow is a separate navigation stack from main app
 
-## Future Requirements (v2.2+)
+## v2.2 Requirements
+
+Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build → Review → Refine).
+
+### Auth Infrastructure
+
+- [ ] **INFRA-01**: Apple Sign-In Capacitor plugin installed and configured
+- [ ] **INFRA-02**: Google Sign-In Capacitor plugin installed and configured
+- [ ] **INFRA-03**: Supabase Apple provider configured with Service ID, Team ID, Key ID, private key
+- [ ] **INFRA-04**: Supabase Google provider configured with Web client ID and secret
+- [ ] **INFRA-05**: AuthStack navigation with routes for all 5 auth screens
+- [ ] **INFRA-06**: App routing logic checks session + onboardingComplete to route appropriately
+
+### Splash Screen
+
+- [ ] **SPLASH-01**: Splash screen displays chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline
+- [ ] **SPLASH-02**: Gold loading bar animates during app initialization
+- [ ] **SPLASH-03**: Splash auto-transitions to appropriate destination after load complete
+
+### Sign Up (Social Entry)
+
+- [ ] **SIGNUP-01**: Sign Up screen displays logo, BEGIN YOUR PROTOCOL headline, 3 auth buttons, legal copy
+- [ ] **SIGNUP-02**: Apple button triggers Apple Sign-In flow and creates Supabase session
+- [ ] **SIGNUP-03**: Google button triggers Google Sign-In flow and creates Supabase session
+- [ ] **SIGNUP-04**: Email button navigates to Email Sign Up form
+- [ ] **SIGNUP-05**: Sign In link navigates to Sign In screen
+
+### Sign In (Social Entry)
+
+- [ ] **SIGNIN-01**: Sign In screen displays logo, WELCOME BACK headline, 3 auth buttons
+- [ ] **SIGNIN-02**: Apple button triggers Apple Sign-In flow
+- [ ] **SIGNIN-03**: Google button triggers Google Sign-In flow
+- [ ] **SIGNIN-04**: Email button navigates to Email Sign In form
+- [ ] **SIGNIN-05**: Create Account link navigates to Sign Up screen
+- [ ] **SIGNIN-06**: Forgot Password link navigates to Forgot Password screen
+
+### Email Sign Up Form
+
+- [ ] **EMAILSIGNUP-01**: Email Sign Up form displays email, password, confirm password fields with gold icons
+- [ ] **EMAILSIGNUP-02**: Password strength indicator shows 4 segments based on complexity criteria
+- [ ] **EMAILSIGNUP-03**: CREATE ACCOUNT button disabled until all validation passes
+- [ ] **EMAILSIGNUP-04**: User can create account with valid email and password via Supabase signUp
+- [ ] **EMAILSIGNUP-05**: Sign In link navigates to Sign In screen
+
+### Email Sign In Form
+
+- [ ] **EMAILSIGNIN-01**: Email Sign In form displays email and password fields with gold icons
+- [ ] **EMAILSIGNIN-02**: User can sign in with valid credentials via Supabase signInWithPassword
+- [ ] **EMAILSIGNIN-03**: Invalid credentials show inline error message below password field
+- [ ] **EMAILSIGNIN-04**: Forgot Password link navigates to Forgot Password screen
+- [ ] **EMAILSIGNIN-05**: Create Account link navigates to Sign Up screen
+
+### Forgot Password
+
+- [ ] **FORGOT-01**: Forgot Password screen displays logo, gold key icon, email field
+- [ ] **FORGOT-02**: User can request password reset email via Supabase resetPasswordForEmail
+- [ ] **FORGOT-03**: Success state shows confirmation message with submitted email address
+- [ ] **FORGOT-04**: Back to Sign In link navigates to Sign In screen
+
+## Future Requirements (v2.3+)
 
 ### Onboarding Enhancements
 
@@ -210,7 +269,6 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | Marketing site | App only |
 | Coach dashboard in-app | Moved to welltrained-coach |
 | Email collection during onboarding | Research shows email walls cause abandonment; collect in Profile after engagement |
-| Social login (Apple, Google) | Email/password sufficient for v2.1 |
 | Onboarding skip option | All screens are conversion-critical |
 | Custom avatar selection in onboarding | Avatar is fixed during onboarding; customization is post-onboarding |
 | Height/weight input in onboarding | Use defaults for v2.1; user can update in Profile settings |
@@ -332,9 +390,10 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 **Coverage:**
 - v2.0 requirements: 47 total
 - v2.1 requirements: 44 total
+- v2.2 requirements: 27 total
 - Mapped to phases: 91
-- Unmapped: 0
+- Unmapped: 27 (v2.2 pending roadmap)
 
 ---
-*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1)*
-*Last updated: 2026-03-06 -- v2.1 traceability added*
+*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2)*
+*Last updated: 2026-03-06 — v2.2 Auth Flow requirements added*
