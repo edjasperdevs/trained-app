@@ -27,7 +27,7 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
       case 'premium':
         return 'bg-[#D4A853] text-black'
       case 'coming-soon':
-        return 'bg-[#3F3F46] text-white'
+        return 'bg-[#3F3F46] text-[#A1A1AA]'
     }
   }
 
@@ -49,47 +49,49 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
     <button
       onClick={onSelect}
       disabled={isDisabled}
-      className={`relative flex items-center h-[88px] rounded-xl transition-all duration-150 ease-out ${
-        isDisabled ? 'opacity-40 pointer-events-none' : ''
+      className={`relative flex items-center h-[120px] rounded-2xl transition-all duration-150 ease-out overflow-visible ${
+        isDisabled ? 'opacity-50 pointer-events-none' : ''
       } ${
         isSelected
           ? 'bg-[rgba(212,168,83,0.08)] border-2 border-[#D4A853]'
-          : 'bg-[#26282B] border border-[#3F3F46]'
+          : 'bg-[#1A1A1A] border border-[#2A2A2A]'
       }`}
     >
-      {/* Avatar container - allows overflow for 3D pop-out effect */}
-      <div className="relative w-[100px] h-full flex-shrink-0 flex items-end justify-center overflow-visible">
+      {/* Avatar container - positioned to overflow card bounds */}
+      <div className="relative w-[130px] h-full flex-shrink-0 flex items-center justify-center">
         {/* Glow effect behind avatar */}
         <div
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full blur-xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full blur-2xl opacity-60"
           style={{
-            background: 'radial-gradient(circle, rgba(212,168,83,0.35) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(212,168,83,0.5) 0%, transparent 70%)',
           }}
         />
-        {/* Avatar image - cropped to show waist up, head extends above card */}
-        <div className="relative z-10 w-[90px] h-[110px] -mt-6 overflow-hidden">
-          <img
-            src={avatarSrc}
-            alt={info.name}
-            className="w-full h-auto object-cover object-top"
-            style={{ marginTop: '0px' }}
-          />
-        </div>
+        {/* Avatar image - large, extends above and below card */}
+        <img
+          src={avatarSrc}
+          alt={info.name}
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[140px] h-auto z-10"
+          style={{
+            maxHeight: '170px',
+            objectFit: 'contain',
+            objectPosition: 'bottom',
+          }}
+        />
       </div>
 
-      {/* Text content */}
-      <div className="flex flex-col items-start text-left px-4 flex-1">
+      {/* Text content - centered vertically */}
+      <div className="flex flex-col items-start text-left pl-2 pr-4 flex-1 justify-center">
         <span
-          className="font-bold text-xl text-[#FAFAFA]"
+          className="font-bold text-2xl text-[#FAFAFA] tracking-wide"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
           {info.name.toUpperCase()}
         </span>
-        <span className="text-[#A1A1AA] text-sm">{info.tagline}</span>
+        <span className="text-[#71717A] text-sm mt-0.5">{info.tagline}</span>
       </div>
 
       {/* Badge */}
-      <span className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded font-medium ${getBadgeStyles()}`}>
+      <span className={`absolute top-3 right-3 text-xs px-2.5 py-1 rounded font-semibold tracking-wide ${getBadgeStyles()}`}>
         {getBadgeLabel()}
       </span>
     </button>
@@ -198,7 +200,7 @@ export function ArchetypeScreen() {
 
       {/* Main headline */}
       <motion.h1
-        className="text-3xl md:text-4xl font-black text-[#FAFAFA] text-center leading-tight mb-8"
+        className="text-3xl md:text-4xl font-black text-[#FAFAFA] text-center leading-tight mb-4"
         style={{ fontFamily: "'Oswald', sans-serif" }}
         initial="hidden"
         animate="visible"
@@ -207,9 +209,9 @@ export function ArchetypeScreen() {
         CHOOSE YOUR DISCIPLINE
       </motion.h1>
 
-      {/* Archetype cards - pt-4 allows room for avatar overflow */}
+      {/* Archetype cards - pt-8 allows room for avatar overflow */}
       <motion.div
-        className="flex flex-col gap-3 flex-1 pt-4"
+        className="flex flex-col gap-2 flex-1 pt-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
@@ -229,7 +231,7 @@ export function ArchetypeScreen() {
 
       {/* Bottom CTA */}
       <motion.div
-        className="mt-8"
+        className="mt-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.3, ease: [0, 0, 0.2, 1] }}
