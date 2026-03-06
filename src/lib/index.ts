@@ -20,3 +20,5 @@ export {
 export { friendlyError } from './errors'
 export { haptics } from './haptics'
 export { MacroCalculator } from './formulas'
+export { signInWithApple } from './apple-auth'
+export { signInWithGoogle, configureGoogleSignIn, signOutGoogle } from './google-auth'
