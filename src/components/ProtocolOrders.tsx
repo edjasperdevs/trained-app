@@ -17,7 +17,6 @@ import { useSubscriptionStore } from '@/stores/subscriptionStore'
 import { useMacroStore } from '@/stores/macroStore'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useHealthStore } from '@/stores/healthStore'
-import { useDPStore } from '@/stores/dpStore'
 import { cn } from '@/lib/cn'
 import { LABELS } from '@/design/constants'
 import { getLocalDateString, getLocalWeekString } from '@/lib/dateUtils'
@@ -54,10 +53,10 @@ function initializeStoreSubscriptions() {
   }
 
   // Subscribe to stores that affect quest conditions
+  // Note: Do NOT subscribe to dpStore - it causes infinite loop since quest completion updates DP
   useMacroStore.subscribe(checkQuests)
   useWorkoutStore.subscribe(checkQuests)
   useHealthStore.subscribe(checkQuests)
-  useDPStore.subscribe(checkQuests)
 }
 
 // Seeded shuffle for deterministic quest preview for non-premium users
