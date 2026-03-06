@@ -336,4 +336,4 @@ Plans:
 | 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
 | 27. Profile and Goal | 2/2 | Complete    | 2026-03-06 | - |
 | 28. Archetype and Macros | 2/2 | Complete    | 2026-03-06 | - |
-| 29. Paywall and Entry | 2/2 | Complete   | 2026-03-06 | - |
+| 29. Paywall and Entry | 2/2 | Complete    | 2026-03-06 | - |
