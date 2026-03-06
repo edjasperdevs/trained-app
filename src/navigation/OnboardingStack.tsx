@@ -8,7 +8,7 @@ import {
   ProfileScreen,
   GoalScreen,
   ArchetypeScreen,
-  OnboardingMacros,
+  MacrosScreen,
   OnboardingPaywall,
   OnboardingFinal,
 } from '@/screens/onboarding-v2'
@@ -31,7 +31,7 @@ export function OnboardingStack() {
         <Route path="profile" element={<ProfileScreen />} />
         <Route path="goal" element={<GoalScreen />} />
         <Route path="archetype" element={<ArchetypeScreen />} />
-        <Route path="macros" element={<OnboardingMacros />} />
+        <Route path="macros" element={<MacrosScreen />} />
         <Route path="paywall" element={<OnboardingPaywall />} />
         <Route path="final" element={<OnboardingFinal />} />
         <Route path="*" element={<Navigate to="welcome" replace />} />
