@@ -47,5 +47,16 @@
 	<true/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>WellTrained reads your steps and sleep data to reward you with Discipline Points for healthy habits.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Google Sign-In</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.809336881982-h226g1k2qtp7nh7csq1nfk7d9crrmnvr</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
