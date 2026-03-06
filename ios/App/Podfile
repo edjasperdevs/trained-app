@@ -11,6 +11,7 @@ install! 'cocoapods', :disable_input_output_paths => true
 def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCommunityAppleSignIn', :path => '../../node_modules/@capacitor-community/apple-sign-in'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorDialog', :path => '../../node_modules/@capacitor/dialog'
   pod 'CapacitorFilesystem', :path => '../../node_modules/@capacitor/filesystem'
@@ -23,6 +24,7 @@ def capacitor_pods
   pod 'CapawesomeCapacitorBadge', :path => '../../node_modules/@capawesome/capacitor-badge'
   pod 'CapgoCapacitorHealth', :path => '../../node_modules/@capgo/capacitor-health'
   pod 'RevenuecatPurchasesCapacitor', :path => '../../node_modules/@revenuecat/purchases-capacitor'
+  pod 'SouthdevsCapacitorGoogleAuth', :path => '../../node_modules/@southdevs/capacitor-google-auth'
 end
 
 target 'App' do

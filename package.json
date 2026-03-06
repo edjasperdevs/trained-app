@@ -21,6 +21,7 @@
     "cap:run": "npx cap run ios"
   },
   "dependencies": {
+    "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor/app": "^7.1.2",
     "@capacitor/core": "^7.5.0",
     "@capacitor/dialog": "^7.0.4",
@@ -39,6 +40,7 @@
     "@fontsource-variable/oswald": "^5.2.8",
     "@revenuecat/purchases-capacitor": "^11.3.2",
     "@sentry/react": "^10.38.0",
+    "@southdevs/capacitor-google-auth": "^7.0.0",
     "@supabase/supabase-js": "^2.93.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

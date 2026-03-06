@@ -34,6 +34,11 @@ const config: CapacitorConfig = {
       persist: true,
       autoClear: false,
     },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId: process.env.VITE_GOOGLE_WEB_CLIENT_ID,
+      forceCodeForRefreshToken: true,
+    },
   },
   server: process.env.CAPACITOR_LIVE_RELOAD ? {
     url: process.env.CAPACITOR_DEV_URL || 'http://localhost:5173',
