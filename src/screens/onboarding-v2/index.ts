@@ -10,3 +10,4 @@ export {
 } from './PlaceholderScreens'
 
 export { WelcomeScreen } from './WelcomeScreen'
+export { ValueScreen } from './ValueScreen'
