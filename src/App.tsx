@@ -17,6 +17,7 @@ import { useRemindersStore } from '@/stores/remindersStore'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { Auth } from '@/screens'
+import { OnboardingStack } from '@/navigation'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
@@ -270,16 +271,15 @@ function AppContent() {
     )
   }
 
-  // If authenticated but onboarding not complete, show onboarding
+  // If authenticated but onboarding not complete, show OnboardingStack
   if (!devBypass && (!profile || !profile.onboardingComplete)) {
     return (
       <>
         <ToastContainer />
-        <Suspense fallback={<OnboardingSkeleton />}>
-          <SentryRoutes>
-            <Route path="*" element={<Onboarding />} />
-          </SentryRoutes>
-        </Suspense>
+        <SentryRoutes>
+          <Route path="/onboarding/*" element={<OnboardingStack />} />
+          <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
+        </SentryRoutes>
       </>
     )
   }
