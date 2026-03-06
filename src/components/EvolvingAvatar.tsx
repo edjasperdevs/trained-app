@@ -15,12 +15,12 @@
  */
 
 import { useDPStore, useSubscriptionStore, useUserStore } from '@/stores'
-import { getAvatarStage } from '@/screens/AvatarScreen'
+import { getAvatarStage } from '@/lib/avatarUtils'
 import { LockedAvatar } from './LockedAvatar'
 import { getAvatarImage } from '@/assets/avatars'
 
 interface EvolvingAvatarProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   /** Whether to show locked preview for non-premium users (default: true) */
   showLocked?: boolean
 }
@@ -29,7 +29,8 @@ const SIZE_MAP = {
   sm: 64,
   md: 96,
   lg: 128,
-  xl: 192,
+  xl: 240,
+  '2xl': 320,
 }
 
 const PREMIUM_STAGES = [3, 4, 5]

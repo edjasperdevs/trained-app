@@ -2,28 +2,33 @@
  * LockedAvatar Component
  *
  * Displays a locked preview of premium avatar stages (3-5) with an upgrade prompt.
- * Shows the stage SVG with reduced opacity, grayscale, and blur effect.
+ * Shows the avatar image with reduced opacity, grayscale, and blur effect.
  * Clicking navigates to the paywall for subscription upgrade.
  */
 
 import { Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Stage3, Stage4, Stage5 } from './AvatarStages'
+import { useUserStore } from '@/stores'
+import { getAvatarImage } from '@/assets/avatars'
 
 interface LockedAvatarProps {
   stage: 3 | 4 | 5
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 }
 
-const STAGE_COMPONENTS = {
-  3: Stage3,
-  4: Stage4,
-  5: Stage5,
+const SIZE_MAP = {
+  sm: 64,
+  md: 96,
+  lg: 128,
+  xl: 240,
+  '2xl': 320,
 }
 
 export function LockedAvatar({ stage, size = 'md' }: LockedAvatarProps) {
   const navigate = useNavigate()
-  const StageComponent = STAGE_COMPONENTS[stage]
+  const archetype = useUserStore((s) => s.profile?.archetype) || 'bro'
+  const dimension = SIZE_MAP[size]
+  const avatarSrc = getAvatarImage(archetype, stage)
 
   const handleUnlock = () => {
     navigate('/paywall')
@@ -33,7 +38,13 @@ export function LockedAvatar({ stage, size = 'md' }: LockedAvatarProps) {
     <div className="relative inline-block">
       {/* Locked stage preview */}
       <div className="opacity-40 grayscale blur-[1px]">
-        <StageComponent size={size} />
+        <img
+          src={avatarSrc}
+          alt={`${archetype} avatar - Stage ${stage} (locked)`}
+          width={dimension}
+          height={dimension}
+          className="object-contain"
+        />
       </div>
 
       {/* Unlock overlay */}

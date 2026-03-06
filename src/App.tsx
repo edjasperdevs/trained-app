@@ -35,6 +35,7 @@ const Terms = lazy(() => import('@/screens/Terms').then(m => ({ default: m.Terms
 const Paywall = lazy(() => import('@/screens/Paywall').then(m => ({ default: m.Paywall })))
 const HealthPermission = lazy(() => import('@/screens/HealthPermission').then(m => ({ default: m.HealthPermission })))
 const DebugScreen = lazy(() => import('@/screens/DebugScreen').then(m => ({ default: m.DebugScreen })))
+const Progress = lazy(() => import('@/screens/Progress').then(m => ({ default: m.Progress })))
 // TODO: Re-enable for v2 launch
 // const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
 
@@ -307,6 +308,7 @@ function AppContent() {
             <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
             <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
             <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+            <Route path="/progress" element={<Suspense fallback={<HomeSkeleton />}><Progress /></Suspense>} />
             <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
             <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
             <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
