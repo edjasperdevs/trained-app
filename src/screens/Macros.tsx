@@ -1,31 +1,201 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { MealBuilder, EmptyState, FoodSearch, RankUpModal, AnimatedPage, AnimatedRing } from '@/components'
-import { useMacroStore, useUserStore, MacroTargets, SavedMeal, LoggedMeal, Gender, MealIngredient, RecentFood, toast } from '@/stores'
+import { EmptyState, FoodSearch, RankUpModal, AnimatedPage } from '@/components'
+import { useMacroStore, useUserStore, MacroTargets, SavedMeal, Gender, RecentFood, LoggedMeal, MealIngredient, toast } from '@/stores'
 import { useDPStore } from '@/stores/dpStore'
-import { motion } from 'framer-motion'
-import { Beef, Zap, UtensilsCrossed, Check, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, Heart } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { UtensilsCrossed, ChevronDown, Flame, Scale, TrendingUp, RefreshCw, ShieldCheck, ChevronLeft, Plus, Trash2, X, Heart, Bookmark, Pencil } from 'lucide-react'
 import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
-// import { useNavigate } from 'react-router-dom' // Disabled for v1 - Protocol AI
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { springs } from '@/lib/animations'
 
-type TabType = 'daily' | 'log' | 'meals' | 'calculator'
+type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre-workout' | 'post-workout'
 
-type MacroProgress = {
-  protein: { current: number; target: number; percentage: number }
-  calories: { current: number; target: number; percentage: number }
-  carbs: { current: number; target: number; percentage: number }
-  fats: { current: number; target: number; percentage: number }
-} | null
+// Laurel wreath SVG component
+function LaurelLogo({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} fill="currentColor">
+      <path d="M8 16c-2-3-3-7-2-11 1 3 3 6 5 8-1-3-1-7 1-10 0 4 1 7 4 9-2-3-2-6-1-9 1 3 3 5 5 7"
+            strokeWidth="0" opacity="0.9"/>
+      <path d="M24 16c2-3 3-7 2-11-1 3-3 6-5 8 1-3 1-7-1-10 0 4-1 7-4 9 2-3 2-6 1-9-1 3-3 5-5 7"
+            strokeWidth="0" opacity="0.9"/>
+      <circle cx="16" cy="28" r="2"/>
+    </svg>
+  )
+}
+
+// Dual ring component - outer for calories, inner for protein
+function DualRing({
+  calories,
+  caloriesTarget,
+  protein,
+  proteinTarget
+}: {
+  calories: number
+  caloriesTarget: number
+  protein: number
+  proteinTarget: number
+}) {
+  const caloriePercentage = Math.min((calories / caloriesTarget) * 100, 100)
+  const proteinPercentage = Math.min((protein / proteinTarget) * 100, 100)
+
+  // Large rings with minimal gap
+  const size = 360
+  const center = size / 2
+
+  // Outer ring (calories) - gold - thick
+  const outerRadius = 165
+  const outerStroke = 28
+  const outerNormalizedRadius = outerRadius - outerStroke / 2
+  const outerCircumference = outerNormalizedRadius * 2 * Math.PI
+  const outerStrokeDashoffset = outerCircumference - (caloriePercentage / 100) * outerCircumference
+
+  // Inner ring (protein) - teal - 5px gap from outer, also thick
+  const innerRadius = 128  // outer inner edge (151) - 5px gap - half stroke
+  const innerStroke = 24
+  const innerNormalizedRadius = innerRadius - innerStroke / 2
+  const innerCircumference = innerNormalizedRadius * 2 * Math.PI
+  const innerStrokeDashoffset = innerCircumference - (proteinPercentage / 100) * innerCircumference
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} className="transform -rotate-90">
+          {/* Gradients */}
+          <defs>
+            <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#D4A853" />
+              <stop offset="100%" stopColor="#B8860B" />
+            </linearGradient>
+            <linearGradient id="proteinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#14B8A6" />
+              <stop offset="100%" stopColor="#0D9488" />
+            </linearGradient>
+          </defs>
+
+          {/* Outer ring background (calories) */}
+          <circle
+            stroke="rgba(212, 168, 83, 0.15)"
+            fill="transparent"
+            strokeWidth={outerStroke}
+            r={outerNormalizedRadius}
+            cx={center}
+            cy={center}
+          />
+          {/* Outer ring progress (calories) */}
+          <motion.circle
+            stroke="url(#calorieGradient)"
+            fill="transparent"
+            strokeWidth={outerStroke}
+            strokeLinecap="round"
+            strokeDasharray={outerCircumference}
+            initial={{ strokeDashoffset: outerCircumference }}
+            animate={{ strokeDashoffset: outerStrokeDashoffset }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            r={outerNormalizedRadius}
+            cx={center}
+            cy={center}
+            className="drop-shadow-[0_0_8px_rgba(212,168,83,0.35)]"
+          />
+
+          {/* Inner ring background (protein) */}
+          <circle
+            stroke="rgba(20, 184, 166, 0.15)"
+            fill="transparent"
+            strokeWidth={innerStroke}
+            r={innerNormalizedRadius}
+            cx={center}
+            cy={center}
+          />
+          {/* Inner ring progress (protein) */}
+          <motion.circle
+            stroke="url(#proteinGradient)"
+            fill="transparent"
+            strokeWidth={innerStroke}
+            strokeLinecap="round"
+            strokeDasharray={innerCircumference}
+            initial={{ strokeDashoffset: innerCircumference }}
+            animate={{ strokeDashoffset: innerStrokeDashoffset }}
+            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+            r={innerNormalizedRadius}
+            cx={center}
+            cy={center}
+            className="drop-shadow-[0_0_8px_rgba(20,184,166,0.35)]"
+          />
+        </svg>
+
+        {/* Center content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <motion.span
+            className="text-4xl font-bold font-mono text-foreground"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            {calories.toLocaleString()}
+          </motion.span>
+          <span className="text-sm text-muted-foreground">
+            / {caloriesTarget.toLocaleString()} kcal
+          </span>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-6 mt-3">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-[#D4A853] to-[#B8860B]" />
+          <span className="text-xs text-muted-foreground">Calories</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-[#14B8A6] to-[#0D9488]" />
+          <span className="text-xs text-muted-foreground">Protein</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Mini progress ring for macro cards
+function MiniRing({ percentage }: { percentage: number }) {
+  const radius = 12
+  const stroke = 3
+  const normalizedRadius = radius - stroke / 2
+  const circumference = normalizedRadius * 2 * Math.PI
+  const strokeDashoffset = circumference - (Math.min(percentage, 100) / 100) * circumference
+
+  return (
+    <svg width="24" height="24" className="transform -rotate-90">
+      <circle
+        stroke="rgba(212, 168, 83, 0.2)"
+        fill="transparent"
+        strokeWidth={stroke}
+        r={normalizedRadius}
+        cx="12"
+        cy="12"
+      />
+      <circle
+        stroke="#D4A853"
+        fill="transparent"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        r={normalizedRadius}
+        cx="12"
+        cy="12"
+        className="transition-all duration-500"
+      />
+    </svg>
+  )
+}
 
 export function Macros() {
-  // const navigate = useNavigate() // Disabled for v1 - Protocol AI
-  const [activeTab, setActiveTab] = useState<TabType>('daily')
+  const [showLogMeal, setShowLogMeal] = useState(false)
+  const [selectedMeal, setSelectedMeal] = useState<LoggedMeal | null>(null)
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   // PERF-02: Use granular selectors for reactive state
@@ -44,38 +214,49 @@ export function Macros() {
     getTodayProgress,
     logNamedMeal,
     addRecentFood,
-    toggleFavoriteFood,
-    saveMeal,
-    deleteSavedMeal,
     getTodayMeals,
     deleteLoggedMeal,
-    isProteinTargetHit,
-    isCalorieTargetHit,
+    updateLoggedMeal,
     calculateMacros,
+    toggleFavoriteFood,
+    saveMeal,
+    updateSavedMeal,
+    deleteSavedMeal,
   } = useMacroStore.getState()
 
   const profile = useUserStore((state) => state.profile)
   const progress = getTodayProgress()
   const todayMeals = getTodayMeals()
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'daily', label: 'Daily' },
-    { id: 'log', label: 'Meals' },
-    { id: 'meals', label: 'Saved' },
-    ...(setBy !== 'coach' ? [{ id: 'calculator' as TabType, label: 'Calc' }] : [])
-  ]
-
   const dismissCoachUpdate = () => {
     useMacroStore.getState().dismissCoachMacroUpdated()
   }
 
+  // Format today's date
+  const dateString = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleLogMeal = (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }, _mealType?: MealType, fromSavedMeal?: boolean) => {
+    logNamedMeal(name, macros, fromSavedMeal)
+    const result = useDPStore.getState().awardDP('meal')
+    if (result.rankedUp) {
+      const rankInfo = useDPStore.getState().getRankInfo()
+      setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
+    }
+    scheduleSync()
+  }
+
   return (
     <AnimatedPage>
-      <div data-testid="macros-screen" className="min-h-screen pb-20">
+      <div data-testid="macros-screen" className="min-h-screen pb-32 bg-background">
         {/* Coach Macro Updated Modal */}
         {coachMacroUpdated && targets && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6">
-            <Card className="py-0 w-full max-w-sm">
+            <Card className="py-0 w-full max-w-sm bg-surface border-border">
               <CardContent className="p-6 text-center">
                 <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
                 <p className="text-lg font-bold mb-2">Macros Updated by Coach</p>
@@ -85,23 +266,23 @@ export function Macros() {
                 <div className="grid grid-cols-2 gap-3 text-left mb-6">
                   <div>
                     <p className="text-xs text-muted-foreground">Calories</p>
-                    <p className="text-xl font-bold font-digital text-primary">{targets.calories}</p>
+                    <p className="text-xl font-bold font-mono text-primary">{targets.calories}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Protein</p>
-                    <p className="text-xl font-bold font-digital text-primary">{targets.protein}g</p>
+                    <p className="text-xl font-bold font-mono text-primary">{targets.protein}g</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Carbs</p>
-                    <p className="text-lg font-digital">{targets.carbs}g</p>
+                    <p className="text-lg font-mono">{targets.carbs}g</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Fats</p>
-                    <p className="text-lg font-digital">{targets.fats}g</p>
+                    <p className="text-lg font-mono">{targets.fats}g</p>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Button className="w-full" onClick={() => { dismissCoachUpdate(); setActiveTab('daily') }}>
+                  <Button className="w-full" onClick={() => { dismissCoachUpdate() }}>
                     View Macros
                   </Button>
                   <Button variant="ghost" className="w-full" onClick={dismissCoachUpdate}>
@@ -115,197 +296,197 @@ export function Macros() {
 
         {/* Header */}
         <motion.div
-          className="bg-card pt-14 pb-4 px-5"
+          className="pt-14 pb-2 px-6"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springs.smooth}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">Macros</h1>
-              {setBy === 'coach' && (
-                <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-                  <ShieldCheck size={12} />
-                  Set by Coach
-                </span>
-              )}
-            </div>
-            {/* Protocol AI button - disabled for v1
-            <button
-              onClick={() => navigate('/protocol-ai')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold border border-primary/20"
-            >
-              <Zap size={14} className="fill-current" /> Protocol AI
-            </button>
-            */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <LaurelLogo className="w-5 h-5 text-primary" />
+            <span className="text-xs font-heading uppercase tracking-[0.2em] text-primary font-bold">
+              WellTrained
+            </span>
           </div>
 
-          {/* Tabs with sliding indicator */}
-          <div className="flex gap-2 relative" role="tablist" aria-label="Macro views">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                aria-controls={`tabpanel-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'relative flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors z-10',
-                  activeTab === tab.id ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="macros-tab-indicator"
-                    className="absolute inset-0 bg-primary rounded-lg"
-                    style={{ zIndex: -1 }}
-                    transition={springs.snappy}
-                  />
-                )}
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-heading font-bold text-foreground">Fuel</h1>
+              <p className="text-sm text-muted-foreground mt-1">{dateString}</p>
+            </div>
+            {setBy === 'coach' && (
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full font-medium flex items-center gap-1">
+                <ShieldCheck size={12} />
+                Coach
+              </span>
+            )}
           </div>
         </motion.div>
 
-        <div className="px-5 py-6" data-sentry-mask>
-          {/* Coach-set macro targets at top */}
-          {setBy === 'coach' && targets && (
-            <Card className="py-0 border-primary/20 mb-6">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <ShieldCheck size={16} className="text-primary" />
-                  <h3 className="text-sm font-semibold text-muted-foreground">YOUR TARGETS</h3>
-                </div>
-                <div className="grid grid-cols-4 gap-3 text-center">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Calories</p>
-                    <p className="text-lg font-bold font-digital text-primary">{targets.calories}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Protein</p>
-                    <p className="text-lg font-bold font-digital text-primary">{targets.protein}g</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Carbs</p>
-                    <p className="text-lg font-bold font-digital">{targets.carbs}g</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Fats</p>
-                    <p className="text-lg font-bold font-digital">{targets.fats}g</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === 'daily' && (
-            <DailyView
-              progress={progress}
-              targets={targets}
-              proteinHit={isProteinTargetHit()}
-              caloriesHit={isCalorieTargetHit()}
-              onLogNamedMeal={(name, macros) => {
-                logNamedMeal(name, macros)
-                const result = useDPStore.getState().awardDP('meal')
-                if (result.rankedUp) {
-                  const rankInfo = useDPStore.getState().getRankInfo()
-                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-                }
-                scheduleSync()
-              }}
-              onAddRecentFood={addRecentFood}
-              recentFoods={recentFoods}
-              favoriteFoods={favoriteFoods}
-              onToggleFavorite={toggleFavoriteFood}
-              todayMeals={todayMeals}
-              onDeleteMeal={deleteLoggedMeal}
-              onSetupTargets={() => setActiveTab('calculator')}
+        {/* Main Content */}
+        <div className="px-6 py-6" data-sentry-mask>
+          {!targets || !progress ? (
+            <EmptyState
+              icon={UtensilsCrossed}
+              title="No macro targets set"
+              description="Set up your daily nutrition targets to start tracking calories and protein."
+              action={{ label: "Set Up Targets", onClick: () => setShowLogMeal(true) }}
             />
-          )}
+          ) : (
+            <div className="space-y-6">
+              {/* Dual Ring - Calories (outer) + Protein (inner) */}
+              <motion.div
+                className="flex justify-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                <DualRing
+                  calories={progress.calories.current}
+                  caloriesTarget={progress.calories.target}
+                  protein={progress.protein.current}
+                  proteinTarget={progress.protein.target}
+                />
+              </motion.div>
 
-          {activeTab === 'log' && (
-            <LogMealView
-              savedMeals={savedMeals}
-              favoriteFoods={favoriteFoods}
-              onToggleFavorite={toggleFavoriteFood}
-              onLogMeal={(name, macros) => {
-                logNamedMeal(name, macros)
-                const result = useDPStore.getState().awardDP('meal')
-                if (result.rankedUp) {
-                  const rankInfo = useDPStore.getState().getRankInfo()
-                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-                }
-                scheduleSync()
-              }}
-              onSaveMeal={saveMeal}
-              onDeleteSavedMeal={deleteSavedMeal}
-            />
-          )}
-
-          {activeTab === 'meals' && (
-            <SavedView
-              favoriteFoods={favoriteFoods}
-              recentFoods={recentFoods}
-              savedMeals={savedMeals}
-              onLogNamedMeal={(name, macros) => {
-                logNamedMeal(name, macros)
-                const result = useDPStore.getState().awardDP('meal')
-                if (result.rankedUp) {
-                  const rankInfo = useDPStore.getState().getRankInfo()
-                  setRankUpData({ oldRank: result.newRank - 1, newRank: result.newRank, rankName: rankInfo.name })
-                }
-                scheduleSync()
-              }}
-              onToggleFavorite={toggleFavoriteFood}
-            />
-          )}
-
-          {activeTab === 'calculator' && (
-            setBy === 'coach' ? (
-              <Card className="py-0 border-primary/20">
-                <CardContent className="text-center py-8">
-                  <ShieldCheck size={40} className="mx-auto mb-4 text-primary" />
-                  <p className="text-lg font-bold mb-2">Macros Set by Coach</p>
-                  <p className="text-muted-foreground text-sm mb-6">
-                    Your macro targets are managed by your coach. Contact them to request changes.
+              {/* Macro Cards Row */}
+              <motion.div
+                className="grid grid-cols-3 gap-3"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                {/* Protein */}
+                <div className="bg-surface border border-border rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-2">
+                    <MiniRing percentage={progress.protein.percentage} />
+                    <span className="text-xs text-muted-foreground font-medium">Protein</span>
+                  </div>
+                  <p className="text-lg font-bold font-mono text-primary">
+                    {progress.protein.current}g
                   </p>
-                  {targets && (
-                    <div className="grid grid-cols-2 gap-4 text-left max-w-xs mx-auto">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Calories</p>
-                        <p className="text-2xl font-bold font-digital text-primary">{targets.calories}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Protein</p>
-                        <p className="text-2xl font-bold font-digital text-primary">{targets.protein}g</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Carbs</p>
-                        <p className="text-lg font-digital">{targets.carbs}g</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Fats</p>
-                        <p className="text-lg font-digital">{targets.fats}g</p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ) : (
-              <CalculatorView
-                currentWeight={profile?.weight || 150}
-                currentHeight={profile?.height || 70}
-                currentAge={profile?.age || 30}
-                currentGender={profile?.gender || 'male'}
-                currentGoal={profile?.goal || 'maintain'}
-                currentActivity={activityLevel}
-                targets={targets}
-                onCalculate={calculateMacros}
-              />
-            )
+                  <p className="text-[10px] text-muted-foreground">/ {progress.protein.target}g</p>
+                </div>
+
+                {/* Carbs */}
+                <div className="bg-surface border border-border rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-2">
+                    <MiniRing percentage={progress.carbs.percentage} />
+                    <span className="text-xs text-muted-foreground font-medium">Carbs</span>
+                  </div>
+                  <p className="text-lg font-bold font-mono text-primary">
+                    {progress.carbs.current}g
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">/ {progress.carbs.target}g</p>
+                </div>
+
+                {/* Fats */}
+                <div className="bg-surface border border-border rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-2">
+                    <MiniRing percentage={progress.fats.percentage} />
+                    <span className="text-xs text-muted-foreground font-medium">Fat</span>
+                  </div>
+                  <p className="text-lg font-bold font-mono text-primary">
+                    {progress.fats.current}g
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">/ {progress.fats.target}g</p>
+                </div>
+              </motion.div>
+
+              {/* Meals Today */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h2 className="text-sm font-heading font-bold text-foreground mb-3">
+                  Meals Today
+                </h2>
+                {todayMeals.length > 0 ? (
+                  <div className="flex gap-2 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide">
+                    {[...todayMeals].reverse().map((meal) => (
+                      <button
+                        key={meal.id}
+                        onClick={() => setSelectedMeal(meal)}
+                        className={cn(
+                          "flex-shrink-0 rounded-lg px-4 py-2 text-left transition-colors group",
+                          meal.fromSavedMeal
+                            ? "bg-primary/10 border border-primary/30 hover:border-primary/50"
+                            : "bg-surface border border-border hover:border-primary/30"
+                        )}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {meal.fromSavedMeal && <Bookmark size={12} className="text-primary" />}
+                          <p className="text-sm font-medium text-foreground group-hover:text-primary truncate max-w-[100px]">
+                            {meal.name}
+                          </p>
+                        </div>
+                        <p className="text-xs text-primary font-mono">{meal.calories} kcal</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Please add meals</p>
+                )}
+              </motion.div>
+
+              {/* Log Fuel Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Button
+                  onClick={() => setShowLogMeal(true)}
+                  className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-heading uppercase tracking-widest text-base py-5 rounded-xl shadow-[0_0_20px_rgba(212,168,83,0.25)] transition-all hover:shadow-[0_0_30px_rgba(212,168,83,0.35)]"
+                  size="lg"
+                >
+                  Log Fuel
+                </Button>
+              </motion.div>
+            </div>
           )}
         </div>
+
+        {/* Log Meal Sheet */}
+        <AnimatePresence>
+          {showLogMeal && (
+            <LogMealSheet
+              onClose={() => setShowLogMeal(false)}
+              onLogMeal={handleLogMeal}
+              onAddRecentFood={addRecentFood}
+              onToggleFavorite={toggleFavoriteFood}
+              onSaveMeal={saveMeal}
+              onUpdateSavedMeal={updateSavedMeal}
+              onDeleteSavedMeal={deleteSavedMeal}
+              recentFoods={recentFoods}
+              favoriteFoods={favoriteFoods}
+              savedMeals={savedMeals}
+              targets={targets}
+              activityLevel={activityLevel}
+              profile={profile}
+              onCalculateMacros={calculateMacros}
+              setBy={setBy}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Meal Detail Sheet */}
+        <AnimatePresence>
+          {selectedMeal && (
+            <MealDetailSheet
+              meal={selectedMeal}
+              onClose={() => setSelectedMeal(null)}
+              onDelete={(id) => {
+                deleteLoggedMeal(id)
+                setSelectedMeal(null)
+              }}
+              onUpdate={(id, updates) => {
+                updateLoggedMeal(id, updates)
+                setSelectedMeal(null)
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Rank Up Modal */}
         {rankUpData && (
@@ -321,565 +502,573 @@ export function Macros() {
   )
 }
 
-function DailyView({
-  progress,
-  targets,
-  proteinHit,
-  caloriesHit,
-  onLogNamedMeal,
+// Log Meal Sheet - Full screen overlay for logging meals
+function LogMealSheet({
+  onClose,
+  onLogMeal,
   onAddRecentFood,
+  onToggleFavorite,
+  onSaveMeal,
+  onUpdateSavedMeal,
+  onDeleteSavedMeal,
   recentFoods,
   favoriteFoods,
-  onToggleFavorite,
-  todayMeals,
-  onDeleteMeal,
-  onSetupTargets
+  savedMeals,
+  targets,
+  activityLevel,
+  profile,
+  onCalculateMacros,
+  setBy,
 }: {
-  progress: MacroProgress
-  targets: MacroTargets | null
-  proteinHit: boolean
-  caloriesHit: boolean
-  onLogNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  onClose: () => void
+  onLogMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }, mealType?: MealType, fromSavedMeal?: boolean) => void
   onAddRecentFood: (food: RecentFood) => void
+  onToggleFavorite: (food: RecentFood) => void
+  onSaveMeal: (name: string, ingredients: MealIngredient[]) => void
+  onUpdateSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt' | 'usageCount'>>) => void
+  onDeleteSavedMeal: (id: string) => void
   recentFoods: RecentFood[]
   favoriteFoods: RecentFood[]
-  onToggleFavorite: (food: RecentFood) => void
-  todayMeals: LoggedMeal[]
-  onDeleteMeal: (id: string) => void
-  onSetupTargets: () => void
+  savedMeals: SavedMeal[]
+  targets: MacroTargets | null
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active'
+  profile: { weight?: number; height?: number; age?: number; gender?: Gender; goal?: 'cut' | 'recomp' | 'maintain' | 'bulk' } | null
+  onCalculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: 'cut' | 'recomp' | 'maintain' | 'bulk', activity: 'sedentary' | 'light' | 'moderate' | 'active') => void
+  setBy: 'self' | 'coach'
 }) {
-  const [quickLog, setQuickLog] = useState({ name: '', protein: '', calories: '', carbs: '', fats: '' })
-  const [showMeals, setShowMeals] = useState(false)
-  const [loggedRecentId, setLoggedRecentId] = useState<string | null>(null)
+  const [sessionMacros, setSessionMacros] = useState({ calories: 0, protein: 0, carbs: 0, fats: 0 })
+  const [sessionFoods, setSessionFoods] = useState<MealIngredient[]>([])
+  const [showCalculator, setShowCalculator] = useState(false)
+  const [showSaveMeal, setShowSaveMeal] = useState(false)
+  const [saveMealName, setSaveMealName] = useState('')
+  const [selectedSavedMeal, setSelectedSavedMeal] = useState<SavedMeal | null>(null)
 
-  // Track protein/calorie target hit once per session
-  const proteinTracked = useRef(false)
-  const caloriesTracked = useRef(false)
-
-  useEffect(() => {
-    if (proteinHit && !proteinTracked.current) {
-      analytics.proteinTargetHit()
-      proteinTracked.current = true
+  const handleAddFood = (food: { id?: string; name: string; protein: number; carbs: number; fats: number; calories: number; quantity?: number; unit?: 'g' | 'oz' | 'serving' }) => {
+    setSessionMacros(prev => ({
+      calories: prev.calories + food.calories,
+      protein: prev.protein + food.protein,
+      carbs: prev.carbs + food.carbs,
+      fats: prev.fats + food.fats,
+    }))
+    const ingredient: MealIngredient = {
+      id: food.id || `food-${Date.now()}`,
+      name: food.name,
+      protein: food.protein,
+      carbs: food.carbs,
+      fats: food.fats,
+      calories: food.calories,
+      quantity: food.quantity || 1,
+      unit: food.unit || 'serving',
     }
-  }, [proteinHit])
+    setSessionFoods(prev => [...prev, ingredient])
+    toast.success(`${food.name} added`)
+  }
 
-  useEffect(() => {
-    if (caloriesHit && !caloriesTracked.current) {
-      analytics.calorieTargetHit()
-      caloriesTracked.current = true
+  const handleDone = () => {
+    // Only log if something was added this session
+    if (sessionMacros.calories > 0 || sessionMacros.protein > 0) {
+      // Use meal type as name, or combine food names if only 1-2 items
+      const foodNames = sessionFoods.map(f => f.name)
+      const mealName = foodNames.length <= 2 && foodNames.length > 0
+        ? foodNames.join(' + ')
+        : 'Meal'
+      onLogMeal(mealName, sessionMacros)
+      analytics.mealLogged('manual')
     }
-  }, [caloriesHit])
+    onClose()
+    setSessionMacros({ calories: 0, protein: 0, carbs: 0, fats: 0 })
+    setSessionFoods([])
+  }
 
-  const [quickLogSuccess, setQuickLogSuccess] = useState(false)
+  const handleSaveMeal = () => {
+    if (sessionFoods.length === 0) {
+      toast.warning('Add some foods first')
+      return
+    }
+    if (!saveMealName.trim()) {
+      toast.warning('Please enter a meal name')
+      return
+    }
+    onSaveMeal(saveMealName.trim(), sessionFoods)
+    toast.success(`"${saveMealName}" saved`)
+    setSaveMealName('')
+    setShowSaveMeal(false)
+  }
 
-  if (!targets || !progress) {
+  const isFavorite = (foodId: string) => favoriteFoods.some(f => f.id === foodId)
+
+  // If no targets set, show calculator
+  if (!targets && !showCalculator) {
     return (
-      <EmptyState
-        icon={UtensilsCrossed}
-        title="No macro targets set"
-        description="Set up your daily nutrition targets to start tracking calories and protein."
-        action={{ label: "Set Up Targets", onClick: onSetupTargets }}
-      />
+      <motion.div
+        className="fixed inset-0 z-50 bg-background"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+            <button onClick={onClose} className="p-2 -ml-2">
+              <ChevronLeft size={24} className="text-foreground" />
+            </button>
+            <h1 className="text-lg font-heading font-bold">Set Targets</h1>
+            <div className="w-10" />
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="text-center mb-8">
+              <UtensilsCrossed size={48} className="mx-auto mb-4 text-primary" />
+              <h2 className="text-xl font-bold mb-2">Set Your Macro Targets</h2>
+              <p className="text-muted-foreground">
+                Calculate your daily nutrition targets to start tracking.
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowCalculator(true)}
+              className="w-full"
+              size="lg"
+            >
+              Calculate My Macros
+            </Button>
+          </div>
+        </div>
+      </motion.div>
     )
   }
 
-  const handleQuickLog = () => {
-    const proteinVal = Number(quickLog.protein)
-    const caloriesVal = Number(quickLog.calories)
-    const carbsVal = Number(quickLog.carbs)
-    const fatsVal = Number(quickLog.fats)
+  // Show calculator view
+  if (showCalculator || (!targets && setBy !== 'coach')) {
+    return (
+      <motion.div
+        className="fixed inset-0 z-50 bg-background"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+            <button onClick={() => targets ? setShowCalculator(false) : onClose()} className="p-2 -ml-2">
+              <ChevronLeft size={24} className="text-foreground" />
+            </button>
+            <h1 className="text-lg font-heading font-bold">Calculate Macros</h1>
+            <div className="w-10" />
+          </div>
 
-    const fields = [
-      { value: quickLog.protein, parsed: proteinVal },
-      { value: quickLog.calories, parsed: caloriesVal },
-      { value: quickLog.carbs, parsed: carbsVal },
-      { value: quickLog.fats, parsed: fatsVal },
-    ]
-
-    if (fields.some(f => f.value && (f.parsed < 0 || !isFinite(f.parsed)))) {
-      toast.warning('Please enter valid positive values')
-      return
-    }
-
-    const name = quickLog.name.trim() || 'Quick Log'
-    onLogNamedMeal(name, {
-      protein: quickLog.protein ? proteinVal : 0,
-      carbs: quickLog.carbs ? carbsVal : 0,
-      fats: quickLog.fats ? fatsVal : 0,
-      calories: quickLog.calories ? caloriesVal : 0,
-    })
-    analytics.mealLogged('manual')
-    setQuickLog({ name: '', protein: '', calories: '', carbs: '', fats: '' })
-    toast.success('Macros logged')
-    setQuickLogSuccess(true)
-    setTimeout(() => setQuickLogSuccess(false), 2000)
+          <div className="flex-1 overflow-y-auto">
+            <CalculatorView
+              currentWeight={profile?.weight || 150}
+              currentHeight={profile?.height || 70}
+              currentAge={profile?.age || 30}
+              currentGender={profile?.gender || 'male'}
+              currentGoal={profile?.goal || 'maintain'}
+              currentActivity={activityLevel}
+              targets={targets}
+              onCalculate={(w, h, a, g, goal, act) => {
+                onCalculateMacros(w, h, a, g, goal, act)
+                setShowCalculator(false)
+              }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hero Card: Stats Grid */}
-      <div className="bg-surface-dark border border-neutral-800 rounded-2xl p-6 shadow-lg shadow-black/50">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-8">
-          <AnimatedRing
-            percentage={progress.protein.percentage}
-            label="Protein"
-            current={progress.protein.current}
-            target={progress.protein.target}
-            subLabel="g"
-          />
-          <AnimatedRing
-            percentage={progress.calories.percentage}
-            label="Calories"
-            current={progress.calories.current}
-            target={progress.calories.target}
-          />
-          <AnimatedRing
-            percentage={progress.carbs.percentage}
-            label="Carbs"
-            current={progress.carbs.current}
-            target={progress.carbs.target}
-            subLabel="g"
-          />
-          <AnimatedRing
-            percentage={progress.fats.percentage}
-            label="Fats"
-            current={progress.fats.current}
-            target={progress.fats.target}
-            subLabel="g"
-          />
+    <motion.div
+      className="fixed inset-0 z-50 bg-background"
+      initial={{ y: '100%' }}
+      animate={{ y: 0 }}
+      exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+    >
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+          <button onClick={onClose} className="p-2 -ml-2">
+            <ChevronLeft size={24} className="text-foreground" />
+          </button>
+          <h1 className="text-lg font-heading font-bold">Log Fuel</h1>
+          <div className="w-10" />
         </div>
-      </div>
 
-      {/* Quick Log */}
-      <Card className="py-0">
-        <CardContent className="p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4">QUICK LOG</h3>
-
-          {/* Food Search */}
-          <FoodSearch
-            onSelect={(food) => {
-              const macros = { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories }
-              onLogNamedMeal(food.name, macros)
-              onAddRecentFood({
-                id: food.id,
-                name: food.name,
-                brand: food.brand,
-                protein: food.protein,
-                carbs: food.carbs,
-                fats: food.fats,
-                calories: food.calories,
-                servingSize: food.servingSize,
-                servingDescription: food.servingDescription,
-                quantity: food.quantity,
-                unit: food.unit,
-                loggedAt: Date.now(),
-              })
-              analytics.mealLogged('search')
-              toast.success(`${food.name} logged`)
-            }}
-          />
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4">
+          {/* Search */}
+          <div className="mb-6">
+            <FoodSearch
+              onSelect={(food) => {
+                handleAddFood({
+                  name: food.name,
+                  protein: food.protein,
+                  carbs: food.carbs,
+                  fats: food.fats,
+                  calories: food.calories,
+                })
+                onAddRecentFood({
+                  id: food.id,
+                  name: food.name,
+                  brand: food.brand,
+                  protein: food.protein,
+                  carbs: food.carbs,
+                  fats: food.fats,
+                  calories: food.calories,
+                  servingSize: food.servingSize,
+                  servingDescription: food.servingDescription,
+                  quantity: food.quantity,
+                  unit: food.unit,
+                  loggedAt: Date.now(),
+                })
+              }}
+            />
+          </div>
 
           {/* Recent Foods */}
           {recentFoods.length > 0 && (
-            <div className="mt-4">
-              <p className="text-xs text-muted-foreground mb-2">RECENT</p>
+            <div className="mb-6">
+              <h2 className="text-sm font-bold text-foreground mb-3">Recent Foods</h2>
               <div className="space-y-2">
-                {recentFoods.map((food) => (
+                {recentFoods.slice(0, 5).map((food) => (
                   <div
                     key={`${food.id}-${food.loggedAt}`}
-                    className="flex items-center justify-between bg-muted rounded-lg p-2.5"
+                    className="flex items-center justify-between py-3 border-b border-border/50"
                   >
                     <button
                       onClick={() => onToggleFavorite(food)}
-                      aria-label={favoriteFoods.some(f => f.id === food.id) ? `Unfavorite ${food.name}` : `Favorite ${food.name}`}
-                      className="shrink-0 p-1 mr-1"
+                      className="p-1 mr-2"
                     >
                       <Heart
-                        size={16}
-                        className={cn(
-                          favoriteFoods.some(f => f.id === food.id)
-                            ? 'text-primary fill-primary'
-                            : 'text-muted-foreground'
-                        )}
+                        size={18}
+                        className={isFavorite(food.id) ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}
                       />
                     </button>
-                    <div className="flex-1 min-w-0 mr-2">
-                      <p className="text-sm font-medium truncate">{food.name}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{food.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
+                        {food.servingDescription || '1 serving'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        P: {food.protein}g  C: {food.carbs}g  F: {food.fats}g
                       </p>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className={cn('shrink-0 text-xs h-7 px-2', loggedRecentId === food.id && 'text-success')}
-                      disabled={loggedRecentId === food.id}
-                      onClick={() => {
-                        const macros = { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories }
-                        onLogNamedMeal(food.name, macros)
-                        onAddRecentFood({ ...food, loggedAt: Date.now() })
-                        analytics.mealLogged('saved')
-                        toast.success(`${food.name} logged`)
-                        setLoggedRecentId(food.id)
-                        setTimeout(() => setLoggedRecentId(null), 2000)
-                      }}
-                    >
-                      {loggedRecentId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-primary font-mono">{food.calories} kcal</span>
+                      <button
+                        onClick={() => {
+                          handleAddFood(food)
+                          onAddRecentFood({ ...food, loggedAt: Date.now() })
+                        }}
+                        className="w-8 h-8 rounded-full border border-primary/50 flex items-center justify-center hover:bg-primary/10 transition-colors"
+                      >
+                        <Plus size={18} className="text-primary" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Manual Entry */}
-          <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-3">MANUAL ENTRY</p>
-            <div className="mb-3">
-              <label className="text-xs text-muted-foreground block mb-1">Meal Name</label>
-              <Input
-                type="text"
-                value={quickLog.name}
-                onChange={(e) => setQuickLog(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Quick Log"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
-                <Input
-                  type="number"
-                  value={quickLog.protein}
-                  onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
-                  placeholder="0"
-                  className="font-digital"
-                  data-testid="macros-food-search-input"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Calories</label>
-                <Input
-                  type="number"
-                  value={quickLog.calories}
-                  onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
-                  placeholder="0"
-                  className="font-digital"
-                  data-testid="macros-calories-input"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Carbs (g)</label>
-                <Input
-                  type="number"
-                  value={quickLog.carbs}
-                  onChange={(e) => setQuickLog(prev => ({ ...prev, carbs: e.target.value }))}
-                  placeholder="0"
-                  className="font-digital"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Fats (g)</label>
-                <Input
-                  type="number"
-                  value={quickLog.fats}
-                  onChange={(e) => setQuickLog(prev => ({ ...prev, fats: e.target.value }))}
-                  placeholder="0"
-                  className="font-digital"
-                />
-              </div>
-            </div>
-            <Button
-              onClick={handleQuickLog}
-              className={cn('w-full', quickLogSuccess && 'bg-success hover:bg-success')}
-              disabled={quickLogSuccess || (!quickLog.protein && !quickLog.calories && !quickLog.carbs && !quickLog.fats)}
-              data-testid="macros-add-meal-button"
-            >
-              {quickLogSuccess ? (
-                <span className="flex items-center gap-1.5"><Check className="h-4 w-4" /> Logged!</span>
-              ) : (
-                'Log Macros'
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* XP Indicators */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className={cn('py-0', proteinHit && 'bg-success/10 border-success/30')}>
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              {proteinHit ? (
-                <Check size={20} className="text-success" />
-              ) : (
-                <Beef size={20} className="text-muted-foreground" />
-              )}
-              <div>
-                <p className="text-sm font-semibold">Protein Target</p>
-                <p className="text-xs text-muted-foreground">
-                  {proteinHit ? '+50 XP earned' : 'Within 10g for +50 XP'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className={cn('py-0', caloriesHit && 'bg-success/10 border-success/30')}>
-          <CardContent className="p-3">
-            <div className="flex items-center gap-2">
-              {caloriesHit ? (
-                <Check size={20} className="text-success" />
-              ) : (
-                <Zap size={20} className="text-muted-foreground" />
-              )}
-              <div>
-                <p className="text-sm font-semibold">Calorie Target</p>
-                <p className="text-xs text-muted-foreground">
-                  {caloriesHit ? '+50 XP earned' : 'Within 100 for +50 XP'}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Today's Logged Meals */}
-      {todayMeals.length > 0 && (
-        <Card className="py-0">
-          <CardContent className="p-4">
-            <button
-              onClick={() => setShowMeals(!showMeals)}
-              className="w-full flex items-center justify-between"
-            >
-              <h3 className="text-sm font-semibold text-muted-foreground">
-                TODAY'S MEALS ({todayMeals.length})
-              </h3>
-              <ChevronDown
-                size={16}
-                className={cn('text-muted-foreground transition-transform', showMeals && 'rotate-180')}
-              />
-            </button>
-
-            <div className={cn(
-              'overflow-hidden transition-all duration-300',
-              showMeals ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
-            )}>
+          {/* Favorites */}
+          {favoriteFoods.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-bold text-foreground mb-3">Favorites</h2>
               <div className="space-y-2">
-                {todayMeals.map((meal) => {
-                  const asFavorite: RecentFood = {
-                    id: meal.id,
-                    name: meal.name,
-                    protein: meal.protein,
-                    carbs: meal.carbs,
-                    fats: meal.fats,
-                    calories: meal.calories,
-                    servingSize: 1,
-                    servingDescription: '1 serving',
-                    quantity: 1,
-                    unit: 'serving',
-                    loggedAt: meal.timestamp,
-                  }
-                  const isFav = favoriteFoods.some(f => f.id === meal.id)
-                  return (
-                    <div
-                      key={meal.id}
-                      className="flex items-center justify-between bg-card rounded-lg p-3"
-                      data-testid="macros-meal-entry"
+                {favoriteFoods.slice(0, 5).map((food) => (
+                  <div
+                    key={food.id}
+                    className="flex items-center justify-between py-3 border-b border-border/50"
+                  >
+                    <button
+                      onClick={() => onToggleFavorite(food)}
+                      className="p-1 mr-2"
                     >
+                      <Heart size={18} className="text-red-500 fill-red-500" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{food.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        P: {food.protein}g  C: {food.carbs}g  F: {food.fats}g
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-primary font-mono">{food.calories} kcal</span>
                       <button
-                        onClick={() => onToggleFavorite(asFavorite)}
-                        aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
-                        className="shrink-0 p-1 mr-2"
+                        onClick={() => handleAddFood(food)}
+                        className="w-8 h-8 rounded-full border border-primary/50 flex items-center justify-center hover:bg-primary/10 transition-colors"
                       >
-                        <Heart
-                          size={16}
-                          className={cn(
-                            isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
-                          )}
-                        />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm">{meal.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
-                        </p>
-                      </div>
-                      <button
-                        onClick={async () => {
-                          if (await confirmAction('Delete this meal entry?', 'Delete Entry')) {
-                            onDeleteMeal(meal.id)
-                          }
-                        }}
-                        aria-label={`Delete ${meal.name}`}
-                        className="text-muted-foreground hover:text-destructive p-1"
-                      >
-                        ✕
+                        <Plus size={18} className="text-primary" />
                       </button>
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          )}
+
+          {/* Saved Meals */}
+          {savedMeals.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-sm font-bold text-foreground mb-3">Saved Meals</h2>
+              <div className="space-y-2">
+                {savedMeals.slice(0, 5).map((meal) => (
+                  <div
+                    key={meal.id}
+                    className="flex items-center justify-between py-3 border-b border-border/50"
+                  >
+                    <button
+                      onClick={() => setSelectedSavedMeal(meal)}
+                      className="p-1 mr-2"
+                    >
+                      <Pencil size={16} className="text-muted-foreground" />
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{meal.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        P: {meal.protein}g  C: {meal.carbs}g  F: {meal.fats}g
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-primary font-mono">{meal.calories} kcal</span>
+                      <button
+                        onClick={() => {
+                          onLogMeal(meal.name, { protein: meal.protein, carbs: meal.carbs, fats: meal.fats, calories: meal.calories }, undefined, true)
+                          toast.success(`${meal.name} logged`)
+                        }}
+                        className="w-8 h-8 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center hover:bg-primary/30 transition-colors"
+                      >
+                        <Plus size={18} className="text-primary" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Manual Entry */}
+          <QuickLogSection onLogMeal={handleAddFood} />
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-border bg-surface px-4 py-3 pb-24">
+          {/* Session totals */}
+          <div className="grid grid-cols-4 gap-4 mb-3">
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground uppercase">Calories</p>
+              <p className="text-sm font-bold font-mono">{sessionMacros.calories}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground uppercase">Protein</p>
+              <p className="text-sm font-bold font-mono">{sessionMacros.protein}g</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground uppercase">Carbs</p>
+              <p className="text-sm font-bold font-mono">{sessionMacros.carbs}g</p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-muted-foreground uppercase">Fat</p>
+              <p className="text-sm font-bold font-mono">{sessionMacros.fats}g</p>
+            </div>
+          </div>
+          {/* Buttons */}
+          <div className="flex gap-2">
+            {sessionFoods.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={() => setShowSaveMeal(true)}
+                className="flex-1"
+              >
+                <Bookmark size={16} className="mr-2" />
+                Save Meal
+              </Button>
+            )}
+            <Button
+              onClick={handleDone}
+              className={cn(
+                "bg-primary hover:bg-primary-hover",
+                sessionFoods.length > 0 ? "flex-1" : "w-full"
+              )}
+            >
+              Done
+            </Button>
+          </div>
+        </div>
+
+        {/* Save Meal Modal */}
+        <AnimatePresence>
+          {showSaveMeal && (
+            <motion.div
+              className="fixed inset-0 z-[60] flex items-center justify-center px-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="absolute inset-0 bg-black/60" onClick={() => setShowSaveMeal(false)} />
+              <motion.div
+                className="relative bg-surface border border-border rounded-xl p-6 w-full max-w-sm"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+              >
+                <h3 className="text-lg font-heading font-bold mb-2">Save as Meal</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Save these {sessionFoods.length} items as a meal to quickly add again later.
+                </p>
+                <Input
+                  value={saveMealName}
+                  onChange={(e) => setSaveMealName(e.target.value)}
+                  placeholder="Meal name (e.g., Post-Workout Shake)"
+                  className="mb-4"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowSaveMeal(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-50"
+                    onClick={handleSaveMeal}
+                    disabled={!saveMealName.trim()}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Saved Meal Detail Sheet */}
+        <AnimatePresence>
+          {selectedSavedMeal && (
+            <SavedMealDetailSheet
+              meal={selectedSavedMeal}
+              onClose={() => setSelectedSavedMeal(null)}
+              onUpdate={(id, updates) => {
+                onUpdateSavedMeal(id, updates)
+                setSelectedSavedMeal(null)
+              }}
+              onDelete={(id) => {
+                onDeleteSavedMeal(id)
+                setSelectedSavedMeal(null)
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   )
 }
-function SavedView({
-  favoriteFoods,
-  recentFoods,
-  savedMeals,
-  onLogNamedMeal,
-  onToggleFavorite,
-}: {
-  favoriteFoods: RecentFood[]
-  recentFoods: RecentFood[]
-  savedMeals: SavedMeal[]
-  onLogNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
-  onToggleFavorite: (food: RecentFood) => void
-}) {
-  const [loggedId, setLoggedId] = useState<string | null>(null)
 
-  const handleLog = (id: string, name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => {
-    onLogNamedMeal(name, macros)
-    analytics.mealLogged('saved')
-    toast.success(`${name} logged`)
-    setLoggedId(id)
-    setTimeout(() => setLoggedId(null), 2000)
+// Quick Log Section for manual entry
+function QuickLogSection({ onLogMeal }: { onLogMeal: (food: { name: string; protein: number; carbs: number; fats: number; calories: number }) => void }) {
+  const [expanded, setExpanded] = useState(false)
+  const [quickLog, setQuickLog] = useState({ name: '', protein: '', calories: '', carbs: '', fats: '' })
+
+  const handleQuickLog = () => {
+    const proteinVal = Number(quickLog.protein) || 0
+    const caloriesVal = Number(quickLog.calories) || 0
+    const carbsVal = Number(quickLog.carbs) || 0
+    const fatsVal = Number(quickLog.fats) || 0
+
+    if (proteinVal === 0 && caloriesVal === 0 && carbsVal === 0 && fatsVal === 0) {
+      toast.warning('Please enter at least one value')
+      return
+    }
+
+    const name = quickLog.name.trim() || 'Quick Log'
+    onLogMeal({
+      name,
+      protein: proteinVal,
+      carbs: carbsVal,
+      fats: fatsVal,
+      calories: caloriesVal,
+    })
+    setQuickLog({ name: '', protein: '', calories: '', carbs: '', fats: '' })
+    setExpanded(false)
   }
 
-  const favoriteIds = new Set(favoriteFoods.map(f => f.id))
-  const filteredRecents = recentFoods.filter(f => !favoriteIds.has(f.id))
-
   return (
-    <div className="space-y-6">
-      {/* Favorites */}
-      <div>
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3">FAVORITES</h3>
-        {favoriteFoods.length > 0 ? (
-          <div className="space-y-2">
-            {favoriteFoods.map((food) => (
-              <div
-                key={food.id}
-                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
-              >
-                <button
-                  onClick={() => onToggleFavorite(food)}
-                  aria-label={`Unfavorite ${food.name}`}
-                  className="shrink-0 p-1 mr-1"
-                >
-                  <Heart size={16} className="text-primary fill-primary" />
-                </button>
-                <div className="flex-1 min-w-0 mr-2">
-                  <p className="text-sm font-medium truncate">{food.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === food.id && 'text-success')}
-                  disabled={loggedId === food.id}
-                  onClick={() => handleLog(food.id, food.name, { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories })}
-                >
-                  {loggedId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Card className="py-0">
-            <CardContent className="text-center py-6">
-              <Heart size={24} className="mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">
-                Tap the heart on any food to pin it here
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+    <div className="mt-4">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center justify-between w-full py-3"
+      >
+        <span className="text-sm font-bold text-foreground">Manual Entry</span>
+        <ChevronDown size={18} className={cn('text-muted-foreground transition-transform', expanded && 'rotate-180')} />
+      </button>
 
-      {/* Recent (excluding favorites) */}
-      {filteredRecents.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">RECENT</h3>
-          <div className="space-y-2">
-            {filteredRecents.map((food) => (
-              <div
-                key={`${food.id}-${food.loggedAt}`}
-                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
-              >
-                <button
-                  onClick={() => onToggleFavorite(food)}
-                  aria-label={`Favorite ${food.name}`}
-                  className="shrink-0 p-1 mr-1"
-                >
-                  <Heart size={16} className="text-muted-foreground" />
-                </button>
-                <div className="flex-1 min-w-0 mr-2">
-                  <p className="text-sm font-medium truncate">{food.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    P: {food.protein}g · C: {food.carbs}g · F: {food.fats}g · {food.calories} cal
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === food.id && 'text-success')}
-                  disabled={loggedId === food.id}
-                  onClick={() => handleLog(food.id, food.name, { protein: food.protein, carbs: food.carbs, fats: food.fats, calories: food.calories })}
-                >
-                  {loggedId === food.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
-                </Button>
-              </div>
-            ))}
+      {expanded && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="space-y-3 pt-2"
+        >
+          <Input
+            type="text"
+            value={quickLog.name}
+            onChange={(e) => setQuickLog(prev => ({ ...prev, name: e.target.value }))}
+            placeholder="Meal name"
+            className="bg-surface"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
+              <Input
+                type="number"
+                value={quickLog.protein}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, protein: e.target.value }))}
+                placeholder="0"
+                className="font-mono bg-surface"
+                data-testid="macros-food-search-input"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Calories</label>
+              <Input
+                type="number"
+                value={quickLog.calories}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, calories: e.target.value }))}
+                placeholder="0"
+                className="font-mono bg-surface"
+                data-testid="macros-calories-input"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Carbs (g)</label>
+              <Input
+                type="number"
+                value={quickLog.carbs}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, carbs: e.target.value }))}
+                placeholder="0"
+                className="font-mono bg-surface"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground block mb-1">Fat (g)</label>
+              <Input
+                type="number"
+                value={quickLog.fats}
+                onChange={(e) => setQuickLog(prev => ({ ...prev, fats: e.target.value }))}
+                placeholder="0"
+                className="font-mono bg-surface"
+              />
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Saved Meals */}
-      {savedMeals.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-3">SAVED MEALS</h3>
-          <div className="space-y-2">
-            {savedMeals.map((meal) => (
-              <div
-                key={meal.id}
-                className="flex items-center justify-between bg-muted rounded-lg p-2.5"
-              >
-                <div className="flex-1 min-w-0 mr-2">
-                  <p className="text-sm font-medium truncate">{meal.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={cn('shrink-0 text-xs h-7 px-2', loggedId === meal.id && 'text-success')}
-                  disabled={loggedId === meal.id}
-                  onClick={() => handleLog(meal.id, meal.name, { protein: meal.protein, carbs: meal.carbs, fats: meal.fats, calories: meal.calories })}
-                >
-                  {loggedId === meal.id ? <Check className="h-3.5 w-3.5" /> : 'Log'}
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Empty state when nothing at all */}
-      {favoriteFoods.length === 0 && filteredRecents.length === 0 && savedMeals.length === 0 && (
-        <Card className="py-0">
-          <CardContent className="text-center py-8">
-            <UtensilsCrossed size={40} className="mx-auto mb-3 text-muted-foreground" />
-            <p className="text-lg font-semibold mb-1">Nothing Saved Yet</p>
-            <p className="text-sm text-muted-foreground">
-              Search and log foods from the Daily tab — they'll appear here as recents
-            </p>
-          </CardContent>
-        </Card>
+          <Button
+            onClick={handleQuickLog}
+            className="w-full"
+            data-testid="macros-add-meal-button"
+          >
+            Add Entry
+          </Button>
+        </motion.div>
       )}
     </div>
   )
@@ -1134,213 +1323,554 @@ function CalculatorView({
   )
 }
 
-function LogMealView({
-  savedMeals,
-  favoriteFoods,
-  onToggleFavorite,
-  onLogMeal,
-  onSaveMeal,
-  onDeleteSavedMeal
+// Meal Detail Sheet - View/Edit/Delete a logged meal
+function MealDetailSheet({
+  meal,
+  onClose,
+  onDelete,
+  onUpdate,
 }: {
-  savedMeals: SavedMeal[]
-  favoriteFoods: RecentFood[]
-  onToggleFavorite: (food: RecentFood) => void
-  onLogMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
-  onSaveMeal: (name: string, ingredients: MealIngredient[]) => void
-  onDeleteSavedMeal: (id: string) => void
+  meal: LoggedMeal
+  onClose: () => void
+  onDelete: (id: string) => void
+  onUpdate: (id: string, updates: Partial<Omit<LoggedMeal, 'id' | 'timestamp'>>) => void
 }) {
-  const [showMealBuilder, setShowMealBuilder] = useState(false)
-  const [editingMeal, setEditingMeal] = useState<SavedMeal | null>(null)
-  const [expandedMealId, setExpandedMealId] = useState<string | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValues, setEditValues] = useState({
+    name: meal.name,
+    calories: String(meal.calories),
+    protein: String(meal.protein),
+    carbs: String(meal.carbs),
+    fats: String(meal.fats),
+  })
 
-  const handleSaveMeal = (name: string, ingredients: MealIngredient[]) => {
-    onSaveMeal(name, ingredients)
-    analytics.mealSaved()
-    setShowMealBuilder(false)
-    setEditingMeal(null)
-  }
-
-  const [loggedMealId, setLoggedMealId] = useState<string | null>(null)
-
-  const handleLogSavedMeal = (meal: SavedMeal) => {
-    onLogMeal(meal.name, {
-      protein: meal.protein,
-      carbs: meal.carbs,
-      fats: meal.fats,
-      calories: meal.calories
+  const handleSave = () => {
+    onUpdate(meal.id, {
+      name: editValues.name.trim() || meal.name,
+      calories: Number(editValues.calories) || 0,
+      protein: Number(editValues.protein) || 0,
+      carbs: Number(editValues.carbs) || 0,
+      fats: Number(editValues.fats) || 0,
     })
-    analytics.mealLogged('saved')
-    toast.success(`${meal.name} logged`)
-    setLoggedMealId(meal.id)
-    setTimeout(() => setLoggedMealId(null), 2000)
   }
 
-  const handleEditMeal = (meal: SavedMeal) => {
-    setEditingMeal(meal)
-    setShowMealBuilder(true)
+  const handleDelete = async () => {
+    if (await confirmAction('Delete this meal?', 'Delete')) {
+      onDelete(meal.id)
+    }
   }
 
-  const toggleExpandMeal = (mealId: string) => {
-    setExpandedMealId(expandedMealId === mealId ? null : mealId)
+  const loggedTime = new Date(meal.timestamp).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      />
+
+      {/* Sheet */}
+      <motion.div
+        className="relative w-full max-w-lg bg-surface border-t border-border rounded-t-2xl"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 bg-border rounded-full" />
+        </div>
+
+        <div className="px-6 pb-24">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            {isEditing ? (
+              <Input
+                value={editValues.name}
+                onChange={(e) => setEditValues(prev => ({ ...prev, name: e.target.value }))}
+                className="text-lg font-bold bg-surface-elevated"
+                autoFocus
+              />
+            ) : (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">{meal.name}</h2>
+                <p className="text-xs text-muted-foreground">Logged at {loggedTime}</p>
+              </div>
+            )}
+            <button onClick={onClose} className="p-2 -mr-2">
+              <X size={20} className="text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Macros */}
+          {isEditing ? (
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Calories</label>
+                <Input
+                  type="number"
+                  value={editValues.calories}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, calories: e.target.value }))}
+                  className="font-mono bg-surface-elevated"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Protein (g)</label>
+                <Input
+                  type="number"
+                  value={editValues.protein}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, protein: e.target.value }))}
+                  className="font-mono bg-surface-elevated"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Carbs (g)</label>
+                <Input
+                  type="number"
+                  value={editValues.carbs}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, carbs: e.target.value }))}
+                  className="font-mono bg-surface-elevated"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground block mb-1">Fat (g)</label>
+                <Input
+                  type="number"
+                  value={editValues.fats}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, fats: e.target.value }))}
+                  className="font-mono bg-surface-elevated"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-3 mb-6">
+              <div className="bg-surface-elevated rounded-lg p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Calories</p>
+                <p className="text-lg font-bold font-mono text-primary">{meal.calories}</p>
+              </div>
+              <div className="bg-surface-elevated rounded-lg p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Protein</p>
+                <p className="text-lg font-bold font-mono">{meal.protein}g</p>
+              </div>
+              <div className="bg-surface-elevated rounded-lg p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Carbs</p>
+                <p className="text-lg font-bold font-mono">{meal.carbs}g</p>
+              </div>
+              <div className="bg-surface-elevated rounded-lg p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Fat</p>
+                <p className="text-lg font-bold font-mono">{meal.fats}g</p>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsEditing(false)
+                    setEditValues({
+                      name: meal.name,
+                      calories: String(meal.calories),
+                      protein: String(meal.protein),
+                      carbs: String(meal.carbs),
+                      fats: String(meal.fats),
+                    })
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-primary hover:bg-primary-hover" onClick={handleSave}>
+                  Save Changes
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className={meal.fromSavedMeal ? "w-full border-destructive/50 text-destructive hover:bg-destructive/10" : "flex-1 border-destructive/50 text-destructive hover:bg-destructive/10"}
+                  onClick={handleDelete}
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Delete
+                </Button>
+                {!meal.fromSavedMeal && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Edit
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+          {meal.fromSavedMeal && (
+            <p className="text-xs text-muted-foreground text-center mt-3">
+              This meal was logged from a saved meal preset
+            </p>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// Saved Meal Detail Sheet - View/Edit/Delete a saved meal
+function SavedMealDetailSheet({
+  meal,
+  onClose,
+  onUpdate,
+  onDelete,
+}: {
+  meal: SavedMeal
+  onClose: () => void
+  onUpdate: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt' | 'usageCount'>>) => void
+  onDelete: (id: string) => void
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [editName, setEditName] = useState(meal.name)
+  const [editIngredients, setEditIngredients] = useState<MealIngredient[]>(meal.ingredients)
+  const [showAddIngredient, setShowAddIngredient] = useState(false)
+  const [newIngredient, setNewIngredient] = useState({
+    name: '',
+    calories: '',
+    protein: '',
+    carbs: '',
+    fats: '',
+  })
+
+  // Calculate totals from ingredients
+  const totals = editIngredients.reduce(
+    (acc, ing) => ({
+      calories: acc.calories + ing.calories,
+      protein: acc.protein + ing.protein,
+      carbs: acc.carbs + ing.carbs,
+      fats: acc.fats + ing.fats,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0 }
+  )
+
+  const handleUpdateIngredientQuantity = (index: number, newQuantity: number) => {
+    setEditIngredients(prev => prev.map((ing, i) => {
+      if (i !== index) return ing
+      const ratio = ing.quantity > 0 ? newQuantity / ing.quantity : 1
+      return {
+        ...ing,
+        quantity: newQuantity,
+        calories: Math.round(ing.calories * ratio),
+        protein: Math.round(ing.protein * ratio),
+        carbs: Math.round(ing.carbs * ratio),
+        fats: Math.round(ing.fats * ratio),
+      }
+    }))
+  }
+
+  const handleRemoveIngredient = (index: number) => {
+    setEditIngredients(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleAddIngredient = () => {
+    if (!newIngredient.name.trim()) {
+      toast.warning('Please enter ingredient name')
+      return
+    }
+    const ingredient: MealIngredient = {
+      id: `ing-${Date.now()}`,
+      name: newIngredient.name.trim(),
+      quantity: 1,
+      unit: 'serving',
+      calories: Number(newIngredient.calories) || 0,
+      protein: Number(newIngredient.protein) || 0,
+      carbs: Number(newIngredient.carbs) || 0,
+      fats: Number(newIngredient.fats) || 0,
+    }
+    setEditIngredients(prev => [...prev, ingredient])
+    setNewIngredient({ name: '', calories: '', protein: '', carbs: '', fats: '' })
+    setShowAddIngredient(false)
+  }
+
+  const handleSave = () => {
+    onUpdate(meal.id, {
+      name: editName.trim() || meal.name,
+      ingredients: editIngredients,
+      ...totals,
+    })
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    setEditName(meal.name)
+    setEditIngredients(meal.ingredients)
+    setShowAddIngredient(false)
+  }
+
+  const handleDelete = async () => {
+    if (await confirmAction('Delete this saved meal?', 'Delete')) {
+      onDelete(meal.id)
+    }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Create New Meal Button */}
-      <Button
-        onClick={() => {
-          setEditingMeal(null)
-          setShowMealBuilder(true)
-        }}
-        className="w-full"
-        size="lg"
-      >
-        <span className="mr-2">+</span> Create New Meal
-      </Button>
-
-      {/* Saved Meals */}
-      {savedMeals.length > 0 ? (
-        <div className="space-y-3" data-testid="macros-saved-meals">
-          <h3 className="text-sm font-semibold text-muted-foreground">SAVED MEALS ({savedMeals.length})</h3>
-
-          {savedMeals.map((meal) => (
-            <Card key={meal.id} className="py-0 overflow-hidden">
-              {/* Meal Header */}
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  {(() => {
-                    const asFavorite: RecentFood = {
-                      id: meal.id,
-                      name: meal.name,
-                      protein: meal.protein,
-                      carbs: meal.carbs,
-                      fats: meal.fats,
-                      calories: meal.calories,
-                      servingSize: 1,
-                      servingDescription: '1 serving',
-                      quantity: 1,
-                      unit: 'serving',
-                      loggedAt: meal.createdAt,
-                    }
-                    const isFav = favoriteFoods.some(f => f.id === meal.id)
-                    return (
-                      <button
-                        onClick={() => onToggleFavorite(asFavorite)}
-                        aria-label={isFav ? `Unfavorite ${meal.name}` : `Favorite ${meal.name}`}
-                        className="shrink-0 p-1 mr-2 mt-0.5"
-                      >
-                        <Heart
-                          size={16}
-                          className={cn(
-                            isFav ? 'text-primary fill-primary' : 'text-muted-foreground'
-                          )}
-                        />
-                      </button>
-                    )
-                  })()}
-                  <button
-                    onClick={() => toggleExpandMeal(meal.id)}
-                    className="flex-1 text-left"
-                  >
-                    <p className="font-semibold">{meal.name}</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fats}g · {meal.calories} cal
-                    </p>
-                    {meal.ingredients && meal.ingredients.length > 0 && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {meal.ingredients.length} ingredient{meal.ingredients.length !== 1 ? 's' : ''}
-                        <span className="ml-2">{expandedMealId === meal.id ? '▲' : '▼'}</span>
-                      </p>
-                    )}
-                  </button>
-
-                  <div className="flex items-center gap-2 ml-3">
-                    <Button
-                      size="sm"
-                      onClick={() => handleLogSavedMeal(meal)}
-                      disabled={loggedMealId === meal.id}
-                      className={cn(loggedMealId === meal.id && 'bg-success hover:bg-success')}
-                    >
-                      {loggedMealId === meal.id ? <Check className="h-4 w-4" /> : 'Log'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex gap-2 mt-3 pt-3 border-t border-border">
-                  <button
-                    onClick={() => handleEditMeal(meal)}
-                    className="flex-1 text-sm text-muted-foreground hover:text-primary py-1"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (await confirmAction(`Delete saved meal "${meal.name}"?`, 'Delete Meal')) {
-                        onDeleteSavedMeal(meal.id)
-                      }
-                    }}
-                    className="flex-1 text-sm text-muted-foreground hover:text-destructive py-1"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              {/* Expanded Ingredients */}
-              <div className={cn(
-                'overflow-hidden transition-all duration-300',
-                expandedMealId === meal.id && meal.ingredients && meal.ingredients.length > 0
-                  ? 'max-h-[2000px] opacity-100'
-                  : 'max-h-0 opacity-0'
-              )}>
-                <div className="px-4 py-3 border-t border-border">
-                  <p className="text-xs text-muted-foreground mb-2">INGREDIENTS</p>
-                  <div className="space-y-2">
-                    {meal.ingredients?.map((ing) => (
-                      <div key={ing.id} className="text-sm">
-                        <p className="text-foreground">
-                          {ing.name}
-                          <span className="text-muted-foreground ml-2">
-                            ({ing.quantity}{ing.unit === 'serving' ? ' serving' : ing.unit})
-                          </span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fats}g · {ing.calories} cal
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card className="py-0">
-          <CardContent className="text-center py-8">
-            <UtensilsCrossed size={40} className="mx-auto mb-3 text-muted-foreground" />
-            <p className="text-lg font-semibold mb-1">No Saved Meals</p>
-            <p className="text-muted-foreground text-sm">
-              Create a meal with multiple ingredients to quickly log it later
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Meal Builder Modal */}
-      <MealBuilder
-        isOpen={showMealBuilder}
-        onClose={() => {
-          setShowMealBuilder(false)
-          setEditingMeal(null)
-        }}
-        onSave={handleSaveMeal}
-        editMeal={editingMeal ? {
-          name: editingMeal.name,
-          ingredients: editingMeal.ingredients || []
-        } : null}
+    <motion.div
+      className="fixed inset-0 z-[60] flex items-end justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/60"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       />
-    </div>
+
+      {/* Sheet */}
+      <motion.div
+        className="relative w-full max-w-lg bg-surface border-t border-border rounded-t-2xl max-h-[85vh] flex flex-col"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 bg-border rounded-full" />
+        </div>
+
+        <div className="px-6 pb-24 overflow-y-auto flex-1">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            {isEditing ? (
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="text-lg font-bold bg-surface-elevated"
+              />
+            ) : (
+              <div>
+                <h2 className="text-lg font-heading font-bold text-foreground">{meal.name}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {meal.ingredients.length} item{meal.ingredients.length !== 1 ? 's' : ''} · Used {meal.usageCount} time{meal.usageCount !== 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
+            <button onClick={onClose} className="p-2 -mr-2">
+              <X size={20} className="text-muted-foreground" />
+            </button>
+          </div>
+
+          {/* Totals */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            <div className="bg-surface-elevated rounded-lg p-2 text-center">
+              <p className="text-[9px] text-muted-foreground uppercase">Cal</p>
+              <p className="text-sm font-bold font-mono text-primary">{isEditing ? totals.calories : meal.calories}</p>
+            </div>
+            <div className="bg-surface-elevated rounded-lg p-2 text-center">
+              <p className="text-[9px] text-muted-foreground uppercase">Protein</p>
+              <p className="text-sm font-bold font-mono">{isEditing ? totals.protein : meal.protein}g</p>
+            </div>
+            <div className="bg-surface-elevated rounded-lg p-2 text-center">
+              <p className="text-[9px] text-muted-foreground uppercase">Carbs</p>
+              <p className="text-sm font-bold font-mono">{isEditing ? totals.carbs : meal.carbs}g</p>
+            </div>
+            <div className="bg-surface-elevated rounded-lg p-2 text-center">
+              <p className="text-[9px] text-muted-foreground uppercase">Fat</p>
+              <p className="text-sm font-bold font-mono">{isEditing ? totals.fats : meal.fats}g</p>
+            </div>
+          </div>
+
+          {/* Ingredients list */}
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground uppercase mb-2">Ingredients</p>
+            {isEditing ? (
+              <div className="space-y-2">
+                {editIngredients.map((ing, i) => (
+                  <div key={ing.id} className="flex items-center gap-2 bg-surface-elevated rounded-lg p-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{ing.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {ing.calories} kcal · P:{ing.protein}g
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        value={ing.quantity}
+                        onChange={(e) => handleUpdateIngredientQuantity(i, Number(e.target.value) || 0)}
+                        className="w-14 h-8 text-center font-mono text-sm p-1"
+                        min={0}
+                        step={0.5}
+                      />
+                      <span className="text-xs text-muted-foreground w-12">{ing.unit}</span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveIngredient(i)}
+                      className="p-1 text-muted-foreground hover:text-destructive"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add ingredient form */}
+                {showAddIngredient ? (
+                  <div className="border border-border rounded-lg p-3 space-y-2">
+                    <Input
+                      value={newIngredient.name}
+                      onChange={(e) => setNewIngredient(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Ingredient name"
+                      className="bg-surface"
+                      autoFocus
+                    />
+                    <div className="grid grid-cols-4 gap-2">
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Cal</label>
+                        <Input
+                          type="number"
+                          value={newIngredient.calories}
+                          onChange={(e) => setNewIngredient(prev => ({ ...prev, calories: e.target.value }))}
+                          className="h-8 text-sm font-mono"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Protein</label>
+                        <Input
+                          type="number"
+                          value={newIngredient.protein}
+                          onChange={(e) => setNewIngredient(prev => ({ ...prev, protein: e.target.value }))}
+                          className="h-8 text-sm font-mono"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Carbs</label>
+                        <Input
+                          type="number"
+                          value={newIngredient.carbs}
+                          onChange={(e) => setNewIngredient(prev => ({ ...prev, carbs: e.target.value }))}
+                          className="h-8 text-sm font-mono"
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-muted-foreground">Fat</label>
+                        <Input
+                          type="number"
+                          value={newIngredient.fats}
+                          onChange={(e) => setNewIngredient(prev => ({ ...prev, fats: e.target.value }))}
+                          className="h-8 text-sm font-mono"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          setShowAddIngredient(false)
+                          setNewIngredient({ name: '', calories: '', protein: '', carbs: '', fats: '' })
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-primary hover:bg-primary-hover"
+                        onClick={handleAddIngredient}
+                        disabled={!newIngredient.name.trim()}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowAddIngredient(true)}
+                    className="w-full py-2 border border-dashed border-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Plus size={16} />
+                    Add Ingredient
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {meal.ingredients.length > 0 ? (
+                  meal.ingredients.map((ing, i) => (
+                    <div key={i} className="flex justify-between text-sm py-1">
+                      <span className="text-foreground">{ing.quantity} {ing.unit} {ing.name}</span>
+                      <span className="text-muted-foreground">{ing.calories} kcal</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No ingredients</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            {isEditing ? (
+              <>
+                <Button variant="outline" className="flex-1" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary-hover"
+                  onClick={handleSave}
+                  disabled={editIngredients.length === 0}
+                >
+                  Save Changes
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="flex-1 border-destructive/50 text-destructive hover:bg-destructive/10"
+                  onClick={handleDelete}
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  Delete
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setIsEditing(true)}
+                >
+                  Edit
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
+

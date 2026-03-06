@@ -27,6 +27,7 @@ export interface LoggedMeal {
   fats: number
   calories: number
   timestamp: number
+  fromSavedMeal?: boolean
 }
 
 export interface RecentFood {
@@ -107,13 +108,15 @@ interface MacroStore {
   toggleFavoriteFood: (food: RecentFood) => void
   calculateMacros: (weight: number, height: number, age: number, gender: Gender, goal: Goal, activity: ActivityLevel) => void
   generateMealPlan: () => void
-  logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }) => void
+  logNamedMeal: (name: string, macros: { protein: number; carbs: number; fats: number; calories: number }, fromSavedMeal?: boolean) => void
   logQuickMacros: (macros: Partial<MacroTargets>) => void
   saveMeal: (name: string, ingredients: MealIngredient[]) => void
   deleteSavedMeal: (id: string) => void
+  updateSavedMeal: (id: string, updates: Partial<Omit<SavedMeal, 'id' | 'createdAt' | 'usageCount'>>) => void
   getSavedMeals: () => SavedMeal[]
   getTodayMeals: () => LoggedMeal[]
   deleteLoggedMeal: (id: string) => void
+  updateLoggedMeal: (id: string, updates: Partial<Omit<LoggedMeal, 'id' | 'timestamp'>>) => void
   getTodayLog: () => DailyMacroLog | null
   getTodayProgress: () => {
     protein: { current: number; target: number; percentage: number }
@@ -272,14 +275,15 @@ export const useMacroStore = create<MacroStore>()(
         set({ mealPlan })
       },
 
-      logNamedMeal: (name, macros) => {
+      logNamedMeal: (name, macros, fromSavedMeal) => {
         const today = getLocalDateString()
         const existingLog = get().dailyLogs.find(log => log.date === today)
         const newMeal: LoggedMeal = {
           id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           name,
           ...macros,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          ...(fromSavedMeal && { fromSavedMeal: true })
         }
 
         if (existingLog) {
@@ -405,6 +409,29 @@ export const useMacroStore = create<MacroStore>()(
         }))
       },
 
+      updateSavedMeal: (id, updates) => {
+        set((state) => ({
+          savedMeals: state.savedMeals.map(meal => {
+            if (meal.id !== id) return meal
+            const updatedMeal = { ...meal, ...updates }
+            // Recalculate totals if ingredients changed
+            if (updates.ingredients) {
+              const totals = updates.ingredients.reduce(
+                (acc, ing) => ({
+                  protein: acc.protein + ing.protein,
+                  carbs: acc.carbs + ing.carbs,
+                  fats: acc.fats + ing.fats,
+                  calories: acc.calories + ing.calories
+                }),
+                { protein: 0, carbs: 0, fats: 0, calories: 0 }
+              )
+              return { ...updatedMeal, ...totals }
+            }
+            return updatedMeal
+          })
+        }))
+      },
+
       getSavedMeals: () => {
         // Return sorted by usage count (most used first)
         return [...get().savedMeals].sort((a, b) => b.usageCount - a.usageCount)
@@ -421,6 +448,51 @@ export const useMacroStore = create<MacroStore>()(
         if (!existingLog) return
 
         const updatedLoggedMeals = existingLog.loggedMeals.filter(m => m.id !== id)
+        const totals = updatedLoggedMeals.reduce(
+          (acc, meal) => ({
+            protein: acc.protein + meal.protein,
+            carbs: acc.carbs + meal.carbs,
+            fats: acc.fats + meal.fats,
+            calories: acc.calories + meal.calories
+          }),
+          { protein: 0, carbs: 0, fats: 0, calories: 0 }
+        )
+
+        // Also add any existing numbered meals
+        const numberedMealTotals = existingLog.meals.reduce(
+          (acc, meal) => ({
+            protein: acc.protein + meal.protein,
+            carbs: acc.carbs + meal.carbs,
+            fats: acc.fats + meal.fats,
+            calories: acc.calories + meal.calories
+          }),
+          { protein: 0, carbs: 0, fats: 0, calories: 0 }
+        )
+
+        set((state) => ({
+          dailyLogs: state.dailyLogs.map(log =>
+            log.date === today
+              ? {
+                  ...log,
+                  protein: totals.protein + numberedMealTotals.protein,
+                  calories: totals.calories + numberedMealTotals.calories,
+                  carbs: totals.carbs + numberedMealTotals.carbs,
+                  fats: totals.fats + numberedMealTotals.fats,
+                  loggedMeals: updatedLoggedMeals
+                }
+              : log
+          )
+        }))
+      },
+
+      updateLoggedMeal: (id, updates) => {
+        const today = getLocalDateString()
+        const existingLog = get().dailyLogs.find(log => log.date === today)
+        if (!existingLog) return
+
+        const updatedLoggedMeals = existingLog.loggedMeals.map(m =>
+          m.id === id ? { ...m, ...updates } : m
+        )
         const totals = updatedLoggedMeals.reduce(
           (acc, meal) => ({
             protein: acc.protein + meal.protein,
