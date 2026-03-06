@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { WeightChart, ProgressBar } from '@/components'
+import { WeightChart, ProgressBar, AppHeader } from '@/components'
 import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
@@ -428,15 +428,17 @@ export function Settings() {
   }
 
   return (
-    <div data-testid="settings-screen" className="min-h-screen pb-20">
-      {/* Header */}
-      <div className="pt-14 pb-6 px-5 bg-card">
-        <h1 className="text-2xl font-bold">
+    <div data-testid="settings-screen" className="min-h-screen pb-20 bg-background">
+      <AppHeader />
+
+      {/* Page Title */}
+      <div className="px-6 pb-2">
+        <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-foreground">
           Settings
         </h1>
       </div>
 
-      <div className="px-5 py-6 space-y-6">
+      <div className="px-6 py-4 space-y-6">
         {/* Profile Section */}
         <Card className="py-0">
           <CardContent className="p-4">

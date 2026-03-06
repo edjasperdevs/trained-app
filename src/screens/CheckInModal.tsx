@@ -6,14 +6,15 @@ import {
   useWorkoutStore,
   useMacroStore,
   useAvatarStore,
-  useAchievementsStore
+  useAchievementsStore,
+  useHealthStore
 } from '@/stores'
 import { DP_VALUES, RANKS } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
-import { Flame, PartyPopper, Moon, Check } from 'lucide-react'
+import { Flame, PartyPopper, Moon, Check, X } from 'lucide-react'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -23,18 +24,28 @@ interface CheckInModalProps {
 interface CheckInData {
   workout: boolean
   protein: boolean
+  meal: boolean
+  steps: boolean
+  sleep: boolean
 }
+
+const STEPS_GOAL = 10000
+const SLEEP_GOAL_MINUTES = 420 // 7 hours
 
 export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   const updateStreak = useUserStore((state) => state.updateStreak)
   const obedienceStreak = useDPStore((state) => state.obedienceStreak)
   const { getTodayWorkout, isWorkoutCompletedToday } = useWorkoutStore()
-  const { isProteinTargetHit } = useMacroStore()
+  const { isProteinTargetHit, isCalorieTargetHit } = useMacroStore()
+  const { getEffectiveSteps, getEffectiveSleep } = useHealthStore()
   const { triggerReaction } = useAvatarStore()
 
   const [data, setData] = useState<CheckInData>({
     workout: false,
     protein: false,
+    meal: false,
+    steps: false,
+    sleep: false,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -53,9 +64,14 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   // Initialize data based on current state
   useEffect(() => {
     if (isOpen) {
+      const steps = getEffectiveSteps()
+      const sleepMins = getEffectiveSleep()
       setData({
         workout: workoutCompleted,
         protein: isProteinTargetHit(),
+        meal: isCalorieTargetHit(),
+        steps: steps >= STEPS_GOAL,
+        sleep: sleepMins >= SLEEP_GOAL_MINUTES,
       })
       setSubmitted(false)
       setEarnedDP(0)
@@ -68,10 +84,11 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
   const calculateDP = () => {
     let total = 0
-    // Only count DP for things not yet awarded today
-    const todayLog = useDPStore.getState().getTodayLog()
-    if (todayWorkout && data.workout && !(todayLog && todayLog.training > 0)) total += DP_VALUES.training
-    if (data.protein && !(todayLog && todayLog.protein > 0)) total += DP_VALUES.protein
+    if (data.workout) total += DP_VALUES.training
+    if (data.protein) total += DP_VALUES.protein
+    if (data.meal) total += DP_VALUES.meal
+    if (data.steps) total += DP_VALUES.steps
+    if (data.sleep) total += DP_VALUES.sleep
     return total
   }
 
@@ -97,7 +114,31 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
     if (data.protein && !(todayLog && todayLog.protein > 0)) {
       const result = useDPStore.getState().awardDP('protein')
       totalDP += result.dpAwarded
-      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Protein Target' })
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Protein Goal' })
+      if (result.rankedUp) lastRankUp = result
+    }
+
+    // Award meal compliance DP
+    if (data.meal && !(todayLog && todayLog.meals > 0)) {
+      const result = useDPStore.getState().awardDP('meal')
+      totalDP += result.dpAwarded
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Meal Compliance' })
+      if (result.rankedUp) lastRankUp = result
+    }
+
+    // Award steps DP
+    if (data.steps && !(todayLog && todayLog.steps > 0)) {
+      const result = useDPStore.getState().awardDP('steps')
+      totalDP += result.dpAwarded
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Steps Goal' })
+      if (result.rankedUp) lastRankUp = result
+    }
+
+    // Award sleep DP
+    if (data.sleep && !(todayLog && todayLog.sleep > 0)) {
+      const result = useDPStore.getState().awardDP('sleep')
+      totalDP += result.dpAwarded
+      animations.push({ id: animations.length, amount: result.dpAwarded, label: 'Sleep Goal' })
       if (result.rankedUp) lastRankUp = result
     }
 
@@ -157,11 +198,18 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
         {!submitted ? (
           <>
             {/* Header */}
-            <div className="pt-14 pb-6 px-6 text-center">
-              <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-primary mb-2">
+            <div className="pt-14 pb-8 px-6 text-center relative">
+              <button
+                onClick={() => onClose(false)}
+                className="absolute right-4 top-12 p-2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                <X size={24} />
+              </button>
+              <h1 className="text-2xl font-heading font-bold uppercase tracking-[0.15em] text-foreground mb-2">
                 Daily Report
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[15px] text-muted-foreground">
                 Log your compliance. Earn your DP.
               </p>
             </div>
@@ -179,12 +227,17 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     disabled={workoutCompleted}
                   />
                 ) : (
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-border">
-                    <Moon size={20} className="text-muted-foreground" />
+                  <div
+                    className="relative flex items-center gap-3 p-4 pl-5 rounded-xl border border-border overflow-hidden"
+                    style={{ backgroundColor: '#161616' }}
+                  >
+                    {/* Muted left accent bar */}
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-muted-foreground/50" />
                     <div className="flex-1">
-                      <p className="font-heading uppercase tracking-wider text-sm text-muted-foreground">Training</p>
-                      <p className="text-xs text-muted-foreground/60">Recovery Day</p>
+                      <p className="font-heading font-bold uppercase tracking-wider text-[17px] text-muted-foreground">Training</p>
+                      <p className="text-[14px] text-muted-foreground/60">Recovery Day</p>
                     </div>
+                    <Moon size={20} className="text-muted-foreground" />
                   </div>
                 )}
 
@@ -197,36 +250,67 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
                 />
 
+                {/* Meal Compliance */}
+                <ComplianceRow
+                  label="Meal Compliance"
+                  sublabel={data.meal ? 'Calories on target' : 'Stay within calorie goal'}
+                  dp={DP_VALUES.meal}
+                  checked={data.meal}
+                  onChange={(v) => setData(d => ({ ...d, meal: v }))}
+                />
+
+                {/* Steps */}
+                <ComplianceRow
+                  label="Steps Goal"
+                  sublabel={`${getEffectiveSteps().toLocaleString()} / ${STEPS_GOAL.toLocaleString()} steps`}
+                  dp={DP_VALUES.steps}
+                  checked={data.steps}
+                  onChange={(v) => setData(d => ({ ...d, steps: v }))}
+                />
+
+                {/* Sleep */}
+                <ComplianceRow
+                  label="Sleep Goal"
+                  sublabel={`${Math.round(getEffectiveSleep() / 60 * 10) / 10}h / 7h sleep`}
+                  dp={DP_VALUES.sleep}
+                  checked={data.sleep}
+                  onChange={(v) => setData(d => ({ ...d, sleep: v }))}
+                />
+
                 {/* Streak Info */}
                 {obedienceStreak > 0 && (
-                  <div data-testid="checkin-streak-display" className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
+                  <div
+                    data-testid="checkin-streak-display"
+                    className="flex items-center justify-between p-4 rounded-xl border border-primary/30"
+                    style={{ backgroundColor: '#161616' }}
+                  >
                     <div className="flex items-center gap-3">
                       <Flame size={20} className="text-primary" />
-                      <span className="text-sm">Current Streak</span>
+                      <span className="text-[15px] text-foreground">Current Streak</span>
                     </div>
-                    <span className="font-mono font-bold text-primary">{obedienceStreak} days</span>
+                    <span className="font-mono font-bold text-primary text-lg">{obedienceStreak} days</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Footer with total and submit */}
-            <div className="px-6 pb-8 safe-bottom">
+            <div className="px-6 pb-24 pt-4">
               {/* Total DP Preview */}
-              <div className="text-center mb-4">
-                <span className="text-muted-foreground text-sm">Today: </span>
-                <span className="text-2xl font-bold font-mono text-primary">
+              <div className="text-center mb-6">
+                <span className="text-foreground text-xl">Today: </span>
+                <span className="text-3xl font-bold font-mono text-primary">
                   +{calculateDP()} DP
                 </span>
-                <span className="text-muted-foreground text-sm"> earned</span>
+                <span className="text-foreground text-xl"> earned</span>
               </div>
 
               <Button
                 onClick={handleSubmit}
-                className="w-full h-14 text-lg font-heading uppercase tracking-wider"
+                className="w-full h-14 text-lg font-heading font-bold uppercase tracking-wider"
                 size="lg"
                 data-testid="checkin-confirm-button"
-                disabled={isSubmitting || (!data.workout && !data.protein)}
+                disabled={isSubmitting || (!data.workout && !data.protein && !data.meal && !data.steps && !data.sleep)}
               >
                 Submit Report
               </Button>
@@ -322,22 +406,27 @@ function ComplianceRow({
       aria-label={`${label}: ${dp} DP`}
       aria-disabled={disabled}
       className={cn(
-        'flex items-center gap-4 w-full p-4 rounded-xl border text-left transition-all',
+        'relative flex items-center gap-3 w-full p-4 pl-5 rounded-xl border text-left transition-all overflow-hidden',
         disabled ? 'cursor-default' : 'cursor-pointer',
         checked
-          ? 'bg-surface border-primary/30'
-          : 'bg-surface border-border hover:border-border/80'
+          ? 'border-primary'
+          : 'border-primary/50 hover:border-primary/70'
       )}
+      style={{ backgroundColor: '#161616' }}
     >
-      <div className="flex-1">
-        <p className={cn(
-          'font-heading uppercase tracking-wider text-sm',
-          checked ? 'text-foreground' : 'text-foreground'
-        )}>
+      {/* Gold left accent bar */}
+      <div className={cn(
+        'absolute left-0 top-0 bottom-0 w-[3px] transition-colors',
+        checked ? 'bg-primary' : 'bg-primary/50'
+      )} />
+
+      {/* Label and sublabel */}
+      <div className="flex-1 min-w-0">
+        <p className="font-heading font-bold uppercase tracking-wider text-[17px] text-foreground">
           {label}
         </p>
         {sublabel && (
-          <p className="text-xs text-muted-foreground mt-0.5">{sublabel}</p>
+          <p className="text-[14px] text-muted-foreground mt-0.5">{sublabel}</p>
         )}
       </div>
 
@@ -345,23 +434,23 @@ function ComplianceRow({
       <div
         aria-hidden="true"
         className={cn(
-          'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+          'w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0',
           checked
-            ? 'bg-primary border-primary'
-            : 'border-muted-foreground/30 bg-transparent'
+            ? 'bg-primary border-primary shadow-[0_0_8px_rgba(212,168,83,0.4)]'
+            : 'border-muted-foreground/40 bg-transparent'
         )}
       >
         {checked && (
-          <Check size={14} className="text-primary-foreground" />
+          <Check size={16} className="text-background" strokeWidth={3} />
         )}
       </div>
 
       {/* DP Badge */}
       <div className={cn(
-        'px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all',
+        'px-3 py-1.5 rounded-full text-[13px] font-mono font-bold transition-all flex-shrink-0',
         checked
-          ? 'bg-primary/20 text-primary'
-          : 'bg-surface-elevated text-muted-foreground'
+          ? 'bg-primary/20 text-primary border border-primary/40'
+          : 'bg-transparent text-muted-foreground border border-border/60'
       )}>
         +{dp} DP
       </div>

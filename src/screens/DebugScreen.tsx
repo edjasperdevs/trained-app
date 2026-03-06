@@ -5,10 +5,11 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Trash2, User, RefreshCw, Trophy } from 'lucide-react'
+import { ChevronLeft, Trash2, User, RefreshCw, Trophy, ClipboardCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RankUpModal } from '@/components/RankUpModal'
+import { CheckInModal } from '@/screens/CheckInModal'
 import { useUserStore, useDPStore, useSubscriptionStore } from '@/stores'
 import { seedPersona, clearTestData } from '@/lib/devSeed'
 import { RANKS } from '@/stores/dpStore'
@@ -45,6 +46,7 @@ export function DebugScreen() {
   const [loading, setLoading] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [showRankUp, setShowRankUp] = useState(false)
+  const [showCheckIn, setShowCheckIn] = useState(false)
 
   const profile = useUserStore((s) => s.profile)
   const totalDP = useDPStore((s) => s.totalDP)
@@ -160,7 +162,7 @@ export function DebugScreen() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">UI Previews</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <Button
               onClick={() => setShowRankUp(true)}
               className="w-full"
@@ -168,6 +170,14 @@ export function DebugScreen() {
             >
               <Trophy size={16} className="mr-2" />
               Preview RankUp Modal
+            </Button>
+            <Button
+              onClick={() => setShowCheckIn(true)}
+              className="w-full"
+              variant="outline"
+            >
+              <ClipboardCheck size={16} className="mr-2" />
+              Preview Daily Check-In
             </Button>
           </CardContent>
         </Card>
@@ -270,6 +280,12 @@ export function DebugScreen() {
           onClose={() => setShowRankUp(false)}
         />
       )}
+
+      {/* CheckIn Modal Preview */}
+      <CheckInModal
+        isOpen={showCheckIn}
+        onClose={() => setShowCheckIn(false)}
+      />
     </div>
   )
 }

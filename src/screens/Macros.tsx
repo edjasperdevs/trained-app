@@ -11,7 +11,6 @@ import { scheduleSync } from '@/lib/sync'
 import { confirmAction } from '@/lib/confirm'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
-import { springs } from '@/lib/animations'
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre-workout' | 'post-workout'
 

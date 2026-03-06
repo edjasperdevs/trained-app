@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { ProgressBar, EmptyState, Confetti } from '@/components'
+import { ProgressBar, EmptyState, Confetti, AppHeader } from '@/components'
 import { RankUpModal } from '@/components'
 import { useWorkoutStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { useDPStore, DP_VALUES } from '@/stores/dpStore'
@@ -18,7 +18,7 @@ import { getLocalDateString } from '@/lib/dateUtils'
 import { cn } from '@/lib/cn'
 import { motion } from 'framer-motion'
 import { springs } from '@/lib/animations'
-import { Clock, Dumbbell, ShieldCheck, Timer } from 'lucide-react'
+import { Clock, Dumbbell, ShieldCheck, Timer, Pencil, Moon, Check, ArrowUpRight, ChevronLeft, RotateCcw } from 'lucide-react'
 
 export function Workouts() {
   // PERF-02: Use granular selectors for reactive state only
@@ -65,6 +65,7 @@ export function Workouts() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
   const [showCelebration, setShowCelebration] = useState(false)
+  const [viewingWorkoutLog, setViewingWorkoutLog] = useState<WorkoutLog | null>(null)
 
   const todayWorkout = getTodayWorkout()
   const isCompleted = isWorkoutCompletedToday()
@@ -257,19 +258,21 @@ export function Workouts() {
   return (
     <div data-testid="workouts-screen" className="min-h-screen pb-20 bg-background">
       <Confetti trigger={showCelebration} duration={3000} />
-      {/* Header */}
-      <div className="pt-14 pb-6 px-6 bg-background">
-        <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-primary mb-1">
-          {activeWorkout ? `${activeWorkout.workoutType} Day`.toUpperCase() : 'Training'}
+      <AppHeader />
+
+      {/* Page Title */}
+      <div className="px-6 pb-5">
+        <h1 className="text-[26px] font-heading font-bold uppercase tracking-wide text-foreground leading-tight">
+          {activeWorkout ? `${activeWorkout.workoutType} Day` : 'Training'}
         </h1>
         {currentPlan && !activeWorkout && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[13px] text-muted-foreground mt-1">
             {currentPlan.trainingDays}-Day Split
           </p>
         )}
       </div>
 
-      <div className="px-6 py-6 space-y-6">
+      <div className="px-6 space-y-7">
         {/* Active Workout */}
         {activeWorkout ? (
           <ActiveWorkoutView
@@ -287,13 +290,17 @@ export function Workouts() {
           />
         ) : (
           <>
-            {/* Today's Workout */}
+            {/* TODAY */}
             <div>
-              <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">Today</h2>
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-primary mb-2">Today</p>
               {todayWorkout || hasAssignment ? (
                 <>
-                  <Card className="py-0">
-                    <CardContent className="p-4">
+                  {/* Today Card */}
+                  <div className="relative rounded-lg overflow-hidden border border-primary/30" style={{ backgroundColor: '#161616' }}>
+                    {/* Gold left accent line */}
+                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary" />
+
+                    <div className="p-4 pl-5">
                       {hasAssignment && (
                         <div className="flex items-center gap-1.5 mb-2">
                           <ShieldCheck size={14} className="text-primary" />
@@ -302,33 +309,42 @@ export function Workouts() {
                           </span>
                         </div>
                       )}
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xl font-bold">
-                            {hasAssignment ? 'Coach Workout' : todayWorkout?.name}
+
+                      {/* Main content row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[17px] font-bold text-foreground leading-tight">
+                            {hasAssignment ? 'Coach Workout' : (
+                              <>
+                                <span className="capitalize">{todayWorkout?.type}</span>
+                                {todayWorkout?.name && todayWorkout.name !== todayWorkout.type && (
+                                  <span className="text-muted-foreground font-normal"> ({todayWorkout.name})</span>
+                                )}
+                              </>
+                            )}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-[13px] text-muted-foreground mt-1">
                             {hasAssignment
                               ? `${assignedWorkout?.exercises.length} exercises prescribed`
                               : `Day ${todayWorkout?.dayNumber} of your week`}
                           </p>
                         </div>
-                        {isCompleted ? (
-                          <div className="flex items-center gap-2 text-success flex-shrink-0">
-                            <span className="text-2xl">✓</span>
-                            <span className="font-semibold">Done!</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-2 flex-shrink-0">
-                            <Button onClick={() => handleStartWorkout()} data-testid="workouts-start-button">
-                              Start Workout
-                            </Button>
+                        {isCompleted && (
+                          <div className="flex items-center gap-1.5 text-success flex-shrink-0">
+                            <Check size={16} strokeWidth={2.5} />
+                            <span className="font-semibold text-[15px]">Done!</span>
                           </div>
                         )}
+                        {!isCompleted && (
+                          <Button onClick={() => handleStartWorkout()} data-testid="workouts-start-button" size="sm" className="flex-shrink-0">
+                            Start Workout
+                          </Button>
+                        )}
                       </div>
+
                       {/* Prescribed exercises preview */}
                       {hasAssignment && !isCompleted && (
-                        <div className="mt-3 pt-3 border-t border-border space-y-1.5">
+                        <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
                           {assignedWorkout?.exercises.map((ex, i) => (
                             <div key={i} className="flex items-center justify-between text-sm">
                               <span className="text-foreground">{ex.name}</span>
@@ -347,19 +363,14 @@ export function Workouts() {
                           )}
                         </div>
                       )}
+
+                      {/* Action buttons when not completed */}
                       {!isCompleted && (
-                        <div className="mt-4 pt-4 border-t border-border space-y-2">
+                        <div className="mt-4 pt-4 border-t border-border/50 space-y-2">
                           {hasAssignment && todayWorkout && (
                             <button
-                              onClick={() => {
-                                setAssignedWorkout(null)
-                              }}
-                              className="
-                              w-full flex items-center justify-center gap-2 py-2.5 px-4
-                              text-sm font-medium transition-all
-                              border border-border text-muted-foreground hover:border-primary hover:text-primary
-                              rounded-lg
-                            "
+                              onClick={() => setAssignedWorkout(null)}
+                              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-all border border-border text-muted-foreground hover:border-primary hover:text-primary rounded-lg"
                             >
                               <Dumbbell size={16} />
                               Do your own workout instead
@@ -367,27 +378,25 @@ export function Workouts() {
                           )}
                           <button
                             onClick={() => setShowMinimalModal(true)}
-                            className="
-                            w-full flex items-center justify-center gap-2 py-2.5 px-4
-                            text-sm font-medium transition-all
-                            border border-border text-muted-foreground hover:border-primary hover:text-primary
-                            rounded-lg
-                          "
+                            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium transition-all border border-border text-muted-foreground hover:border-primary hover:text-primary rounded-lg"
                           >
                             <Clock size={16} />
                             {`Log ${LABELS.minimalWorkout.toLowerCase()} instead`}
                           </button>
                         </div>
                       )}
+
+                      {/* DP earned when completed */}
                       {isCompleted && (
-                        <div className="mt-3 pt-3 border-t border-border">
-                          <p className="text-sm text-muted-foreground">
+                        <div className="mt-3 flex justify-end">
+                          <span className="text-[13px] text-primary flex items-center gap-1 font-medium">
                             +{DP_VALUES.training} {LABELS.dp} earned
-                          </p>
+                            <ArrowUpRight size={14} />
+                          </span>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                   {!isCompleted && otherWorkouts.length > 0 && (
                     <div className="mt-3">
                       <button
@@ -439,48 +448,53 @@ export function Workouts() {
                   )}
                 </>
               ) : (
-                <Card className="py-0">
-                  <CardContent className="p-4">
-                    <div className="text-center py-4">
-                      <span className="text-4xl mb-3 block" role="img" aria-label="Rest day">😴</span>
-                      <p className="text-xl font-bold">
-                        Recovery Day
-                      </p>
-                      <p className="text-muted-foreground">
-                        Recovery is part of the protocol
-                      </p>
+                <div className="relative bg-surface border border-border rounded-xl overflow-hidden">
+                  {/* Gold left accent */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-muted-foreground/30" />
+
+                  <div className="p-6 pl-7 text-center">
+                    <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                      <RotateCcw size={24} className="text-muted-foreground" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <p className="text-lg font-bold text-foreground">
+                      Recovery Day
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Recovery is part of the protocol
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Customize Workouts */}
+            {/* CUSTOMIZE WORKOUTS */}
             {currentPlan && (
               <div>
-                <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">Customize Workouts</h2>
-                <div className="grid grid-cols-2 gap-2">
+                <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground mb-3">Customize Workouts</p>
+                <div className="grid grid-cols-2 gap-3">
                   {getUniqueWorkoutTypes(currentPlan.schedule).map((type) => {
                     const isCustomized = customizations.some(c => c.workoutType === type && c.exercises.length > 0)
                     return (
                       <button
                         key={type}
                         onClick={() => setEditingWorkoutType(type)}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-card hover:bg-card/80 transition-colors"
+                        className="rounded-lg p-4 text-left transition-all group border border-primary/30 hover:border-primary/50"
+                        style={{ backgroundColor: '#161616' }}
                       >
-                        <span className="text-xl">{getWorkoutEmoji(type)}</span>
-                        <div className="flex-1 text-left">
-                          <p className="font-semibold text-sm capitalize">{type}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {isCustomized ? 'Customized' : 'Default'}
-                          </p>
+                        {/* Top row: icon + pencil */}
+                        <div className="flex items-center justify-between mb-3">
+                          {/* Dumbbell icon in outlined circle */}
+                          <div className="w-10 h-10 rounded-full border border-primary/80 flex items-center justify-center">
+                            <Dumbbell size={18} className="text-primary" />
+                          </div>
+                          {/* Edit icon */}
+                          <Pencil size={14} className="text-primary/60 group-hover:text-primary transition-colors" />
                         </div>
-                        <span className="text-muted-foreground" aria-hidden="true">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                        </span>
+
+                        <p className="font-semibold text-[15px] text-foreground capitalize">{type}</p>
+                        <p className="text-[13px] text-muted-foreground mt-0.5">
+                          {isCustomized ? 'Customized' : 'Default'}
+                        </p>
                       </button>
                     )
                   })}
@@ -488,33 +502,52 @@ export function Workouts() {
               </div>
             )}
 
-            {/* Week Overview */}
+            {/* THIS WEEK */}
             <div>
-              <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground mb-3">This Week</h2>
-              <div className="grid grid-cols-7 gap-2">
+              <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground mb-4">This Week</p>
+              <div className="flex justify-between gap-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                   const workout = currentPlan?.schedule.find(s => s.day === index)
                   const todayDOW = new Date().getDay()
                   const isToday = todayDOW === index
                   const isPast = !isToday && (todayDOW === 0 ? index !== 0 : index < todayDOW)
                   const isCoachDay = isToday && hasAssignment
+                  const isRestDay = workout?.type === 'rest'
+                  const weekWorkout = weekWorkouts.find(w => w.day === index)
+                  const isDone = weekWorkout?.completed
 
                   return (
                     <div
                       key={index}
                       className={cn(
-                        'aspect-square rounded-xl flex flex-col items-center justify-center text-xs border',
-                        isToday ? 'bg-primary/10 border-primary/50' : 'bg-surface border-border',
-                        isPast && workout?.type !== 'rest' && 'opacity-50'
+                        'flex-1 flex flex-col items-center justify-between py-2.5 rounded-xl transition-all',
+                        isToday
+                          ? 'bg-primary/30 border-2 border-primary shadow-[0_0_15px_rgba(212,168,83,0.4)]'
+                          : 'border border-border/50',
+                        isPast && !isDone && !isRestDay && 'opacity-40'
                       )}
+                      style={{
+                        backgroundColor: isToday ? undefined : '#1a1a1a',
+                        minHeight: '72px'
+                      }}
                     >
-                      <span className={cn('text-[10px] mb-1', isToday ? 'text-primary' : 'text-muted-foreground')}>{day}</span>
+                      {/* Day label inside box */}
+                      <span className={cn(
+                        "text-[13px] font-medium",
+                        isToday ? "text-primary" : "text-muted-foreground"
+                      )}>
+                        {day}
+                      </span>
+
+                      {/* Icon */}
                       {isCoachDay ? (
-                        <ShieldCheck size={16} className="text-primary" />
+                        <ShieldCheck size={20} className="text-primary" />
+                      ) : isRestDay ? (
+                        <Moon size={18} className="text-muted-foreground" />
                       ) : (
-                        <span className="text-base">
-                          {workout?.type === 'rest' ? '😴' : getWorkoutEmoji(workout?.type || 'rest')}
-                        </span>
+                        <Dumbbell size={20} className={cn(
+                          isToday || isDone ? 'text-primary' : 'text-muted-foreground/70'
+                        )} />
                       )}
                     </div>
                   )
@@ -522,60 +555,70 @@ export function Workouts() {
               </div>
             </div>
 
-            {/* History */}
+            {/* RECENT WORKOUTS */}
             <div data-testid="workouts-history">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-heading uppercase tracking-[0.15em] text-muted-foreground">Recent Workouts</h2>
+                <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">Recent Workouts</p>
                 <button
                   onClick={() => setShowHistory(!showHistory)}
-                  className="text-primary text-sm"
+                  className="text-[13px] text-primary font-medium hover:text-primary/80 transition-colors"
                 >
                   {showHistory ? 'Hide' : 'Show All'}
                 </button>
               </div>
 
-              {(showHistory ? workoutHistory : workoutHistory.slice(0, 3)).map((log, index) => (
-                <div
-                  key={log.id}
-                  className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <Card className="py-0 mb-2">
-                    <CardContent className="p-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl" role="img" aria-label={log.isMinimal ? 'Minimal workout' : log.workoutType}>{log.isMinimal ? '⚡' : getWorkoutEmoji(log.workoutType)}</span>
-                          <div>
-                            <p className="font-semibold capitalize text-sm">
-                              {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(log.date).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric'
-                              })}
-                            </p>
-                          </div>
+              <div className="space-y-2.5">
+                {(showHistory ? workoutHistory : workoutHistory.slice(0, 3)).map((log, index) => (
+                  <button
+                    key={log.id}
+                    onClick={() => setViewingWorkoutLog(log)}
+                    className="w-full text-left animate-in fade-in slide-in-from-bottom-2 duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="rounded-lg p-4 border border-primary/30 hover:border-primary/50 transition-colors" style={{ backgroundColor: '#161616' }}>
+                      <div className="flex items-center gap-4">
+                        {/* Filled gold circular icon */}
+                        <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(212,168,83,0.25)]">
+                          <Dumbbell size={20} className="text-background" />
                         </div>
-                        <div className="text-right">
-                          <p className="text-success text-sm">✓ Complete</p>
-                          <p className="text-xs text-muted-foreground">
+
+                        {/* Workout info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold capitalize text-foreground text-[15px]">
+                            {log.isMinimal ? LABELS.minimalWorkout : log.workoutType}
+                          </p>
+                          <p className="text-[13px] text-muted-foreground mt-0.5">
+                            {new Date(log.date).toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+
+                        {/* Status */}
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-success text-[13px] flex items-center gap-1.5 justify-end font-medium">
+                            <Check size={14} strokeWidth={2.5} />
+                            Complete
+                          </p>
+                          <p className="text-[13px] text-muted-foreground mt-0.5">
                             {log.isMinimal
                               ? 'Minimal'
                               : `${log.exercises.reduce((acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0)} sets`}
                           </p>
                         </div>
                       </div>
+
                       {log.isMinimal && log.notes && (
-                        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border italic">
+                        <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border/50 italic">
                           "{log.notes}"
                         </p>
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
 
               {workoutHistory.length === 0 && (
                 <EmptyState
@@ -878,6 +921,147 @@ export function Workouts() {
           </div>
         </div>
       )}
+
+      {/* Workout Log Detail Modal */}
+      {viewingWorkoutLog && (
+        <WorkoutLogModal
+          log={viewingWorkoutLog}
+          onClose={() => setViewingWorkoutLog(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function WorkoutLogModal({ log, onClose }: { log: WorkoutLog; onClose: () => void }) {
+  // Get all logs of the same workout type to show day tabs
+  const workoutLogs = useWorkoutStore((s) => s.workoutLogs)
+  const sameTypeLogs = workoutLogs
+    .filter(l => l.workoutType === log.workoutType && !l.isMinimal)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5)
+
+  const [selectedLog, setSelectedLog] = useState(log)
+
+  // Calculate PRs for this workout type
+  const exercisePRs = new Map<string, number>()
+  workoutLogs.forEach(l => {
+    l.exercises.forEach(ex => {
+      ex.sets.forEach(set => {
+        if (set.completed && set.weight > 0) {
+          const currentPR = exercisePRs.get(ex.name) || 0
+          if (set.weight > currentPR) {
+            exercisePRs.set(ex.name, set.weight)
+          }
+        }
+      })
+    })
+  })
+
+  const formatDayLabel = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 bg-black/90 z-50 flex flex-col animate-in fade-in duration-200"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 border-b border-border/30">
+        <button onClick={onClose} className="p-2 -ml-2">
+          <ChevronLeft size={24} className="text-foreground" />
+        </button>
+        <h1 className="text-lg font-heading font-bold uppercase tracking-wide text-foreground">
+          {selectedLog.workoutType} Day {selectedLog.dayNumber ? String.fromCharCode(64 + selectedLog.dayNumber) : ''}
+        </h1>
+        <div className="w-10" />
+      </div>
+
+      {/* Day Tabs */}
+      {sameTypeLogs.length > 1 && (
+        <div className="flex gap-2 px-4 py-3">
+          {sameTypeLogs.map((l) => {
+            const isSelected = l.id === selectedLog.id
+            return (
+              <button
+                key={l.id}
+                onClick={() => setSelectedLog(l)}
+                className={cn(
+                  'px-4 py-2 rounded-full text-sm font-semibold transition-all',
+                  isSelected
+                    ? 'bg-primary text-background'
+                    : 'bg-surface-elevated text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {formatDayLabel(l.date)}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Exercise List */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {selectedLog.exercises.map((exercise) => {
+          const isPR = exercise.sets.some(s => s.completed && s.weight === exercisePRs.get(exercise.name))
+
+          return (
+            <div
+              key={exercise.id}
+              className="rounded-xl p-4 border border-primary/30"
+              style={{ backgroundColor: '#161616' }}
+            >
+              {/* Exercise Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="text-[17px] font-bold text-foreground">
+                  {exercise.name}
+                </h3>
+                {isPR && (
+                  <span className="px-2 py-0.5 bg-primary text-background text-[11px] font-bold rounded uppercase">
+                    PR
+                  </span>
+                )}
+              </div>
+
+              {/* Sets */}
+              <div className="space-y-1.5">
+                {exercise.sets.filter(s => !s.warmup && s.completed).map((set, idx) => {
+                  const isSetPR = set.weight === exercisePRs.get(exercise.name)
+                  return (
+                    <p
+                      key={idx}
+                      className={cn(
+                        'text-[15px]',
+                        isSetPR ? 'text-primary font-semibold' : 'text-foreground'
+                      )}
+                    >
+                      {set.reps} × {set.weight} lbs
+                      {isSetPR && <span className="text-primary ml-2">PR</span>}
+                    </p>
+                  )
+                })}
+                {exercise.sets.filter(s => !s.warmup && s.completed).length === 0 && (
+                  <p className="text-[15px] text-muted-foreground italic">No sets completed</p>
+                )}
+              </div>
+            </div>
+          )
+        })}
+
+        {selectedLog.isMinimal && selectedLog.notes && (
+          <div
+            className="rounded-xl p-4 border border-border"
+            style={{ backgroundColor: '#161616' }}
+          >
+            <h3 className="text-[15px] font-semibold text-foreground mb-2">Notes</h3>
+            <p className="text-[15px] text-muted-foreground italic">"{selectedLog.notes}"</p>
+          </div>
+        )}
+      </div>
+
     </div>
   )
 }

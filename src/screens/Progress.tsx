@@ -2,10 +2,9 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useAchievementsStore } from '@/stores'
-import { Trophy, ChevronRight, Dumbbell, Award, TrendingUp } from 'lucide-react'
-import { AnimatedPage, StaggerList, StaggerItem } from '@/components'
+import { Trophy, ChevronRight, Dumbbell, Award } from 'lucide-react'
+import { AnimatedPage, StaggerList, StaggerItem, AppHeader } from '@/components'
 import { motion } from 'framer-motion'
-import { springs } from '@/lib/animations'
 
 // Get the last N weeks of dates
 function getWeekDates(numWeeks: number): Date[][] {
@@ -145,20 +144,14 @@ export function Progress() {
   return (
     <AnimatedPage>
       <div className="min-h-screen pb-24 bg-background">
-        {/* Header */}
-        <motion.div
-          className="pt-14 pb-6 px-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springs.smooth}
-        >
-          <div className="flex items-center justify-center gap-3">
-            <TrendingUp size={20} className="text-primary" />
-            <h1 className="text-lg font-heading uppercase tracking-[0.2em] text-primary font-bold">
-              Your Progress
-            </h1>
-          </div>
-        </motion.div>
+        <AppHeader />
+
+        {/* Page Title */}
+        <div className="px-6 pb-4">
+          <h1 className="text-lg font-heading uppercase tracking-[0.15em] text-foreground">
+            Your Progress
+          </h1>
+        </div>
 
         {/* Training Volume Chart */}
         <StaggerList className="px-6 pb-6">

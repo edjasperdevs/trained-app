@@ -5,7 +5,6 @@ import { HealthCard } from '@/components/HealthCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { motion } from 'framer-motion'
 import { Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck, Target, Activity, LineChart, Flame, Beef } from 'lucide-react'
-import { springs } from '@/lib/animations'
 import {
   useUserStore,
   useDPStore,
