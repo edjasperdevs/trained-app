@@ -9,9 +9,144 @@
 - v1.4 Intake Dashboard (Phases 7-10, shipped 2026-02-21)
 - v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)
 - v2.0 WellTrained V2 (Phases 17-24, in progress)
-- **v2.1 Onboarding Redesign** (Phases 25-29, in progress)
+- v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
+- **v2.2 Auth Flow Redesign** (Phases 30-36, in progress)
 
-## v2.1 Onboarding Redesign
+## v2.2 Auth Flow Redesign
+
+**Milestone Goal:** Full authentication flow redesign with Apple Sign-In, Google Sign-In, and email/password. All screens updated to Obsidian/Dopamine Noir styling with chain-link crown branding. 3-pass implementation per screen: Build -> Review -> Refine.
+
+### Phases
+
+- [ ] **Phase 30: Auth Infrastructure** - Apple/Google Sign-In plugins, Supabase providers, AuthStack navigation
+- [ ] **Phase 31: Splash Screen** - Chain-link crown logo, wordmark, tagline, loading indicator (3 passes)
+- [ ] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes)
+- [ ] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes)
+- [ ] **Phase 34: Email Sign Up Form** - Email/password registration with strength indicator (3 passes)
+- [ ] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes)
+- [ ] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes)
+
+## Phase Details
+
+### Phase 30: Auth Infrastructure
+**Goal**: Authentication foundation ready for all social and email auth flows
+**Depends on**: Nothing (first phase of v2.2)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06
+**Success Criteria** (what must be TRUE):
+  1. Apple Sign-In Capacitor plugin responds to native sign-in trigger on iOS device
+  2. Google Sign-In Capacitor plugin responds to native sign-in trigger on iOS device
+  3. Supabase accepts Apple and Google ID tokens via signInWithIdToken
+  4. AuthStack navigation renders correct screen based on route
+  5. App routes unauthenticated users to AuthStack, authenticated+onboarded users to MainTabNavigator
+**Plans**: 2 plans
+
+Plans:
+- [ ] 30-01: Install and configure Apple/Google Sign-In Capacitor plugins with Supabase providers
+- [ ] 30-02: Build AuthStack navigation with routing logic
+
+### Phase 31: Splash Screen
+**Goal**: Branded loading experience during app initialization
+**Depends on**: Phase 30
+**Requirements**: SPLASH-01, SPLASH-02, SPLASH-03
+**Success Criteria** (what must be TRUE):
+  1. User sees chain-link crown logo, WELLTRAINED wordmark, and FORGE YOUR LEGEND tagline on app launch
+  2. Gold loading bar animates while app initializes
+  3. Splash automatically transitions to appropriate screen (Auth or Main) after load completes
+**Plans**: 3 plans
+
+Plans:
+- [ ] 31-01: Build - Implement Splash screen with logo, wordmark, tagline, loading bar
+- [ ] 31-02: Review - Compare to mockup and identify visual gaps
+- [ ] 31-03: Refine - Pixel-polish spacing, typography, animations
+
+### Phase 32: Sign Up Screen
+**Goal**: New users can begin registration via Apple, Google, or email
+**Depends on**: Phase 31
+**Requirements**: SIGNUP-01, SIGNUP-02, SIGNUP-03, SIGNUP-04, SIGNUP-05
+**Success Criteria** (what must be TRUE):
+  1. User sees logo, BEGIN YOUR PROTOCOL headline, three auth buttons, and legal copy
+  2. Apple button triggers native Apple Sign-In and creates Supabase session
+  3. Google button triggers native Google Sign-In and creates Supabase session
+  4. Email button navigates to Email Sign Up form
+  5. Sign In link navigates to Sign In screen
+**Plans**: 3 plans
+
+Plans:
+- [ ] 32-01: Build - Implement Sign Up screen with layout and auth button handlers
+- [ ] 32-02: Review - Compare to mockup and identify visual gaps
+- [ ] 32-03: Refine - Pixel-polish spacing, button styling, animations
+
+### Phase 33: Sign In Screen
+**Goal**: Returning users can authenticate via Apple, Google, or email
+**Depends on**: Phase 32
+**Requirements**: SIGNIN-01, SIGNIN-02, SIGNIN-03, SIGNIN-04, SIGNIN-05, SIGNIN-06
+**Success Criteria** (what must be TRUE):
+  1. User sees logo, WELCOME BACK headline, and three auth buttons
+  2. Apple button triggers Apple Sign-In flow
+  3. Google button triggers Google Sign-In flow
+  4. Email button navigates to Email Sign In form
+  5. Create Account link navigates to Sign Up screen
+  6. Forgot Password link navigates to Forgot Password screen
+**Plans**: 3 plans
+
+Plans:
+- [ ] 33-01: Build - Implement Sign In screen with layout and auth button handlers
+- [ ] 33-02: Review - Compare to mockup and identify visual gaps
+- [ ] 33-03: Refine - Pixel-polish spacing, button styling, animations
+
+### Phase 34: Email Sign Up Form
+**Goal**: Users can create account with email and password
+**Depends on**: Phase 33
+**Requirements**: EMAILSIGNUP-01, EMAILSIGNUP-02, EMAILSIGNUP-03, EMAILSIGNUP-04, EMAILSIGNUP-05
+**Success Criteria** (what must be TRUE):
+  1. User sees email, password, confirm password fields with gold icons
+  2. Password strength indicator shows 4 segments updating based on complexity
+  3. CREATE ACCOUNT button disabled until all validation passes
+  4. Valid form submission creates Supabase account and session
+  5. Sign In link navigates to Sign In screen
+**Plans**: 3 plans
+
+Plans:
+- [ ] 34-01: Build - Implement Email Sign Up form with fields, validation, strength indicator
+- [ ] 34-02: Review - Compare to mockup and identify visual gaps
+- [ ] 34-03: Refine - Pixel-polish form styling, error states, animations
+
+### Phase 35: Email Sign In Form
+**Goal**: Users can sign in with email and password
+**Depends on**: Phase 34
+**Requirements**: EMAILSIGNIN-01, EMAILSIGNIN-02, EMAILSIGNIN-03, EMAILSIGNIN-04, EMAILSIGNIN-05
+**Success Criteria** (what must be TRUE):
+  1. User sees email and password fields with gold icons
+  2. Valid credentials sign in via Supabase signInWithPassword
+  3. Invalid credentials show inline error message below password field
+  4. Forgot Password link navigates to Forgot Password screen
+  5. Create Account link navigates to Sign Up screen
+**Plans**: 3 plans
+
+Plans:
+- [ ] 35-01: Build - Implement Email Sign In form with fields and auth handler
+- [ ] 35-02: Review - Compare to mockup and identify visual gaps
+- [ ] 35-03: Refine - Pixel-polish form styling, error states, animations
+
+### Phase 36: Forgot Password Screen
+**Goal**: Users can reset forgotten password via email
+**Depends on**: Phase 35
+**Requirements**: FORGOT-01, FORGOT-02, FORGOT-03, FORGOT-04
+**Success Criteria** (what must be TRUE):
+  1. User sees logo, gold key icon, and email field
+  2. Submit triggers Supabase resetPasswordForEmail
+  3. Success state shows confirmation message with submitted email address
+  4. Back to Sign In link navigates to Sign In screen
+**Plans**: 3 plans
+
+Plans:
+- [ ] 36-01: Build - Implement Forgot Password screen with form and success state
+- [ ] 36-02: Review - Compare to mockup and identify visual gaps
+- [ ] 36-03: Refine - Pixel-polish form styling, success state, animations
+
+---
+
+## v2.1 Onboarding Redesign (Completed)
 
 **Milestone Goal:** Complete 8-screen onboarding flow with value-first approach, Obsidian styling, paywall after investment, and reverse trial for non-subscribers. Replace existing 10-step wizard with conversion-optimized journey.
 
@@ -23,7 +158,8 @@
 - [x] **Phase 28: Archetype and Macros** - Archetype Selection (5 cards with premium badges) and Macro Setup (donut chart, calculated targets) (completed 2026-03-06)
 - [x] **Phase 29: Paywall and Entry** - Paywall with reverse trial and Welcome to Protocol cinematic entry (completed 2026-03-06)
 
-## Phase Details
+<details>
+<summary>v2.1 Phase Details</summary>
 
 ### Phase 25: Onboarding Navigation
 **Goal**: The app correctly routes new users through the onboarding stack and existing users to the main tab navigator -- the foundation that all onboarding screens render within
@@ -36,7 +172,7 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 25-01-PLAN.md -- OnboardingStack infrastructure, onboardingStore, App.tsx routing gate
+- [x] 25-01-PLAN.md -- OnboardingStack infrastructure, onboardingStore, App.tsx routing gate
 
 ### Phase 26: Welcome and Value
 **Goal**: Users see a compelling brand hook and understand the discipline system before entering any personal data -- the value-first screens that set the emotional context
@@ -52,7 +188,7 @@ Plans:
 
 Plans:
 - [x] 26-01-PLAN.md -- Welcome screen with brand hook, animations, and navigation CTAs
-- [ ] 26-02-PLAN.md -- Value Proposition screen with benefit rows, ProgressIndicator component
+- [x] 26-02-PLAN.md -- Value Proposition screen with benefit rows, ProgressIndicator component
 
 ### Phase 27: Profile and Goal
 **Goal**: Users provide their profile information and select their training goal -- the data collection screens that personalize the experience
@@ -67,8 +203,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 27-01-PLAN.md -- ProfileScreen with name, units, training days, fitness level inputs
-- [ ] 27-02-PLAN.md -- GoalScreen with 4 goal cards and gold selection animation
+- [x] 27-01-PLAN.md -- ProfileScreen with name, units, training days, fitness level inputs
+- [x] 27-02-PLAN.md -- GoalScreen with 4 goal cards and gold selection animation
 
 ### Phase 28: Archetype and Macros
 **Goal**: Users choose their archetype specialization and see calculated macro targets -- the screens that show premium value and personalized results
@@ -84,8 +220,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 28-01-PLAN.md -- ArchetypeScreen with 5 archetype cards, badges (FREE/PREMIUM/COMING SOON), default Bro selection
-- [ ] 28-02-PLAN.md -- MacrosScreen with animated donut chart, count-up stat cards, macroStore integration
+- [x] 28-01-PLAN.md -- ArchetypeScreen with 5 archetype cards, badges (FREE/PREMIUM/COMING SOON), default Bro selection
+- [x] 28-02-PLAN.md -- MacrosScreen with animated donut chart, count-up stat cards, macroStore integration
 
 ### Phase 29: Paywall and Entry
 **Goal**: Users see the premium offering and make a subscription decision, then enter the app with a cinematic welcome -- the conversion and onboarding completion screens
@@ -100,8 +236,12 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 29-01-PLAN.md -- PaywallScreen with subscription options, reverse trial on skip, premium bypass
-- [ ] 29-02-PLAN.md -- FinalScreen (Welcome to Protocol) with avatar fade-in, rank card, and entry CTA
+- [x] 29-01-PLAN.md -- PaywallScreen with subscription options, reverse trial on skip, premium bypass
+- [x] 29-02-PLAN.md -- FinalScreen (Welcome to Protocol) with avatar fade-in, rank card, and entry CTA
+
+</details>
+
+---
 
 ## v2.0 WellTrained V2
 
@@ -117,6 +257,9 @@ Plans:
 - [x] **Phase 22: Protocol Orders** - Daily and weekly quests with bonus DP rewards (completed 2026-02-28)
 - [x] **Phase 23: Avatar Evolution** - 5-stage evolving silhouette tied to rank milestones (completed 2026-03-01)
 - [ ] **Phase 24: App Store Submission** - Data migration, compliance, TestFlight, App Store review
+
+<details>
+<summary>v2.0 Phase Details</summary>
 
 ### Phase 17: Foundation Cleanup
 **Goal**: The codebase is stripped of all coach dashboard code and the entire app renders with the Dopamine Noir V2 color system -- every subsequent phase builds on a clean, V2-branded foundation
@@ -245,6 +388,8 @@ Plans:
 - [ ] 24-02-PLAN.md -- Build preparation (PrivacyInfo.xcprivacy HealthKit, AASA Team ID)
 - [ ] 24-03-PLAN.md -- App Store submission (metadata, review notes, TestFlight, submission)
 
+</details>
+
 <details>
 <summary>v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)</summary>
 
@@ -314,7 +459,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 25 -> 26 -> 27 -> 28 -> 29 (then 24 for App Store)
+**Execution Order:** 30 -> 31 -> 32 -> 33 -> 34 -> 35 -> 36 (then 24 for App Store)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -332,8 +477,18 @@ Plans:
 | 22. Protocol Orders | v2.0 | 2/2 | Complete | 2026-02-28 |
 | 23. Avatar Evolution | v2.0 | 2/2 | Complete | 2026-03-01 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
-| 25. Onboarding Navigation | 1/1 | Complete    | 2026-03-06 | - |
-| 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
-| 27. Profile and Goal | 2/2 | Complete    | 2026-03-06 | - |
-| 28. Archetype and Macros | 2/2 | Complete    | 2026-03-06 | - |
-| 29. Paywall and Entry | 2/2 | Complete    | 2026-03-06 | - |
+| 25. Onboarding Navigation | v2.1 | 1/1 | Complete | 2026-03-06 |
+| 26. Welcome and Value | v2.1 | 2/2 | Complete | 2026-03-06 |
+| 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
+| 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
+| 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
+| 30. Auth Infrastructure | v2.2 | 0/2 | Not started | - |
+| 31. Splash Screen | v2.2 | 0/3 | Not started | - |
+| 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
+| 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
+| 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
+| 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
+| 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
+
+**v2.2 Total Plans:** 20
+**v2.2 Requirements Coverage:** 34/34 mapped

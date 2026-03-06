@@ -174,7 +174,7 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ## v2.2 Requirements
 
-Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build → Review → Refine).
+Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build -> Review -> Refine).
 
 ### Auth Infrastructure
 
@@ -386,14 +386,48 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 | NAV-01 | Phase 25 | Complete |
 | NAV-02 | Phase 25 | Complete |
 | NAV-03 | Phase 25 | Complete |
+| INFRA-01 | Phase 30 | Pending |
+| INFRA-02 | Phase 30 | Pending |
+| INFRA-03 | Phase 30 | Pending |
+| INFRA-04 | Phase 30 | Pending |
+| INFRA-05 | Phase 30 | Pending |
+| INFRA-06 | Phase 30 | Pending |
+| SPLASH-01 | Phase 31 | Pending |
+| SPLASH-02 | Phase 31 | Pending |
+| SPLASH-03 | Phase 31 | Pending |
+| SIGNUP-01 | Phase 32 | Pending |
+| SIGNUP-02 | Phase 32 | Pending |
+| SIGNUP-03 | Phase 32 | Pending |
+| SIGNUP-04 | Phase 32 | Pending |
+| SIGNUP-05 | Phase 32 | Pending |
+| SIGNIN-01 | Phase 33 | Pending |
+| SIGNIN-02 | Phase 33 | Pending |
+| SIGNIN-03 | Phase 33 | Pending |
+| SIGNIN-04 | Phase 33 | Pending |
+| SIGNIN-05 | Phase 33 | Pending |
+| SIGNIN-06 | Phase 33 | Pending |
+| EMAILSIGNUP-01 | Phase 34 | Pending |
+| EMAILSIGNUP-02 | Phase 34 | Pending |
+| EMAILSIGNUP-03 | Phase 34 | Pending |
+| EMAILSIGNUP-04 | Phase 34 | Pending |
+| EMAILSIGNUP-05 | Phase 34 | Pending |
+| EMAILSIGNIN-01 | Phase 35 | Pending |
+| EMAILSIGNIN-02 | Phase 35 | Pending |
+| EMAILSIGNIN-03 | Phase 35 | Pending |
+| EMAILSIGNIN-04 | Phase 35 | Pending |
+| EMAILSIGNIN-05 | Phase 35 | Pending |
+| FORGOT-01 | Phase 36 | Pending |
+| FORGOT-02 | Phase 36 | Pending |
+| FORGOT-03 | Phase 36 | Pending |
+| FORGOT-04 | Phase 36 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
 - v2.1 requirements: 44 total
-- v2.2 requirements: 27 total
-- Mapped to phases: 91
-- Unmapped: 27 (v2.2 pending roadmap)
+- v2.2 requirements: 34 total
+- Total mapped to phases: 125
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2)*
-*Last updated: 2026-03-06 — v2.2 Auth Flow requirements added*
+*Last updated: 2026-03-06 -- v2.2 Auth Flow requirements mapped to Phases 30-36*
