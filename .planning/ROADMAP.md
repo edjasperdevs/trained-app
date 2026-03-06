@@ -64,7 +64,11 @@ Plans:
   3. CONTINUE button is disabled until name has at least one character
   4. User can select one of 4 goal cards (Build Muscle, Lose Fat, Get Stronger, Improve Fitness) with gold border animation
   5. Selected goal is stored in user profile store for macro calculation
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 27-01-PLAN.md -- ProfileScreen with name, units, training days, fitness level inputs
+- [ ] 27-02-PLAN.md -- GoalScreen with 4 goal cards and gold selection animation
 
 ### Phase 28: Archetype and Macros
 **Goal**: Users choose their archetype specialization and see calculated macro targets -- the screens that show premium value and personalized results
@@ -322,6 +326,6 @@ Plans:
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 | 25. Onboarding Navigation | 1/1 | Complete    | 2026-03-06 | - |
 | 26. Welcome and Value | 2/2 | Complete    | 2026-03-06 | - |
-| 27. Profile and Goal | v2.1 | 0/? | Not started | - |
+| 27. Profile and Goal | v2.1 | 0/2 | Not started | - |
 | 28. Archetype and Macros | v2.1 | 0/? | Not started | - |
 | 29. Paywall and Entry | v2.1 | 0/? | Not started | - |
