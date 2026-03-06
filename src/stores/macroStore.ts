@@ -129,6 +129,7 @@ interface MacroStore {
   isPerfectDay: () => boolean
   setSavedMeals: (meals: SavedMeal[]) => void
   setCoachTargets: (targets: MacroTargets, coachId: string) => void
+  setOnboardingTargets: (targets: MacroTargets) => void
   dismissCoachMacroUpdated: () => void
   setActivityLevel: (level: ActivityLevel) => void
   resetMacros: () => void
@@ -606,6 +607,15 @@ export const useMacroStore = create<MacroStore>()(
         })
         // Regenerate meal plan with new targets
         get().generateMealPlan()
+      },
+
+      setOnboardingTargets: (targets) => {
+        set({
+          targets,
+          setBy: 'self',
+          setByCoachId: null,
+        })
+        // Don't generate meal plan during onboarding - user can do that later
       },
 
       dismissCoachMacroUpdated: () => set({ coachMacroUpdated: false }),
