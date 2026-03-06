@@ -5,6 +5,7 @@ import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
 import { haptics } from '@/lib/haptics'
 import { ARCHETYPE_INFO, type Archetype } from '@/design/constants'
+import { getAvatarImage } from '@/assets/avatars'
 
 type BadgeType = 'free' | 'premium' | 'coming-soon'
 
@@ -41,11 +42,13 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
     }
   }
 
+  const avatarSrc = getAvatarImage(archetype, 1)
+
   return (
     <button
       onClick={onSelect}
       disabled={isDisabled}
-      className={`relative flex items-center h-20 rounded-xl transition-all duration-150 ease-out overflow-hidden ${
+      className={`relative flex items-center h-[88px] rounded-xl transition-all duration-150 ease-out overflow-hidden ${
         isDisabled ? 'opacity-40 pointer-events-none' : ''
       } ${
         isSelected
@@ -53,15 +56,19 @@ function ArchetypeCard({ archetype, isSelected, isDisabled, badge, onSelect }: A
           : 'bg-[#26282B] border border-[#3F3F46]'
       }`}
     >
-      {/* Avatar placeholder with gradient */}
-      <div className="w-20 h-full flex-shrink-0 bg-gradient-to-br from-[#3F3F46] to-[#26282B] flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full bg-[#1A1A1A] opacity-50" />
+      {/* Avatar image with gradient background */}
+      <div className="w-[88px] h-full flex-shrink-0 bg-gradient-to-br from-[#3F3F46] to-[#26282B] flex items-end justify-center overflow-hidden">
+        <img
+          src={avatarSrc}
+          alt={info.name}
+          className="w-[72px] h-auto object-cover object-top"
+        />
       </div>
 
       {/* Text content */}
       <div className="flex flex-col items-start text-left px-4 flex-1">
         <span
-          className="font-bold text-lg text-[#FAFAFA]"
+          className="font-bold text-xl text-[#FAFAFA]"
           style={{ fontFamily: "'Oswald', sans-serif" }}
         >
           {info.name.toUpperCase()}
