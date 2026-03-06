@@ -210,7 +210,7 @@ export function ArchetypeScreen() {
 
       {/* Archetype cards - pt-8 allows room for avatar overflow */}
       <motion.div
-        className="flex flex-col gap-4 flex-1 pt-8"
+        className="flex flex-col gap-5 flex-1 pt-8"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
