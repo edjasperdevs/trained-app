@@ -19,7 +19,17 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: /(auth-onboarding|meal-persistence)\.spec\.ts/,
+      // Smoke tests use real auth to verify login flow works
+      testMatch: /smoke\.spec\.ts/,
+    },
+    {
+      name: 'chromium-bypass',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: 'http://localhost:5174',
+      },
+      // Tests that need seeded data use dev bypass
+      testMatch: /(core-journeys|p0-critical|workout-features|favorites|food-search)\.spec\.ts/,
     },
     {
       name: 'chromium-auth',
@@ -27,26 +37,24 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         baseURL: 'http://localhost:5174',
       },
+      // Auth/onboarding tests mock Supabase and need bypass for access gate
       testMatch: /(auth-onboarding|meal-persistence)\.spec\.ts/,
     },
   ],
 
   webServer: [
     {
+      // Real auth server - no bypass, uses real Supabase from .env
       command: 'npx vite --port 5173',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
-      env: { VITE_DEV_BYPASS: 'true' },
     },
     {
+      // Bypass server - for seeded tests and auth mocking
       command: 'npx vite --port 5174',
       url: 'http://localhost:5174',
       reuseExistingServer: !process.env.CI,
-      env: {
-        VITE_DEV_BYPASS: 'false',
-        VITE_SUPABASE_URL: 'http://fake-supabase.test',
-        VITE_SUPABASE_ANON_KEY: 'fake-anon-key-for-e2e',
-      },
+      env: { VITE_DEV_BYPASS: 'true' },
     },
   ],
 })
