@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 28 - Archetype and Macros
-Plan: 02 complete (2/2 plans in phase)
-Status: Phase complete
-Last activity: 2026-03-06 -- Completed 28-02 MacrosScreen
+Phase: 29 - Paywall and Entry
+Plan: 01 complete (1/2 plans in phase)
+Status: In progress
+Last activity: 2026-03-06 -- Completed 29-01 PaywallScreen
 
-Progress: [==============______] 70%
+Progress: [===============_____] 75%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [==============______] 70%
 | 27-02 | GoalScreen | 2min | 2 | 3 |
 | 28-01 | ArchetypeScreen | 2min | 2 | 3 |
 | 28-02 | MacrosScreen | 4min | 3 | 4 |
+| 29-01 | PaywallScreen | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -124,6 +125,10 @@ Progress: [==============______] 70%
 - [Phase 28]: [Phase 28-02]: Custom SVG donut chart with framer-motion (not Recharts)
 - [Phase 28]: [Phase 28-02]: setOnboardingTargets skips meal plan generation (deferred to post-onboarding)
 - [Phase 28]: [Phase 28-02]: Chart animation 800ms, count-up 600ms starting after chart completes
+- [Phase 29]: [Phase 29-01]: Monthly card gold border with MOST POPULAR as primary conversion option
+- [Phase 29]: [Phase 29-01]: No back button on paywall - forces decision (subscribe or skip)
+- [Phase 29]: [Phase 29-01]: Reverse trial handled server-side by RevenueCat - no client action needed
+- [Phase 29]: [Phase 29-01]: 5s loading timeout before showing Continue to App fallback
 
 ### Pending Todos
 
@@ -141,5 +146,5 @@ Progress: [==============______] 70%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 28-02-PLAN.md (MacrosScreen)
-Resume file: None -- Phase 28 complete
+Stopped at: Completed 29-01-PLAN.md (PaywallScreen)
+Resume file: .planning/phases/29-paywall-and-entry/29-02-PLAN.md

@@ -140,14 +140,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Paywall (Onboarding)
 
-- [ ] **PAY-01**: User sees paywall after completing profile setup
-- [ ] **PAY-02**: Monthly option ($9.99/month, 7-day free trial) is visually prominent with gold border and MOST POPULAR label
-- [ ] **PAY-03**: Annual option ($59.99/year, save 50%) shown as secondary card
-- [ ] **PAY-04**: User can tap "START FREE TRIAL" to initiate RevenueCat purchase flow
-- [ ] **PAY-05**: User can tap "Continue with free access" to skip paywall
-- [ ] **PAY-06**: Skipping paywall grants 7-day free Premium trial automatically (reverse trial via RevenueCat)
-- [ ] **PAY-07**: Paywall screen does not show back arrow
-- [ ] **PAY-08**: Paywall screen is skipped entirely if user is already premium
+- [x] **PAY-01**: User sees paywall after completing profile setup
+- [x] **PAY-02**: Monthly option ($9.99/month, 7-day free trial) is visually prominent with gold border and MOST POPULAR label
+- [x] **PAY-03**: Annual option ($59.99/year, save 50%) shown as secondary card
+- [x] **PAY-04**: User can tap "START FREE TRIAL" to initiate RevenueCat purchase flow
+- [x] **PAY-05**: User can tap "Continue with free access" to skip paywall
+- [x] **PAY-06**: Skipping paywall grants 7-day free Premium trial automatically (reverse trial via RevenueCat)
+- [x] **PAY-07**: Paywall screen does not show back arrow
+- [x] **PAY-08**: Paywall screen is skipped entirely if user is already premium
 
 ### Welcome to Protocol
 
@@ -306,14 +306,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | MACR-07 | Phase 28 | Complete |
 | MACR-08 | Phase 28 | Complete |
 | MACR-09 | Phase 28 | Complete |
-| PAY-01 | Phase 29 | Pending |
-| PAY-02 | Phase 29 | Pending |
-| PAY-03 | Phase 29 | Pending |
-| PAY-04 | Phase 29 | Pending |
-| PAY-05 | Phase 29 | Pending |
-| PAY-06 | Phase 29 | Pending |
-| PAY-07 | Phase 29 | Pending |
-| PAY-08 | Phase 29 | Pending |
+| PAY-01 | Phase 29 | Complete |
+| PAY-02 | Phase 29 | Complete |
+| PAY-03 | Phase 29 | Complete |
+| PAY-04 | Phase 29 | Complete |
+| PAY-05 | Phase 29 | Complete |
+| PAY-06 | Phase 29 | Complete |
+| PAY-07 | Phase 29 | Complete |
+| PAY-08 | Phase 29 | Complete |
 | FINAL-01 | Phase 29 | Pending |
 | FINAL-02 | Phase 29 | Pending |
 | FINAL-03 | Phase 29 | Pending |
