@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 29 - Paywall and Entry
-Plan: 01 complete (1/2 plans in phase)
-Status: In progress
-Last activity: 2026-03-06 -- Completed 29-01 PaywallScreen
+Plan: 02 complete (2/2 plans in phase)
+Status: Complete
+Last activity: 2026-03-06 -- Completed 29-02 FinalScreen
 
-Progress: [===============_____] 75%
+Progress: [====================] 100%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [===============_____] 75%
 | 28-01 | ArchetypeScreen | 2min | 2 | 3 |
 | 28-02 | MacrosScreen | 4min | 3 | 4 |
 | 29-01 | PaywallScreen | 2min | 2 | 3 |
+| 29-02 | FinalScreen | 2min | 3 | 3 |
 
 ## Accumulated Context
 
@@ -129,6 +130,9 @@ Progress: [===============_____] 75%
 - [Phase 29]: [Phase 29-01]: No back button on paywall - forces decision (subscribe or skip)
 - [Phase 29]: [Phase 29-01]: Reverse trial handled server-side by RevenueCat - no client action needed
 - [Phase 29]: [Phase 29-01]: 5s loading timeout before showing Continue to App fallback
+- [Phase 29]: [Phase 29-02]: Custom rank card instead of DPDisplay for controlled initial state display
+- [Phase 29]: [Phase 29-02]: showLocked=false on EvolvingAvatar to always show stage 1 during onboarding
+- [Phase 29]: [Phase 29-02]: CTA pulses once via useState + setTimeout pattern
 
 ### Pending Todos
 
@@ -146,5 +150,5 @@ Progress: [===============_____] 75%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 29-01-PLAN.md (PaywallScreen)
-Resume file: .planning/phases/29-paywall-and-entry/29-02-PLAN.md
+Stopped at: Completed 29-02-PLAN.md (FinalScreen) -- Phase 29 complete
+Resume file: Next phase TBD

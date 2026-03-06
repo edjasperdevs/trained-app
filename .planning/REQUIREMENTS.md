@@ -151,14 +151,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Welcome to Protocol
 
-- [ ] **FINAL-01**: User sees Welcome to Protocol screen after paywall resolution
-- [ ] **FINAL-02**: Avatar appears with fade-in and subtle scale-up animation (0.95 to 1.0 over 400ms)
-- [ ] **FINAL-03**: Rank card shows "UNINITIATED" with DP progress bar at zero
-- [ ] **FINAL-04**: Rank card displays "0 of 250 DP to Initiate"
-- [ ] **FINAL-05**: Rank card slides up from below (translateY 20px to 0 over 400ms, 200ms delay)
-- [ ] **FINAL-06**: CTA button "ENTER THE DISCIPLINE" pulses once after 1 second
-- [ ] **FINAL-07**: Tapping CTA navigates to Home tab and clears onboarding from navigation history
-- [ ] **FINAL-08**: onboardingComplete flag is set to true
+- [x] **FINAL-01**: User sees Welcome to Protocol screen after paywall resolution
+- [x] **FINAL-02**: Avatar appears with fade-in and subtle scale-up animation (0.95 to 1.0 over 400ms)
+- [x] **FINAL-03**: Rank card shows "UNINITIATED" with DP progress bar at zero
+- [x] **FINAL-04**: Rank card displays "0 of 250 DP to Initiate"
+- [x] **FINAL-05**: Rank card slides up from below (translateY 20px to 0 over 400ms, 200ms delay)
+- [x] **FINAL-06**: CTA button "ENTER THE DISCIPLINE" pulses once after 1 second
+- [x] **FINAL-07**: Tapping CTA navigates to Home tab and clears onboarding from navigation history
+- [x] **FINAL-08**: onboardingComplete flag is set to true
 
 ### Progress Indicator
 
@@ -314,14 +314,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | PAY-06 | Phase 29 | Complete |
 | PAY-07 | Phase 29 | Complete |
 | PAY-08 | Phase 29 | Complete |
-| FINAL-01 | Phase 29 | Pending |
-| FINAL-02 | Phase 29 | Pending |
-| FINAL-03 | Phase 29 | Pending |
-| FINAL-04 | Phase 29 | Pending |
-| FINAL-05 | Phase 29 | Pending |
-| FINAL-06 | Phase 29 | Pending |
-| FINAL-07 | Phase 29 | Pending |
-| FINAL-08 | Phase 29 | Pending |
+| FINAL-01 | Phase 29 | Complete |
+| FINAL-02 | Phase 29 | Complete |
+| FINAL-03 | Phase 29 | Complete |
+| FINAL-04 | Phase 29 | Complete |
+| FINAL-05 | Phase 29 | Complete |
+| FINAL-06 | Phase 29 | Complete |
+| FINAL-07 | Phase 29 | Complete |
+| FINAL-08 | Phase 29 | Complete |
 | PROG-01 | Phase 26 | Complete |
 | PROG-02 | Phase 26 | Complete |
 | PROG-03 | Phase 26 | Complete |
