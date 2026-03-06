@@ -278,6 +278,7 @@ function AppContent() {
         <ToastContainer />
         <SentryRoutes>
           <Route path="/onboarding/*" element={<OnboardingStack />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
         </SentryRoutes>
       </>
