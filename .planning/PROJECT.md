@@ -15,7 +15,7 @@ WellTrained is a fitness gamification app (React 18 + TypeScript + Vite + Zustan
 Previous milestones delivered:
 
 - ✓ User authentication (email/password, session persistence) — existing
-- ✓ Onboarding flow (10-step wizard with progress indicator) — existing
+- ✓ Onboarding flow (10-step wizard with progress indicator) — existing (being replaced in v2.1)
 - ✓ Workout logging (exercises, sets, reps, weights, history) — existing
 - ✓ Macro tracking (calories, protein, food search with fallback) — existing
 - ✓ Streak system (daily check-in, grace period) — existing
@@ -44,23 +44,22 @@ Previous milestones delivered:
 
 ### Active
 
-**Current Milestone: v2.0 WellTrained V2**
+**Current Milestone: v2.1 Onboarding Redesign**
 
-**Goal:** Complete app revamp — new "Dopamine Noir V2" design system, Discipline Points/15-rank progression replacing XP/levels, archetype system, HealthKit integration, freemium subscription via RevenueCat, and coach dashboard stripped (moved to separate welltrained-coach app).
+**Goal:** Complete onboarding flow redesign with 8-screen conversion-optimized journey — value-first approach, Obsidian styling, paywall after investment, reverse trial for non-subscribers.
 
 **Target features:**
-- Dopamine Noir V2 design system (lime signal #C8FF00, premium minimalist)
-- Discipline Points (DP) replacing XP — new earning actions and values
-- 15-rank progression system (~24-27 week mastery curve)
-- 5 archetypes (Bro free, Himbo/Brute/Pup/Bull premium) with DP modifiers
-- Evolving avatar silhouette (5 stages tied to rank milestones)
-- Obedience Streak (renamed streak with future multiplier)
-- Protocol Orders (daily/weekly quests for bonus DP)
-- Steps tracking via HealthKit with manual fallback
-- Sleep tracking via HealthKit with manual fallback
-- Freemium paywall (RevenueCat iOS IAP subscription)
-- Strip coach dashboard (lives in welltrained-coach now)
-- App Store submission (completing what v1.5 started)
+- 8-screen onboarding flow replacing existing 10-step wizard
+- Welcome screen with brand hook and "BEGIN PROTOCOL" CTA
+- Value proposition screen (explain system before asking)
+- Profile setup (name, units, training days, fitness level)
+- Goal selection (4 goal cards: Build Muscle, Lose Fat, Get Stronger, Improve Fitness)
+- Archetype selection (5 archetypes with premium badges)
+- Macro setup with calculated targets and animated donut chart
+- RevenueCat paywall with 7-day free trial and reverse trial
+- Welcome to Protocol cinematic entry with avatar reveal
+- Staggered animations, haptic feedback, progress indicator
+- Protocol-language CTAs throughout ("ACCEPT MY PROTOCOL", "ENTER THE DISCIPLINE")
 
 ### Out of Scope
 
@@ -124,5 +123,9 @@ Previous milestones delivered:
 | 5 archetypes (1 free, 4 premium) | Personalization drives subscription conversion; Bro (generalist) is the free hook | — Pending |
 | Close v1.5 as-is | App Store submission becomes part of V2 launch phase | ✓ Good |
 
+| Value-first onboarding | Show transformation promise before asking for data; paywall after investment | — Pending |
+| Reverse trial | 7-day free Premium for users who skip paywall; increases conversion 30-50% | — Pending |
+| 8-screen flow | Shorter than previous 10-step; value proposition screen before data collection | — Pending |
+
 ---
-*Last updated: 2026-02-27 — v2.0 WellTrained V2 started*
+*Last updated: 2026-03-06 — v2.1 Onboarding Redesign started*

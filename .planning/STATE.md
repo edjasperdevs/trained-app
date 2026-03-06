@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-27)
+See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.0 Phase 23 (Avatar Evolution)
+**Current focus:** v2.1 Onboarding Redesign
 
 ## Current Position
 
-Phase: 23 of 24 (Avatar Evolution) - COMPLETE
-Plan: 2 of 2 in current phase (23-02 complete)
-Status: Phase complete
-Last activity: 2026-03-01 -- Completed 23-02 (Screen Integration)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-06 — Milestone v2.1 started
 
-Progress: [#################_] 94% (17/18 plans)
+Progress: [____________________] 0%
 
 ## Performance Metrics
 
