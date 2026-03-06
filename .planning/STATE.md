@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 26 - Welcome and Value
-Plan: 02 complete (2/2 plans in phase)
-Status: Phase 26 complete
-Last activity: 2026-03-06 -- Completed 26-02 ValueScreen
+Phase: 27 - Profile and Goal
+Plan: 01 complete (1/2 plans in phase)
+Status: In progress
+Last activity: 2026-03-06 -- Completed 27-01 ProfileScreen
 
-Progress: [==========__________] 50%
+Progress: [===========_________] 55%
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [==========__________] 50%
 | 25-01 | OnboardingStack Infrastructure | 4min | 3 | 7 |
 | 26-01 | WelcomeScreen | 2min | 2 | 3 |
 | 26-02 | ValueScreen | 3min | 3 | 5 |
+| 27-01 | ProfileScreen | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -106,6 +107,10 @@ Progress: [==========__________] 50%
 - [Phase 26]: [Phase 26-01]: 5-dot progress indicator shows first dot active
 - [Phase 26]: [Phase 26-02]: ProgressIndicator reusable component with totalSteps/currentStep props
 - [Phase 26]: [Phase 26-02]: Benefit row stagger animations (0.4s headline delay, 0.1s row stagger)
+- [Phase 27]: [Phase 27-01]: Local state for form values, committed to store on CONTINUE tap
+- [Phase 27]: [Phase 27-01]: Gold (#D4A853) border with 8% tint for selected states
+- [Phase 27]: [Phase 27-01]: Training days chip scale-110 on selection for visual emphasis
+- [Phase 27]: [Phase 27-01]: ProgressIndicator currentStep=1 (second dot) for profile screen
 
 ### Pending Todos
 
@@ -123,5 +128,5 @@ Progress: [==========__________] 50%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 26-02-PLAN.md (ValueScreen)
-Resume file: None -- Phase 26 complete, ready for Phase 27
+Stopped at: Completed 27-01-PLAN.md (ProfileScreen)
+Resume file: None -- ready for 27-02

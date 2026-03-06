@@ -97,14 +97,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Profile Setup
 
-- [ ] **PROF-01**: User can enter their name in a text field
-- [ ] **PROF-02**: User can toggle between LBS and KG units
-- [ ] **PROF-03**: User can select training days per week (2-6) via selector chips
-- [ ] **PROF-04**: User can select fitness level (Beginner/Intermediate/Advanced) via cards
-- [ ] **PROF-05**: Selected chips/cards show gold border with subtle gold background tint
-- [ ] **PROF-06**: Training days and fitness level selections trigger haptic feedback
-- [ ] **PROF-07**: CONTINUE button is disabled until name field has at least one character
-- [ ] **PROF-08**: Keyboard pushes form up smoothly on all device sizes
+- [x] **PROF-01**: User can enter their name in a text field
+- [x] **PROF-02**: User can toggle between LBS and KG units
+- [x] **PROF-03**: User can select training days per week (2-6) via selector chips
+- [x] **PROF-04**: User can select fitness level (Beginner/Intermediate/Advanced) via cards
+- [x] **PROF-05**: Selected chips/cards show gold border with subtle gold background tint
+- [x] **PROF-06**: Training days and fitness level selections trigger haptic feedback
+- [x] **PROF-07**: CONTINUE button is disabled until name field has at least one character
+- [x] **PROF-08**: Keyboard pushes form up smoothly on all device sizes
 
 ### Goal Selection
 
@@ -275,14 +275,14 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | VALU-02 | Phase 26 | Complete |
 | VALU-03 | Phase 26 | Complete |
 | VALU-04 | Phase 26 | Complete |
-| PROF-01 | Phase 27 | Pending |
-| PROF-02 | Phase 27 | Pending |
-| PROF-03 | Phase 27 | Pending |
-| PROF-04 | Phase 27 | Pending |
-| PROF-05 | Phase 27 | Pending |
-| PROF-06 | Phase 27 | Pending |
-| PROF-07 | Phase 27 | Pending |
-| PROF-08 | Phase 27 | Pending |
+| PROF-01 | Phase 27 | Complete |
+| PROF-02 | Phase 27 | Complete |
+| PROF-03 | Phase 27 | Complete |
+| PROF-04 | Phase 27 | Complete |
+| PROF-05 | Phase 27 | Complete |
+| PROF-06 | Phase 27 | Complete |
+| PROF-07 | Phase 27 | Complete |
+| PROF-08 | Phase 27 | Complete |
 | GOAL-01 | Phase 27 | Pending |
 | GOAL-02 | Phase 27 | Pending |
 | GOAL-03 | Phase 27 | Pending |
