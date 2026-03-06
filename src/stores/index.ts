@@ -38,3 +38,6 @@ export type { CompletedQuest } from './questStore'
 
 export { useMealPlanStore } from './mealPlanStore'
 export type { FoodPreferences, AIMeal, AIMealPlan } from './mealPlanStore'
+
+export { useOnboardingStore, ONBOARDING_SCREENS } from './onboardingStore'
+export type { OnboardingData, OnboardingScreen } from './onboardingStore'
