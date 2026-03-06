@@ -118,13 +118,13 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Archetype Selection (Onboarding)
 
-- [ ] **ARCH-01**: User sees 5 archetype cards: Bro (FREE), Himbo (PREMIUM), Brute (PREMIUM), Pup (PREMIUM), Bull (COMING SOON)
-- [ ] **ARCH-02**: Bro card is selected by default
-- [ ] **ARCH-03**: Bull card is dimmed (40% opacity) and non-interactive
-- [ ] **ARCH-04**: FREE badge on Bro is green (#22C55E)
-- [ ] **ARCH-05**: PREMIUM badges are gold (#D4A853)
-- [ ] **ARCH-06**: User can select any archetype including premium ones (gate at paywall, not here)
-- [ ] **ARCH-07**: Selected archetype is stored in dpStore
+- [x] **ARCH-01**: User sees 5 archetype cards: Bro (FREE), Himbo (PREMIUM), Brute (PREMIUM), Pup (PREMIUM), Bull (COMING SOON)
+- [x] **ARCH-02**: Bro card is selected by default
+- [x] **ARCH-03**: Bull card is dimmed (40% opacity) and non-interactive
+- [x] **ARCH-04**: FREE badge on Bro is green (#22C55E)
+- [x] **ARCH-05**: PREMIUM badges are gold (#D4A853)
+- [x] **ARCH-06**: User can select any archetype including premium ones (gate at paywall, not here)
+- [x] **ARCH-07**: Selected archetype is stored in dpStore
 
 ### Macro Setup (Onboarding)
 
@@ -290,13 +290,13 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | GOAL-05 | Phase 27 | Complete |
 | GOAL-06 | Phase 27 | Complete |
 | GOAL-07 | Phase 27 | Complete |
-| ARCH-01 | Phase 28 | Pending |
-| ARCH-02 | Phase 28 | Pending |
-| ARCH-03 | Phase 28 | Pending |
-| ARCH-04 | Phase 28 | Pending |
-| ARCH-05 | Phase 28 | Pending |
-| ARCH-06 | Phase 28 | Pending |
-| ARCH-07 | Phase 28 | Pending |
+| ARCH-01 | Phase 28 | Complete |
+| ARCH-02 | Phase 28 | Complete |
+| ARCH-03 | Phase 28 | Complete |
+| ARCH-04 | Phase 28 | Complete |
+| ARCH-05 | Phase 28 | Complete |
+| ARCH-06 | Phase 28 | Complete |
+| ARCH-07 | Phase 28 | Complete |
 | MACR-01 | Phase 28 | Pending |
 | MACR-02 | Phase 28 | Pending |
 | MACR-03 | Phase 28 | Pending |

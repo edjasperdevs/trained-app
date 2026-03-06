@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 
 ## Current Position
 
-Phase: 27 - Profile and Goal
-Plan: 02 complete (2/2 plans in phase)
-Status: Phase complete
-Last activity: 2026-03-06 -- Completed 27-02 GoalScreen
+Phase: 28 - Archetype and Macros
+Plan: 01 complete (1/2 plans in phase)
+Status: In progress
+Last activity: 2026-03-06 -- Completed 28-01 ArchetypeScreen
 
-Progress: [============________] 60%
+Progress: [=============_______] 65%
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [============________] 60%
 | 26-02 | ValueScreen | 3min | 3 | 5 |
 | 27-01 | ProfileScreen | 2min | 2 | 3 |
 | 27-02 | GoalScreen | 2min | 2 | 3 |
+| 28-01 | ArchetypeScreen | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ Progress: [============________] 60%
 - [Phase 27]: [Phase 27-01]: ProgressIndicator currentStep=1 (second dot) for profile screen
 - [Phase 27]: [Phase 27-02]: ProgressIndicator currentStep=2 (third dot) for goal screen
 - [Phase 27]: [Phase 27-02]: Gold icons always visible on goal cards (not conditional on selection)
+- [Phase 28]: [Phase 28-01]: Bro pre-selected as default archetype (free tier default)
+- [Phase 28]: [Phase 28-01]: Bull dimmed at 40% opacity with COMING SOON badge (not yet implemented)
+- [Phase 28]: [Phase 28-01]: ProgressIndicator currentStep=3 (fourth dot) for archetype screen
+- [Phase 28]: [Phase 28-01]: Badge variants: FREE=#22C55E, PREMIUM=#D4A853, COMING SOON=#3F3F46
 
 ### Pending Todos
 
@@ -131,5 +136,5 @@ Progress: [============________] 60%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 27-02-PLAN.md (GoalScreen)
-Resume file: None -- ready for 28-01
+Stopped at: Completed 28-01-PLAN.md (ArchetypeScreen)
+Resume file: None -- ready for 28-02
