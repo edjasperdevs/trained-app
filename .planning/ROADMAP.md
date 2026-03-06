@@ -33,7 +33,10 @@
   1. User who has not completed onboarding sees OnboardingStack instead of main tabs
   2. User who has completed onboarding sees MainTabNavigator and never sees onboarding screens
   3. Onboarding screens can navigate forward through the 8-screen flow without affecting main app routes
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 25-01-PLAN.md -- OnboardingStack infrastructure, onboardingStore, App.tsx routing gate
 
 ### Phase 26: Welcome and Value
 **Goal**: Users see a compelling brand hook and understand the discipline system before entering any personal data -- the value-first screens that set the emotional context
