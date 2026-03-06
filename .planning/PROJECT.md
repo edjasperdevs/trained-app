@@ -41,25 +41,27 @@ Previous milestones delivered:
 - ✓ App lifecycle events (foreground sync) — v1.5
 - ✓ Privacy policy + Apple privacy manifest — v1.5
 - ✓ Account deletion with cascading cleanup — v1.5
+- ✓ 8-screen onboarding flow (Welcome, Value, Profile, Goal, Archetype, Macros, Paywall, Final) — v2.1
+- ✓ RevenueCat paywall with 7-day free trial and reverse trial — v2.1
+- ✓ Value-first onboarding with protocol language — v2.1
 
 ### Active
 
-**Current Milestone: v2.1 Onboarding Redesign**
+**Current Milestone: v2.2 Auth Flow Redesign**
 
-**Goal:** Complete onboarding flow redesign with 8-screen conversion-optimized journey — value-first approach, Obsidian styling, paywall after investment, reverse trial for non-subscribers.
+**Goal:** Full authentication flow redesign with Apple Sign-In, Google Sign-In, and email/password — all screens updated to Obsidian/Dopamine Noir styling, plus app splash screen.
 
 **Target features:**
-- 8-screen onboarding flow replacing existing 10-step wizard
-- Welcome screen with brand hook and "BEGIN PROTOCOL" CTA
-- Value proposition screen (explain system before asking)
-- Profile setup (name, units, training days, fitness level)
-- Goal selection (4 goal cards: Build Muscle, Lose Fat, Get Stronger, Improve Fitness)
-- Archetype selection (5 archetypes with premium badges)
-- Macro setup with calculated targets and animated donut chart
-- RevenueCat paywall with 7-day free trial and reverse trial
-- Welcome to Protocol cinematic entry with avatar reveal
-- Staggered animations, haptic feedback, progress indicator
-- Protocol-language CTAs throughout ("ACCEPT MY PROTOCOL", "ENTER THE DISCIPLINE")
+- Splash screen with chain-link crown logo, wordmark, tagline, loading indicator
+- Sign Up screen (social entry) with Apple/Google/Email buttons
+- Sign In screen (social entry) for returning users
+- Email Sign Up form with password strength indicator (4-segment bar)
+- Email Sign In form with forgot password link
+- Forgot Password screen with email input and success state
+- Apple Sign-In via Capacitor plugin + Supabase signInWithIdToken
+- Google Sign-In via Capacitor plugin + Supabase signInWithIdToken
+- Obsidian design tokens (#0A0A0A bg, #D4A853 gold accents)
+- 3-pass implementation per screen (Build → Review → Refine)
 
 ### Out of Scope
 
@@ -123,9 +125,12 @@ Previous milestones delivered:
 | 5 archetypes (1 free, 4 premium) | Personalization drives subscription conversion; Bro (generalist) is the free hook | — Pending |
 | Close v1.5 as-is | App Store submission becomes part of V2 launch phase | ✓ Good |
 
-| Value-first onboarding | Show transformation promise before asking for data; paywall after investment | — Pending |
-| Reverse trial | 7-day free Premium for users who skip paywall; increases conversion 30-50% | — Pending |
-| 8-screen flow | Shorter than previous 10-step; value proposition screen before data collection | — Pending |
+| Value-first onboarding | Show transformation promise before asking for data; paywall after investment | ✓ Good |
+| Reverse trial | 7-day free Premium for users who skip paywall; increases conversion 30-50% | ✓ Good |
+| 8-screen flow | Shorter than previous 10-step; value proposition screen before data collection | ✓ Good |
+| 3-pass design implementation | Build → Review → Refine for each screen; ensures mockup fidelity | — Pending |
+| Apple + Google Sign-In | Social auth reduces friction; Apple required for App Store if offering other social login | — Pending |
+| Splash screen | Branded loading experience during app initialization | — Pending |
 
 ---
-*Last updated: 2026-03-06 — v2.1 Onboarding Redesign started*
+*Last updated: 2026-03-06 — v2.2 Auth Flow Redesign started*

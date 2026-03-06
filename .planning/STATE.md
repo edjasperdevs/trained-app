@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.1 Onboarding Redesign
+**Current focus:** v2.2 Auth Flow Redesign
 
 ## Current Position
 
-Phase: 29 - Paywall and Entry
-Plan: 02 complete (2/2 plans in phase)
-Status: Complete
-Last activity: 2026-03-06 -- Completed 29-02 FinalScreen
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-06 — Milestone v2.2 started
 
-Progress: [====================] 100%
+Progress: [                    ] 0%
 
 ## Performance Metrics
 
@@ -150,5 +150,5 @@ Progress: [====================] 100%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 29-02-PLAN.md (FinalScreen) -- Phase 29 complete
-Resume file: Next phase TBD
+Stopped at: v2.2 milestone started — defining requirements
+Resume file: —
