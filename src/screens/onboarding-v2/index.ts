@@ -3,7 +3,6 @@ export {
   OnboardingValue,
   OnboardingProfile,
   OnboardingGoal,
-  OnboardingPaywall,
   OnboardingFinal,
 } from './PlaceholderScreens'
 
@@ -13,3 +12,4 @@ export { ProfileScreen } from './ProfileScreen'
 export { GoalScreen } from './GoalScreen'
 export { ArchetypeScreen } from './ArchetypeScreen'
 export { MacrosScreen } from './MacrosScreen'
+export { PaywallScreen } from './PaywallScreen'
