@@ -3,7 +3,7 @@ import { useOnboardingStore, ONBOARDING_SCREENS } from '@/stores'
 import { Suspense, useEffect } from 'react'
 import { OnboardingSkeleton } from '@/components'
 import {
-  OnboardingWelcome,
+  WelcomeScreen,
   OnboardingValue,
   OnboardingProfile,
   OnboardingGoal,
@@ -26,7 +26,7 @@ export function OnboardingStack() {
   return (
     <Suspense fallback={<OnboardingSkeleton />}>
       <Routes>
-        <Route path="welcome" element={<OnboardingWelcome />} />
+        <Route path="welcome" element={<WelcomeScreen />} />
         <Route path="value" element={<OnboardingValue />} />
         <Route path="profile" element={<OnboardingProfile />} />
         <Route path="goal" element={<OnboardingGoal />} />
