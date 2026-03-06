@@ -82,11 +82,11 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Welcome
 
-- [ ] **WELC-01**: User sees Welcome screen with brand mark, wordmark, and headline on app launch (when not onboarded)
-- [ ] **WELC-02**: User can tap "BEGIN PROTOCOL" to start onboarding flow
-- [ ] **WELC-03**: User can tap "Already initiated? Sign In" to go to sign-in screen
-- [ ] **WELC-04**: Welcome screen has fade-up animation on load (logo, wordmark, headline stagger)
-- [ ] **WELC-05**: CTA button pulses subtly after 2 seconds if user hasn't tapped
+- [x] **WELC-01**: User sees Welcome screen with brand mark, wordmark, and headline on app launch (when not onboarded)
+- [x] **WELC-02**: User can tap "BEGIN PROTOCOL" to start onboarding flow
+- [x] **WELC-03**: User can tap "Already initiated? Sign In" to go to sign-in screen
+- [x] **WELC-04**: Welcome screen has fade-up animation on load (logo, wordmark, headline stagger)
+- [x] **WELC-05**: CTA button pulses subtly after 2 seconds if user hasn't tapped
 
 ### Value Proposition
 
@@ -266,11 +266,11 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | LAUNCH-02 | Phase 24 | Pending |
 | LAUNCH-03 | Phase 24 | Pending |
 | LAUNCH-04 | Phase 24 | Pending |
-| WELC-01 | Phase 26 | Pending |
-| WELC-02 | Phase 26 | Pending |
-| WELC-03 | Phase 26 | Pending |
-| WELC-04 | Phase 26 | Pending |
-| WELC-05 | Phase 26 | Pending |
+| WELC-01 | Phase 26 | Complete |
+| WELC-02 | Phase 26 | Complete |
+| WELC-03 | Phase 26 | Complete |
+| WELC-04 | Phase 26 | Complete |
+| WELC-05 | Phase 26 | Complete |
 | VALU-01 | Phase 26 | Pending |
 | VALU-02 | Phase 26 | Pending |
 | VALU-03 | Phase 26 | Pending |
