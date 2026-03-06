@@ -128,15 +128,15 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 
 ### Macro Setup (Onboarding)
 
-- [ ] **MACR-01**: User sees calculated daily macro targets based on profile inputs
-- [ ] **MACR-02**: Large donut ring chart shows macro distribution (Recharts, gold palette)
-- [ ] **MACR-03**: Three macro stat cards show protein, carbs, fat (grams and percentage)
-- [ ] **MACR-04**: Macro calculation uses Mifflin-St Jeor formula adjusted for selected goal
-- [ ] **MACR-05**: Default height/weight (5'10", 185 lbs) used for initial calculation
-- [ ] **MACR-06**: Donut chart animates with draw effect (arc fills clockwise over 800ms)
-- [ ] **MACR-07**: Stat cards count up from 0 to target values over 600ms after chart completes
-- [ ] **MACR-08**: User can tap "ACCEPT MY PROTOCOL" to proceed
-- [ ] **MACR-09**: Calculated macros are stored in macroStore
+- [x] **MACR-01**: User sees calculated daily macro targets based on profile inputs
+- [x] **MACR-02**: Large donut ring chart shows macro distribution (Recharts, gold palette)
+- [x] **MACR-03**: Three macro stat cards show protein, carbs, fat (grams and percentage)
+- [x] **MACR-04**: Macro calculation uses Mifflin-St Jeor formula adjusted for selected goal
+- [x] **MACR-05**: Default height/weight (5'10", 185 lbs) used for initial calculation
+- [x] **MACR-06**: Donut chart animates with draw effect (arc fills clockwise over 800ms)
+- [x] **MACR-07**: Stat cards count up from 0 to target values over 600ms after chart completes
+- [x] **MACR-08**: User can tap "ACCEPT MY PROTOCOL" to proceed
+- [x] **MACR-09**: Calculated macros are stored in macroStore
 
 ### Paywall (Onboarding)
 
@@ -297,15 +297,15 @@ Requirements for onboarding redesign. 8-screen conversion-optimized flow.
 | ARCH-05 | Phase 28 | Complete |
 | ARCH-06 | Phase 28 | Complete |
 | ARCH-07 | Phase 28 | Complete |
-| MACR-01 | Phase 28 | Pending |
-| MACR-02 | Phase 28 | Pending |
-| MACR-03 | Phase 28 | Pending |
-| MACR-04 | Phase 28 | Pending |
-| MACR-05 | Phase 28 | Pending |
-| MACR-06 | Phase 28 | Pending |
-| MACR-07 | Phase 28 | Pending |
-| MACR-08 | Phase 28 | Pending |
-| MACR-09 | Phase 28 | Pending |
+| MACR-01 | Phase 28 | Complete |
+| MACR-02 | Phase 28 | Complete |
+| MACR-03 | Phase 28 | Complete |
+| MACR-04 | Phase 28 | Complete |
+| MACR-05 | Phase 28 | Complete |
+| MACR-06 | Phase 28 | Complete |
+| MACR-07 | Phase 28 | Complete |
+| MACR-08 | Phase 28 | Complete |
+| MACR-09 | Phase 28 | Complete |
 | PAY-01 | Phase 29 | Pending |
 | PAY-02 | Phase 29 | Pending |
 | PAY-03 | Phase 29 | Pending |

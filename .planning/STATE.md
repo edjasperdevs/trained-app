@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 28 - Archetype and Macros
-Plan: 01 complete (1/2 plans in phase)
-Status: In progress
-Last activity: 2026-03-06 -- Completed 28-01 ArchetypeScreen
+Plan: 02 complete (2/2 plans in phase)
+Status: Phase complete
+Last activity: 2026-03-06 -- Completed 28-02 MacrosScreen
 
-Progress: [=============_______] 65%
+Progress: [==============______] 70%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [=============_______] 65%
 | 27-01 | ProfileScreen | 2min | 2 | 3 |
 | 27-02 | GoalScreen | 2min | 2 | 3 |
 | 28-01 | ArchetypeScreen | 2min | 2 | 3 |
+| 28-02 | MacrosScreen | 4min | 3 | 4 |
 
 ## Accumulated Context
 
@@ -119,6 +120,10 @@ Progress: [=============_______] 65%
 - [Phase 28]: [Phase 28-01]: Bull dimmed at 40% opacity with COMING SOON badge (not yet implemented)
 - [Phase 28]: [Phase 28-01]: ProgressIndicator currentStep=3 (fourth dot) for archetype screen
 - [Phase 28]: [Phase 28-01]: Badge variants: FREE=#22C55E, PREMIUM=#D4A853, COMING SOON=#3F3F46
+- [Phase 28]: [Phase 28-02]: Default profile (5'10" 185lbs 30yo male) for macro calculation during onboarding
+- [Phase 28]: [Phase 28-02]: Custom SVG donut chart with framer-motion (not Recharts)
+- [Phase 28]: [Phase 28-02]: setOnboardingTargets skips meal plan generation (deferred to post-onboarding)
+- [Phase 28]: [Phase 28-02]: Chart animation 800ms, count-up 600ms starting after chart completes
 
 ### Pending Todos
 
@@ -136,5 +141,5 @@ Progress: [=============_______] 65%
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 28-01-PLAN.md (ArchetypeScreen)
-Resume file: None -- ready for 28-02
+Stopped at: Completed 28-02-PLAN.md (MacrosScreen)
+Resume file: None -- Phase 28 complete
