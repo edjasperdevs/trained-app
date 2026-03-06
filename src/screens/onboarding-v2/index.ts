@@ -8,3 +8,5 @@ export {
   OnboardingPaywall,
   OnboardingFinal,
 } from './PlaceholderScreens'
+
+export { WelcomeScreen } from './WelcomeScreen'
