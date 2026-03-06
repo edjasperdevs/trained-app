@@ -6,7 +6,7 @@ import {
   WelcomeScreen,
   ValueScreen,
   ProfileScreen,
-  OnboardingGoal,
+  GoalScreen,
   OnboardingArchetype,
   OnboardingMacros,
   OnboardingPaywall,
@@ -29,7 +29,7 @@ export function OnboardingStack() {
         <Route path="welcome" element={<WelcomeScreen />} />
         <Route path="value" element={<ValueScreen />} />
         <Route path="profile" element={<ProfileScreen />} />
-        <Route path="goal" element={<OnboardingGoal />} />
+        <Route path="goal" element={<GoalScreen />} />
         <Route path="archetype" element={<OnboardingArchetype />} />
         <Route path="macros" element={<OnboardingMacros />} />
         <Route path="paywall" element={<OnboardingPaywall />} />

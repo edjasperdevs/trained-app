@@ -12,3 +12,4 @@ export {
 export { WelcomeScreen } from './WelcomeScreen'
 export { ValueScreen } from './ValueScreen'
 export { ProfileScreen } from './ProfileScreen'
+export { GoalScreen } from './GoalScreen'
