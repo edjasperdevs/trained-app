@@ -5,11 +5,13 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Trash2, User, RefreshCw } from 'lucide-react'
+import { ChevronLeft, Trash2, User, RefreshCw, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RankUpModal } from '@/components/RankUpModal'
 import { useUserStore, useDPStore, useSubscriptionStore } from '@/stores'
 import { seedPersona, clearTestData } from '@/lib/devSeed'
+import { RANKS } from '@/stores/dpStore'
 
 type TestPersona = 'newbie' | 'veteran' | 'premium_himbo' | 'premium_brute' |
   'premium_pup' | 'premium_bull' | 'female_user' | 'metric_user' |
@@ -42,11 +44,16 @@ export function DebugScreen() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [showRankUp, setShowRankUp] = useState(false)
 
   const profile = useUserStore((s) => s.profile)
   const totalDP = useDPStore((s) => s.totalDP)
   const currentRank = useDPStore((s) => s.currentRank)
   const isPremium = useSubscriptionStore((s) => s.isPremium)
+
+  // For RankUpModal preview
+  const previewRank = Math.min(currentRank + 1, 15)
+  const previewRankName = RANKS[previewRank]?.name || 'Forged'
 
   const handleSeedPersona = async (persona: TestPersona) => {
     setLoading(persona)
@@ -148,6 +155,23 @@ export function DebugScreen() {
           </CardContent>
         </Card>
 
+        {/* UI Previews */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground uppercase tracking-wider">UI Previews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => setShowRankUp(true)}
+              className="w-full"
+              variant="outline"
+            >
+              <Trophy size={16} className="mr-2" />
+              Preview RankUp Modal
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Message */}
         {message && (
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg text-sm text-center">
@@ -236,6 +260,16 @@ export function DebugScreen() {
           <p>Seeding a persona will reload the app</p>
         </div>
       </div>
+
+      {/* RankUp Modal Preview */}
+      {showRankUp && (
+        <RankUpModal
+          oldRank={currentRank}
+          newRank={previewRank}
+          rankName={previewRankName}
+          onClose={() => setShowRankUp(false)}
+        />
+      )}
     </div>
   )
 }

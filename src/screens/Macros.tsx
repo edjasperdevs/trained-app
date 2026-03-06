@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { EmptyState, FoodSearch, RankUpModal, AnimatedPage } from '@/components'
+import { EmptyState, FoodSearch, RankUpModal, AnimatedPage, AppHeader } from '@/components'
 import { useMacroStore, useUserStore, MacroTargets, SavedMeal, Gender, RecentFood, LoggedMeal, MealIngredient, toast } from '@/stores'
 import { useDPStore } from '@/stores/dpStore'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,19 +14,6 @@ import { cn } from '@/lib/cn'
 import { springs } from '@/lib/animations'
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre-workout' | 'post-workout'
-
-// Laurel wreath SVG component
-function LaurelLogo({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-      <path d="M8 16c-2-3-3-7-2-11 1 3 3 6 5 8-1-3-1-7 1-10 0 4 1 7 4 9-2-3-2-6-1-9 1 3 3 5 5 7"
-            strokeWidth="0" opacity="0.9"/>
-      <path d="M24 16c2-3 3-7 2-11-1 3-3 6-5 8 1-3 1-7-1-10 0 4-1 7-4 9 2-3 2-6 1-9-1 3-3 5-5 7"
-            strokeWidth="0" opacity="0.9"/>
-      <circle cx="16" cy="28" r="2"/>
-    </svg>
-  )
-}
 
 // Dual ring component - outer for calories, inner for protein
 function DualRing({
@@ -294,20 +281,10 @@ export function Macros() {
           </div>
         )}
 
-        {/* Header */}
-        <motion.div
-          className="pt-14 pb-2 px-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springs.smooth}
-        >
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <LaurelLogo className="w-5 h-5 text-primary" />
-            <span className="text-xs font-heading uppercase tracking-[0.2em] text-primary font-bold">
-              WellTrained
-            </span>
-          </div>
+        <AppHeader />
 
+        {/* Page Title */}
+        <div className="px-6 pb-2">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-heading font-bold text-foreground">Fuel</h1>
@@ -320,7 +297,7 @@ export function Macros() {
               </span>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {/* Main Content */}
         <div className="px-6 py-6" data-sentry-mask>

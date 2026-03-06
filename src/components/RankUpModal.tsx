@@ -60,10 +60,16 @@ export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: R
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Golden glow background */}
+          {/* Golden glow background - static for performance */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 blur-[150px] rounded-full" />
-            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent" />
+            {/* Main radial glow */}
+            <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/40 blur-[120px] rounded-full" />
+            {/* Secondary ember glow */}
+            <div className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-ember/30 blur-[80px] rounded-full" />
+            {/* Inner intense glow */}
+            <div className="absolute top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[250px] h-[300px] bg-primary/50 blur-[60px] rounded-full" />
+            {/* Bottom gradient */}
+            <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gradient-to-t from-primary/20 via-primary/5 to-transparent" />
           </div>
 
           {/* Content */}
@@ -80,31 +86,25 @@ export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: R
 
             {/* Avatar with celebration pose */}
             <motion.div
-              className="relative mb-8"
+              className="relative mb-6"
               initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              animate={{ scale: 1.15, opacity: 1 }}
               transition={{ delay: 0.3, ...springs.bouncy }}
             >
-              {/* Golden aura rings */}
+              {/* Single pulse ring - limited repeats */}
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-primary/30 scale-125"
-                initial={{ scale: 1, opacity: 0 }}
+                className="absolute inset-[-15%] rounded-full border-2 border-primary/40"
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1.5, opacity: [0, 0.5, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 0.5 }}
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border border-primary/20 scale-110"
-                initial={{ scale: 1, opacity: 0 }}
-                animate={{ scale: 1.3, opacity: [0, 0.3, 0] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 0.5, delay: 0.3 }}
+                transition={{ duration: 1.5, repeat: 3 }}
               />
 
               <EvolvingAvatar size="xl" />
             </motion.div>
 
-            {/* Rank Name - Big and bold */}
+            {/* Rank Name - Big and bold with glow */}
             <motion.h1
-              className="text-5xl md:text-6xl font-heading font-black text-foreground uppercase tracking-wider mb-4"
+              className="text-6xl md:text-7xl font-heading font-black text-foreground uppercase tracking-wider mb-4 drop-shadow-[0_0_30px_rgba(212,168,83,0.3)]"
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.5, ...springs.bouncy }}
@@ -162,7 +162,7 @@ export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: R
             <Button
               onClick={handleClaim}
               disabled={claimed}
-              className="w-full h-14 text-lg font-heading uppercase tracking-wider"
+              className="w-full h-14 text-lg font-heading uppercase tracking-widest shadow-[0_0_30px_rgba(212,168,83,0.4)] hover:shadow-[0_0_40px_rgba(212,168,83,0.5)]"
               size="lg"
             >
               {claimed ? 'Claimed!' : 'Claim Your Rank'}

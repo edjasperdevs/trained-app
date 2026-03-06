@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { EvolvingAvatar, RankUpModal, AnimatedPage, ProtocolOrders, ProgressBar, WeeklySummary, StreakDisplay, NearestBadges, StaggerList, StaggerItem } from '@/components'
+import { EvolvingAvatar, RankUpModal, AnimatedPage, ProtocolOrders, ProgressBar, WeeklySummary, StreakDisplay, NearestBadges, StaggerList, StaggerItem, AppHeader } from '@/components'
 import { HealthCard } from '@/components/HealthCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { motion } from 'framer-motion'
-import { Bell, Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck, Target, Activity, LineChart, Flame, Beef } from 'lucide-react'
+import { Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck, Target, Activity, LineChart, Flame, Beef } from 'lucide-react'
 import { springs } from '@/lib/animations'
 import {
   useUserStore,
@@ -19,22 +19,6 @@ import { WeeklyReportModal } from './WeeklyReportModal'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 import { Card, CardContent } from '@/components/ui/card'
 import { useQuestStore } from '@/stores/questStore'
-
-// Laurel wreath SVG component
-function LaurelLogo({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} fill="currentColor">
-      {/* Left laurel */}
-      <path d="M8 16c-2-3-3-7-2-11 1 3 3 6 5 8-1-3-1-7 1-10 0 4 1 7 4 9-2-3-2-6-1-9 1 3 3 5 5 7"
-            strokeWidth="0" opacity="0.9"/>
-      {/* Right laurel */}
-      <path d="M24 16c2-3 3-7 2-11-1 3-3 6-5 8 1-3 1-7-1-10 0 4-1 7-4 9 2-3 2-6 1-9-1 3-3 5-5 7"
-            strokeWidth="0" opacity="0.9"/>
-      {/* Center stem */}
-      <circle cx="16" cy="28" r="2"/>
-    </svg>
-  )
-}
 
 // Circular progress ring component
 function DPRing({ progress, dpToNext }: { progress: number; dpToNext: number }) {
@@ -182,28 +166,7 @@ export function Home() {
   return (
     <AnimatedPage>
       <div data-testid="home-screen" className="min-h-screen pb-24 bg-background">
-        {/* Header */}
-        <motion.div
-          className="pt-14 pb-4 px-6"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springs.smooth}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <LaurelLogo className="w-6 h-6 text-primary" />
-              <span className="text-sm font-heading uppercase tracking-[0.2em] text-primary font-bold">
-                WellTrained
-              </span>
-            </div>
-            <button
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface transition-colors"
-              aria-label="Notifications"
-            >
-              <Bell size={20} className="text-muted-foreground" />
-            </button>
-          </div>
-        </motion.div>
+        <AppHeader />
 
         {/* Greeting */}
         <div className="px-6 pb-4">
