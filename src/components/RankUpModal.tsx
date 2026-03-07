@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { haptics } from '@/lib/haptics'
 import { isNative } from '@/lib/platform'
@@ -6,9 +6,13 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Confetti } from '@/components/Confetti'
 import { EvolvingAvatar } from '@/components/EvolvingAvatar'
 import { springs } from '@/lib/animations'
-import { useDPStore } from '@/stores'
+import { useDPStore, useUserStore } from '@/stores'
 import { Button } from '@/components/ui/button'
 import { RANKS } from '@/stores/dpStore'
+import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
+import { RankUpShareCard } from '@/components/share/RankUpShareCard'
+import { shareRankUpCard } from '@/lib/shareCard'
+import { getAvatarStage } from '@/lib/avatarUtils'
 
 interface RankUpModalProps {
   oldRank: number
@@ -17,11 +21,15 @@ interface RankUpModalProps {
   onClose: () => void
 }
 
-export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: RankUpModalProps) {
+export function RankUpModal({ oldRank, newRank, rankName, onClose }: RankUpModalProps) {
   const [claimed, setClaimed] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
   const totalDP = useDPStore((s) => s.totalDP)
+  const streak = useDPStore((s) => s.obedienceStreak)
+  const archetype = useUserStore((s) => s.profile?.archetype) || 'bro'
+  const avatarStage = getAvatarStage(newRank) as 1 | 2 | 3 | 4 | 5
   const oldRankName = RANKS[oldRank]?.name || 'Uninitiated'
-  void _newRank // Used for notification but not display
 
   useEffect(() => {
     haptics.heavy()
@@ -41,7 +49,17 @@ export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: R
   const handleClaim = () => {
     setClaimed(true)
     haptics.success()
-    setTimeout(onClose, 500)
+    // Don't auto-close - let user choose to share or close
+  }
+
+  const handleShare = async () => {
+    if (!cardRef.current || sharing) return
+    setSharing(true)
+    try {
+      await shareRankUpCard(cardRef.current, rankName, totalDP, streak)
+    } finally {
+      setSharing(false)
+    }
   }
 
   return (
@@ -152,24 +170,60 @@ export function RankUpModal({ oldRank, newRank: _newRank, rankName, onClose }: R
             </motion.div>
           </div>
 
-          {/* Claim Button */}
+          {/* Claim/Share Buttons */}
           <motion.div
             className="px-6 pb-8 safe-bottom"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
           >
-            <Button
-              onClick={handleClaim}
-              disabled={claimed}
-              className="w-full h-14 text-lg font-heading uppercase tracking-widest shadow-[0_0_30px_rgba(212,168,83,0.4)] hover:shadow-[0_0_40px_rgba(212,168,83,0.5)]"
-              size="lg"
-            >
-              {claimed ? 'Claimed!' : 'Claim Your Rank'}
-            </Button>
+            {!claimed ? (
+              <Button
+                onClick={handleClaim}
+                className="w-full h-14 text-lg font-heading uppercase tracking-widest shadow-[0_0_30px_rgba(212,168,83,0.4)] hover:shadow-[0_0_40px_rgba(212,168,83,0.5)]"
+                size="lg"
+              >
+                Claim Your Rank
+              </Button>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="flex flex-col gap-3"
+              >
+                <Button
+                  onClick={handleShare}
+                  disabled={sharing}
+                  variant="outline"
+                  className="w-full h-14 text-lg font-heading uppercase tracking-widest border-primary/30 text-primary"
+                  size="lg"
+                >
+                  {sharing ? 'Creating Card...' : 'Share Your Rank'}
+                </Button>
+                <Button
+                  onClick={onClose}
+                  variant="ghost"
+                  className="w-full h-12 text-sm font-heading uppercase tracking-widest text-muted-foreground"
+                >
+                  Continue
+                </Button>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Off-screen share card for PNG capture */}
+      <ShareCardWrapper cardRef={cardRef}>
+        <RankUpShareCard
+          rankName={rankName}
+          totalDP={totalDP}
+          streak={streak}
+          avatarStage={avatarStage}
+          archetype={archetype}
+        />
+      </ShareCardWrapper>
     </>
   )
 }
