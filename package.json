@@ -23,6 +23,7 @@
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor/app": "^7.1.2",
+    "@capacitor/camera": "^7.0.2",
     "@capacitor/core": "^7.5.0",
     "@capacitor/dialog": "^7.0.4",
     "@capacitor/filesystem": "^7.0.1",
@@ -45,6 +46,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.3",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^0.563.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",

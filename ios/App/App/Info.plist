@@ -47,6 +47,10 @@
 	<true/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>WellTrained reads your steps and sleep data to reward you with Discipline Points for healthy habits.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>WellTrained uses your camera to add your photo to share cards.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>WellTrained saves share cards to your photo library.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
