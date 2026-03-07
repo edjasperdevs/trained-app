@@ -17,7 +17,7 @@ Requirements for iOS App Store submission readiness. All items derived from AUDI
 
 ### Security Fixes
 
-- [ ] **SEC-01**: Remove dev fallback in access code validation that accepts any 8+ character string
+- [x] **SEC-01**: Remove dev fallback in access code validation that accepts any 8+ character string
 
 ### UX Improvements
 
@@ -68,7 +68,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STORE-03 | Phase 45 | Complete |
 | STORE-04 | Phase 48 | Pending |
 | STORE-05 | Phase 48 | Pending |
-| SEC-01 | Phase 46 | Pending |
+| SEC-01 | Phase 46 | Complete |
 | UX-01 | Phase 46 | Pending |
 | UX-02 | Phase 46 | Pending |
 | UX-03 | Phase 46 | Pending |
