@@ -84,7 +84,13 @@ function AppContent() {
       (action) => {
         const route = action.notification.extra?.route as string | undefined
         if (route) {
-          navigate(route)
+          // Special handling for weekly report - use sessionStorage flag
+          if (route === '/weekly-report') {
+            sessionStorage.setItem('showWeeklyReport', 'true')
+            navigate('/')
+          } else {
+            navigate(route)
+          }
         }
       }
     )

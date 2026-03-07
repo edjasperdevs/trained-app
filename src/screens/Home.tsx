@@ -15,9 +15,11 @@ import { getLocalDateString, getLocalDaysDifference } from '@/lib/dateUtils'
 import { haptics } from '@/lib/haptics'
 import { CheckInModal } from './CheckInModal'
 import { WeeklyReportModal } from './WeeklyReportModal'
+import { WeeklyReportScreen } from './WeeklyReportScreen'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 import { Card, CardContent } from '@/components/ui/card'
 import { useQuestStore } from '@/stores/questStore'
+import { useWeeklyReportStore } from '@/stores/weeklyReportStore'
 
 // Circular progress ring component
 function DPRing({ progress, dpToNext }: { progress: number; dpToNext: number }) {
@@ -75,9 +77,12 @@ export function Home() {
 
   const { getTodayLog } = useDPStore.getState()
   const { isProteinTargetHit, isCalorieTargetHit, getTodayProgress } = useMacroStore.getState()
+  const shouldShowReport = useWeeklyReportStore((state) => state.shouldShowReport)
+  const markReportShown = useWeeklyReportStore((state) => state.markReportShown)
 
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showWeeklyReport, setShowWeeklyReport] = useState(false)
+  const [showWeeklyReportFull, setShowWeeklyReportFull] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
   const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
   const [hasCoach, setHasCoach] = useState(false)
@@ -120,6 +125,34 @@ export function Home() {
   // Quest completion check
   useEffect(() => {
     useQuestStore.getState().checkAndCompleteQuests()
+  }, [])
+
+  // Check for weekly report trigger on mount and after DP actions
+  useEffect(() => {
+    const checkWeeklyReport = () => {
+      if (shouldShowReport()) {
+        setShowWeeklyReportFull(true)
+      }
+    }
+
+    // Check on mount
+    checkWeeklyReport()
+
+    // Also check when dpStore state changes (after a DP action)
+    const unsubscribe = useDPStore.subscribe(() => {
+      checkWeeklyReport()
+    })
+
+    return () => unsubscribe()
+  }, [shouldShowReport])
+
+  // Handle deep link from push notification
+  useEffect(() => {
+    const deepLinkFlag = sessionStorage.getItem('showWeeklyReport')
+    if (deepLinkFlag === 'true') {
+      sessionStorage.removeItem('showWeeklyReport')
+      setShowWeeklyReportFull(true)
+    }
   }, [])
 
   const todayLog = getTodayLog()
@@ -457,6 +490,17 @@ export function Home() {
           isOpen={showWeeklyReport}
           onClose={() => setShowWeeklyReport(false)}
         />
+
+        {/* Weekly Report Full Screen (triggered on Sunday after DP action) */}
+        {showWeeklyReportFull && (
+          <WeeklyReportScreen
+            onClose={() => {
+              markReportShown()
+              setShowWeeklyReportFull(false)
+            }}
+            onShare={() => {}} // Wired in Plan 03
+          />
+        )}
       </div>
     </AnimatedPage>
   )
