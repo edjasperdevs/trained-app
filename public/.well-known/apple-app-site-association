@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["XXXXXXXXXX.fitness.welltrained.app"],
+        "appIDs": ["TEAM_ID_HERE.fitness.welltrained.app"],
         "components": [
           {
             "/": "/reset-password*",
@@ -15,5 +15,6 @@
         ]
       }
     ]
-  }
+  },
+  "comment": "TODO: Replace TEAM_ID_HERE with actual Apple Team ID from developer.apple.com/account after enrollment verified. Format: 10-character alphanumeric (e.g., A1B2C3D4E5). This enables password reset (/reset-password) and referral (/join/*) deep links."
 }
