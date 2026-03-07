@@ -193,11 +193,11 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Sign Up (Social Entry)
 
-- [ ] **SIGNUP-01**: Sign Up screen displays logo, BEGIN YOUR PROTOCOL headline, 3 auth buttons, legal copy
-- [ ] **SIGNUP-02**: Apple button triggers Apple Sign-In flow and creates Supabase session
-- [ ] **SIGNUP-03**: Google button triggers Google Sign-In flow and creates Supabase session
-- [ ] **SIGNUP-04**: Email button navigates to Email Sign Up form
-- [ ] **SIGNUP-05**: Sign In link navigates to Sign In screen
+- [x] **SIGNUP-01**: Sign Up screen displays logo, BEGIN YOUR PROTOCOL headline, 3 auth buttons, legal copy
+- [x] **SIGNUP-02**: Apple button triggers Apple Sign-In flow and creates Supabase session
+- [x] **SIGNUP-03**: Google button triggers Google Sign-In flow and creates Supabase session
+- [x] **SIGNUP-04**: Email button navigates to Email Sign Up form
+- [x] **SIGNUP-05**: Sign In link navigates to Sign In screen
 
 ### Sign In (Social Entry)
 
@@ -437,11 +437,11 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SPLASH-01 | Phase 31 | Complete |
 | SPLASH-02 | Phase 31 | Complete |
 | SPLASH-03 | Phase 31 | Complete |
-| SIGNUP-01 | Phase 32 | Pending |
-| SIGNUP-02 | Phase 32 | Pending |
-| SIGNUP-03 | Phase 32 | Pending |
-| SIGNUP-04 | Phase 32 | Pending |
-| SIGNUP-05 | Phase 32 | Pending |
+| SIGNUP-01 | Phase 32 | Complete |
+| SIGNUP-02 | Phase 32 | Complete |
+| SIGNUP-03 | Phase 32 | Complete |
+| SIGNUP-04 | Phase 32 | Complete |
+| SIGNUP-05 | Phase 32 | Complete |
 | SIGNIN-01 | Phase 33 | Pending |
 | SIGNIN-02 | Phase 33 | Pending |
 | SIGNIN-03 | Phase 33 | Pending |
