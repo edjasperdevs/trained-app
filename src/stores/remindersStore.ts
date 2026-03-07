@@ -18,6 +18,15 @@ export interface NotificationPreferences {
   weeklyCheckIn: { enabled: boolean; time: NotificationTimePreference }
   streakProtection: { enabled: boolean; time: NotificationTimePreference }
   weeklyReport: { enabled: boolean; time: NotificationTimePreference }
+  lockedProtocol: {
+    enabled: boolean
+    time: NotificationTimePreference               // default: 21:00 (Continuous) or 07:00 (Day Lock)
+    protocolType: 'continuous' | 'day_lock'        // synced from active protocol
+    eveningReminder: {
+      enabled: boolean                             // Day Lock only, default: false
+      time: NotificationTimePreference             // default: 21:00
+    }
+  }
 }
 
 export type ReminderType = 'logMacros' | 'checkIn' | 'claimXP' | 'workout'
@@ -55,6 +64,12 @@ interface RemindersStore {
   shouldShowWorkoutReminder: () => boolean
   getActiveReminders: () => ActiveReminder[]
   resetDismissals: () => void
+  // Locked Protocol setters
+  setLockedProtocolEnabled: (enabled: boolean) => void
+  setLockedProtocolTime: (hour: number, minute: number) => void
+  setLockedProtocolType: (type: 'continuous' | 'day_lock') => void
+  setLockedEveningReminderEnabled: (enabled: boolean) => void
+  setLockedEveningReminderTime: (hour: number, minute: number) => void
 }
 
 const REMINDER_CONFIGS: Record<ReminderType, Omit<ActiveReminder, 'type'>> = {
@@ -107,6 +122,15 @@ export const useRemindersStore = create<RemindersStore>()(
         weeklyCheckIn: { enabled: false, time: { hour: 10, minute: 0 } },
         streakProtection: { enabled: true, time: { hour: 20, minute: 0 } },
         weeklyReport: { enabled: true, time: { hour: 19, minute: 0 } },
+        lockedProtocol: {
+          enabled: true,
+          time: { hour: 21, minute: 0 },  // 9pm default for Continuous
+          protocolType: 'continuous',
+          eveningReminder: {
+            enabled: false,
+            time: { hour: 21, minute: 0 },
+          },
+        },
       },
 
       setPreference: (type, enabled) => {
@@ -229,7 +253,67 @@ export const useRemindersStore = create<RemindersStore>()(
           dismissedToday: [],
           lastDismissDate: null
         })
-      }
+      },
+
+      setLockedProtocolEnabled: (enabled: boolean) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            lockedProtocol: { ...state.notificationPreferences.lockedProtocol, enabled },
+          },
+        }))
+      },
+
+      setLockedProtocolTime: (hour: number, minute: number) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            lockedProtocol: {
+              ...state.notificationPreferences.lockedProtocol,
+              time: { hour, minute },
+            },
+          },
+        }))
+      },
+
+      setLockedProtocolType: (type: 'continuous' | 'day_lock') => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            lockedProtocol: { ...state.notificationPreferences.lockedProtocol, protocolType: type },
+          },
+        }))
+      },
+
+      setLockedEveningReminderEnabled: (enabled: boolean) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            lockedProtocol: {
+              ...state.notificationPreferences.lockedProtocol,
+              eveningReminder: {
+                ...state.notificationPreferences.lockedProtocol.eveningReminder,
+                enabled,
+              },
+            },
+          },
+        }))
+      },
+
+      setLockedEveningReminderTime: (hour: number, minute: number) => {
+        set((state) => ({
+          notificationPreferences: {
+            ...state.notificationPreferences,
+            lockedProtocol: {
+              ...state.notificationPreferences.lockedProtocol,
+              eveningReminder: {
+                ...state.notificationPreferences.lockedProtocol.eveningReminder,
+                time: { hour, minute },
+              },
+            },
+          },
+        }))
+      },
     }),
     {
       name: 'gamify-gains-reminders'
