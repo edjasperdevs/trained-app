@@ -59,7 +59,7 @@
 **Plans**: 1 plan
 
 Plans:
-- [ ] 45-01-PLAN.md — Update iOS native config files (privacy manifest, APNS production, Team ID placeholder)
+- [x] 45-01-PLAN.md — Update iOS native config files (privacy manifest, APNS production, Team ID placeholder)
 
 #### Phase 46: Security & UX Fixes
 **Goal**: Security vulnerabilities closed and UX issues resolved
@@ -70,10 +70,12 @@ Plans:
   2. User sees visible health/medical disclaimer during onboarding flow
   3. Workout names display without overflow on Workouts screen Today card
   4. Recovery day compliance calculation correctly distinguishes 4/4 vs 5/5 scenarios
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 46-01: TBD
+- [ ] 46-01-PLAN.md — Remove dev fallback from access code validator
+- [ ] 46-02-PLAN.md — Add health disclaimer component and onboarding step
+- [ ] 46-03-PLAN.md — Fix workout name overflow and recovery day compliance logic
 
 #### Phase 47: Asset & Code Cleanup
 **Goal**: Assets optimized and dead code removed
@@ -395,8 +397,8 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 45. iOS Configuration & Entitlements | 1/1 | Complete    | 2026-03-07 | - |
-| 46. Security & UX Fixes | v2.4 | 0/? | Not started | - |
+| 45. iOS Configuration & Entitlements | v2.4 | 1/1 | Complete | 2026-03-07 |
+| 46. Security & UX Fixes | v2.4 | 0/3 | Not started | - |
 | 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
 | 41. Weekly Protocol Report | v2.3 | 3/3 | Complete | 2026-03-07 |
