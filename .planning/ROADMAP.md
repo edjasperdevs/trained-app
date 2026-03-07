@@ -56,7 +56,12 @@ Plans:
   4. Deep link handling captures referral code before signup and stores it for post-signup attribution
   5. Recruits list shows recruit callsign, rank, status (pending/completed), and DP earned (0 or 100)
   6. Settings has "Recruit a Sub" entry under Protocol section that navigates to referral screen
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 42-01-PLAN.md -- Referrals database migration, referralStore with code generation
+- [ ] 42-02-PLAN.md -- Recruit a Sub screen UI, Settings navigation entry
+- [ ] 42-03-PLAN.md -- Deep link capture for /join/* paths, post-signup attribution
 
 ### Phase 43: Referral Rewards
 **Goal**: Referred users receive Premium trial and referrers earn DP when recruits complete first week
