@@ -279,7 +279,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **WRPT-03**: Auto-generated highlights appear based on protein compliance, PRs, streak milestones
 - [x] **WRPT-04**: Push notification triggers report on Sunday at 7pm local time
 - [x] **WRPT-05**: In-app trigger shows report on Sunday after first DP action (once per week)
-- [ ] **WRPT-06**: Share button produces weekly report share card
+- [x] **WRPT-06**: Share button produces weekly report share card
 - [x] **WRPT-07**: User can configure weekly report notification in Settings
 
 ### Referrals
@@ -507,7 +507,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | WRPT-03 | Phase 41 | Complete |
 | WRPT-04 | Phase 41 | Complete |
 | WRPT-05 | Phase 41 | Complete |
-| WRPT-06 | Phase 41 | Pending |
+| WRPT-06 | Phase 41 | Complete |
 | WRPT-07 | Phase 41 | Complete |
 | REFR-01 | Phase 42 | Pending |
 | REFR-02 | Phase 43 | Pending |

@@ -20,7 +20,7 @@
 
 ### Phases
 
-- [ ] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data, highlights, push notification, share card
+- [x] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data, highlights, push notification, share card (completed 2026-03-07)
 - [ ] **Phase 42: Referral System** - Unique links, Recruit a Sub screen, deep link handling, recruits list
 - [ ] **Phase 43: Referral Rewards** - RevenueCat promo for referred users, DP rewards for referrers
 
@@ -464,7 +464,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -530,7 +530,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 41. Weekly Protocol Report | 2/3 | In Progress|  | - |
+| 41. Weekly Protocol Report | 3/3 | Complete   | 2026-03-07 | - |
 | 42. Referral System | v2.3 | 0/TBD | Not started | - |
 | 43. Referral Rewards | v2.3 | 0/TBD | Not started | - |
 | 36. Forgot Password Screen | 3/3 | Complete    | 2026-03-07 | - |
