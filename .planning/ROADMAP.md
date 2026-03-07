@@ -55,9 +55,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 31-01: Build - Implement Splash screen with logo, wordmark, tagline, loading bar
-- [ ] 31-02: Review - Compare to mockup and identify visual gaps
-- [ ] 31-03: Refine - Pixel-polish spacing, typography, animations
+- [ ] 31-01-PLAN.md -- Build Splash screen with chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline, animated gold loading bar
+- [ ] 31-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [ ] 31-03-PLAN.md -- Refine spacing, typography, and animations based on review findings
 
 ### Phase 32: Sign Up Screen
 **Goal**: New users can begin registration via Apple, Google, or email
