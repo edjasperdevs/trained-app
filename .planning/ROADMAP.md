@@ -72,7 +72,11 @@ Plans:
   2. Referrer earns 100 DP when recruit completes first week (7 days with at least one DP action per day)
   3. DP award appears in dpStore transaction history with "Recruit completed protocol" label
   4. Completion check runs daily for pending recruits and auto-updates status
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 43-01-PLAN.md -- RevenueCat promotional entitlement grant for referred users on signup
+- [ ] 43-02-PLAN.md -- Recruit completion check, referrer DP rewards, app-level trigger
 
 ---
 
