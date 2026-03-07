@@ -5,195 +5,76 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.4 App Store Readiness
+**Current focus:** Phase 45: iOS Configuration & Entitlements (v2.4 App Store Readiness)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-07 — Milestone v2.4 started
+Phase: 45 of 48 (iOS Configuration & Entitlements)
+Plan: Ready to plan
+Status: Ready to plan
+Last activity: 2026-03-07 — Created v2.4 roadmap with 4 phases covering 14 App Store readiness requirements
+
+Progress: [████████████████████████████████████████░░░░░░] 93% (previous milestones complete, v2.4 starting)
 
 ## Performance Metrics
 
-**Prior Milestones:**
-- v1.0 Launch Polish: 5 phases, 10 plans
-- v1.1 Design Refresh: 7 phases, 12 plans (1.48 hours, avg 7.4min/plan)
-- v1.2 Pre-Launch Confidence: 4 phases, 8 plans (1.01 hours, avg 7.9min/plan)
-- v1.3 Coach Dashboard: 6 phases, 18 plans (61min, avg 3.4min/plan)
-- v1.4 Intake Dashboard: 4 phases (built outside GSD)
-- v1.5 Native iOS App: 6 phases, 12 plans (closed -- App Store submission pending Apple approval)
-- v2.0 WellTrained V2: 7 phases, 17 plans (17/17 complete, Phase 24 deferred)
-- v2.1 Onboarding Redesign: 5 phases, 9 plans (9/9 complete)
-- v2.2 Auth Flow Redesign: 7 phases, 20 plans (19/20 complete, 1 plan remaining)
-- v2.2.1 Social Sharing: 4 phases, 6 plans (6/6 complete, shipped 2026-03-07)
+**Velocity:**
+- Total plans completed: 125+ (from previous milestones)
+- Average duration: ~3-5 min/plan
+- Total execution time: ~40+ hours across v1.0-v2.3
 
-**v2.3 Engagement & Growth:**
-- Total phases: 4 (Phases 41-44)
-- Total plans: 15 (9 shipped + 6 Phase 44)
-- Plans complete: 15 (Phase 44 complete)
+**By Phase:**
+v2.4 execution has not started yet.
 
-### Roadmap Evolution
+**Recent Trend:**
+v2.3 completed successfully with Weekly Protocol Report, Referral System, and Locked Protocol features.
 
-- Phase 44 added: Locked Protocol (streak-based accountability tracker)
+*Will update after first plan completion*
 
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 41 | 01 | 5min | 2 | 3 |
-| 41 | 02 | 7min | 3 | 5 |
-| 41 | 03 | 5min | 2 | 4 |
-| 42 | 01 | 4min | 2 | 4 |
-| 42 | 02 | 5min | 2 | 3 |
-| 42 | 03 | 8min | 3 | 5 |
-| 43 | 01 | 3min | 2 | 5 |
-| 43 | 02 | 3min | 3 | 5 |
-| 44 | 01 | 3min | 2 | 3 |
-| 44 | 02 | 3min | 3 | 2 |
-| 44 | 03 | 3min | 2 | 3 |
-| 44 | 04 | 6min | 3 | 4 |
-| 44 | 05 | 5min | 3 | 5 |
-| 44 | 06 | 2min | 3 | 2 |
+## Accumulated Context
 
 ### Decisions
 
-**v2.3 Roadmap:**
-- 3 phases: Weekly Report (all 7 WRPT reqs) → Referral System (6 REFR reqs) → Referral Rewards (2 REFR reqs)
-- Condensed from 6 phases per user preference
-- Push notifications reuse v1.5 infrastructure (APNs direct, no Firebase)
-- Deep linking reuses v1.5 infrastructure (Universal Links)
-- Share cards reuse v2.2.1 infrastructure (html-to-image, native sheet)
-- RevenueCat promotional entitlement for 7-day Premium trial
+Recent decisions from PROJECT.md affecting v2.4:
 
-**v2.2.1:**
-- 4 phases following feature brief implementation order (infrastructure first, then card-by-card)
-- DP rewards gated by daily limits (workout/compliance) and per-rank (rank-up)
-- Web platform shows "Download Card" fallback instead of native share
-- Camera compositing is final step after basic workout sharing works
-
-**v2.2:**
-- 3-pass implementation per screen (Build / Review / Refine) for mockup fidelity
-- Apple + Google Sign-In as primary auth methods, email as secondary
-- Obsidian design tokens (#0A0A0A bg, #D4A853 gold accents)
-- AuthStack separate from OnboardingStack -- auth first, then onboarding for new users
-
-**v2.1:**
-- Value-first onboarding (show transformation promise before asking for data)
-- Reverse trial (7-day free Premium for users who skip paywall)
-- 8-screen flow (shorter than previous 10-step)
-
-**v2.0:**
-- Capacitor over React Native (preserves entire React codebase)
-- iOS only (most fitness users on iPhone)
-- Direct APNs (no Firebase, Supabase Edge Functions)
-- RevenueCat for subscriptions (handles StoreKit)
-- HealthKit + manual fallback (permission-gated)
-- Lime signal color (#C8FF00)
-- 15 ranks over 99 levels
-- 5 archetypes (1 free, 4 premium)
-
-**Implementation Details:**
-- 30-01: Used @southdevs/capacitor-google-auth instead of @codetrix-studio (Capacitor 7 compatibility)
-- 30-01: Native sign-in returns to Supabase via signInWithIdToken, not OAuth redirect flow
-- 30-02: Used auth-screens/ directory instead of auth/ to avoid case collision with existing Auth.tsx
-- 31-01: Used inline SVG React component instead of file import for better animation control
-- 31-02: User approved splash screen - no visual gaps identified, Plan 03 verification-only
-- 31-03: Verification-only pass - no refinements needed per 31-02 review approval
-- 32-01: Inline ChainLinkCrownLogo SVG in SignUpScreen.tsx (simpler than shared component)
-- 32-01: Disable social auth on web with fallback notice (native-only feature)
-- 32-02: User approved Sign Up screen visual - no gaps identified, Plan 03 verification-only
-- 32-03: Verification-only pass - no refinements needed per 32-02 review approval
-- 37-01: Used @capacitor/camera@7.0.2 for Capacitor 7.x compatibility (v8 requires Capacitor 8)
-- 37-02: Used underscore prefix (_streak) for unused parameter to maintain API consistency
-- 38-01: Used getAvatarStage(newRank) to derive avatar stage from rank
-- 38-01: Removed auto-close after claim to allow share action before dismissal
-- 39-01: Used underscore prefix for unused totalDP/rankName props to maintain API consistency (values used in share text, not card display)
-- 40-01: Used underscore prefix for unused workoutName/rankName props to maintain API consistency (values used in share text, not card display)
-- 40-01: ShareBottomSheet stays open if user cancels camera - only closes on successful share or explicit cancel
-- 40-02: Used username field as callsign for share card (profile.username maps to callsign prop)
-- 40-02: Type assertion for avatarStage (getAvatarStage returns number, card expects 1|2|3|4|5)
-- 33-01: Reused inline SVG icons from SignUpScreen (no shared component)
-- 33-01: Used navigate(-1) for back arrow navigation
-- 33-01: Added underline styling to Create Account and Forgot Password links per mockup
-- 33-02: User approved Sign In screen visual - no gaps identified, Plan 03 verification-only
-- 33-03: Verification-only pass - no refinements needed per 33-02 review approval
-- 34-01: Implemented complete screen in single commit (all tasks share same file)
-- 34-01: Reused inline ChainLinkCrownLogo pattern from SignInScreen
-- 34-01: Password strength criteria: 8+ chars (1), uppercase (2), number (3), special char (4)
-- 34-02: User approved Email Sign Up screen visual - no gaps identified, Plan 03 verification-only
-- 35-02: User approved Email Sign In screen visual - no gaps identified, Plan 03 may be verification-only
-- 36-01: Implemented all tasks in single commit (all tasks share same file) — All 3 tasks modify the same file and represent cohesive feature
-- 36-01: Security pattern: always show success state regardless of email existence — Prevents email enumeration attacks
-- [Phase 36-02]: Implementation approved with zero visual gaps - Plan 03 will be verification-only
-- [Phase 36-03]: Verification-only execution - no code changes needed, all success criteria met
-- 41-01: Week starts on Sunday (aligns with local week utilities)
-- 41-01: DP compliance calculated as days with any DP action / 7
-- 41-01: Report shows once per week (gated by lastShownWeekStart)
-- 41-01: Always generate at least one highlight (default: Week Complete with top stat)
-- [Phase 41]: weeklyReport notification defaults to enabled at 7pm Sunday (matches claimXP notification timing)
-- [Phase 41]: Deep link /weekly-report uses sessionStorage flag pattern (avoids route conflict with modal-based UI)
-- 41-03: No DP award for weekly report share (informational content, not reward action)
-- 41-03: Share functionality internal to WeeklyReportScreen (no onShare prop pattern)
-- 42-01: Referral code format CALLSIGN-XXXX (4-char alphanumeric suffix)
-- 42-01: referral_code nullable in profiles (generated lazily on first access)
-- 42-01: Client-side code generation to reduce DB round-trips
-- 42-02: Used RANKS array from dpStore for rank name lookup (no separate RANK_INFO)
-- 42-02: Native share uses @capacitor/share, web uses platform-specific URLs
-- 42-02: Instagram web fallback copies text to clipboard (no direct share URL)
-- 42-03: Referral code captured before auth flow, attributed after signup (fire-and-forget)
-- 42-03: capturedReferralCode persisted via zustand partialize for app restart resilience
-- 43-01: grantReferralPremium called after attributeReferral (order matters for referral record existence)
-- 43-01: Fire-and-forget pattern for premium grant (non-blocking UX)
-- 43-01: Edge Function verifies referral record exists before granting (prevents abuse)
-- 43-02: 100 DP fixed reward for recruit completion
-- 43-02: 7-day completion criteria: 7 distinct days with any DP activity
-- 43-02: Fire-and-forget completion check on app mount
-- 43-02: Security definer function for referral status updates
-- 44-01: Types added to existing database.types.ts (not separate src/types/ directory)
-- 44-01: Streak has yesterday grace period - continues if logged yesterday even if not today yet
-- 44-01: MILESTONE_DP rewards: 7d=50, 14d=100, 21d=150, 30d=250, 60d=500, 90d=750
-- 44-02: Tasks 1 and 3 combined into single implementation (same file, cohesive feature)
-- 44-02: Share prompt placeholder implemented for Plan 05 wiring
-- 44-02: Protocol type affects button label: LOG COMPLIANCE (continuous) vs LOCK UP (day_lock)
-- [Phase 44]: Locked DP actions bypass dailyLogs tracking (separate from standard DP flow)
-- [Phase 44]: Guard dailyLogs update for trackable actions only (training/meal/protein/steps/sleep)
-- 44-04: Continuous users get evening reminder at 9pm default, Day Lock users get morning reminder with optional evening check
-- 44-04: Locked protocol notifications added to scheduleAllNotifications and dedicated scheduleLockedProtocolNotifications
-- 44-04: Settings shows notification options only when user has active protocol
-- 44-05: Share cards use inline styles for html-to-image capture (no Tailwind JIT)
-- 44-05: +10 DP for each locked share type (start, milestone)
-- 44-05: One-time gate per protocol ID for start share, per milestone day for milestone share
-- [Phase 44]: LOCKED STREAK card spans full width in stats grid
+- Apple Developer account enrollment submitted, awaiting verification
+- Close v1.5 as-is — App Store submission becomes part of V2 launch phase
+- Reverse trial (7-day free Premium) increases conversion 30-50%
+- Domain: app.welltrained.fitness (Vercel)
 
 ### Pending Todos
 
 - Apple Developer account verification (submitted, awaiting response)
 - Capacitor 7->8 migration needed before April 28, 2026 Apple deadline
-- Phase 36 Complete ✓ (v2.2 Forgot Password Screen)
+- Phase 36 Complete (v2.2 Forgot Password Screen)
 - Phase 35 Plan 03 remaining (v2.2 Email Sign In Form)
 - Phase 34 Plan 03 remaining (v2.2 Email Sign Up Form)
 - Phase 24 (v2.0 App Store Submission) - 3 plans remaining
 
 ### Blockers/Concerns
 
-- Apple Developer enrollment awaiting approval (blocks App Store submission, not development)
-- Capacitor 7->8 migration constrains roadmap end date
+**Apple Developer Account:** Enrollment submitted but awaiting verification. This blocks final App Store submission (Phase 48) but not development work (Phases 45-47).
 
-### v2.3 Requirements Coverage
+**P0 Audit Items:** All P0 and P1 items from AUDIT_REPORT.md mapped to phases 45-47. Must be resolved before Phase 48 submission.
 
-**Phase 41 - Weekly Protocol Report (7 requirements):**
-- WRPT-01, WRPT-02, WRPT-03, WRPT-04, WRPT-05, WRPT-06, WRPT-07
+### v2.4 Requirements Coverage
 
-**Phase 42 - Referral System (6 requirements):**
-- REFR-01, REFR-04, REFR-05, REFR-06, REFR-07, REFR-08
+**Phase 45 - iOS Configuration & Entitlements (3 requirements):**
+- STORE-01, STORE-02, STORE-03
 
-**Phase 43 - Referral Rewards (2 requirements):**
-- REFR-02, REFR-03
+**Phase 46 - Security & UX Fixes (4 requirements):**
+- SEC-01, UX-01, UX-02, UX-03
 
-**Coverage:** 15/15 (100%) ✓
+**Phase 47 - Asset & Code Cleanup (4 requirements):**
+- ASSET-01, ASSET-02, ASSET-03, INFRA-02
+
+**Phase 48 - App Store Submission (3 requirements):**
+- STORE-04, STORE-05, INFRA-01
+
+**Coverage:** 14/14 (100%) ✓
 
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 44-06-PLAN.md (Weekly Report Integration)
-Resume file: None
-Next action: Phase 44 complete - v2.3 milestone complete
+Stopped at: v2.4 roadmap created, ready to begin Phase 45 planning
+Resume file: None (starting fresh milestone)

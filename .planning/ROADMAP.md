@@ -13,6 +13,7 @@
 - v2.2 Auth Flow Redesign (Phases 30-36, in progress)
 - v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07)
 - ✅ **v2.3 Engagement & Growth** (Phases 41-44, shipped 2026-03-07)
+- 🚧 **v2.4 App Store Readiness** (Phases 45-48, in progress)
 
 ## Phases
 
@@ -31,6 +32,76 @@
 **Full details:** [.planning/milestones/v2.3-ROADMAP.md](milestones/v2.3-ROADMAP.md)
 
 </details>
+
+---
+
+## v2.4 App Store Readiness
+
+**Milestone Goal:** Resolve all P0 and P1 blockers identified in AUDIT_REPORT.md to prepare for iOS App Store submission.
+
+### Phases
+
+- [ ] **Phase 45: iOS Configuration & Entitlements** - Fix privacy manifest, APN environment, and Team ID
+- [ ] **Phase 46: Security & UX Fixes** - Close dev fallback, add health disclaimer, fix overflow and compliance bugs
+- [ ] **Phase 47: Asset & Code Cleanup** - Optimize splash/logos, remove .DS_Store and dead code
+- [ ] **Phase 48: App Store Submission** - Complete metadata, verify Xcode build, host privacy policy
+
+### Phase Details
+
+#### Phase 45: iOS Configuration & Entitlements
+**Goal**: iOS native configuration is App Store compliant
+**Depends on**: Nothing (first phase of milestone)
+**Requirements**: STORE-01, STORE-02, STORE-03
+**Success Criteria** (what must be TRUE):
+  1. PrivacyInfo.xcprivacy declares all collected data types (health, fitness, email, photos, usage)
+  2. App.entitlements has aps-environment set to "production" for App Store builds
+  3. apple-app-site-association file contains actual Team ID (no XXXXXXXXXX placeholder)
+**Plans**: TBD
+
+Plans:
+- [ ] 45-01: TBD
+
+#### Phase 46: Security & UX Fixes
+**Goal**: Security vulnerabilities closed and UX issues resolved
+**Depends on**: Nothing (independent of Phase 45)
+**Requirements**: SEC-01, UX-01, UX-02, UX-03
+**Success Criteria** (what must be TRUE):
+  1. Access code validation no longer accepts dev fallback (any 8+ character string)
+  2. User sees visible health/medical disclaimer during onboarding flow
+  3. Workout names display without overflow on Workouts screen Today card
+  4. Recovery day compliance calculation correctly distinguishes 4/4 vs 5/5 scenarios
+**Plans**: TBD
+
+Plans:
+- [ ] 46-01: TBD
+
+#### Phase 47: Asset & Code Cleanup
+**Goal**: Assets optimized and dead code removed
+**Depends on**: Nothing (independent cleanup)
+**Requirements**: ASSET-01, ASSET-02, ASSET-03, INFRA-02
+**Success Criteria** (what must be TRUE):
+  1. Splash screen displays WellTrained branding (no generic dim green glow)
+  2. Icon-only.png and WT Logo.png are optimized (reduced from 3.1 MB each)
+  3. Repository contains no .DS_Store files and .gitignore prevents future additions
+  4. Legacy Onboarding.tsx (1,017 lines) removed from codebase
+**Plans**: TBD
+
+Plans:
+- [ ] 47-01: TBD
+
+#### Phase 48: App Store Submission
+**Goal**: App successfully submitted to App Store
+**Depends on**: Phases 45, 46, 47 (all blockers resolved)
+**Requirements**: STORE-04, STORE-05, INFRA-01
+**Success Criteria** (what must be TRUE):
+  1. App Store Connect has complete metadata (screenshots, description, privacy label)
+  2. Build compiles successfully with latest Xcode and iOS 18 SDK
+  3. Privacy policy is publicly accessible at hosted URL (not just in-app /privacy route)
+  4. App binary uploaded to App Store Connect and passes automated review checks
+**Plans**: TBD
+
+Plans:
+- [ ] 48-01: TBD
 
 ---
 
@@ -320,10 +391,14 @@ Plans:
 
 ## Progress
 
-**Execution Order:** Continue with incomplete phases in v2.2 or v2.0, or start new milestone
+**Execution Order:** Continue with v2.4 App Store Readiness
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
+| 45. iOS Configuration & Entitlements | v2.4 | 0/? | Not started | - |
+| 46. Security & UX Fixes | v2.4 | 0/? | Not started | - |
+| 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
+| 48. App Store Submission | v2.4 | 0/? | Not started | - |
 | 41. Weekly Protocol Report | v2.3 | 3/3 | Complete | 2026-03-07 |
 | 42. Referral System | v2.3 | 3/3 | Complete | 2026-03-07 |
 | 43. Referral Rewards | v2.3 | 2/2 | Complete | 2026-03-07 |

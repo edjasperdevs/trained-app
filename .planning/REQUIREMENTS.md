@@ -63,26 +63,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STORE-01 | TBD | Pending |
-| STORE-02 | TBD | Pending |
-| STORE-03 | TBD | Pending |
-| STORE-04 | TBD | Pending |
-| STORE-05 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| UX-01 | TBD | Pending |
-| UX-02 | TBD | Pending |
-| UX-03 | TBD | Pending |
-| ASSET-01 | TBD | Pending |
-| ASSET-02 | TBD | Pending |
-| ASSET-03 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
+| STORE-01 | Phase 45 | Pending |
+| STORE-02 | Phase 45 | Pending |
+| STORE-03 | Phase 45 | Pending |
+| STORE-04 | Phase 48 | Pending |
+| STORE-05 | Phase 48 | Pending |
+| SEC-01 | Phase 46 | Pending |
+| UX-01 | Phase 46 | Pending |
+| UX-02 | Phase 46 | Pending |
+| UX-03 | Phase 46 | Pending |
+| ASSET-01 | Phase 47 | Pending |
+| ASSET-02 | Phase 47 | Pending |
+| ASSET-03 | Phase 47 | Pending |
+| INFRA-01 | Phase 48 | Pending |
+| INFRA-02 | Phase 47 | Pending |
 
 **Coverage:**
 - v2.4 requirements: 14 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after initial definition*
+*Last updated: 2026-03-07 after roadmap creation*
