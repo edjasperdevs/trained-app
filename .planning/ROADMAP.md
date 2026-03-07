@@ -472,7 +472,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 2/2 plans complete
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -560,7 +560,7 @@ Plans:
 | 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 33. Sign In Screen | 1/3 | In Progress|  | - |
+| 33. Sign In Screen | 2/3 | In Progress|  | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
