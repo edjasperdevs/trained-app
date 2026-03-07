@@ -12,7 +12,7 @@
 - v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
 - v2.2 Auth Flow Redesign (Phases 30-36, in progress)
 - v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07)
-- v2.3 Engagement & Growth (Phases 41-46, in progress)
+- v2.3 Engagement & Growth (Phases 41-43, in progress)
 
 ## v2.3 Engagement & Growth
 
@@ -20,73 +20,42 @@
 
 ### Phases
 
-- [ ] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data and auto-generated highlights
-- [ ] **Phase 42: Weekly Report Distribution** - Push notification trigger and Settings preference
-- [ ] **Phase 43: Weekly Report Sharing** - Share card integration for weekly reports
-- [ ] **Phase 44: Referral Foundation** - Unique user links and Recruit a Sub screen
-- [ ] **Phase 45: Referral Integration** - Deep link handling, signup capture, and recruits list
-- [ ] **Phase 46: Referral Rewards** - RevenueCat promo and DP rewards for completed referrals
+- [ ] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data, highlights, push notification, share card
+- [ ] **Phase 42: Referral System** - Unique links, Recruit a Sub screen, deep link handling, recruits list
+- [ ] **Phase 43: Referral Rewards** - RevenueCat promo for referred users, DP rewards for referrers
 
 ## Phase Details
 
 ### Phase 41: Weekly Protocol Report
-**Goal**: Users see a compelling weekly summary of their protocol performance with auto-generated highlights
+**Goal**: Users see a compelling weekly summary of their protocol performance with auto-generated highlights, receive push notifications, and can share their report
 **Depends on**: Nothing (first phase of v2.3)
-**Requirements**: WRPT-01, WRPT-02, WRPT-03, WRPT-05
+**Requirements**: WRPT-01, WRPT-02, WRPT-03, WRPT-04, WRPT-05, WRPT-06, WRPT-07
 **Success Criteria** (what must be TRUE):
   1. User sees full-screen weekly summary showing DP earned, compliance percentage, streak, and workouts completed for the past 7 days
   2. User sees current rank, DP to next rank, and rank progress bar in the summary
   3. Auto-generated highlights appear based on protein compliance, PRs, and streak milestones (at least one highlight always shows)
   4. In-app trigger shows the report on Sunday after user completes first DP action (once per week)
+  5. Push notification fires on Sunday at 7pm local time and deep links to weekly report screen
+  6. User can toggle weekly report notifications on/off in Settings
+  7. Share button generates weekly report share card and opens native share sheet
 **Plans**: TBD
 
-### Phase 42: Weekly Report Distribution
-**Goal**: Users receive push notifications that trigger the weekly report and can configure when they receive it
-**Depends on**: Phase 41 (report must exist to deliver)
-**Requirements**: WRPT-04, WRPT-07
-**Success Criteria** (what must be TRUE):
-  1. Push notification fires on Sunday at 7pm local time announcing the weekly report is ready
-  2. Tapping the notification deep links to the weekly report screen
-  3. User can toggle weekly report notifications on/off in Settings
-  4. User can configure custom notification time in Settings (default 7pm Sunday)
-**Plans**: TBD
-
-### Phase 43: Weekly Report Sharing
-**Goal**: Users can share their weekly report as a branded card to social media
-**Depends on**: Phase 41 (report must exist to share)
-**Requirements**: WRPT-06
-**Success Criteria** (what must be TRUE):
-  1. User sees "Share My Week" button on the weekly report screen
-  2. Share button generates weekly report share card with DP earned, compliance %, streak, and top highlight
-  3. Native share sheet opens with the generated card image
-  4. Sharing does not award DP (report viewing is the reward)
-**Plans**: TBD
-
-### Phase 44: Referral Foundation
-**Goal**: Users have unique referral links they can share to invite new users
+### Phase 42: Referral System
+**Goal**: Users have unique referral links they can share to invite new users, with deep link capture and recruits list
 **Depends on**: Nothing (parallel to weekly report work)
-**Requirements**: REFR-01, REFR-04
+**Requirements**: REFR-01, REFR-04, REFR-05, REFR-06, REFR-07, REFR-08
 **Success Criteria** (what must be TRUE):
-  1. User has unique referral link with their callsign and short code (e.g., app.welltrained.fitness/join/ALPHA-ABC123)
-  2. User sees Recruit a Sub screen displaying their referral link
-  3. User can tap "Copy Link" button to copy referral link to clipboard with haptic confirmation
-  4. Referral tracking table exists in Supabase with columns for referrer, recruit, status, created_at, completed_at
+  1. User has unique referral link with their callsign and short code (e.g., app.welltrained.fitness/join/CALLSIGN-ABC1)
+  2. User sees Recruit a Sub screen displaying their referral link with copy button and social share buttons
+  3. Referral tracking table exists in Supabase with columns for referrer, recruit, status, created_at, completed_at
+  4. Deep link handling captures referral code before signup and stores it for post-signup attribution
+  5. Recruits list shows recruit callsign, rank, status (pending/completed), and DP earned (0 or 100)
+  6. Settings has "Recruit a Sub" entry under Protocol section that navigates to referral screen
 **Plans**: TBD
 
-### Phase 45: Referral Integration
-**Goal**: Referral links route correctly, capture signups, display recruits, and surface the feature throughout the app
-**Depends on**: Phase 44 (referral links and tracking must exist)
-**Requirements**: REFR-05, REFR-06, REFR-07, REFR-08
-**Success Criteria** (what must be TRUE):
-  1. Social share buttons (Instagram, X, Messages) on Recruit a Sub screen share referral link with branded copy
-  2. Recruits list shows recruit callsign, rank, status (pending/completed), and DP earned (0 or 100)
-  3. Deep link handling captures referral code before signup and stores it for post-signup attribution
-  4. Settings has "Recruit a Sub" entry under Protocol section that navigates to referral screen
-**Plans**: TBD
-
-### Phase 46: Referral Rewards
+### Phase 43: Referral Rewards
 **Goal**: Referred users receive Premium trial and referrers earn DP when recruits complete first week
-**Depends on**: Phases 44 and 45 (referral tracking and capture must work)
+**Depends on**: Phase 42 (referral tracking and capture must work)
 **Requirements**: REFR-02, REFR-03
 **Success Criteria** (what must be TRUE):
   1. Referred user receives 7-day Premium access via RevenueCat promotional entitlement on signup
@@ -547,17 +516,14 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 41 -> 42 -> 43 -> 44 -> 45 -> 46 (v2.3), then continue with 36 (v2.2) and 24 (v2.0)
+**Execution Order:** 41 -> 42 -> 43 (v2.3), then continue with 36 (v2.2) and 24 (v2.0)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 41. Weekly Protocol Report | v2.3 | 0/TBD | Not started | - |
-| 42. Weekly Report Distribution | v2.3 | 0/TBD | Not started | - |
-| 43. Weekly Report Sharing | v2.3 | 0/TBD | Not started | - |
-| 44. Referral Foundation | v2.3 | 0/TBD | Not started | - |
-| 45. Referral Integration | v2.3 | 0/TBD | Not started | - |
-| 46. Referral Rewards | v2.3 | 0/TBD | Not started | - |
-| 36. Forgot Password Screen | 2/3 | In Progress|  | - |
+| 42. Referral System | v2.3 | 0/TBD | Not started | - |
+| 43. Referral Rewards | v2.3 | 0/TBD | Not started | - |
+| 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
 **v2.3 Total Plans:** TBD (will be determined during phase planning)

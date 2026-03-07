@@ -505,18 +505,18 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | WRPT-01 | Phase 41 | Pending |
 | WRPT-02 | Phase 41 | Pending |
 | WRPT-03 | Phase 41 | Pending |
-| WRPT-04 | Phase 42 | Pending |
+| WRPT-04 | Phase 41 | Pending |
 | WRPT-05 | Phase 41 | Pending |
-| WRPT-06 | Phase 43 | Pending |
-| WRPT-07 | Phase 42 | Pending |
-| REFR-01 | Phase 44 | Pending |
-| REFR-02 | Phase 46 | Pending |
-| REFR-03 | Phase 46 | Pending |
-| REFR-04 | Phase 44 | Pending |
-| REFR-05 | Phase 45 | Pending |
-| REFR-06 | Phase 45 | Pending |
-| REFR-07 | Phase 45 | Pending |
-| REFR-08 | Phase 45 | Pending |
+| WRPT-06 | Phase 41 | Pending |
+| WRPT-07 | Phase 41 | Pending |
+| REFR-01 | Phase 42 | Pending |
+| REFR-02 | Phase 43 | Pending |
+| REFR-03 | Phase 43 | Pending |
+| REFR-04 | Phase 42 | Pending |
+| REFR-05 | Phase 42 | Pending |
+| REFR-06 | Phase 42 | Pending |
+| REFR-07 | Phase 42 | Pending |
+| REFR-08 | Phase 42 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total

@@ -14,7 +14,7 @@ Plan: —
 Status: Roadmap defined, ready for phase planning
 Last activity: 2026-03-07 — v2.3 roadmap created
 
-Progress: ⬜⬜⬜⬜⬜⬜ (0/6 phases complete)
+Progress: ⬜⬜⬜ (0/3 phases complete)
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Progress: ⬜⬜⬜⬜⬜⬜ (0/6 phases complete)
 - v2.2.1 Social Sharing: 4 phases, 6 plans (6/6 complete, shipped 2026-03-07)
 
 **v2.3 Engagement & Growth:**
-- Total phases: 6 (Phases 41-46)
+- Total phases: 3 (Phases 41-43)
 - Total plans: TBD (will be determined during phase planning)
 - Plans complete: 0
 
@@ -45,10 +45,8 @@ Progress: ⬜⬜⬜⬜⬜⬜ (0/6 phases complete)
 ### Decisions
 
 **v2.3 Roadmap:**
-- 6 phases following feature brief implementation order (Weekly Report → Referral System)
-- Weekly Report: 3 phases (core report, distribution/notifications, share card)
-- Referrals: 3 phases (foundation, integration, rewards)
-- Phase 41 independent of referral work (can be executed in parallel if needed)
+- 3 phases: Weekly Report (all 7 WRPT reqs) → Referral System (6 REFR reqs) → Referral Rewards (2 REFR reqs)
+- Condensed from 6 phases per user preference
 - Push notifications reuse v1.5 infrastructure (APNs direct, no Firebase)
 - Deep linking reuses v1.5 infrastructure (Universal Links)
 - Share cards reuse v2.2.1 infrastructure (html-to-image, native sheet)
@@ -131,24 +129,14 @@ Progress: ⬜⬜⬜⬜⬜⬜ (0/6 phases complete)
 
 ### v2.3 Requirements Coverage
 
-**Weekly Protocol Report (7 requirements):**
-- WRPT-01 → Phase 41 (full-screen summary)
-- WRPT-02 → Phase 41 (rank and progress)
-- WRPT-03 → Phase 41 (auto-generated highlights)
-- WRPT-04 → Phase 42 (push notification trigger)
-- WRPT-05 → Phase 41 (in-app trigger)
-- WRPT-06 → Phase 43 (share card)
-- WRPT-07 → Phase 42 (notification preference)
+**Phase 41 - Weekly Protocol Report (7 requirements):**
+- WRPT-01, WRPT-02, WRPT-03, WRPT-04, WRPT-05, WRPT-06, WRPT-07
 
-**Referrals (8 requirements):**
-- REFR-01 → Phase 44 (unique referral link)
-- REFR-02 → Phase 46 (7-day Premium for referred users)
-- REFR-03 → Phase 46 (100 DP reward for referrer)
-- REFR-04 → Phase 44 (Recruit a Sub screen)
-- REFR-05 → Phase 45 (social share buttons)
-- REFR-06 → Phase 45 (recruits list)
-- REFR-07 → Phase 45 (deep link handling)
-- REFR-08 → Phase 45 (Settings entry)
+**Phase 42 - Referral System (6 requirements):**
+- REFR-01, REFR-04, REFR-05, REFR-06, REFR-07, REFR-08
+
+**Phase 43 - Referral Rewards (2 requirements):**
+- REFR-02, REFR-03
 
 **Coverage:** 15/15 (100%) ✓
 
