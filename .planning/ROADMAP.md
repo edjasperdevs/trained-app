@@ -395,7 +395,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 45. iOS Configuration & Entitlements | 1/1 | Complete   | 2026-03-07 | - |
+| 45. iOS Configuration & Entitlements | 1/1 | Complete    | 2026-03-07 | - |
 | 46. Security & UX Fixes | v2.4 | 0/? | Not started | - |
 | 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
