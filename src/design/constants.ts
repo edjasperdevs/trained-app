@@ -73,6 +73,8 @@ const DP_VALUES: Record<DPAction, number> = {
   protein: 25,
   steps: 10,
   sleep: 10,
+  locked: 15,           // daily compliance bonus (bypass daily cap)
+  locked_milestone: 0,  // variable, handled separately
 }
 
 /**

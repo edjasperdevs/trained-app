@@ -15,6 +15,8 @@ function getGlobalShowDPToast() {
 }
 
 export type DPAction = 'training' | 'meal' | 'protein' | 'steps' | 'sleep'
+  | 'locked'           // +15 DP/day for daily compliance
+  | 'locked_milestone' // milestone bonus (50-750 DP)
 
 export const DP_VALUES: Record<DPAction, number> = {
   training: 50,
@@ -22,6 +24,18 @@ export const DP_VALUES: Record<DPAction, number> = {
   protein: 25,
   steps: 10,
   sleep: 10,
+  locked: 15,           // daily compliance bonus
+  locked_milestone: 0,  // variable, handled separately
+}
+
+// Locked Protocol milestone DP values
+const LOCKED_MILESTONE_DP: Record<number, number> = {
+  7: 50,
+  14: 100,
+  21: 150,
+  30: 250,
+  60: 500,
+  90: 750,
 }
 
 // Master spec rank table — ~24-27 weeks to Master rank at consistent daily activity
@@ -82,6 +96,9 @@ interface DPStore {
   awardShareRankUpDP: (rankName: string) => void
   // Referral DP action
   awardReferralDP: (recruitId: string) => { dpAwarded: number; rankedUp: boolean; newRank: number }
+  // Locked Protocol DP actions (bypass daily cap)
+  awardLockedDP: () => { dpAwarded: number; rankedUp: boolean; newRank: number }
+  awardLockedMilestoneDP: (milestone: number) => { dpAwarded: number; rankedUp: boolean; newRank: number }
 }
 
 /** Calculate rank from totalDP using the rank threshold table */
@@ -144,19 +161,26 @@ export const useDPStore = create<DPStore>()(
         const newRank = calculateRank(newTotalDP)
         const rankedUp = newRank > oldRank
 
-        // Update daily log
-        const actionKey = action === 'meal' ? 'meals' : action
-        const updatedLog: DailyDP = {
-          ...todayLog,
-          [actionKey]: todayLog[actionKey] + 1,
-          total: todayLog.total + dpValue,
-        }
+        // Update daily log (only for standard trackable actions)
+        type TrackableAction = 'training' | 'meal' | 'protein' | 'steps' | 'sleep'
+        const trackableActions: TrackableAction[] = ['training', 'meal', 'protein', 'steps', 'sleep']
+        const isTrackable = trackableActions.includes(action as TrackableAction)
 
-        // Update daily logs array
-        const existingIndex = state.dailyLogs.findIndex(log => log.date === today)
-        const newDailyLogs = existingIndex >= 0
-          ? state.dailyLogs.map((log, i) => i === existingIndex ? updatedLog : log)
-          : [...state.dailyLogs, updatedLog]
+        let newDailyLogs = state.dailyLogs
+        if (isTrackable) {
+          const actionKey = action === 'meal' ? 'meals' : (action as keyof Omit<DailyDP, 'date' | 'total' | 'meals'>)
+          const updatedLog: DailyDP = {
+            ...todayLog,
+            [actionKey]: todayLog[actionKey] + 1,
+            total: todayLog.total + dpValue,
+          }
+
+          // Update daily logs array
+          const existingIndex = state.dailyLogs.findIndex(log => log.date === today)
+          newDailyLogs = existingIndex >= 0
+            ? state.dailyLogs.map((log, i) => i === existingIndex ? updatedLog : log)
+            : [...state.dailyLogs, updatedLog]
+        }
 
         // Update obedience streak
         let newStreak = state.obedienceStreak
@@ -345,6 +369,54 @@ export const useDPStore = create<DPStore>()(
         // Fire DP toast notification
         try {
           getGlobalShowDPToast()?.(dpValue, 'referral')
+        } catch { /* non-critical */ }
+
+        return { dpAwarded: dpValue, rankedUp, newRank }
+      },
+
+      awardLockedDP: () => {
+        const state = get()
+        const dpValue = 15 // Fixed daily bonus, no archetype modifier
+        const newTotalDP = state.totalDP + dpValue
+        const oldRank = state.currentRank
+        const newRank = calculateRank(newTotalDP)
+        const rankedUp = newRank > oldRank
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: rankedUp ? newRank : state.lastCelebratedRank,
+        })
+
+        // Fire DP toast notification
+        try {
+          getGlobalShowDPToast()?.(dpValue, 'locked')
+        } catch { /* non-critical */ }
+
+        return { dpAwarded: dpValue, rankedUp, newRank }
+      },
+
+      awardLockedMilestoneDP: (milestone: number) => {
+        const state = get()
+        const dpValue = LOCKED_MILESTONE_DP[milestone] || 0
+        if (dpValue === 0) {
+          return { dpAwarded: 0, rankedUp: false, newRank: state.currentRank }
+        }
+
+        const newTotalDP = state.totalDP + dpValue
+        const oldRank = state.currentRank
+        const newRank = calculateRank(newTotalDP)
+        const rankedUp = newRank > oldRank
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: rankedUp ? newRank : state.lastCelebratedRank,
+        })
+
+        // Fire DP toast notification
+        try {
+          getGlobalShowDPToast()?.(dpValue, 'locked_milestone')
         } catch { /* non-critical */ }
 
         return { dpAwarded: dpValue, rankedUp, newRank }
