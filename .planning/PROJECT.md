@@ -48,21 +48,23 @@ Previous milestones delivered:
 - ✓ Workout share card with camera selfie compositing, +5 DP daily reward — v2.2.1
 - ✓ Compliance share card for 5/5 days with +5 DP daily reward — v2.2.1
 - ✓ Share infrastructure (html-to-image, @capacitor/share, web download fallback) — v2.2.1
+- ✓ Weekly Protocol Report (Sunday summaries, auto-generated highlights, push notifications, share cards) — v2.3
+- ✓ Recruit a Sub referral system (unique CALLSIGN-XXXX links, deep link capture, recruits tracking) — v2.3
+- ✓ Referral rewards (7-day Premium for recruits via RevenueCat promo, 100 DP for referrers) — v2.3
+- ✓ Locked Protocol (streak-based accountability with Continuous/Day Lock types, daily logging +15 DP, milestone bonuses 50-750 DP) — v2.3
 
 ### Active
 
-**Current Milestone: v2.3 Engagement & Growth**
+**Current Milestone:** Planning next milestone
 
-**Goal:** Add retention and growth features — Weekly Protocol Report (Sunday summaries) and Recruit a Sub (referral system with DP rewards).
+**Recently Shipped (v2.3):**
+- Weekly Protocol Report with auto-generated highlights (protein compliance, PRs, streak milestones)
+- Referral system with promotional entitlement flow for 7-day Premium trials
+- Locked Protocol streak tracker with protocol-aware notifications
+- Complete engagement and growth feature set
 
-**Target features:**
-- Weekly Protocol Report full-screen summary (push notification + in-app trigger)
-- Auto-generated highlights from DP, workouts, PRs, streak
-- Share card integration for weekly report
-- Recruit a Sub referral system with unique user links
-- 7-day Premium for referred users via RevenueCat promotional entitlement
-- 100 DP reward for referrer when recruit completes first week
-- Referrals table and tracking in Supabase
+**Next Up:**
+- TBD via `/gsd:new-milestone`
 
 ### Out of Scope
 
@@ -135,6 +137,12 @@ Previous milestones delivered:
 | Splash screen | Branded loading experience during app initialization | ✓ Good |
 | html-to-image for share cards | DOM-to-PNG generation, works with native share sheet | ✓ Good |
 | Daily/per-rank DP gating | Prevents share spam while rewarding engagement | ✓ Good |
+| Week starts on Sunday | Aligns with local week utilities, Sunday 7pm push notifications | ✓ Good |
+| CALLSIGN-XXXX referral codes | Personal + shareable format using username + 4-char suffix | ✓ Good |
+| Fire-and-forget premium grant | Non-blocking UX, Edge Function handles RevenueCat promo entitlement | ✓ Good |
+| Locked Protocol types | Continuous (evening reminder) vs Day Lock (morning reminder) serves different user preferences | ✓ Good |
+| Milestone DP escalation | 7d=50, 14d=100, 21d=150, 30d=250, 60d=500, 90d=750 — rewards long-term commitment | ✓ Good |
+| Streak yesterday grace | Allows user to log "today" if they logged yesterday but haven't yet today | ✓ Good |
 
 ---
-*Last updated: 2026-03-07 — v2.3 Engagement & Growth milestone started*
+*Last updated: 2026-03-07 after v2.3 Engagement & Growth milestone*
