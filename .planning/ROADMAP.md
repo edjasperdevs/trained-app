@@ -125,8 +125,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 35-01-PLAN.md -- Implement Email Sign In form with fields, validation, error handling, and Supabase auth
-- [ ] 35-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [x] 35-01-PLAN.md -- Implement Email Sign In form with fields, validation, error handling, and Supabase auth
+- [x] 35-02-PLAN.md -- Review implementation against mockup, document visual gaps (User approved - zero gaps)
 - [ ] 35-03-PLAN.md -- Pixel-polish form styling, error states, animations based on review findings
 
 ### Phase 36: Forgot Password Screen
@@ -469,7 +469,7 @@ Plans:
 | 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 33. Sign In Screen | 3/3 | Complete    | 2026-03-07 | - |
 | 34. Email Sign Up Form | 2/3 | Complete    | 2026-03-07 | - |
-| 35. Email Sign In Form | 1/3 | Complete    | 2026-03-07 | - |
+| 35. Email Sign In Form | 2/3 | Complete    | 2026-03-07 | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
