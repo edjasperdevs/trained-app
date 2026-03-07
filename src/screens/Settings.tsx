@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar, AppHeader } from '@/components'
-import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw } from 'lucide-react'
+import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw, Users } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { isNative } from '@/lib/platform'
@@ -857,6 +857,28 @@ export function Settings() {
                 Log your weight daily to track your progress
               </p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Recruit a Sub */}
+        <Card className="py-0">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+              Protocol
+            </h3>
+            <button
+              onClick={() => navigate('/recruit')}
+              className="w-full flex items-center justify-between p-3 transition-all duration-150 rounded bg-muted hover:bg-muted/80"
+            >
+              <div className="flex items-center gap-3">
+                <Users size={20} className="text-primary" />
+                <div className="text-left">
+                  <p className="font-medium text-sm">Recruit a Sub</p>
+                  <p className="text-xs text-muted-foreground">Earn 100 DP when recruits complete their first week</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </button>
           </CardContent>
         </Card>
 
