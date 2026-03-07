@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { WeightChart, ProgressBar, AppHeader } from '@/components'
-import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw, Users } from 'lucide-react'
+import { PartyPopper, ChevronDown, UtensilsCrossed, CheckCircle2, Gift, Dumbbell, TrendingDown, TrendingUp, Minus, BarChart3, ChevronRight, CheckCircle, Award, Bell, Loader2, Crown, ExternalLink, RefreshCw, Users, Lock } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import { confirmAction } from '@/lib/confirm'
 import { isNative } from '@/lib/platform'
@@ -22,6 +22,7 @@ import {
   useRemindersStore,
   useAchievementsStore,
   useSubscriptionStore,
+  useLockedStore,
   toast,
   DayOfWeek,
   ReminderType,
@@ -34,7 +35,7 @@ import { ArchetypeSelector } from '@/components'
 import { formatWeight, getWeightUnit, toDisplayWeight, toInternalWeight } from '@/lib/units'
 import { friendlyError } from '@/lib/errors'
 import { getSupabaseClient } from '@/lib/supabase'
-import { scheduleAllNotifications } from '@/lib/notifications'
+import { scheduleAllNotifications, scheduleLockedProtocolNotifications } from '@/lib/notifications'
 import { getLocalDateString } from '@/lib/dateUtils'
 import { isObject, isValidMacroTargets, isValidWorkoutLog, isValidDailyLog, isArray } from '@/lib/validation'
 import { cn } from '@/lib/cn'
@@ -70,6 +71,12 @@ export function Settings() {
   const notificationPreferences = useRemindersStore((state) => state.notificationPreferences)
   const setNotificationPreference = useRemindersStore((state) => state.setNotificationPreference)
   const setNotificationTime = useRemindersStore((state) => state.setNotificationTime)
+  const setLockedProtocolEnabled = useRemindersStore((state) => state.setLockedProtocolEnabled)
+  const setLockedProtocolTime = useRemindersStore((state) => state.setLockedProtocolTime)
+  const setLockedEveningReminderEnabled = useRemindersStore((state) => state.setLockedEveningReminderEnabled)
+  const setLockedEveningReminderTime = useRemindersStore((state) => state.setLockedEveningReminderTime)
+
+  const activeProtocol = useLockedStore((state) => state.activeProtocol)
 
   const [showDangerZone, setShowDangerZone] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
@@ -879,6 +886,19 @@ export function Settings() {
               </div>
               <ChevronRight size={20} className="text-muted-foreground" />
             </button>
+            <button
+              onClick={() => navigate('/locked-protocol')}
+              className="w-full flex items-center justify-between p-3 mt-2 transition-all duration-150 rounded bg-muted hover:bg-muted/80"
+            >
+              <div className="flex items-center gap-3">
+                <Lock size={20} className="text-primary" />
+                <div className="text-left">
+                  <p className="font-medium text-sm">Locked Protocol</p>
+                  <p className="text-xs text-muted-foreground">Streak-based accountability tracker</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-muted-foreground" />
+            </button>
           </CardContent>
         </Card>
 
@@ -988,6 +1008,134 @@ export function Settings() {
                     )}
                   </div>
                 ))}
+
+                {/* Locked Protocol Notification */}
+                <div className="rounded bg-muted p-3">
+                  <button
+                    role="switch"
+                    aria-checked={notificationPreferences.lockedProtocol.enabled}
+                    onClick={() => {
+                      const newEnabled = !notificationPreferences.lockedProtocol.enabled
+                      setLockedProtocolEnabled(newEnabled)
+                      // Reschedule locked notifications
+                      scheduleLockedProtocolNotifications(
+                        { ...notificationPreferences.lockedProtocol, enabled: newEnabled },
+                        !!activeProtocol,
+                        false // hasLoggedToday - we don't check here, scheduling handles it
+                      )
+                    }}
+                    className="w-full flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Lock size={20} className="text-muted-foreground" />
+                      <div className="text-left">
+                        <p className="font-medium text-sm">Locked Protocol</p>
+                        <p className="text-xs text-muted-foreground">Reminder based on your protocol type</p>
+                      </div>
+                    </div>
+                    <div className={cn(
+                      'w-11 h-6 transition-all duration-300 flex items-center rounded',
+                      notificationPreferences.lockedProtocol.enabled ? 'bg-primary justify-end' : 'bg-card justify-start'
+                    )}>
+                      <div className={cn(
+                        'w-5 h-5 mx-0.5 rounded-sm transition-all duration-300',
+                        notificationPreferences.lockedProtocol.enabled ? 'bg-primary-foreground' : 'bg-muted-foreground/50'
+                      )} />
+                    </div>
+                  </button>
+
+                  {notificationPreferences.lockedProtocol.enabled && activeProtocol && (
+                    <div className="mt-3 pl-8 space-y-3">
+                      {/* Reminder time */}
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">
+                          {activeProtocol.protocolType === 'day_lock' ? 'Morning Reminder' : 'Evening Reminder'}
+                        </label>
+                        <input
+                          type="time"
+                          value={`${String(notificationPreferences.lockedProtocol.time.hour).padStart(2, '0')}:${String(notificationPreferences.lockedProtocol.time.minute).padStart(2, '0')}`}
+                          onChange={(e) => {
+                            const [h, m] = e.target.value.split(':').map(Number)
+                            if (!isNaN(h) && !isNaN(m)) {
+                              setLockedProtocolTime(h, m)
+                              scheduleLockedProtocolNotifications(
+                                { ...notificationPreferences.lockedProtocol, time: { hour: h, minute: m } },
+                                true,
+                                false
+                              )
+                            }
+                          }}
+                          className="bg-transparent text-sm text-primary font-digital border border-border rounded px-2 py-1 outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      {/* Day Lock: optional evening reminder */}
+                      {activeProtocol.protocolType === 'day_lock' && (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Bell size={16} className="text-muted-foreground" />
+                              <div>
+                                <p className="text-sm">Evening Check</p>
+                                <p className="text-xs text-muted-foreground">Optional end-of-day reminder</p>
+                              </div>
+                            </div>
+                            <button
+                              role="switch"
+                              aria-checked={notificationPreferences.lockedProtocol.eveningReminder.enabled}
+                              onClick={() => {
+                                const newEnabled = !notificationPreferences.lockedProtocol.eveningReminder.enabled
+                                setLockedEveningReminderEnabled(newEnabled)
+                                scheduleLockedProtocolNotifications(
+                                  {
+                                    ...notificationPreferences.lockedProtocol,
+                                    eveningReminder: { ...notificationPreferences.lockedProtocol.eveningReminder, enabled: newEnabled }
+                                  },
+                                  true,
+                                  false
+                                )
+                              }}
+                              className={cn(
+                                'w-9 h-5 transition-all duration-300 flex items-center rounded',
+                                notificationPreferences.lockedProtocol.eveningReminder.enabled ? 'bg-primary justify-end' : 'bg-card justify-start'
+                              )}
+                            >
+                              <div className={cn(
+                                'w-4 h-4 mx-0.5 rounded-sm transition-all duration-300',
+                                notificationPreferences.lockedProtocol.eveningReminder.enabled ? 'bg-primary-foreground' : 'bg-muted-foreground/50'
+                              )} />
+                            </button>
+                          </div>
+
+                          {notificationPreferences.lockedProtocol.eveningReminder.enabled && (
+                            <div className="pl-6">
+                              <label className="text-xs text-muted-foreground block mb-1">Evening Time</label>
+                              <input
+                                type="time"
+                                value={`${String(notificationPreferences.lockedProtocol.eveningReminder.time.hour).padStart(2, '0')}:${String(notificationPreferences.lockedProtocol.eveningReminder.time.minute).padStart(2, '0')}`}
+                                onChange={(e) => {
+                                  const [h, m] = e.target.value.split(':').map(Number)
+                                  if (!isNaN(h) && !isNaN(m)) {
+                                    setLockedEveningReminderTime(h, m)
+                                    scheduleLockedProtocolNotifications(
+                                      {
+                                        ...notificationPreferences.lockedProtocol,
+                                        eveningReminder: { ...notificationPreferences.lockedProtocol.eveningReminder, time: { hour: h, minute: m } }
+                                      },
+                                      true,
+                                      false
+                                    )
+                                  }
+                                }}
+                                className="bg-transparent text-sm text-primary font-digital border border-border rounded px-2 py-1 outline-none focus:border-primary"
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

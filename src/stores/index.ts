@@ -47,3 +47,6 @@ export type { WeeklyStats } from './weeklyReportStore'
 
 export { useReferralStore } from './referralStore'
 export type { Recruit } from './referralStore'
+
+export { useLockedStore, MILESTONES, MILESTONE_DP, getNextMilestone } from './lockedStore'
+export type { ProtocolType, ProtocolStatus, LockedProtocol } from './lockedStore'
