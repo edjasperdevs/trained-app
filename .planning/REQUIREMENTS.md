@@ -502,6 +502,21 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | SHARE-13 | Phase 40 | Complete |
 | SHARE-14 | Phase 40 | Complete |
 | SHARE-15 | Phase 37 | Complete |
+| WRPT-01 | Phase 41 | Pending |
+| WRPT-02 | Phase 41 | Pending |
+| WRPT-03 | Phase 41 | Pending |
+| WRPT-04 | Phase 42 | Pending |
+| WRPT-05 | Phase 41 | Pending |
+| WRPT-06 | Phase 43 | Pending |
+| WRPT-07 | Phase 42 | Pending |
+| REFR-01 | Phase 44 | Pending |
+| REFR-02 | Phase 46 | Pending |
+| REFR-03 | Phase 46 | Pending |
+| REFR-04 | Phase 44 | Pending |
+| REFR-05 | Phase 45 | Pending |
+| REFR-06 | Phase 45 | Pending |
+| REFR-07 | Phase 45 | Pending |
+| REFR-08 | Phase 45 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
@@ -509,9 +524,9 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - v2.2 requirements: 34 total
 - v2.2.1 requirements: 15 total
 - v2.3 requirements: 15 total
-- Total mapped to phases: 140
-- Unmapped: 15 (v2.3 pending roadmap)
+- Total mapped to phases: 155
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1), 2026-03-07 (v2.3)*
-*Last updated: 2026-03-07 -- v2.3 Engagement & Growth requirements defined*
+*Last updated: 2026-03-07 -- v2.3 Engagement & Growth roadmap created*

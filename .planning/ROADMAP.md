@@ -485,7 +485,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -557,7 +557,7 @@ Plans:
 | 44. Referral Foundation | v2.3 | 0/TBD | Not started | - |
 | 45. Referral Integration | v2.3 | 0/TBD | Not started | - |
 | 46. Referral Rewards | v2.3 | 0/TBD | Not started | - |
-| 36. Forgot Password Screen | 1/3 | In Progress|  | - |
+| 36. Forgot Password Screen | 2/3 | In Progress|  | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
 **v2.3 Total Plans:** TBD (will be determined during phase planning)
