@@ -1,6 +1,7 @@
 import { App } from '@capacitor/app'
 import { supabase } from '@/lib/supabase'
 import { isNative } from '@/lib/platform'
+import { useReferralStore } from '@/stores/referralStore'
 
 // Allowed URL schemes and hosts for deep links
 const ALLOWED_SCHEMES = ['https', 'capacitor', 'welltrained']
@@ -55,6 +56,17 @@ async function handleDeepLink(url: string, navigate: (path: string) => void) {
 
     const parsed = new URL(url)
     const hashParams = new URLSearchParams(parsed.hash.substring(1))
+
+    // Handle referral deep links first (before auth flow checks)
+    if (parsed.pathname.startsWith('/join/')) {
+      const code = parsed.pathname.replace('/join/', '')
+      if (code && code.includes('-')) {
+        useReferralStore.getState().setCapturedCode(code)
+        // Navigate to signup to complete referral
+        navigate('/auth/signup')
+        return
+      }
+    }
 
     const accessToken = hashParams.get('access_token')
     const refreshToken = hashParams.get('refresh_token')

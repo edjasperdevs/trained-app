@@ -19,11 +19,15 @@ interface ReferralStore {
   referralCode: string | null
   recruits: Recruit[]
   isLoading: boolean
+  capturedReferralCode: string | null // Code captured from deep link (pre-signup)
 
   // Actions
   fetchReferralCode: () => Promise<string>
   fetchRecruits: () => Promise<void>
   getReferralLink: () => string
+  setCapturedCode: (code: string) => void // Store captured code
+  clearCapturedCode: () => void
+  attributeReferral: () => Promise<void> // Create referral record post-signup
 
   // Computed helpers
   pendingCount: () => number
@@ -50,6 +54,7 @@ const INITIAL_STATE = {
   referralCode: null as string | null,
   recruits: [] as Recruit[],
   isLoading: false,
+  capturedReferralCode: null as string | null,
 }
 
 export const useReferralStore = create<ReferralStore>()(
@@ -189,12 +194,94 @@ export const useReferralStore = create<ReferralStore>()(
         return get().recruits.reduce((sum, r) => sum + r.dpEarned, 0)
       },
 
+      setCapturedCode: (code: string): void => {
+        // Validate code format (contains hyphen, alphanumeric)
+        if (!code || !code.includes('-')) {
+          console.warn('[referralStore] Invalid referral code format:', code)
+          return
+        }
+        // Check alphanumeric pattern (CALLSIGN-XXXX format)
+        const isValidFormat = /^[A-Z0-9]+-[A-Z0-9]{4}$/i.test(code)
+        if (!isValidFormat) {
+          console.warn('[referralStore] Invalid referral code format:', code)
+          return
+        }
+        set({ capturedReferralCode: code.toUpperCase() })
+      },
+
+      clearCapturedCode: (): void => {
+        set({ capturedReferralCode: null })
+      },
+
+      attributeReferral: async (): Promise<void> => {
+        const { capturedReferralCode } = get()
+        if (!capturedReferralCode || !supabase) {
+          return
+        }
+
+        const user = useAuthStore.getState().user
+        if (!user) {
+          console.warn('[referralStore] No user for referral attribution')
+          return
+        }
+
+        try {
+          // Query profiles to find referrer by referral_code
+          const { data: referrerProfile, error: referrerError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('referral_code', capturedReferralCode)
+            .single()
+
+          if (referrerError || !referrerProfile) {
+            console.warn('[referralStore] Referrer not found for code:', capturedReferralCode)
+            get().clearCapturedCode()
+            return
+          }
+
+          // Don't allow self-referral
+          if (referrerProfile.id === user.id) {
+            console.warn('[referralStore] Self-referral not allowed')
+            get().clearCapturedCode()
+            return
+          }
+
+          // Insert into referrals table
+          const { error: insertError } = await supabase
+            .from('referrals')
+            .insert({
+              referrer_id: referrerProfile.id,
+              recruit_id: user.id,
+              referral_code_used: capturedReferralCode,
+              status: 'pending',
+            })
+
+          if (insertError) {
+            // Handle duplicate gracefully (user already referred)
+            if (insertError.code === '23505') {
+              console.log('[referralStore] User already has a referral record')
+            } else {
+              console.error('[referralStore] Error creating referral:', insertError)
+            }
+          }
+
+          // Clear captured code after successful insert or handled duplicate
+          get().clearCapturedCode()
+        } catch (error) {
+          console.error('[referralStore] Error in attributeReferral:', error)
+        }
+      },
+
       reset: () => {
         set({ ...INITIAL_STATE })
       },
     }),
     {
       name: 'trained-referral',
+      partialize: (state) => ({
+        // Persist capturedReferralCode so it survives app restart before signup completes
+        capturedReferralCode: state.capturedReferralCode,
+      }),
     }
   )
 )
