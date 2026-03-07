@@ -554,7 +554,7 @@ Plans:
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
-| 37. Share Infrastructure | 2/2 | Complete   | 2026-03-07 | - |
+| 37. Share Infrastructure | 2/2 | Complete    | 2026-03-07 | - |
 | 38. Rank-Up Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
