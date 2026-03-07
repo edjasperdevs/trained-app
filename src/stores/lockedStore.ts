@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '@/lib/supabase'
 import { getLocalDateString, getLocalDaysDifference } from '@/lib/dateUtils'
+import { useDPStore } from './dpStore'
 
 export type ProtocolType = 'continuous' | 'day_lock'
 export type ProtocolStatus = 'active' | 'ended' | 'broken'
@@ -30,7 +31,11 @@ interface LockedState {
   // Actions
   fetchProtocol: () => Promise<void>
   startProtocol: (protocolType: ProtocolType, goalDays: number) => Promise<void>
-  logCompliance: () => Promise<{ dpAwarded: number; milestoneReached: number | null }>
+  logCompliance: () => Promise<{
+    dpAwarded: number
+    milestoneReached: number | null
+    rankedUp: boolean
+  }>
   endProtocol: () => Promise<void>
   checkMilestones: () => number | null // returns milestone day if just reached
   resetStreak: () => void
@@ -200,7 +205,7 @@ export const useLockedStore = create<LockedState>()(
       logCompliance: async () => {
         const state = get()
         if (!state.activeProtocol || state.hasLoggedToday) {
-          return { dpAwarded: 0, milestoneReached: null }
+          return { dpAwarded: 0, milestoneReached: null, rankedUp: false }
         }
 
         if (!supabase) throw new Error('Supabase not configured')
@@ -208,7 +213,6 @@ export const useLockedStore = create<LockedState>()(
         if (!user) throw new Error('Not authenticated')
 
         const today = getLocalDateString()
-        const dpAwarded = 15 // Daily bonus
 
         const { error } = await supabase
           .from('locked_logs')
@@ -216,10 +220,13 @@ export const useLockedStore = create<LockedState>()(
             protocol_id: state.activeProtocol.id,
             user_id: user.id,
             log_date: today,
-            dp_awarded: dpAwarded,
+            dp_awarded: 15,
           })
 
         if (error) throw error
+
+        // Award daily DP via dpStore (bypasses daily cap)
+        const dpResult = useDPStore.getState().awardLockedDP()
 
         const newStreak = state.currentStreak + 1
         const newLongestStreak = Math.max(newStreak, state.longestStreak)
@@ -237,6 +244,13 @@ export const useLockedStore = create<LockedState>()(
           m => newStreak === m && !state.milestonesReached.includes(m)
         ) ?? null
 
+        // Award milestone DP if reached
+        let milestoneRankedUp = false
+        if (milestoneReached) {
+          const milestoneResult = useDPStore.getState().awardLockedMilestoneDP(milestoneReached)
+          milestoneRankedUp = milestoneResult.rankedUp
+        }
+
         const newMilestonesReached = milestoneReached
           ? [...state.milestonesReached, milestoneReached]
           : state.milestonesReached
@@ -245,11 +259,15 @@ export const useLockedStore = create<LockedState>()(
           currentStreak: newStreak,
           longestStreak: newLongestStreak,
           hasLoggedToday: true,
-          totalDPEarned: state.totalDPEarned + dpAwarded,
+          totalDPEarned: state.totalDPEarned + 15 + (milestoneReached ? MILESTONE_DP[milestoneReached] : 0),
           milestonesReached: newMilestonesReached,
         })
 
-        return { dpAwarded, milestoneReached }
+        return {
+          dpAwarded: 15 + (milestoneReached ? MILESTONE_DP[milestoneReached] : 0),
+          milestoneReached,
+          rankedUp: dpResult.rankedUp || milestoneRankedUp,
+        }
       },
 
       endProtocol: async () => {
@@ -294,3 +312,8 @@ export const useLockedStore = create<LockedState>()(
 )
 
 export { MILESTONES, MILESTONE_DP }
+
+/** Get the next milestone day that hasn't been reached yet */
+export function getNextMilestone(currentStreak: number, milestonesReached: number[]): number | null {
+  return MILESTONES.find(m => m > currentStreak && !milestonesReached.includes(m)) ?? null
+}
