@@ -17,6 +17,7 @@ export interface NotificationPreferences {
   claimXP: { enabled: boolean; time: NotificationTimePreference }
   weeklyCheckIn: { enabled: boolean; time: NotificationTimePreference }
   streakProtection: { enabled: boolean; time: NotificationTimePreference }
+  weeklyReport: { enabled: boolean; time: NotificationTimePreference }
 }
 
 export type ReminderType = 'logMacros' | 'checkIn' | 'claimXP' | 'workout'
@@ -105,6 +106,7 @@ export const useRemindersStore = create<RemindersStore>()(
         claimXP: { enabled: true, time: { hour: 10, minute: 0 } },
         weeklyCheckIn: { enabled: false, time: { hour: 10, minute: 0 } },
         streakProtection: { enabled: true, time: { hour: 20, minute: 0 } },
+        weeklyReport: { enabled: true, time: { hour: 19, minute: 0 } },
       },
 
       setPreference: (type, enabled) => {

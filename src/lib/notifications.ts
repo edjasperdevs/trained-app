@@ -14,6 +14,7 @@ export const NOTIFICATION_IDS = {
   XP_CLAIM: 4,
   WEEKLY_CHECKIN: 5,
   STREAK_AT_RISK: 6,
+  WEEKLY_REPORT: 7,
   REST_TIMER: 100,
 } as const
 
@@ -144,6 +145,23 @@ export async function scheduleAllNotifications(
         },
       },
       extra: { route: '/' },
+    })
+  }
+
+  // Weekly Protocol Report reminder (Sunday at configured time)
+  if (prefs.weeklyReport.enabled) {
+    notifications.push({
+      id: NOTIFICATION_IDS.WEEKLY_REPORT,
+      title: 'Weekly Protocol Report',
+      body: 'Your weekly performance summary is ready.',
+      schedule: {
+        on: {
+          weekday: Weekday.Sunday,
+          hour: prefs.weeklyReport.time.hour,
+          minute: prefs.weeklyReport.time.minute,
+        },
+      },
+      extra: { route: '/weekly-report' },
     })
   }
 
