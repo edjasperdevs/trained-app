@@ -218,11 +218,11 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Email Sign In Form
 
-- [ ] **EMAILSIGNIN-01**: Email Sign In form displays email and password fields with gold icons
-- [ ] **EMAILSIGNIN-02**: User can sign in with valid credentials via Supabase signInWithPassword
-- [ ] **EMAILSIGNIN-03**: Invalid credentials show inline error message below password field
-- [ ] **EMAILSIGNIN-04**: Forgot Password link navigates to Forgot Password screen
-- [ ] **EMAILSIGNIN-05**: Create Account link navigates to Sign Up screen
+- [x] **EMAILSIGNIN-01**: Email Sign In form displays email and password fields with gold icons
+- [x] **EMAILSIGNIN-02**: User can sign in with valid credentials via Supabase signInWithPassword
+- [x] **EMAILSIGNIN-03**: Invalid credentials show inline error message below password field
+- [x] **EMAILSIGNIN-04**: Forgot Password link navigates to Forgot Password screen
+- [x] **EMAILSIGNIN-05**: Create Account link navigates to Sign Up screen
 
 ### Forgot Password
 
@@ -453,11 +453,11 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | EMAILSIGNUP-03 | Phase 34 | Complete |
 | EMAILSIGNUP-04 | Phase 34 | Complete |
 | EMAILSIGNUP-05 | Phase 34 | Complete |
-| EMAILSIGNIN-01 | Phase 35 | Pending |
-| EMAILSIGNIN-02 | Phase 35 | Pending |
-| EMAILSIGNIN-03 | Phase 35 | Pending |
-| EMAILSIGNIN-04 | Phase 35 | Pending |
-| EMAILSIGNIN-05 | Phase 35 | Pending |
+| EMAILSIGNIN-01 | Phase 35 | Complete |
+| EMAILSIGNIN-02 | Phase 35 | Complete |
+| EMAILSIGNIN-03 | Phase 35 | Complete |
+| EMAILSIGNIN-04 | Phase 35 | Complete |
+| EMAILSIGNIN-05 | Phase 35 | Complete |
 | FORGOT-01 | Phase 36 | Pending |
 | FORGOT-02 | Phase 36 | Pending |
 | FORGOT-03 | Phase 36 | Pending |
