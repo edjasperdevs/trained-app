@@ -125,9 +125,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 35-01: Build - Implement Email Sign In form with fields and auth handler
-- [ ] 35-02: Review - Compare to mockup and identify visual gaps
-- [ ] 35-03: Refine - Pixel-polish form styling, error states, animations
+- [ ] 35-01-PLAN.md -- Implement Email Sign In form with fields, validation, error handling, and Supabase auth
+- [ ] 35-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [ ] 35-03-PLAN.md -- Pixel-polish form styling, error states, animations based on review findings
 
 ### Phase 36: Forgot Password Screen
 **Goal**: Users can reset forgotten password via email
