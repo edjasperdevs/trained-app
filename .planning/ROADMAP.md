@@ -562,7 +562,7 @@ Plans:
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
 | 38. Rank-Up Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
-| 39. Compliance Sharing | 1/1 | Complete   | 2026-03-07 | - |
+| 39. Compliance Sharing | 1/1 | Complete    | 2026-03-07 | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
 
 **v2.2 Total Plans:** 20
