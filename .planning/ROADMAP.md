@@ -12,17 +12,18 @@
 - v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
 - v2.2 Auth Flow Redesign (Phases 30-36, in progress)
 - v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07)
-- v2.3 Engagement & Growth (Phases 41-43, in progress)
+- v2.3 Engagement & Growth (Phases 41-44, in progress)
 
 ## v2.3 Engagement & Growth
 
-**Milestone Goal:** Add retention and growth features -- Weekly Protocol Report (Sunday summaries with push notifications and share cards) and Recruit a Sub (referral system with DP rewards and 7-day Premium trial).
+**Milestone Goal:** Add retention and growth features -- Weekly Protocol Report (Sunday summaries with push notifications and share cards), Recruit a Sub (referral system with DP rewards and 7-day Premium trial), and Locked Protocol (streak-based accountability tracker with daily compliance logging and milestone rewards).
 
 ### Phases
 
 - [x] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data, highlights, push notification, share card (completed 2026-03-07)
 - [x] **Phase 42: Referral System** - Unique links, Recruit a Sub screen, deep link handling, recruits list (completed 2026-03-07)
 - [x] **Phase 43: Referral Rewards** - RevenueCat promo for referred users, DP rewards for referrers (completed 2026-03-07)
+- [ ] **Phase 44: Locked Protocol** - Streak-based accountability tracker with daily compliance, milestones, share cards
 
 ## Phase Details
 
@@ -41,9 +42,9 @@
 **Plans**: 3 plans
 
 Plans:
-- [ ] 41-01-PLAN.md -- Weekly Report screen, data store, highlights generator
-- [ ] 41-02-PLAN.md -- In-app trigger, push notification, Settings toggle
-- [ ] 41-03-PLAN.md -- Weekly report share card
+- [x] 41-01-PLAN.md -- Weekly Report screen, data store, highlights generator
+- [x] 41-02-PLAN.md -- In-app trigger, push notification, Settings toggle
+- [x] 41-03-PLAN.md -- Weekly report share card
 
 ### Phase 42: Referral System
 **Goal**: Users have unique referral links they can share to invite new users, with deep link capture and recruits list
@@ -59,9 +60,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 42-01-PLAN.md -- Referrals database migration, referralStore with code generation
-- [ ] 42-02-PLAN.md -- Recruit a Sub screen UI, Settings navigation entry
-- [ ] 42-03-PLAN.md -- Deep link capture for /join/* paths, post-signup attribution
+- [x] 42-01-PLAN.md -- Referrals database migration, referralStore with code generation
+- [x] 42-02-PLAN.md -- Recruit a Sub screen UI, Settings navigation entry
+- [x] 42-03-PLAN.md -- Deep link capture for /join/* paths, post-signup attribution
 
 ### Phase 43: Referral Rewards
 **Goal**: Referred users receive Premium trial and referrers earn DP when recruits complete first week
@@ -77,6 +78,30 @@ Plans:
 Plans:
 - [x] 43-01-PLAN.md -- RevenueCat promotional entitlement grant for referred users on signup
 - [x] 43-02-PLAN.md -- Recruit completion check, referrer DP rewards, app-level trigger
+
+### Phase 44: Locked Protocol
+**Goal**: Users can activate, track, and complete a streak-based Locked Protocol with daily compliance logging, milestone bonuses, share cards, and notifications
+**Depends on**: Phase 43 (builds on existing v2.3 infrastructure)
+**Requirements**: LOCK-01, LOCK-02, LOCK-03, LOCK-04, LOCK-05, LOCK-06, LOCK-07, LOCK-08, LOCK-09, LOCK-10, LOCK-11, LOCK-12, LOCK-13
+**Success Criteria** (what must be TRUE):
+  1. Database tables (locked_protocols, locked_logs) exist with RLS policies
+  2. User sees acceptance flow with protocol type (Continuous/Day Lock) and goal selection (7-90 days)
+  3. User sees active protocol screen with day counter, streak, stats, and milestone list
+  4. User can log daily compliance (+15 DP, once per day)
+  5. Milestones (7, 14, 21, 30, 60, 90 days) award escalating DP bonuses (50-750 DP)
+  6. Share cards (Protocol Initiated, Milestone) display correctly and award +10 DP
+  7. Notifications remind user to log compliance (Continuous: evening, Day Lock: morning)
+  8. Settings shows "Locked Protocol" entry and notification toggles
+  9. Weekly Report shows LOCKED STREAK card when protocol is active
+**Plans**: 6 plans
+
+Plans:
+- [ ] 44-01-PLAN.md -- Database migration, types, lockedStore foundation
+- [ ] 44-02-PLAN.md -- LockedProtocolScreen with acceptance flow and daily logging
+- [ ] 44-03-PLAN.md -- dpStore integration for locked and locked_milestone DP actions
+- [ ] 44-04-PLAN.md -- Notifications and remindersStore update for locked reminders
+- [ ] 44-05-PLAN.md -- Share cards (Protocol Initiated, Milestone) with DP rewards
+- [ ] 44-06-PLAN.md -- Weekly Report integration and visual verification checkpoint
 
 ---
 
@@ -312,15 +337,6 @@ Plans:
 
 </details>
 
-### Phase 44: Locked Protocol
-
-**Goal:** [To be planned]
-**Depends on:** Phase 43
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 44 to break down)
-
 ---
 
 ## v2.0 WellTrained V2
@@ -539,18 +555,16 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 41 -> 42 -> 43 (v2.3), then continue with 36 (v2.2) and 24 (v2.0)
+**Execution Order:** 44 (v2.3), then continue with 36 (v2.2) and 24 (v2.0)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 41. Weekly Protocol Report | v2.3 | Complete    | 2026-03-07 | 2026-03-07 |
-| 42. Referral System | v2.3 | 3/3 | Complete    | 2026-03-07 |
-| 43. Referral Rewards | v2.3 | Complete    | 2026-03-07 | 2026-03-07 |
-| 36. Forgot Password Screen | 3/3 | Complete    | 2026-03-07 | - |
+| 44. Locked Protocol | v2.3 | 0/6 | Not started | - |
+| 36. Forgot Password Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
-**v2.3 Total Plans:** TBD (will be determined during phase planning)
-**v2.3 Requirements Coverage:** 15/15 mapped
+**v2.3 Total Plans:** 14 (8 complete + 6 for Phase 44)
+**v2.3 Requirements Coverage:** 28/28 mapped (15 prior + 13 new for Locked Protocol)
 
 <details>
 <summary>Archived Milestones</summary>
@@ -562,5 +576,6 @@ Plans:
 | 25-29 | v2.1 Onboarding Redesign | 9/9 | Complete | 2026-03-06 |
 | 30-35 | v2.2 Auth Flow Redesign | 17/20 | In progress | - |
 | 37-40 | v2.2.1 Social Sharing | 6/6 | Complete | 2026-03-07 |
+| 41-43 | v2.3 Engagement & Growth | 8/8 | Complete | 2026-03-07 |
 
 </details>

@@ -270,7 +270,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 ## v2.3 Requirements
 
-Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit a Sub referral system.
+Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit a Sub referral system + Locked Protocol.
 
 ### Weekly Report
 
@@ -292,6 +292,22 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **REFR-06**: Recruits list shows recruit callsign, rank, status, and DP earned
 - [x] **REFR-07**: Deep link handling captures referral code before signup
 - [x] **REFR-08**: Settings has "Recruit a Sub" entry under Protocol section
+
+### Locked Protocol
+
+- [ ] **LOCK-01**: Database tables (locked_protocols, locked_logs) exist with RLS policies
+- [ ] **LOCK-02**: lockedStore provides fetchProtocol, startProtocol, logCompliance, endProtocol methods
+- [ ] **LOCK-03**: User sees acceptance flow with protocol type selection (Continuous/Day Lock)
+- [ ] **LOCK-04**: User sees acceptance flow with goal duration selection (7, 14, 21, 30, 60, 90 days)
+- [ ] **LOCK-05**: User sees active protocol screen with day counter, streak, stats, and milestone list
+- [ ] **LOCK-06**: Daily compliance logging awards +15 DP (bypasses daily cap)
+- [ ] **LOCK-07**: Milestones (7, 14, 21, 30, 60, 90 days) award escalating DP bonuses (50-750 DP)
+- [ ] **LOCK-08**: Continuous users receive reminder notification if not logged by evening
+- [ ] **LOCK-09**: Day Lock users receive morning "lock up" notification with optional evening reminder
+- [ ] **LOCK-10**: Protocol Initiated share card displays padlock, keyholder, goal days, start date
+- [ ] **LOCK-11**: Milestone share card displays days locked count, milestone title, DP earned
+- [ ] **LOCK-12**: Weekly Report shows LOCKED STREAK card when protocol is active
+- [ ] **LOCK-13**: Settings shows "Locked Protocol" entry under Protocol section
 
 ## Future Requirements (v2.4+)
 
@@ -517,16 +533,29 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | REFR-06 | Phase 42 | Complete |
 | REFR-07 | Phase 42 | Complete |
 | REFR-08 | Phase 42 | Complete |
+| LOCK-01 | Phase 44 | Pending |
+| LOCK-02 | Phase 44 | Pending |
+| LOCK-03 | Phase 44 | Pending |
+| LOCK-04 | Phase 44 | Pending |
+| LOCK-05 | Phase 44 | Pending |
+| LOCK-06 | Phase 44 | Pending |
+| LOCK-07 | Phase 44 | Pending |
+| LOCK-08 | Phase 44 | Pending |
+| LOCK-09 | Phase 44 | Pending |
+| LOCK-10 | Phase 44 | Pending |
+| LOCK-11 | Phase 44 | Pending |
+| LOCK-12 | Phase 44 | Pending |
+| LOCK-13 | Phase 44 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
 - v2.1 requirements: 44 total
 - v2.2 requirements: 34 total
 - v2.2.1 requirements: 15 total
-- v2.3 requirements: 15 total
-- Total mapped to phases: 155
+- v2.3 requirements: 28 total (15 prior + 13 Locked Protocol)
+- Total mapped to phases: 168
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1), 2026-03-07 (v2.3)*
-*Last updated: 2026-03-07 -- v2.3 Engagement & Growth roadmap created*
+*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1), 2026-03-07 (v2.3 + Locked Protocol)*
+*Last updated: 2026-03-07 -- Phase 44 Locked Protocol requirements added*
