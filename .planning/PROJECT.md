@@ -51,15 +51,18 @@ Previous milestones delivered:
 
 ### Active
 
-**Current Milestone: v2.2 Auth Flow Redesign (continued)**
+**Current Milestone: v2.3 Engagement & Growth**
 
-**Goal:** Complete authentication flow with Apple Sign-In, Google Sign-In, and email/password. Remaining screens: Sign In, Email Sign Up, Email Sign In, Forgot Password.
+**Goal:** Add retention and growth features — Weekly Protocol Report (Sunday summaries) and Recruit a Sub (referral system with DP rewards).
 
 **Target features:**
-- Sign In screen with Apple/Google/Email buttons (Phase 33, in progress)
-- Email Sign Up form with password strength indicator (Phase 34)
-- Email Sign In form with error handling (Phase 35)
-- Forgot Password screen with success state (Phase 36)
+- Weekly Protocol Report full-screen summary (push notification + in-app trigger)
+- Auto-generated highlights from DP, workouts, PRs, streak
+- Share card integration for weekly report
+- Recruit a Sub referral system with unique user links
+- 7-day Premium for referred users via RevenueCat promotional entitlement
+- 100 DP reward for referrer when recruit completes first week
+- Referrals table and tracking in Supabase
 
 ### Out of Scope
 
@@ -77,8 +80,8 @@ Previous milestones delivered:
 ## Context
 
 **Current State:**
+- v2.2 Auth Flow Redesign complete (Splash, Sign Up, Sign In, Email forms, Forgot Password)
 - v2.2.1 Social Sharing shipped (3 branded share cards, DP rewards, camera compositing)
-- v2.2 Auth Flow Redesign in progress (Splash, Sign Up complete; Sign In, Email forms remaining)
 - v2.1 Onboarding Redesign complete (8-screen value-first flow with reverse trial)
 - Capacitor iOS shell fully functional with native features
 - 139 unit tests + 10 E2E tests passing
@@ -134,4 +137,4 @@ Previous milestones delivered:
 | Daily/per-rank DP gating | Prevents share spam while rewarding engagement | ✓ Good |
 
 ---
-*Last updated: 2026-03-07 — v2.2.1 Social Sharing complete*
+*Last updated: 2026-03-07 — v2.3 Engagement & Growth milestone started*
