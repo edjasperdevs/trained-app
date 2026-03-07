@@ -923,6 +923,7 @@ export function Settings() {
                   { key: 'workout' as keyof NotificationPreferences, label: 'Training', description: 'Reminder on workout days', icon: Dumbbell, visible: true },
                   { key: 'logMacros' as keyof NotificationPreferences, label: 'Log Protocol', description: 'Evening reminder to track nutrition', icon: UtensilsCrossed, visible: true },
                   { key: 'claimXP' as keyof NotificationPreferences, label: `Weekly ${LABELS.dp}`, description: 'Sunday reminder to check your weekly progress', icon: Gift, visible: true },
+                  { key: 'weeklyReport' as keyof NotificationPreferences, label: 'Weekly Report', description: 'Sunday reminder to view your weekly summary', icon: BarChart3, visible: true },
                   { key: 'weeklyCheckIn' as keyof NotificationPreferences, label: 'Weekly Check-in', description: 'Saturday reminder to submit your check-in', icon: CheckCircle2, visible: hasCoach },
                   { key: 'streakProtection' as keyof NotificationPreferences, label: 'Streak Protection', description: "Evening alert if you haven't checked in", icon: Bell, visible: true },
                 ]).filter(i => i.visible).map(({ key, label, description, icon: Icon }) => (
