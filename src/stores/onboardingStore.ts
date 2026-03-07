@@ -7,10 +7,11 @@ export const ONBOARDING_SCREENS = [
   'value',        // 1
   'profile',      // 2
   'goal',         // 3
-  'archetype',    // 4
-  'macros',       // 5
-  'paywall',      // 6
-  'final',        // 7
+  'disclaimer',   // 4
+  'archetype',    // 5
+  'macros',       // 6
+  'paywall',      // 7
+  'final',        // 8
 ] as const
 
 export type OnboardingScreen = typeof ONBOARDING_SCREENS[number]
@@ -27,7 +28,7 @@ export interface OnboardingData {
 
 interface OnboardingState {
   // Flow control
-  currentStep: number // 0-7 for 8 screens
+  currentStep: number // 0-8 for 9 screens
 
   // Collected data (populated as user progresses)
   data: OnboardingData
