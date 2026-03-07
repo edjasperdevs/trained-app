@@ -11,7 +11,91 @@
 - v2.0 WellTrained V2 (Phases 17-24, in progress)
 - v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
 - v2.2 Auth Flow Redesign (Phases 30-36, in progress)
-- ✅ v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07) — [Archive](milestones/v2.2.1-ROADMAP.md)
+- v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07)
+- v2.3 Engagement & Growth (Phases 41-46, in progress)
+
+## v2.3 Engagement & Growth
+
+**Milestone Goal:** Add retention and growth features -- Weekly Protocol Report (Sunday summaries with push notifications and share cards) and Recruit a Sub (referral system with DP rewards and 7-day Premium trial).
+
+### Phases
+
+- [ ] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data and auto-generated highlights
+- [ ] **Phase 42: Weekly Report Distribution** - Push notification trigger and Settings preference
+- [ ] **Phase 43: Weekly Report Sharing** - Share card integration for weekly reports
+- [ ] **Phase 44: Referral Foundation** - Unique user links and Recruit a Sub screen
+- [ ] **Phase 45: Referral Integration** - Deep link handling, signup capture, and recruits list
+- [ ] **Phase 46: Referral Rewards** - RevenueCat promo and DP rewards for completed referrals
+
+## Phase Details
+
+### Phase 41: Weekly Protocol Report
+**Goal**: Users see a compelling weekly summary of their protocol performance with auto-generated highlights
+**Depends on**: Nothing (first phase of v2.3)
+**Requirements**: WRPT-01, WRPT-02, WRPT-03, WRPT-05
+**Success Criteria** (what must be TRUE):
+  1. User sees full-screen weekly summary showing DP earned, compliance percentage, streak, and workouts completed for the past 7 days
+  2. User sees current rank, DP to next rank, and rank progress bar in the summary
+  3. Auto-generated highlights appear based on protein compliance, PRs, and streak milestones (at least one highlight always shows)
+  4. In-app trigger shows the report on Sunday after user completes first DP action (once per week)
+**Plans**: TBD
+
+### Phase 42: Weekly Report Distribution
+**Goal**: Users receive push notifications that trigger the weekly report and can configure when they receive it
+**Depends on**: Phase 41 (report must exist to deliver)
+**Requirements**: WRPT-04, WRPT-07
+**Success Criteria** (what must be TRUE):
+  1. Push notification fires on Sunday at 7pm local time announcing the weekly report is ready
+  2. Tapping the notification deep links to the weekly report screen
+  3. User can toggle weekly report notifications on/off in Settings
+  4. User can configure custom notification time in Settings (default 7pm Sunday)
+**Plans**: TBD
+
+### Phase 43: Weekly Report Sharing
+**Goal**: Users can share their weekly report as a branded card to social media
+**Depends on**: Phase 41 (report must exist to share)
+**Requirements**: WRPT-06
+**Success Criteria** (what must be TRUE):
+  1. User sees "Share My Week" button on the weekly report screen
+  2. Share button generates weekly report share card with DP earned, compliance %, streak, and top highlight
+  3. Native share sheet opens with the generated card image
+  4. Sharing does not award DP (report viewing is the reward)
+**Plans**: TBD
+
+### Phase 44: Referral Foundation
+**Goal**: Users have unique referral links they can share to invite new users
+**Depends on**: Nothing (parallel to weekly report work)
+**Requirements**: REFR-01, REFR-04
+**Success Criteria** (what must be TRUE):
+  1. User has unique referral link with their callsign and short code (e.g., app.welltrained.fitness/join/ALPHA-ABC123)
+  2. User sees Recruit a Sub screen displaying their referral link
+  3. User can tap "Copy Link" button to copy referral link to clipboard with haptic confirmation
+  4. Referral tracking table exists in Supabase with columns for referrer, recruit, status, created_at, completed_at
+**Plans**: TBD
+
+### Phase 45: Referral Integration
+**Goal**: Referral links route correctly, capture signups, display recruits, and surface the feature throughout the app
+**Depends on**: Phase 44 (referral links and tracking must exist)
+**Requirements**: REFR-05, REFR-06, REFR-07, REFR-08
+**Success Criteria** (what must be TRUE):
+  1. Social share buttons (Instagram, X, Messages) on Recruit a Sub screen share referral link with branded copy
+  2. Recruits list shows recruit callsign, rank, status (pending/completed), and DP earned (0 or 100)
+  3. Deep link handling captures referral code before signup and stores it for post-signup attribution
+  4. Settings has "Recruit a Sub" entry under Protocol section that navigates to referral screen
+**Plans**: TBD
+
+### Phase 46: Referral Rewards
+**Goal**: Referred users receive Premium trial and referrers earn DP when recruits complete first week
+**Depends on**: Phases 44 and 45 (referral tracking and capture must work)
+**Requirements**: REFR-02, REFR-03
+**Success Criteria** (what must be TRUE):
+  1. Referred user receives 7-day Premium access via RevenueCat promotional entitlement on signup
+  2. Referrer earns 100 DP when recruit completes first week (7 days with at least one DP action per day)
+  3. DP award appears in dpStore transaction history with "Recruit completed protocol" label
+  4. Completion check runs daily for pending recruits and auto-updates status
+**Plans**: TBD
+
+---
 
 ## v2.2 Auth Flow Redesign
 
@@ -27,7 +111,8 @@
 - [x] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes) (completed 2026-03-07)
 - [ ] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes)
 
-## Phase Details
+<details>
+<summary>v2.2 Phase Details</summary>
 
 ### Phase 30: Auth Infrastructure
 **Goal**: Authentication foundation ready for all social and email auth flows
@@ -109,7 +194,7 @@ Plans:
 
 Plans:
 - [x] 34-01-PLAN.md -- Implement Email Sign Up form with fields, validation, strength indicator, Supabase auth
-- [ ] 34-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [x] 34-02-PLAN.md -- Review implementation against mockup, document visual gaps
 - [ ] 34-03-PLAN.md -- Pixel-polish form styling, error states, animations based on review findings
 
 ### Phase 35: Email Sign In Form
@@ -144,6 +229,8 @@ Plans:
 - [ ] 36-01-PLAN.md -- Implement Forgot Password screen with form, Supabase integration, and success state
 - [ ] 36-02-PLAN.md -- Review implementation against mockup, document visual gaps
 - [ ] 36-03-PLAN.md -- Pixel-polish form styling, success state, animations based on review findings
+
+</details>
 
 ---
 
@@ -398,7 +485,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/3 plans complete
+**Plans:** 1/3 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -460,21 +547,21 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 33 -> 34 -> 35 -> 36 (v2.2), then 24 (App Store)
+**Execution Order:** 41 -> 42 -> 43 -> 44 -> 45 -> 46 (v2.3), then continue with 36 (v2.2) and 24 (v2.0)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
-| 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 33. Sign In Screen | 3/3 | Complete    | 2026-03-07 | - |
-| 34. Email Sign Up Form | 2/3 | Complete    | 2026-03-07 | - |
-| 35. Email Sign In Form | 2/3 | Complete    | 2026-03-07 | - |
-| 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
+| 41. Weekly Protocol Report | v2.3 | 0/TBD | Not started | - |
+| 42. Weekly Report Distribution | v2.3 | 0/TBD | Not started | - |
+| 43. Weekly Report Sharing | v2.3 | 0/TBD | Not started | - |
+| 44. Referral Foundation | v2.3 | 0/TBD | Not started | - |
+| 45. Referral Integration | v2.3 | 0/TBD | Not started | - |
+| 46. Referral Rewards | v2.3 | 0/TBD | Not started | - |
+| 36. Forgot Password Screen | 1/3 | In Progress|  | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
-**v2.2 Total Plans:** 20
-**v2.2 Requirements Coverage:** 34/34 mapped
+**v2.3 Total Plans:** TBD (will be determined during phase planning)
+**v2.3 Requirements Coverage:** 15/15 mapped
 
 <details>
 <summary>Archived Milestones</summary>
@@ -484,6 +571,7 @@ Plans:
 | 11-16 | v1.5 Native iOS App | 12/14 | Closed | 2026-02-27 |
 | 17-23 | v2.0 WellTrained V2 | 17/17 | Complete | 2026-03-01 |
 | 25-29 | v2.1 Onboarding Redesign | 9/9 | Complete | 2026-03-06 |
+| 30-35 | v2.2 Auth Flow Redesign | 17/20 | In progress | - |
 | 37-40 | v2.2.1 Social Sharing | 6/6 | Complete | 2026-03-07 |
 
 </details>

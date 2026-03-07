@@ -226,10 +226,10 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Forgot Password
 
-- [ ] **FORGOT-01**: Forgot Password screen displays logo, gold key icon, email field
-- [ ] **FORGOT-02**: User can request password reset email via Supabase resetPasswordForEmail
-- [ ] **FORGOT-03**: Success state shows confirmation message with submitted email address
-- [ ] **FORGOT-04**: Back to Sign In link navigates to Sign In screen
+- [x] **FORGOT-01**: Forgot Password screen displays logo, gold key icon, email field
+- [x] **FORGOT-02**: User can request password reset email via Supabase resetPasswordForEmail
+- [x] **FORGOT-03**: Success state shows confirmation message with submitted email address
+- [x] **FORGOT-04**: Back to Sign In link navigates to Sign In screen
 
 ## v2.2.1 Requirements
 
@@ -483,10 +483,10 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | EMAILSIGNIN-03 | Phase 35 | Complete |
 | EMAILSIGNIN-04 | Phase 35 | Complete |
 | EMAILSIGNIN-05 | Phase 35 | Complete |
-| FORGOT-01 | Phase 36 | Pending |
-| FORGOT-02 | Phase 36 | Pending |
-| FORGOT-03 | Phase 36 | Pending |
-| FORGOT-04 | Phase 36 | Pending |
+| FORGOT-01 | Phase 36 | Complete |
+| FORGOT-02 | Phase 36 | Complete |
+| FORGOT-03 | Phase 36 | Complete |
+| FORGOT-04 | Phase 36 | Complete |
 | SHARE-01 | Phase 37 | Complete |
 | SHARE-02 | Phase 37 | Complete |
 | SHARE-03 | Phase 37 | Complete |

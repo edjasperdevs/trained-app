@@ -55,6 +55,7 @@ Last activity: 2026-03-07 — Milestone v2.3 started
 | 34 | 02 | 3min | 3 | 1 |
 | 35 | 01 | 3min | 3 | 1 |
 | 35 | 02 | 1min | 3 | 1 |
+| Phase 36 P01 | 2min | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Last activity: 2026-03-07 — Milestone v2.3 started
 - 34-01: Password strength criteria: 8+ chars (1), uppercase (2), number (3), special char (4)
 - 34-02: User approved Email Sign Up screen visual - no gaps identified, Plan 03 verification-only
 - 35-02: User approved Email Sign In screen visual - no gaps identified, Plan 03 may be verification-only
+- [Phase 36]: Implemented all tasks in single commit (all tasks share same file) — All 3 tasks modify the same file and represent cohesive feature
+- [Phase 36]: Security pattern: always show success state regardless of email existence — Prevents email enumeration attacks
 
 ### Pending Todos
 
