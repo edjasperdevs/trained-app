@@ -482,7 +482,7 @@ Plans:
 | 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
+| 30. Auth Infrastructure | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 0/3 | Not started | - |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
