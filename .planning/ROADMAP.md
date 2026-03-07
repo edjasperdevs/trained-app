@@ -97,7 +97,7 @@ Plans:
 
 Plans:
 - [x] 44-01-PLAN.md -- Database migration, types, lockedStore foundation
-- [ ] 44-02-PLAN.md -- LockedProtocolScreen with acceptance flow and daily logging
+- [x] 44-02-PLAN.md -- LockedProtocolScreen with acceptance flow and daily logging
 - [ ] 44-03-PLAN.md -- dpStore integration for locked and locked_milestone DP actions
 - [ ] 44-04-PLAN.md -- Notifications and remindersStore update for locked reminders
 - [ ] 44-05-PLAN.md -- Share cards (Protocol Initiated, Milestone) with DP rewards
@@ -559,7 +559,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 44. Locked Protocol | v2.3 | 1/6 | In progress | - |
+| 44. Locked Protocol | v2.3 | 2/6 | In progress | - |
 | 36. Forgot Password Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
