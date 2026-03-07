@@ -74,10 +74,14 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   const todayWorkout = getTodayWorkout()
   const workoutCompleted = isWorkoutCompletedToday()
 
-  // Full compliance = all 5 items checked (workout only counts if there was a workout scheduled)
-  // Per feature brief, share button only shows on "full 5/5 compliance days"
-  // On recovery days (no workout), user cannot achieve 5/5, so share button should NOT appear
-  const isFullCompliance = data.workout && data.protein && data.meal && data.steps && data.sleep
+  // Full compliance logic:
+  // - Training day (workout scheduled): 5/5 required (workout + protein + meal + steps + sleep)
+  // - Recovery day (no workout): 4/4 required (protein + meal + steps + sleep)
+  // This allows users on rest days to achieve shareable compliance
+  const hasWorkoutScheduled = todayWorkout !== null
+  const isFullCompliance = hasWorkoutScheduled
+    ? (data.workout && data.protein && data.meal && data.steps && data.sleep)
+    : (data.protein && data.meal && data.steps && data.sleep)
 
   // Milestone detection for share card
   function getMilestone(streak: number): string | undefined {
