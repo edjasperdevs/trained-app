@@ -304,8 +304,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **LOCK-07**: Milestones (7, 14, 21, 30, 60, 90 days) award escalating DP bonuses (50-750 DP)
 - [x] **LOCK-08**: Continuous users receive reminder notification if not logged by evening
 - [x] **LOCK-09**: Day Lock users receive morning "lock up" notification with optional evening reminder
-- [ ] **LOCK-10**: Protocol Initiated share card displays padlock, keyholder, goal days, start date
-- [ ] **LOCK-11**: Milestone share card displays days locked count, milestone title, DP earned
+- [x] **LOCK-10**: Protocol Initiated share card displays padlock, keyholder, goal days, start date
+- [x] **LOCK-11**: Milestone share card displays days locked count, milestone title, DP earned
 - [ ] **LOCK-12**: Weekly Report shows LOCKED STREAK card when protocol is active
 - [ ] **LOCK-13**: Settings shows "Locked Protocol" entry under Protocol section
 
@@ -542,8 +542,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | LOCK-07 | Phase 44 | Complete |
 | LOCK-08 | Phase 44 | Complete |
 | LOCK-09 | Phase 44 | Complete |
-| LOCK-10 | Phase 44 | Pending |
-| LOCK-11 | Phase 44 | Pending |
+| LOCK-10 | Phase 44 | Complete |
+| LOCK-11 | Phase 44 | Complete |
 | LOCK-12 | Phase 44 | Pending |
 | LOCK-13 | Phase 44 | Pending |
 

@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 44 (Locked Protocol)
-Plan: 04 (of 06)
+Plan: 05 (of 06)
 Status: Complete
-Last activity: 2026-03-07 — Completed 44-04 (Notifications)
+Last activity: 2026-03-07 — Completed 44-05 (Share Cards)
 
-Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
+Progress: ⬛⬛⬛⬛⬛⬜ (5/6 plans complete)
 
 ## Performance Metrics
 
@@ -32,9 +32,8 @@ Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
 
 **v2.3 Engagement & Growth:**
 - Total phases: 4 (Phases 41-44)
-- Total phases: 4 (Phases 41-44)
 - Total plans: 15 (9 shipped + 6 Phase 44)
-- Plans complete: 13
+- Plans complete: 14
 
 ### Roadmap Evolution
 
@@ -54,6 +53,7 @@ Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
 | 44 | 02 | 3min | 3 | 2 |
 | 44 | 03 | 3min | 2 | 3 |
 | 44 | 04 | 6min | 3 | 4 |
+| 44 | 05 | 5min | 3 | 5 |
 
 ### Decisions
 
@@ -160,6 +160,9 @@ Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
 - 44-04: Continuous users get evening reminder at 9pm default, Day Lock users get morning reminder with optional evening check
 - 44-04: Locked protocol notifications added to scheduleAllNotifications and dedicated scheduleLockedProtocolNotifications
 - 44-04: Settings shows notification options only when user has active protocol
+- 44-05: Share cards use inline styles for html-to-image capture (no Tailwind JIT)
+- 44-05: +10 DP for each locked share type (start, milestone)
+- 44-05: One-time gate per protocol ID for start share, per milestone day for milestone share
 
 ### Pending Todos
 
@@ -191,6 +194,6 @@ Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 44-04-PLAN.md (Notifications)
+Stopped at: Completed 44-05-PLAN.md (Share Cards)
 Resume file: None
-Next action: Execute 44-05-PLAN.md (Share Cards)
+Next action: Execute 44-06-PLAN.md (Entry Points)
