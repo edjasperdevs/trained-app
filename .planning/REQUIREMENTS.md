@@ -285,7 +285,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 ### Referrals
 
 - [x] **REFR-01**: User has unique referral link with callsign and short code
-- [ ] **REFR-02**: Referred user receives 7-day Premium free via RevenueCat promotional entitlement
+- [x] **REFR-02**: Referred user receives 7-day Premium free via RevenueCat promotional entitlement
 - [ ] **REFR-03**: Referrer earns 100 DP when recruit completes first week (7 days with DP actions)
 - [x] **REFR-04**: Recruit a Sub screen shows referral link with copy button
 - [x] **REFR-05**: Social share buttons (Instagram, X, Messages) share referral link
@@ -510,7 +510,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | WRPT-06 | Phase 41 | Complete |
 | WRPT-07 | Phase 41 | Complete |
 | REFR-01 | Phase 42 | Complete |
-| REFR-02 | Phase 43 | Pending |
+| REFR-02 | Phase 43 | Complete |
 | REFR-03 | Phase 43 | Pending |
 | REFR-04 | Phase 42 | Complete |
 | REFR-05 | Phase 42 | Complete |

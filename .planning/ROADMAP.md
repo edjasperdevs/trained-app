@@ -75,7 +75,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 43-01-PLAN.md -- RevenueCat promotional entitlement grant for referred users on signup
+- [x] 43-01-PLAN.md -- RevenueCat promotional entitlement grant for referred users on signup
 - [ ] 43-02-PLAN.md -- Recruit completion check, referrer DP rewards, app-level trigger
 
 ---
@@ -536,7 +536,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 41. Weekly Protocol Report | 3/3 | Complete    | 2026-03-07 | - |
 | 42. Referral System | 3/3 | Complete    | 2026-03-07 | - |
-| 43. Referral Rewards | v2.3 | 0/TBD | Not started | - |
+| 43. Referral Rewards | v2.3 | 1/2 | In progress | - |
 | 36. Forgot Password Screen | 3/3 | Complete    | 2026-03-07 | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
