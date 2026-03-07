@@ -41,3 +41,6 @@ export type { FoodPreferences, AIMeal, AIMealPlan } from './mealPlanStore'
 
 export { useOnboardingStore, ONBOARDING_SCREENS } from './onboardingStore'
 export type { OnboardingData, OnboardingScreen } from './onboardingStore'
+
+export { useWeeklyReportStore } from './weeklyReportStore'
+export type { WeeklyStats } from './weeklyReportStore'
