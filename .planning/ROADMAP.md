@@ -39,7 +39,7 @@
 
 Plans:
 - [x] 37-01-PLAN.md -- Install dependencies, configure iOS camera permissions, add DP share actions to dpStore
-- [ ] 37-02-PLAN.md -- Create shareCard.ts utility with generateAndShare, ShareCardWrapper component, web fallback
+- [x] 37-02-PLAN.md -- Create shareCard.ts utility with generateAndShare, ShareCardWrapper component, web fallback
 
 ### Phase 38: Rank-Up Sharing
 **Goal**: Users can share a branded card celebrating their new rank after claiming it
@@ -50,7 +50,10 @@ Plans:
   2. RankUpModal shows "Share Your Rank" button after user claims rank
   3. Tapping share opens native share sheet with PNG card and pre-filled text
   4. Successful share awards +10 DP (once per rank, not repeatable)
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 38-01-PLAN.md -- Create RankUpShareCard component and integrate share button into RankUpModal
 
 ### Phase 39: Compliance Sharing
 **Goal**: Users can share a branded card celebrating full 5/5 daily compliance
@@ -554,8 +557,8 @@ Plans:
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
-| 37. Share Infrastructure | 2/2 | Complete    | 2026-03-07 | - |
-| 38. Rank-Up Sharing | v2.2.1 | 0/TBD | Not started | - |
+| 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
+| 38. Rank-Up Sharing | v2.2.1 | 0/1 | Not started | - |
 | 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
 
