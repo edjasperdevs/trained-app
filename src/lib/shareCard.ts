@@ -4,7 +4,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem'
 import { isNative } from './platform'
 import { useDPStore } from '@/stores/dpStore'
 
-type ShareType = 'workout' | 'compliance' | 'rankup' | 'weekly'
+type ShareType = 'workout' | 'compliance' | 'rankup' | 'weekly' | 'locked_start' | 'locked_milestone'
 
 interface ShareOptions {
   element: HTMLElement
@@ -12,6 +12,8 @@ interface ShareOptions {
   text: string
   shareType: ShareType
   rankName?: string // Required for rankup type
+  protocolId?: string // Required for locked_start type
+  milestone?: number // Required for locked_milestone type
 }
 
 /**
@@ -20,7 +22,7 @@ interface ShareOptions {
  * Awards DP after successful share based on shareType.
  */
 export async function generateAndShare(options: ShareOptions): Promise<boolean> {
-  const { element, filename, text, shareType, rankName } = options
+  const { element, filename, text, shareType, rankName, protocolId, milestone } = options
 
   try {
     // Wait for fonts to be ready before capture
@@ -41,7 +43,7 @@ export async function generateAndShare(options: ShareOptions): Promise<boolean> 
       link.click()
 
       // Award DP even on web download
-      awardDPForShare(shareType, rankName)
+      awardDPForShare(shareType, rankName, protocolId, milestone)
       return true
     }
 
@@ -64,7 +66,7 @@ export async function generateAndShare(options: ShareOptions): Promise<boolean> 
     })
 
     // Award DP after successful share
-    awardDPForShare(shareType, rankName)
+    awardDPForShare(shareType, rankName, protocolId, milestone)
     return true
   } catch (error) {
     console.error('Share failed:', error)
@@ -75,7 +77,7 @@ export async function generateAndShare(options: ShareOptions): Promise<boolean> 
 /**
  * Awards DP based on share type. Called after successful share.
  */
-function awardDPForShare(shareType: ShareType, rankName?: string): void {
+function awardDPForShare(shareType: ShareType, rankName?: string, protocolId?: string, milestone?: number): void {
   const store = useDPStore.getState()
 
   switch (shareType) {
@@ -92,6 +94,16 @@ function awardDPForShare(shareType: ShareType, rankName?: string): void {
       break
     case 'weekly':
       // No DP award for weekly report share
+      break
+    case 'locked_start':
+      if (protocolId) {
+        store.awardLockedStartShareDP(protocolId)
+      }
+      break
+    case 'locked_milestone':
+      if (milestone) {
+        store.awardLockedMilestoneShareDP(milestone)
+      }
       break
   }
 }
@@ -162,5 +174,38 @@ export async function shareWeeklyReportCard(
     filename: `welltrained-weekly-report-${Date.now()}`,
     text,
     shareType: 'weekly',
+  })
+}
+
+export async function shareLockedStartCard(
+  element: HTMLElement,
+  protocolId: string,
+  goalDays: number
+): Promise<boolean> {
+  const text = `WellTrained is my keyholder. Locked Protocol started. Goal: ${goalDays} days. The app doesn't negotiate. #WellTrained #LockedProtocol`
+
+  return generateAndShare({
+    element,
+    filename: `welltrained-locked-start-${Date.now()}`,
+    text,
+    shareType: 'locked_start',
+    protocolId,
+  })
+}
+
+export async function shareLockedMilestoneCard(
+  element: HTMLElement,
+  daysLocked: number,
+  milestoneTitle: string,
+  milestone: number
+): Promise<boolean> {
+  const text = `Day ${daysLocked}. ${milestoneTitle} Keyholder: WellTrained. #${daysLocked}DaysLocked #WellTrained`
+
+  return generateAndShare({
+    element,
+    filename: `welltrained-locked-milestone-${daysLocked}`,
+    text,
+    shareType: 'locked_milestone',
+    milestone,
   })
 }

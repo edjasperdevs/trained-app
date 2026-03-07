@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 import { Lock, ChevronLeft, Check } from 'lucide-react'
 import { useLockedStore, MILESTONES, MILESTONE_DP, ProtocolType } from '@/stores/lockedStore'
+import { useDPStore } from '@/stores/dpStore'
+import { useUserStore } from '@/stores/userStore'
 import { isNative } from '@/lib/platform'
+import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
+import { LockedStartShareCard } from '@/components/share/LockedStartShareCard'
+import { LockedMilestoneShareCard, MILESTONE_TITLES } from '@/components/share/LockedMilestoneShareCard'
+import { shareLockedStartCard, shareLockedMilestoneCard } from '@/lib/shareCard'
 
 const GOAL_OPTIONS = [7, 14, 21, 30, 60, 90]
 
@@ -144,12 +150,24 @@ export function LockedProtocolScreen() {
   const logCompliance = useLockedStore((state) => state.logCompliance)
   const endProtocol = useLockedStore((state) => state.endProtocol)
 
+  // User profile and rank info
+  const profile = useUserStore((state) => state.profile)
+  const rankInfo = useDPStore((state) => state.getRankInfo())
+  const callsign = profile?.username || 'RECRUIT'
+
   // Local state for acceptance flow
   const [protocolType, setProtocolType] = useState<ProtocolType>('continuous')
   const [goalDays, setGoalDays] = useState(30)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSharePrompt, setShowSharePrompt] = useState(false)
   const [milestoneToast, setMilestoneToast] = useState<string | null>(null)
+  const [showMilestoneSharePrompt, setShowMilestoneSharePrompt] = useState(false)
+  const [milestoneToShare, setMilestoneToShare] = useState<number | null>(null)
+  const [isSharing, setIsSharing] = useState(false)
+
+  // Refs for share card capture
+  const startCardRef = useRef<HTMLDivElement>(null)
+  const milestoneCardRef = useRef<HTMLDivElement>(null)
 
   // Fetch protocol on mount
   useEffect(() => {
@@ -200,7 +218,12 @@ export function LockedProtocolScreen() {
       if (result.milestoneReached) {
         const info = MILESTONE_INFO[result.milestoneReached]
         setMilestoneToast(`+${MILESTONE_DP[result.milestoneReached]} DP - ${info.badge} milestone reached.`)
-        setTimeout(() => setMilestoneToast(null), 3000)
+        setTimeout(() => {
+          setMilestoneToast(null)
+          // Show milestone share prompt after toast dismisses
+          setMilestoneToShare(result.milestoneReached)
+          setShowMilestoneSharePrompt(true)
+        }, 3000)
       }
     } catch (error) {
       console.error('Error logging compliance:', error)
@@ -226,9 +249,50 @@ export function LockedProtocolScreen() {
     navigate(-1)
   }
 
-  // Handle dismiss share prompt (placeholder for Plan 05)
-  const handleDismissSharePrompt = () => {
+  // Handle share after protocol start
+  const handleShareStart = async () => {
+    if (!startCardRef.current || !activeProtocol || isSharing) return
+    setIsSharing(true)
+    await triggerHaptic()
+    try {
+      await shareLockedStartCard(startCardRef.current, activeProtocol.id, activeProtocol.goalDays)
+    } finally {
+      setIsSharing(false)
+      setShowSharePrompt(false)
+    }
+  }
+
+  // Handle skip share prompt
+  const handleSkipShare = () => {
     setShowSharePrompt(false)
+  }
+
+  // Handle share after milestone
+  const handleShareMilestone = async () => {
+    if (!milestoneCardRef.current || !milestoneToShare || isSharing) return
+    setIsSharing(true)
+    await triggerHaptic()
+    try {
+      const title = MILESTONE_TITLES[milestoneToShare] || `${milestoneToShare} DAYS LOCKED.`
+      await shareLockedMilestoneCard(milestoneCardRef.current, milestoneToShare, title, milestoneToShare)
+    } finally {
+      setIsSharing(false)
+      setShowMilestoneSharePrompt(false)
+      setMilestoneToShare(null)
+    }
+  }
+
+  // Handle skip milestone share
+  const handleSkipMilestoneShare = () => {
+    setShowMilestoneSharePrompt(false)
+    setMilestoneToShare(null)
+  }
+
+  // Format start date for share card
+  const formatStartDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    return `${months[date.getMonth()]} ${date.getDate()}`
   }
 
   // Loading state
@@ -240,10 +304,20 @@ export function LockedProtocolScreen() {
     )
   }
 
-  // Share prompt overlay (placeholder for Plan 05)
-  if (showSharePrompt) {
+  // Share prompt overlay for protocol start
+  if (showSharePrompt && activeProtocol) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6">
+        {/* Off-screen share card for capture */}
+        <ShareCardWrapper cardRef={startCardRef}>
+          <LockedStartShareCard
+            callsign={callsign}
+            rankName={rankInfo.name}
+            goalDays={activeProtocol.goalDays}
+            startDate={formatStartDate(activeProtocol.startDate)}
+          />
+        </ShareCardWrapper>
+
         <SmallPadlock className="w-16 h-20 mb-6" />
         <h2
           className="text-2xl font-bold text-[#F5F0E8] text-center mb-4"
@@ -256,14 +330,63 @@ export function LockedProtocolScreen() {
         </p>
         <div className="w-full max-w-sm space-y-3">
           <button
-            onClick={handleDismissSharePrompt}
-            className="w-full h-14 rounded-lg bg-[#D4A853] text-[#0A0A0A] font-semibold"
+            onClick={handleShareStart}
+            disabled={isSharing}
+            className={`w-full h-14 rounded-lg bg-[#D4A853] text-[#0A0A0A] font-semibold ${isSharing ? 'opacity-50' : ''}`}
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            SHARE TO STORIES
+            {isSharing ? 'SHARING...' : 'SHARE TO STORIES'}
           </button>
           <button
-            onClick={handleDismissSharePrompt}
+            onClick={handleSkipShare}
+            disabled={isSharing}
+            className="w-full text-[#8A8A8A] py-3 text-sm"
+          >
+            Not now
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Share prompt overlay for milestone
+  if (showMilestoneSharePrompt && milestoneToShare) {
+    const title = MILESTONE_TITLES[milestoneToShare] || `${milestoneToShare} DAYS LOCKED.`
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6">
+        {/* Off-screen share card for capture */}
+        <ShareCardWrapper cardRef={milestoneCardRef}>
+          <LockedMilestoneShareCard
+            daysLocked={milestoneToShare}
+            milestoneTitle={title}
+            dpEarned={MILESTONE_DP[milestoneToShare] || 0}
+            callsign={callsign}
+            rankName={rankInfo.name}
+          />
+        </ShareCardWrapper>
+
+        <SmallPadlock className="w-16 h-20 mb-6" />
+        <h2
+          className="text-2xl font-bold text-[#F5F0E8] text-center mb-4"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          Share your milestone?
+        </h2>
+        <p className="text-sm text-[#8A8A8A] text-center mb-8">
+          You reached {milestoneToShare} days locked!
+        </p>
+        <div className="w-full max-w-sm space-y-3">
+          <button
+            onClick={handleShareMilestone}
+            disabled={isSharing}
+            className={`w-full h-14 rounded-lg bg-[#D4A853] text-[#0A0A0A] font-semibold ${isSharing ? 'opacity-50' : ''}`}
+            style={{ fontFamily: "'Oswald', sans-serif" }}
+          >
+            {isSharing ? 'SHARING...' : 'SHARE TO STORIES'}
+          </button>
+          <button
+            onClick={handleSkipMilestoneShare}
+            disabled={isSharing}
             className="w-full text-[#8A8A8A] py-3 text-sm"
           >
             Not now

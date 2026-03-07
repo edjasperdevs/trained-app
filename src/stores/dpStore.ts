@@ -84,6 +84,9 @@ interface DPStore {
   lastRankUpShareClaimed: string | null
   // Referral DP tracking
   referralDPAwarded: string[] // recruit IDs that have already triggered DP award
+  // Locked Protocol share gating
+  lastLockedStartShareProtocolId: string | null // protocol ID that was shared
+  lastLockedMilestoneShareMilestones: number[] // milestone days that were shared
 
   awardDP: (action: DPAction) => { dpAwarded: number; rankedUp: boolean; newRank: number }
   getRankInfo: () => { name: string; rank: number; dpForNext: number; progress: number }
@@ -99,6 +102,9 @@ interface DPStore {
   // Locked Protocol DP actions (bypass daily cap)
   awardLockedDP: () => { dpAwarded: number; rankedUp: boolean; newRank: number }
   awardLockedMilestoneDP: (milestone: number) => { dpAwarded: number; rankedUp: boolean; newRank: number }
+  // Locked Protocol share DP actions
+  awardLockedStartShareDP: (protocolId: string) => void
+  awardLockedMilestoneShareDP: (milestone: number) => void
 }
 
 /** Calculate rank from totalDP using the rank threshold table */
@@ -127,6 +133,9 @@ const INITIAL_STATE = {
   lastRankUpShareClaimed: null as string | null,
   // Referral DP tracking
   referralDPAwarded: [] as string[],
+  // Locked Protocol share gating
+  lastLockedStartShareProtocolId: null as string | null,
+  lastLockedMilestoneShareMilestones: [] as number[],
 }
 
 export const useDPStore = create<DPStore>()(
@@ -277,7 +286,7 @@ export const useDPStore = create<DPStore>()(
       },
 
       resetDP: () => {
-        set({ ...INITIAL_STATE, dailyLogs: [], referralDPAwarded: [] })
+        set({ ...INITIAL_STATE, dailyLogs: [], referralDPAwarded: [], lastLockedMilestoneShareMilestones: [] })
       },
 
       awardShareWorkoutDP: () => {
@@ -420,6 +429,48 @@ export const useDPStore = create<DPStore>()(
         } catch { /* non-critical */ }
 
         return { dpAwarded: dpValue, rankedUp, newRank }
+      },
+
+      awardLockedStartShareDP: (protocolId: string) => {
+        const { lastLockedStartShareProtocolId } = get()
+        if (lastLockedStartShareProtocolId === protocolId) return // already shared this protocol
+
+        const newTotalDP = get().totalDP + 10
+        const oldRank = get().currentRank
+        const newRank = calculateRank(newTotalDP)
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: newRank > oldRank ? newRank : get().lastCelebratedRank,
+          lastLockedStartShareProtocolId: protocolId,
+        })
+
+        // Fire DP toast
+        try {
+          getGlobalShowDPToast()?.(10, 'share_locked_start')
+        } catch { /* non-critical */ }
+      },
+
+      awardLockedMilestoneShareDP: (milestone: number) => {
+        const { lastLockedMilestoneShareMilestones } = get()
+        if (lastLockedMilestoneShareMilestones.includes(milestone)) return // already shared this milestone
+
+        const newTotalDP = get().totalDP + 10
+        const oldRank = get().currentRank
+        const newRank = calculateRank(newTotalDP)
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: newRank > oldRank ? newRank : get().lastCelebratedRank,
+          lastLockedMilestoneShareMilestones: [...lastLockedMilestoneShareMilestones, milestone],
+        })
+
+        // Fire DP toast
+        try {
+          getGlobalShowDPToast()?.(10, 'share_locked_milestone')
+        } catch { /* non-critical */ }
       },
     }),
     {
