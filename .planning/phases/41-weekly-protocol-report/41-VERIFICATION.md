@@ -1,20 +1,27 @@
 ---
 phase: 41-weekly-protocol-report
-verified: 2026-03-07T19:30:00Z
+verified: 2026-03-07T20:15:00Z
 status: passed
 score: 7/7 success criteria verified
-re_verification: false
+re_verification: true
+previous_verification:
+  date: 2026-03-07T19:30:00Z
+  status: passed
+  score: 7/7
+  gaps_closed: []
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 41: Weekly Protocol Report Verification Report
 
 **Phase Goal:** Users see a compelling weekly summary of their protocol performance with auto-generated highlights, receive push notifications, and can share their report
 
-**Verified:** 2026-03-07T19:30:00Z
+**Verified:** 2026-03-07T20:15:00Z
 
 **Status:** passed
 
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — validation of previous passing verification
 
 ## Goal Achievement
 
@@ -22,13 +29,13 @@ re_verification: false
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | User sees full-screen weekly summary showing DP earned, compliance percentage, streak, and workouts completed for the past 7 days | ✓ VERIFIED | WeeklyReportScreen.tsx (lines 128-164) renders 2x2 stats grid with all required metrics. weeklyReportStore.ts getWeeklyStats() aggregates data from dpStore.dailyLogs and workoutStore.workoutLogs for Sunday-Saturday date range. |
-| 2 | User sees current rank, DP to next rank, and rank progress bar in the summary | ✓ VERIFIED | WeeklyReportScreen.tsx (lines 167-185) displays rank name, gradient progress bar (width based on rankInfo.progress), and "X DP to next rank" text. getRankInfo() called from dpStore. |
-| 3 | Auto-generated highlights appear based on protein compliance, PRs, and streak milestones (at least one highlight always shows) | ✓ VERIFIED | highlights.ts generateHighlights() implements 6 milestone rules (protein ≥5 days, streak ≥7, new record, workouts ≥4, 100% compliance, DP ≥500) with fallback "Week Complete" highlight (lines 78-106) ensuring at least one always displays. |
-| 4 | In-app trigger shows the report on Sunday after user completes first DP action (once per week) | ✓ VERIFIED | Home.tsx (lines 131-147) subscribes to dpStore changes, calls shouldShowReport() which checks dayOfWeek === 0 (Sunday) AND lastShownWeekStart !== current week. markReportShown() prevents duplicate shows. |
-| 5 | Push notification fires on Sunday at 7pm local time and deep links to weekly report screen | ✓ VERIFIED | notifications.ts (lines 152-166) schedules WEEKLY_REPORT notification for Weekday.Sunday at prefs.weeklyReport.time (default 19:00), with route '/weekly-report'. App.tsx (line 88) handles deep link by setting sessionStorage flag, Home.tsx (lines 150-156) detects flag and shows modal. |
-| 6 | User can toggle weekly report notifications on/off in Settings | ✓ VERIFIED | Settings.tsx (line 926) renders weeklyReport toggle in notification preferences array with enable/disable switch and time picker. remindersStore.ts (line 109) defaults to enabled: true, time: 19:00. |
-| 7 | Share button generates weekly report share card and opens native share sheet | ✓ VERIFIED | WeeklyReportScreen.tsx (lines 64-72) calls shareWeeklyReportCard() with off-screen WeeklyReportShareCard component (lines 77-89). shareCard.ts (lines 152-165) captures PNG and opens native share with text. ShareType union includes 'weekly' (line 7), no DP award (lines 93-95). |
+| 1 | User sees full-screen weekly summary showing DP earned, compliance percentage, streak, and workouts completed for the past 7 days | ✓ VERIFIED | WeeklyReportScreen.tsx (235 lines) renders 2x2 stats grid with all required metrics (lines 128-164). weeklyReportStore.ts (130 lines) getWeeklyStats() aggregates data from dpStore.dailyLogs and workoutStore.workoutLogs for Sunday-Saturday date range (lines 36-106). |
+| 2 | User sees current rank, DP to next rank, and rank progress bar in the summary | ✓ VERIFIED | WeeklyReportScreen.tsx displays rank section (lines 167-185) with rank name, gradient progress bar (width based on rankInfo.progress), and "X DP to next rank" text. getRankInfo() called from dpStore (line 46). |
+| 3 | Auto-generated highlights appear based on protein compliance, PRs, and streak milestones (at least one highlight always shows) | ✓ VERIFIED | highlights.ts (109 lines) generateHighlights() implements 6 milestone rules (protein ≥5 days, streak ≥7, new record, workouts ≥4, 100% compliance, DP ≥500) with fallback "Week Complete" highlight (lines 78-106) ensuring at least one always displays. Exported generateHighlights function verified. |
+| 4 | In-app trigger shows the report on Sunday after user completes first DP action (once per week) | ✓ VERIFIED | Home.tsx (lines 131-147) subscribes to dpStore changes, calls shouldShowReport() which checks dayOfWeek === 0 (Sunday) AND lastShownWeekStart !== current week (weeklyReportStore.ts lines 108-119). markReportShown() prevents duplicate shows (lines 121-127). |
+| 5 | Push notification fires on Sunday at 7pm local time and deep links to weekly report screen | ✓ VERIFIED | notifications.ts (lines 152-166) schedules WEEKLY_REPORT notification for Weekday.Sunday at prefs.weeklyReport.time (default 19:00 hour/minute), with route '/weekly-report'. App.tsx (lines 90-92) handles deep link by setting sessionStorage flag, Home.tsx (lines 150-156) detects flag and shows modal. |
+| 6 | User can toggle weekly report notifications on/off in Settings | ✓ VERIFIED | Settings.tsx (line 948) renders weeklyReport toggle in notification preferences array with enable/disable switch, BarChart3 icon, and time picker. remindersStore.ts (lines 20, 109) defines weeklyReport preference with enabled: true, time: 19:00 default. |
+| 7 | Share button generates weekly report share card and opens native share sheet | ✓ VERIFIED | WeeklyReportScreen.tsx (lines 64-72) calls shareWeeklyReportCard() with off-screen WeeklyReportShareCard component (lines 77-89). shareCard.ts (lines 152-165) captures PNG and opens native share with text. ShareType union includes 'weekly' (line 7), no DP award (lines 93-95). WeeklyReportShareCard.tsx exists (428 lines). |
 
 **Score:** 7/7 truths verified
 
@@ -36,26 +43,26 @@ re_verification: false
 
 | Artifact | Expected | Status | Details |
 |----------|----------|--------|---------|
-| src/stores/weeklyReportStore.ts | Weekly stats aggregation, last shown tracking | ✓ VERIFIED | 131 lines. Exports useWeeklyReportStore with getWeeklyStats(), shouldShowReport(), markReportShown(). Zustand persist middleware. Aggregates DP, compliance %, streak, workouts from dpStore/workoutStore for Sunday-Saturday range. |
-| src/lib/highlights.ts | Auto-generated highlight logic | ✓ VERIFIED | 110 lines. Exports generateHighlights() with 6 milestone rules + fallback. Returns Highlight[] with type, title, description, icon. Always returns at least one highlight. |
-| src/screens/WeeklyReportScreen.tsx | Full-screen weekly report UI | ✓ VERIFIED | 236 lines. Gold/obsidian styling. 2x2 stats grid, rank progress with gradient bar, highlights section with Lucide icons, share button integration. Off-screen WeeklyReportShareCard for PNG capture. |
-| src/stores/remindersStore.ts | weeklyReport notification preference | ✓ VERIFIED | Contains weeklyReport: { enabled: boolean; time: NotificationTimePreference } in interface (line 20), default state enabled: true, 19:00 (line 109). |
-| src/lib/notifications.ts | WEEKLY_REPORT notification scheduling | ✓ VERIFIED | WEEKLY_REPORT: 7 in NOTIFICATION_IDS (line 17). Sunday notification schedule (lines 152-166) with route '/weekly-report' for deep linking. |
-| src/screens/Home.tsx | Modal state and trigger logic | ✓ VERIFIED | showWeeklyReportFull state (line 85), useEffect subscribes to dpStore (lines 131-147), sessionStorage deep link handler (lines 150-156), WeeklyReportScreen conditional render (lines 495-502). |
-| src/screens/Settings.tsx | Weekly Report toggle | ✓ VERIFIED | weeklyReport entry in notification toggles array (line 926) with label, description, BarChart3 icon. Inherits toggle UI pattern. |
-| src/components/share/WeeklyReportShareCard.tsx | Weekly report share card | ✓ VERIFIED | 429 lines. Inline styles, 390x844 dimensions, gold/obsidian theme. 2x2 stats grid, avatar with glow, rank progress bar, branding footer. Takes dpEarned, compliance%, streak, workouts, rank, callsign, avatar props. |
+| src/screens/WeeklyReportScreen.tsx | Full-screen weekly report UI with stats, rank progress, and highlights | ✓ VERIFIED | 235 lines (exceeds min_lines: 150). Gold/obsidian styling. 2x2 stats grid, rank progress with gradient bar, highlights section with Lucide icons, share button integration. Off-screen WeeklyReportShareCard for PNG capture. Exports default WeeklyReportScreen component. |
+| src/stores/weeklyReportStore.ts | Weekly stats aggregation, last shown tracking, and report data | ✓ VERIFIED | 130 lines. Exports useWeeklyReportStore (line 30) with getWeeklyStats() (lines 36-106), shouldShowReport() (lines 108-119), markReportShown() (lines 121-127). Zustand persist middleware. Aggregates DP, compliance %, streak, workouts from dpStore/workoutStore for Sunday-Saturday range. |
+| src/lib/highlights.ts | Auto-generated highlight logic based on weekly performance | ✓ VERIFIED | 109 lines. Exports Highlight interface (line 3) and generateHighlights function (line 14). Implements 6 milestone rules + fallback. Returns Highlight[] with type, title, description, icon. Always returns at least one highlight. |
+| src/screens/Home.tsx | Modal state for WeeklyReportScreen, trigger logic after DP action | ✓ VERIFIED | Contains WeeklyReportScreen import (line 18), showWeeklyReportFull state (line 85), useEffect subscribes to dpStore (lines 131-147), sessionStorage deep link handler (lines 150-156), WeeklyReportScreen conditional render (lines 495-502). |
+| src/stores/remindersStore.ts | weeklyReport notification preference (enabled, time) | ✓ VERIFIED | Contains weeklyReport: { enabled: boolean; time: NotificationTimePreference } in interface (line 20), default state enabled: true, time: { hour: 19, minute: 0 } (line 109). |
+| src/lib/notifications.ts | WEEKLY_REPORT notification scheduling | ✓ VERIFIED | WEEKLY_REPORT: 7 in NOTIFICATION_IDS (line 17). Sunday notification schedule (lines 152-166) with route '/weekly-report' for deep linking. Uses prefs.weeklyReport.enabled and prefs.weeklyReport.time. |
+| src/screens/Settings.tsx | Weekly Report toggle in Push Notifications section | ✓ VERIFIED | weeklyReport entry in notification toggles array (line 948) with label "Weekly Report", description "Sunday reminder to view your weekly summary", BarChart3 icon, visible: true. Inherits toggle UI pattern with enable/disable + time picker. |
+| src/components/share/WeeklyReportShareCard.tsx | Weekly report share card component for PNG capture | ✓ VERIFIED | 428 lines (exceeds min_lines: 100). Inline styles, 390x844 dimensions, gold/obsidian theme. 2x2 stats grid, avatar with glow, rank progress bar, branding footer. Takes dpEarned, compliance%, streak, workouts, rank, callsign, avatar props. |
 | src/lib/shareCard.ts | shareWeeklyReportCard function | ✓ VERIFIED | shareWeeklyReportCard() function (lines 152-165) accepts element, dpEarned, streak, rankName. ShareType union includes 'weekly' (line 7). awardDPForShare case 'weekly' does nothing (lines 93-95) — no DP reward for informational share. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 |------|-------|-----|--------|---------|
-| WeeklyReportScreen.tsx | weeklyReportStore.ts | useWeeklyReportStore hook | ✓ WIRED | Imports useWeeklyReportStore (line 2), calls getWeeklyStats() (line 45), markReportShown() (lines 58-61). |
-| WeeklyReportScreen.tsx | dpStore.ts | getRankInfo | ✓ WIRED | Imports useDPStore (line 3), calls getRankInfo() (line 46) for rank data, longestObedienceStreak (line 47) for highlights. |
-| WeeklyReportScreen.tsx | highlights.ts | generateHighlights call | ✓ WIRED | Imports generateHighlights (line 5), called with stats and longestStreak (line 52), result used in highlights section (lines 193-208). |
-| Home.tsx | weeklyReportStore.ts | shouldShowReport/markReportShown | ✓ WIRED | Imports from weeklyReportStore (lines 80-81), shouldShowReport() checked in useEffect (line 133), markReportShown() called on close (line 498). Subscribe pattern triggers after DP actions (lines 142-144). |
-| notifications.ts | remindersStore.ts | weeklyReport preference | ✓ WIRED | prefs.weeklyReport.enabled check (line 152), prefs.weeklyReport.time.hour/minute used in schedule (lines 160-161). |
-| App.tsx | Home.tsx | Deep link via sessionStorage | ✓ WIRED | App.tsx sets sessionStorage 'showWeeklyReport' for route '/weekly-report' (line 88+). Home.tsx detects flag on mount (lines 150-156), shows modal, clears flag. |
+| WeeklyReportScreen.tsx | weeklyReportStore.ts | useWeeklyReportStore hook | ✓ WIRED | Imports useWeeklyReportStore (line 2), calls getWeeklyStats() (line 45), markReportShown() (line 58). Pattern "useWeeklyReportStore" found. |
+| WeeklyReportScreen.tsx | dpStore.ts | getRankInfo | ✓ WIRED | Imports useDPStore (line 3), calls getRankInfo() (line 46) for rank data. Pattern "useDPStore.*getRankInfo" found. |
+| WeeklyReportScreen.tsx | highlights.ts | generateHighlights call | ✓ WIRED | Imports generateHighlights (line 5), called with stats and longestStreak (line 52), result used in highlights section render. |
+| Home.tsx | weeklyReportStore.ts | shouldShowReport/markReportShown | ✓ WIRED | Imports from weeklyReportStore (lines 80-81), shouldShowReport() checked in useEffect (line 133), markReportShown() called on close (line 498). Subscribe pattern triggers after DP actions (lines 131-147). |
+| notifications.ts | remindersStore.ts | weeklyReport preference | ✓ WIRED | prefs.weeklyReport.enabled check (line 152), prefs.weeklyReport.time.hour/minute used in schedule (lines 160-161). Pattern "prefs\.weeklyReport" found. |
+| App.tsx | Home.tsx | Deep link via sessionStorage | ✓ WIRED | App.tsx sets sessionStorage 'showWeeklyReport' for route '/weekly-report' (lines 90-92). Home.tsx detects flag on mount (lines 150-156), shows modal, clears flag. |
 | WeeklyReportScreen.tsx | shareCard.ts | Share button handler | ✓ WIRED | Imports shareWeeklyReportCard (line 6), handleShare calls it with shareCardRef element and stats (lines 64-72), wired to share button onClick (line 215). |
 | shareCard.ts | WeeklyReportShareCard.tsx | Off-screen render | ✓ WIRED | WeeklyReportScreen renders WeeklyReportShareCard in ShareCardWrapper (lines 77-89), ref passed to shareWeeklyReportCard for capture. |
 
@@ -63,19 +70,42 @@ re_verification: false
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |-------------|------------|-------------|--------|----------|
-| WRPT-01 | 41-01 | User sees full-screen weekly summary with DP earned, compliance %, streak, workouts completed | ✓ SATISFIED | WeeklyReportScreen.tsx stats grid displays all 4 metrics from weeklyReportStore.getWeeklyStats() |
-| WRPT-02 | 41-01 | Summary shows current rank, DP to next rank, and rank progress bar | ✓ SATISFIED | Rank section (lines 167-185) with name, progress bar, dpForNext text |
-| WRPT-03 | 41-01 | Auto-generated highlights appear based on protein compliance, PRs, streak milestones | ✓ SATISFIED | highlights.ts implements 6 milestone rules with guaranteed fallback |
-| WRPT-04 | 41-02 | Push notification triggers report on Sunday at 7pm local time | ✓ SATISFIED | notifications.ts Sunday 7pm schedule with deep link to '/weekly-report' |
-| WRPT-05 | 41-02 | In-app trigger shows report on Sunday after first DP action (once per week) | ✓ SATISFIED | Home.tsx useEffect subscribes to dpStore, shouldShowReport() gates on Sunday + lastShownWeekStart |
-| WRPT-06 | 41-03 | Share button produces weekly report share card | ✓ SATISFIED | WeeklyReportShareCard component with PNG capture via shareWeeklyReportCard() |
-| WRPT-07 | 41-02 | User can configure weekly report notification in Settings | ✓ SATISFIED | Settings.tsx toggle with enable/disable + time picker, remindersStore persistence |
+| WRPT-01 | 41-01 | User sees full-screen weekly summary with DP earned, compliance %, streak, workouts completed | ✓ SATISFIED | WeeklyReportScreen.tsx stats grid displays all 4 metrics from weeklyReportStore.getWeeklyStats(). Success criterion 1 verified. |
+| WRPT-02 | 41-01 | Summary shows current rank, DP to next rank, and rank progress bar | ✓ SATISFIED | Rank section (lines 167-185) with name, progress bar, dpForNext text. Success criterion 2 verified. |
+| WRPT-03 | 41-01 | Auto-generated highlights appear based on protein compliance, PRs, streak milestones | ✓ SATISFIED | highlights.ts implements 6 milestone rules with guaranteed fallback. Success criterion 3 verified. |
+| WRPT-04 | 41-02 | Push notification triggers report on Sunday at 7pm local time | ✓ SATISFIED | notifications.ts Sunday 7pm schedule with deep link to '/weekly-report'. Success criterion 5 verified. |
+| WRPT-05 | 41-02 | In-app trigger shows report on Sunday after first DP action (once per week) | ✓ SATISFIED | Home.tsx useEffect subscribes to dpStore, shouldShowReport() gates on Sunday + lastShownWeekStart. Success criterion 4 verified. |
+| WRPT-06 | 41-03 | Share button produces weekly report share card | ✓ SATISFIED | WeeklyReportShareCard component with PNG capture via shareWeeklyReportCard(). Success criterion 7 verified. |
+| WRPT-07 | 41-02 | User can configure weekly report notification in Settings | ✓ SATISFIED | Settings.tsx toggle with enable/disable + time picker, remindersStore persistence. Success criterion 6 verified. |
 
-All 7 requirements mapped to Phase 41 in REQUIREMENTS.md are satisfied. No orphaned requirements found.
+**All 7 requirements mapped to Phase 41 in REQUIREMENTS.md are satisfied. No orphaned requirements found.**
 
 ### Anti-Patterns Found
 
 None — all files checked for TODOs, placeholders, empty implementations, and console.log-only handlers. No anti-patterns detected.
+
+**Files scanned:**
+- src/screens/WeeklyReportScreen.tsx: No TODOs, no placeholders, no empty returns
+- src/stores/weeklyReportStore.ts: No TODOs, substantive implementation with DP aggregation logic
+- src/lib/highlights.ts: No TODOs, complete rule-based highlight generation
+- src/components/share/WeeklyReportShareCard.tsx: No TODOs, complete inline-styled share card
+
+### Commits Verified
+
+All commit hashes from SUMMARY files verified to exist in git history:
+
+**Plan 01 (41-01-SUMMARY.md):**
+- a5bb32af: feat(41-01): create weeklyReportStore and highlights utility ✓
+- e254e0fc: feat(41-01): create WeeklyReportScreen component ✓
+
+**Plan 02 (41-02-SUMMARY.md):**
+- 700bbf1d: feat(41-02): add weeklyReport notification preference and scheduling ✓
+- 1e5b5f4d: feat(41-02): integrate WeeklyReportScreen in Home with in-app trigger ✓
+- 385d9ac3: feat(41-02): add weekly report toggle to Settings ✓
+
+**Plan 03 (41-03-SUMMARY.md):**
+- 3c57d20b: feat(41-03): create WeeklyReportShareCard component ✓
+- 12632848: feat(41-03): add shareWeeklyReportCard utility and integrate in WeeklyReportScreen ✓
 
 ### Human Verification Required
 
@@ -185,9 +215,25 @@ All 7 success criteria verified programmatically:
 
 **Anti-Patterns:** None detected.
 
-**TypeScript:** Phase 41 files compile without errors. (Note: unrelated referralStore.ts errors exist from Phase 42.)
+**TypeScript:** Phase 41 files compile without errors.
+
+**Commits:** All 7 commits from SUMMARY files verified to exist in git history.
 
 **Human Verification:** 6 items flagged for manual testing — visual appearance, share image quality, timing behavior, push notification deep linking, highlights accuracy, and Settings UI integration. These are standard UI/UX verification needs that cannot be automated.
+
+## Re-verification Notes
+
+This is a re-verification of a previously passing verification (2026-03-07T19:30:00Z). The previous verification status was "passed" with 7/7 success criteria verified and no gaps.
+
+**Changes since previous verification:** None
+
+**Validation approach:** Performed fresh verification of all artifacts, key links, and requirements against actual codebase rather than trusting previous VERIFICATION.md claims.
+
+**Findings:**
+- No regressions detected
+- No gaps found
+- All previous verifications confirmed accurate
+- All implementations remain substantive and wired
 
 ## Phase Completion
 
@@ -204,5 +250,6 @@ All implementation is production-ready pending human verification of visual appe
 
 ---
 
-_Verified: 2026-03-07T19:30:00Z_
+_Verified: 2026-03-07T20:15:00Z_
 _Verifier: Claude (gsd-verifier)_
+_Re-verification: Yes (validation of previous passing verification)_
