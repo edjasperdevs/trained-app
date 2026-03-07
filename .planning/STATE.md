@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.2 Auth Flow Redesign (Phase 31 Complete)
+**Current focus:** v2.2.1 Social Sharing (Phases 37-40)
 
 ## Current Position
 
-Phase: 31 of 36 (Splash Screen) - COMPLETE
-Plan: 3 of 3 in current phase
-Status: Complete
-Last activity: 2026-03-07 -- Completed 31-03 (Splash Screen Refinement)
+Phase: 37 of 40 (Share Infrastructure) - NOT STARTED
+Plan: 0 of TBD in current phase
+Status: Roadmap created, awaiting plan-phase
+Last activity: 2026-03-07 -- Created v2.2.1 Social Sharing roadmap
 
 Progress: [###########---------] 58% (v2.0-v2.2 scope: 32/54 plans)
 
@@ -33,6 +33,11 @@ Progress: [###########---------] 58% (v2.0-v2.2 scope: 32/54 plans)
 - Total plans: 20 (2 + 6x3)
 - Plans complete: 5
 
+**v2.2.1 Social Sharing:**
+- Total phases: 4 (Phases 37-40)
+- Total plans: TBD (awaiting plan-phase)
+- Plans complete: 0
+
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 30 | 01 | 15min | 3 | 10 |
@@ -45,6 +50,10 @@ Progress: [###########---------] 58% (v2.0-v2.2 scope: 32/54 plans)
 
 ### Decisions
 
+- v2.2.1: 4 phases following feature brief implementation order (infrastructure first, then card-by-card)
+- v2.2.1: DP rewards gated by daily limits (workout/compliance) and per-rank (rank-up)
+- v2.2.1: Web platform shows "Download Card" fallback instead of native share
+- v2.2.1: Camera compositing is final step after basic workout sharing works
 - v2.2: 3-pass implementation per screen (Build / Review / Refine) for mockup fidelity
 - v2.2: Apple + Google Sign-In as primary auth methods, email as secondary
 - v2.2: Obsidian design tokens (#0A0A0A bg, #D4A853 gold accents)
@@ -69,5 +78,6 @@ Progress: [###########---------] 58% (v2.0-v2.2 scope: 32/54 plans)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 31-03-PLAN.md (Splash Screen Refinement - Verification Only)
+Stopped at: Created v2.2.1 Social Sharing roadmap (Phases 37-40)
 Resume file: None
+Next action: /gsd:plan-phase 37

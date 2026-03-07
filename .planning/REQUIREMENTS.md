@@ -462,30 +462,30 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | FORGOT-02 | Phase 36 | Pending |
 | FORGOT-03 | Phase 36 | Pending |
 | FORGOT-04 | Phase 36 | Pending |
-| SHARE-01 | — | Pending |
-| SHARE-02 | — | Pending |
-| SHARE-03 | — | Pending |
-| SHARE-04 | — | Pending |
-| SHARE-05 | — | Pending |
-| SHARE-06 | — | Pending |
-| SHARE-07 | — | Pending |
-| SHARE-08 | — | Pending |
-| SHARE-09 | — | Pending |
-| SHARE-10 | — | Pending |
-| SHARE-11 | — | Pending |
-| SHARE-12 | — | Pending |
-| SHARE-13 | — | Pending |
-| SHARE-14 | — | Pending |
-| SHARE-15 | — | Pending |
+| SHARE-01 | Phase 37 | Pending |
+| SHARE-02 | Phase 37 | Pending |
+| SHARE-03 | Phase 37 | Pending |
+| SHARE-04 | Phase 38 | Pending |
+| SHARE-05 | Phase 40 | Pending |
+| SHARE-06 | Phase 39 | Pending |
+| SHARE-07 | Phase 38 | Pending |
+| SHARE-08 | Phase 40 | Pending |
+| SHARE-09 | Phase 39 | Pending |
+| SHARE-10 | Phase 37 | Pending |
+| SHARE-11 | Phase 37 | Pending |
+| SHARE-12 | Phase 37 | Pending |
+| SHARE-13 | Phase 40 | Pending |
+| SHARE-14 | Phase 40 | Pending |
+| SHARE-15 | Phase 37 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
 - v2.1 requirements: 44 total
 - v2.2 requirements: 34 total
 - v2.2.1 requirements: 15 total
-- Total mapped to phases: 125
-- Unmapped: 15 (v2.2.1 roadmap pending)
+- Total mapped to phases: 140
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1)*
-*Last updated: 2026-03-06 -- v2.2.1 Social Sharing requirements defined*
+*Last updated: 2026-03-07 -- v2.2.1 Social Sharing roadmap created*
