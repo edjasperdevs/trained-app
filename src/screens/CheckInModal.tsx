@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { BadgeUnlockModal, RankUpModal } from '@/components'
 import {
   useUserStore,
@@ -11,10 +11,15 @@ import {
 } from '@/stores'
 import { DP_VALUES, RANKS } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
+import type { Archetype } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
 import { Flame, PartyPopper, Moon, Check, X } from 'lucide-react'
+import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
+import { ComplianceShareCard } from '@/components/share/ComplianceShareCard'
+import { shareComplianceCard } from '@/lib/shareCard'
+import { getAvatarStage } from '@/lib/avatarUtils'
 
 interface CheckInModalProps {
   isOpen: boolean
@@ -55,11 +60,43 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
   const [unlockedBadges, setUnlockedBadges] = useState<string[]>([])
   const [showBadgeModal, setShowBadgeModal] = useState(false)
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
+  const [sharing, setSharing] = useState(false)
+
+  const cardRef = useRef<HTMLDivElement>(null)
+  const totalDP = useDPStore((s) => s.totalDP)
+  const archetype = (useUserStore((s) => s.profile?.archetype) || 'bro') as Archetype
+  const currentRank = useDPStore((s) => s.currentRank)
+  const rankInfo = useDPStore((s) => s.getRankInfo())
+  const avatarStage = getAvatarStage(currentRank) as 1 | 2 | 3 | 4 | 5
 
   const checkAndAwardBadges = useAchievementsStore((state) => state.checkAndAwardBadges)
 
   const todayWorkout = getTodayWorkout()
   const workoutCompleted = isWorkoutCompletedToday()
+
+  // Full compliance = all 5 items checked (workout only counts if there was a workout scheduled)
+  // Per feature brief, share button only shows on "full 5/5 compliance days"
+  // On recovery days (no workout), user cannot achieve 5/5, so share button should NOT appear
+  const isFullCompliance = data.workout && data.protein && data.meal && data.steps && data.sleep
+
+  // Milestone detection for share card
+  function getMilestone(streak: number): string | undefined {
+    if (streak === 7) return 'FIRST WEEK COMPLETE'
+    if (streak === 30) return '30-DAY PROTOCOL'
+    if (streak === 100) return '100 DAYS OF DISCIPLINE'
+    return undefined
+  }
+
+  // Share handler for compliance card
+  const handleShare = async () => {
+    if (!cardRef.current || sharing) return
+    setSharing(true)
+    try {
+      await shareComplianceCard(cardRef.current, obedienceStreak, totalDP, rankInfo.name)
+    } finally {
+      setSharing(false)
+    }
+  }
 
   // Initialize data based on current state
   useEffect(() => {
@@ -354,6 +391,18 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               </p>
             </div>
 
+            {/* Share button - only on full 5/5 compliance */}
+            {isFullCompliance && (
+              <Button
+                onClick={handleShare}
+                disabled={sharing}
+                variant="outline"
+                className="w-full mt-3 mb-3 border-primary/30 text-primary font-heading uppercase tracking-widest"
+              >
+                {sharing ? 'Creating Card...' : 'Share Your Protocol'}
+              </Button>
+            )}
+
             <Button onClick={() => onClose(true)} variant="ghost" className="w-full">
               Continue
             </Button>
@@ -378,6 +427,18 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
           onClose={() => setRankUpData(null)}
         />
       )}
+
+      {/* Off-screen share card for PNG capture */}
+      <ShareCardWrapper cardRef={cardRef}>
+        <ComplianceShareCard
+          streak={obedienceStreak}
+          totalDP={totalDP}
+          rankName={rankInfo.name}
+          avatarStage={avatarStage}
+          archetype={archetype}
+          milestone={getMilestone(obedienceStreak)}
+        />
+      </ShareCardWrapper>
     </div>
   )
 }
