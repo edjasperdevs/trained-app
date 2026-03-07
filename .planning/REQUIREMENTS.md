@@ -244,7 +244,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 ### Share Cards
 
 - [x] **SHARE-04**: Rank-Up card displays rank name, avatar, total DP, streak with gold/obsidian styling
-- [ ] **SHARE-05**: Workout card displays sets, top lift, DP earned with full-bleed photo layout
+- [x] **SHARE-05**: Workout card displays sets, top lift, DP earned with full-bleed photo layout
 - [x] **SHARE-06**: Compliance card displays streak, 5 compliance checks, milestone banners (Day 7/30/100)
 
 ### Integration Points
@@ -261,8 +261,8 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 ### Camera Compositing
 
-- [ ] **SHARE-13**: Camera capture integrates photo into workout share card
-- [ ] **SHARE-14**: Bottom sheet offers "with photo" / "without photo" options
+- [x] **SHARE-13**: Camera capture integrates photo into workout share card
+- [x] **SHARE-14**: Bottom sheet offers "with photo" / "without photo" options
 
 ### Platform Handling
 
@@ -466,7 +466,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SHARE-02 | Phase 37 | Complete |
 | SHARE-03 | Phase 37 | Complete |
 | SHARE-04 | Phase 38 | Complete |
-| SHARE-05 | Phase 40 | Pending |
+| SHARE-05 | Phase 40 | Complete |
 | SHARE-06 | Phase 39 | Complete |
 | SHARE-07 | Phase 38 | Complete |
 | SHARE-08 | Phase 40 | Pending |
@@ -474,8 +474,8 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SHARE-10 | Phase 37 | Complete |
 | SHARE-11 | Phase 37 | Complete |
 | SHARE-12 | Phase 37 | Complete |
-| SHARE-13 | Phase 40 | Pending |
-| SHARE-14 | Phase 40 | Pending |
+| SHARE-13 | Phase 40 | Complete |
+| SHARE-14 | Phase 40 | Complete |
 | SHARE-15 | Phase 37 | Complete |
 
 **Coverage:**
