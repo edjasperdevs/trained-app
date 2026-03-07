@@ -64,8 +64,9 @@ export function EmailSignInScreen() {
   // Password visibility state
   const [showPassword, setShowPassword] = useState(false)
 
-  // Loading state
+  // Loading and error state
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Form validation
   const isFormValid = isValidEmail(email) && password.length > 0
@@ -85,9 +86,33 @@ export function EmailSignInScreen() {
     navigate('/auth/signup')
   }
 
-  // Sign In handler (placeholder for Task 3)
+  // Sign In handler
   const handleSignIn = async () => {
-    // Will be implemented in Task 3
+    if (!isFormValid || isLoading) return
+
+    setIsLoading(true)
+    setError(null)
+
+    const { error } = await supabase!.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    setIsLoading(false)
+
+    if (error) {
+      // Handle specific Supabase auth errors
+      if (error.message.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please try again.')
+      } else if (error.message.includes('Email not confirmed')) {
+        setError('Please verify your email address before signing in.')
+      } else {
+        setError(error.message)
+      }
+      return
+    }
+
+    // Session created - App.tsx routing will handle navigation to main app
   }
 
   return (
@@ -172,6 +197,12 @@ export function EmailSignInScreen() {
               )}
             </button>
           </div>
+          {/* Error display */}
+          {error && (
+            <p className="text-sm text-[#EF4444] text-left mt-2 max-w-sm">
+              {error}
+            </p>
+          )}
           {/* Forgot Password link */}
           <div className="mt-2 text-right">
             <button
