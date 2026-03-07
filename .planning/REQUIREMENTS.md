@@ -306,8 +306,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **LOCK-09**: Day Lock users receive morning "lock up" notification with optional evening reminder
 - [x] **LOCK-10**: Protocol Initiated share card displays padlock, keyholder, goal days, start date
 - [x] **LOCK-11**: Milestone share card displays days locked count, milestone title, DP earned
-- [ ] **LOCK-12**: Weekly Report shows LOCKED STREAK card when protocol is active
-- [ ] **LOCK-13**: Settings shows "Locked Protocol" entry under Protocol section
+- [x] **LOCK-12**: Weekly Report shows LOCKED STREAK card when protocol is active
+- [x] **LOCK-13**: Settings shows "Locked Protocol" entry under Protocol section
 
 ## Future Requirements (v2.4+)
 
@@ -544,8 +544,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | LOCK-09 | Phase 44 | Complete |
 | LOCK-10 | Phase 44 | Complete |
 | LOCK-11 | Phase 44 | Complete |
-| LOCK-12 | Phase 44 | Pending |
-| LOCK-13 | Phase 44 | Pending |
+| LOCK-12 | Phase 44 | Complete |
+| LOCK-13 | Phase 44 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 47 total
