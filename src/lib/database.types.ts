@@ -13,6 +13,19 @@ export type CoachClientStatus = 'pending' | 'active' | 'inactive'
 export type InviteStatus = 'pending' | 'accepted' | 'expired'
 export type MacroSetBy = 'self' | 'coach'
 export type CheckinStatus = 'submitted' | 'reviewed'
+export type ReferralStatus = 'pending' | 'completed'
+
+// Referral row
+export interface Referral {
+  id: string
+  created_at: string
+  referrer_id: string
+  recruit_id: string | null
+  referral_code_used: string
+  status: ReferralStatus
+  completed_at: string | null
+  dp_awarded: number
+}
 
 // Prescribed exercise shape (used in workout_templates and assigned_workouts JSONB)
 export interface PrescribedExercise {
@@ -117,6 +130,7 @@ export interface Database {
           last_check_in_date: string | null
           streak_paused: boolean
           onboarding_complete: boolean
+          referral_code: string | null
         }
         Insert: {
           id: string
@@ -138,6 +152,7 @@ export interface Database {
           last_check_in_date?: string | null
           streak_paused?: boolean
           onboarding_complete?: boolean
+          referral_code?: string | null
         }
         Update: {
           id?: string
@@ -159,6 +174,7 @@ export interface Database {
           last_check_in_date?: string | null
           streak_paused?: boolean
           onboarding_complete?: boolean
+          referral_code?: string | null
         }
         Relationships: []
       }
