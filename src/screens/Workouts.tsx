@@ -356,7 +356,7 @@ export function Workouts() {
                       {/* Main content row */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[17px] font-bold text-foreground leading-tight">
+                          <p className="text-[17px] font-bold text-foreground leading-tight truncate">
                             {hasAssignment ? 'Coach Workout' : (
                               <>
                                 <span className="capitalize">{todayWorkout?.type}</span>
