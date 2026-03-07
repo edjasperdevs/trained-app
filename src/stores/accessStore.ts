@@ -48,21 +48,14 @@ export const useAccessStore = create<AccessState>()(
         // SEC-02: Master code check removed from client - now validated server-side only
         // via the validate_access_code RPC which checks Supabase Vault
 
-        // Validate against Supabase access_codes table
+        // No dev fallback: misconfigured environment should fail explicitly
+        // rather than allowing unauthorized access. Developers should configure
+        // VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for local testing.
         if (!supabase) {
-          if (import.meta.env.DEV) {
-            // DEV only: accept any 8+ char code when Supabase not configured
-            console.log('[Access] Supabase not configured, using dev fallback')
-            set({
-              hasAccess: true,
-              licenseKey: trimmedCode,
-              accessGrantedAt: new Date().toISOString(),
-              email: null,
-              instanceId: 'dev-instance'
-            })
-            return { success: true }
+          return {
+            success: false,
+            error: 'App configuration error. Please contact support.'
           }
-          return { success: false, error: 'Validation unavailable. Please try again later.' }
         }
 
         try {
