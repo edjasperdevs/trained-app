@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ProgressBar, EmptyState, Confetti, AppHeader } from '@/components'
 import { RankUpModal } from '@/components'
-import { useWorkoutStore, useAvatarStore, useAchievementsStore, toast, WorkoutType, WorkoutLog } from '@/stores'
+import { useWorkoutStore, useAvatarStore, useAchievementsStore, useUserStore, toast, WorkoutType, WorkoutLog } from '@/stores'
 import { useDPStore, DP_VALUES } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
@@ -19,6 +19,11 @@ import { cn } from '@/lib/cn'
 import { motion } from 'framer-motion'
 import { springs } from '@/lib/animations'
 import { Clock, Dumbbell, ShieldCheck, Timer, Pencil, Moon, Check, ArrowUpRight, ChevronLeft, RotateCcw } from 'lucide-react'
+import { ShareBottomSheet } from '@/components/share/ShareBottomSheet'
+import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
+import { WorkoutShareCard } from '@/components/share/WorkoutShareCard'
+import { shareWorkoutCard } from '@/lib/shareCard'
+import { getAvatarStage } from '@/lib/avatarUtils'
 
 export function Workouts() {
   // PERF-02: Use granular selectors for reactive state only
@@ -66,6 +71,13 @@ export function Workouts() {
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
   const [showCelebration, setShowCelebration] = useState(false)
   const [viewingWorkoutLog, setViewingWorkoutLog] = useState<WorkoutLog | null>(null)
+  const [showShareSheet, setShowShareSheet] = useState(false)
+  const [sharePhoto, setSharePhoto] = useState<string | undefined>()
+  const [isSharing, setIsSharing] = useState(false)
+  const shareCardRef = useRef<HTMLDivElement>(null)
+
+  // Get user profile for share card
+  const profile = useUserStore((s) => s.profile)
 
   const todayWorkout = getTodayWorkout()
   const isCompleted = isWorkoutCompletedToday()
@@ -100,6 +112,37 @@ export function Workouts() {
     startWorkout(type, dayNumber)
     setActiveWorkout(getCurrentWorkout())
     analytics.workoutStarted(type)
+  }
+
+  const handleShareWorkout = async (_withPhoto: boolean, photoDataUrl?: string) => {
+    setIsSharing(true)
+    setSharePhoto(photoDataUrl)
+
+    // Wait for next render to ensure card is populated with photo
+    await new Promise(resolve => setTimeout(resolve, 100))
+
+    if (shareCardRef.current) {
+      const dpStoreState = useDPStore.getState()
+      const rankInfo = dpStoreState.getRankInfo()
+
+      // Get today's completed workout
+      const todayLog = getWorkoutHistory(1)[0]
+      const setsCompleted = todayLog?.exercises.reduce(
+        (acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0
+      ) || 0
+
+      await shareWorkoutCard(
+        shareCardRef.current,
+        todayLog?.workoutType || 'Workout',
+        setsCompleted,
+        DP_VALUES.training,
+        rankInfo.name
+      )
+    }
+
+    setIsSharing(false)
+    setShowShareSheet(false)
+    setSharePhoto(undefined)
   }
 
   const handleMinimalWorkout = () => {
@@ -388,11 +431,20 @@ export function Workouts() {
 
                       {/* DP earned when completed */}
                       {isCompleted && (
-                        <div className="mt-3 flex justify-end">
-                          <span className="text-[13px] text-primary flex items-center gap-1 font-medium">
-                            +{DP_VALUES.training} {LABELS.dp} earned
-                            <ArrowUpRight size={14} />
-                          </span>
+                        <div className="mt-3">
+                          <div className="flex justify-end">
+                            <span className="text-[13px] text-primary flex items-center gap-1 font-medium">
+                              +{DP_VALUES.training} {LABELS.dp} earned
+                              <ArrowUpRight size={14} />
+                            </span>
+                          </div>
+                          {/* Share Protocol button */}
+                          <button
+                            onClick={() => setShowShareSheet(true)}
+                            className="w-full mt-3 py-2.5 text-[13px] font-heading uppercase tracking-widest text-primary border border-primary/30 rounded-lg hover:border-primary/50 transition-colors"
+                          >
+                            Share Protocol
+                          </button>
                         </div>
                       )}
                     </div>
@@ -929,6 +981,45 @@ export function Workouts() {
           onClose={() => setViewingWorkoutLog(null)}
         />
       )}
+
+      {/* Share Bottom Sheet */}
+      <ShareBottomSheet
+        isOpen={showShareSheet}
+        onClose={() => setShowShareSheet(false)}
+        onShare={handleShareWorkout}
+        isLoading={isSharing}
+      />
+
+      {/* Off-screen share card for PNG capture */}
+      <ShareCardWrapper cardRef={shareCardRef}>
+        <WorkoutShareCard
+          workoutName={todayWorkout?.name || todayWorkout?.type || 'Workout'}
+          setsCompleted={(() => {
+            const log = getWorkoutHistory(1)[0]
+            return log?.exercises.reduce((acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0) || 0
+          })()}
+          topLift={(() => {
+            const log = getWorkoutHistory(1)[0]
+            let topLift = 'Training'
+            let topWeight = 0
+            log?.exercises.forEach(ex => {
+              ex.sets.forEach(set => {
+                if (set.completed && set.weight > topWeight) {
+                  topWeight = set.weight
+                  topLift = `${ex.name} x${set.reps}`
+                }
+              })
+            })
+            return topLift
+          })()}
+          dpEarned={DP_VALUES.training}
+          rankName={useDPStore.getState().getRankInfo().name}
+          avatarStage={getAvatarStage(useDPStore.getState().currentRank) as 1 | 2 | 3 | 4 | 5}
+          archetype={profile?.archetype || 'bro'}
+          callsign={profile?.username || 'Initiate'}
+          userPhoto={sharePhoto}
+        />
+      </ShareCardWrapper>
     </div>
   )
 }
