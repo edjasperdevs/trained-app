@@ -14,6 +14,8 @@ export type InviteStatus = 'pending' | 'accepted' | 'expired'
 export type MacroSetBy = 'self' | 'coach'
 export type CheckinStatus = 'submitted' | 'reviewed'
 export type ReferralStatus = 'pending' | 'completed'
+export type ProtocolStatus = 'active' | 'ended' | 'broken'
+export type ProtocolType = 'continuous' | 'day_lock'
 
 // Referral row
 export interface Referral {
@@ -25,6 +27,29 @@ export interface Referral {
   status: ReferralStatus
   completed_at: string | null
   dp_awarded: number
+}
+
+// Locked protocol row
+export interface LockedProtocol {
+  id: string
+  user_id: string
+  status: ProtocolStatus
+  protocol_type: ProtocolType
+  goal_days: number
+  start_date: string
+  end_date: string | null
+  longest_streak: number
+  created_at: string
+}
+
+// Locked log row
+export interface LockedLog {
+  id: string
+  protocol_id: string
+  user_id: string
+  log_date: string
+  dp_awarded: number
+  created_at: string
 }
 
 // Prescribed exercise shape (used in workout_templates and assigned_workouts JSONB)
@@ -793,6 +818,69 @@ export interface Database {
           status?: ReferralStatus
           completed_at?: string | null
           dp_awarded?: number
+        }
+        Relationships: []
+      }
+      locked_protocols: {
+        Row: {
+          id: string
+          user_id: string
+          status: ProtocolStatus
+          protocol_type: ProtocolType
+          goal_days: number
+          start_date: string
+          end_date: string | null
+          longest_streak: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          status?: ProtocolStatus
+          protocol_type?: ProtocolType
+          goal_days?: number
+          start_date: string
+          end_date?: string | null
+          longest_streak?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          status?: ProtocolStatus
+          protocol_type?: ProtocolType
+          goal_days?: number
+          start_date?: string
+          end_date?: string | null
+          longest_streak?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      locked_logs: {
+        Row: {
+          id: string
+          protocol_id: string
+          user_id: string
+          log_date: string
+          dp_awarded: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          protocol_id: string
+          user_id: string
+          log_date: string
+          dp_awarded?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          protocol_id?: string
+          user_id?: string
+          log_date?: string
+          dp_awarded?: number
+          created_at?: string
         }
         Relationships: []
       }
