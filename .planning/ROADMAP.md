@@ -312,6 +312,15 @@ Plans:
 
 </details>
 
+### Phase 44: Locked Protocol
+
+**Goal:** [To be planned]
+**Depends on:** Phase 43
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 44 to break down)
+
 ---
 
 ## v2.0 WellTrained V2
