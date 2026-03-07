@@ -141,9 +141,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 36-01: Build - Implement Forgot Password screen with form and success state
-- [ ] 36-02: Review - Compare to mockup and identify visual gaps
-- [ ] 36-03: Refine - Pixel-polish form styling, success state, animations
+- [ ] 36-01-PLAN.md -- Implement Forgot Password screen with form, Supabase integration, and success state
+- [ ] 36-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [ ] 36-03-PLAN.md -- Pixel-polish form styling, success state, animations based on review findings
 
 ---
 
