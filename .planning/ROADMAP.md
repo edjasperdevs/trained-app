@@ -493,7 +493,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -559,7 +559,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 44. Locked Protocol | 3/6 | In Progress|  | - |
+| 44. Locked Protocol | 4/6 | In Progress|  | - |
 | 36. Forgot Password Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 

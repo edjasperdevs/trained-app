@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 44 (Locked Protocol)
-Plan: 03 (of 06)
+Plan: 04 (of 06)
 Status: Complete
-Last activity: 2026-03-07 — Completed 44-03 (DP Integration)
+Last activity: 2026-03-07 — Completed 44-04 (Notifications)
 
-Progress: ⬛⬛⬛⬜⬜⬜ (3/6 plans complete)
+Progress: ⬛⬛⬛⬛⬜⬜ (4/6 plans complete)
 
 ## Performance Metrics
 
@@ -34,7 +34,7 @@ Progress: ⬛⬛⬛⬜⬜⬜ (3/6 plans complete)
 - Total phases: 4 (Phases 41-44)
 - Total phases: 4 (Phases 41-44)
 - Total plans: 15 (9 shipped + 6 Phase 44)
-- Plans complete: 12
+- Plans complete: 13
 
 ### Roadmap Evolution
 
@@ -53,6 +53,7 @@ Progress: ⬛⬛⬛⬜⬜⬜ (3/6 plans complete)
 | 44 | 01 | 3min | 2 | 3 |
 | 44 | 02 | 3min | 3 | 2 |
 | 44 | 03 | 3min | 2 | 3 |
+| 44 | 04 | 6min | 3 | 4 |
 
 ### Decisions
 
@@ -156,6 +157,9 @@ Progress: ⬛⬛⬛⬜⬜⬜ (3/6 plans complete)
 - 44-02: Protocol type affects button label: LOG COMPLIANCE (continuous) vs LOCK UP (day_lock)
 - [Phase 44]: Locked DP actions bypass dailyLogs tracking (separate from standard DP flow)
 - [Phase 44]: Guard dailyLogs update for trackable actions only (training/meal/protein/steps/sleep)
+- 44-04: Continuous users get evening reminder at 9pm default, Day Lock users get morning reminder with optional evening check
+- 44-04: Locked protocol notifications added to scheduleAllNotifications and dedicated scheduleLockedProtocolNotifications
+- 44-04: Settings shows notification options only when user has active protocol
 
 ### Pending Todos
 
@@ -187,6 +191,6 @@ Progress: ⬛⬛⬛⬜⬜⬜ (3/6 plans complete)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 44-03-PLAN.md (DP Integration)
+Stopped at: Completed 44-04-PLAN.md (Notifications)
 Resume file: None
-Next action: Execute 44-04-PLAN.md (Start Protocol Screen)
+Next action: Execute 44-05-PLAN.md (Share Cards)

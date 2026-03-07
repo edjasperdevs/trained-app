@@ -302,8 +302,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **LOCK-05**: User sees active protocol screen with day counter, streak, stats, and milestone list
 - [x] **LOCK-06**: Daily compliance logging awards +15 DP (bypasses daily cap)
 - [x] **LOCK-07**: Milestones (7, 14, 21, 30, 60, 90 days) award escalating DP bonuses (50-750 DP)
-- [ ] **LOCK-08**: Continuous users receive reminder notification if not logged by evening
-- [ ] **LOCK-09**: Day Lock users receive morning "lock up" notification with optional evening reminder
+- [x] **LOCK-08**: Continuous users receive reminder notification if not logged by evening
+- [x] **LOCK-09**: Day Lock users receive morning "lock up" notification with optional evening reminder
 - [ ] **LOCK-10**: Protocol Initiated share card displays padlock, keyholder, goal days, start date
 - [ ] **LOCK-11**: Milestone share card displays days locked count, milestone title, DP earned
 - [ ] **LOCK-12**: Weekly Report shows LOCKED STREAK card when protocol is active
@@ -540,8 +540,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | LOCK-05 | Phase 44 | Complete (44-02) |
 | LOCK-06 | Phase 44 | Complete |
 | LOCK-07 | Phase 44 | Complete |
-| LOCK-08 | Phase 44 | Pending |
-| LOCK-09 | Phase 44 | Pending |
+| LOCK-08 | Phase 44 | Complete |
+| LOCK-09 | Phase 44 | Complete |
 | LOCK-10 | Phase 44 | Pending |
 | LOCK-11 | Phase 44 | Pending |
 | LOCK-12 | Phase 44 | Pending |
