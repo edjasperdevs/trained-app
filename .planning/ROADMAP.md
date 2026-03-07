@@ -41,7 +41,7 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 30-01-PLAN.md -- Install Apple/Google Sign-In Capacitor plugins, create auth wrapper modules, configure Supabase providers
+- [x] 30-01-PLAN.md -- Install Apple/Google Sign-In Capacitor plugins, create auth wrapper modules, configure Supabase providers
 - [ ] 30-02-PLAN.md -- Create AuthStack navigation with 5 auth screen placeholders, update App.tsx routing logic
 
 ### Phase 31: Splash Screen
@@ -482,7 +482,7 @@ Plans:
 | 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 30. Auth Infrastructure | v2.2 | 0/2 | Planned | - |
+| 30. Auth Infrastructure | v2.2 | 1/2 | In progress | - |
 | 31. Splash Screen | v2.2 | 0/3 | Not started | - |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |

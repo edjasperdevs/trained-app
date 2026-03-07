@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 30 of 36 (Auth Infrastructure)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-03-06 -- Roadmap created for v2.2 Auth Flow Redesign
+Plan: 1 of 2 in current phase
+Status: Executing
+Last activity: 2026-03-06 -- Completed 30-01 (Social Auth Plugins)
 
-Progress: [##########----------] 50% (v2.0-v2.2 scope: 27/54 plans)
+Progress: [##########----------] 52% (v2.0-v2.2 scope: 28/54 plans)
 
 ## Performance Metrics
 
@@ -35,7 +35,7 @@ Progress: [##########----------] 50% (v2.0-v2.2 scope: 27/54 plans)
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
-| - | - | - | - | - |
+| 30 | 01 | 15min | 3 | 10 |
 
 ## Accumulated Context
 
@@ -45,6 +45,8 @@ Progress: [##########----------] 50% (v2.0-v2.2 scope: 27/54 plans)
 - v2.2: Apple + Google Sign-In as primary auth methods, email as secondary
 - v2.2: Obsidian design tokens (#0A0A0A bg, #D4A853 gold accents)
 - v2.2: AuthStack separate from OnboardingStack -- auth first, then onboarding for new users
+- 30-01: Used @southdevs/capacitor-google-auth instead of @codetrix-studio (Capacitor 7 compatibility)
+- 30-01: Native sign-in returns to Supabase via signInWithIdToken, not OAuth redirect flow
 
 ### Pending Todos
 
@@ -59,5 +61,5 @@ Progress: [##########----------] 50% (v2.0-v2.2 scope: 27/54 plans)
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Roadmap created for v2.2, ready to plan Phase 30
+Stopped at: Completed 30-01-PLAN.md (Social Auth Plugins)
 Resume file: None

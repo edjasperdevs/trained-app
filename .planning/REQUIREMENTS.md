@@ -178,10 +178,10 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Auth Infrastructure
 
-- [ ] **INFRA-01**: Apple Sign-In Capacitor plugin installed and configured
-- [ ] **INFRA-02**: Google Sign-In Capacitor plugin installed and configured
-- [ ] **INFRA-03**: Supabase Apple provider configured with Service ID, Team ID, Key ID, private key
-- [ ] **INFRA-04**: Supabase Google provider configured with Web client ID and secret
+- [x] **INFRA-01**: Apple Sign-In Capacitor plugin installed and configured
+- [x] **INFRA-02**: Google Sign-In Capacitor plugin installed and configured
+- [x] **INFRA-03**: Supabase Apple provider configured with Service ID, Team ID, Key ID, private key
+- [x] **INFRA-04**: Supabase Google provider configured with Web client ID and secret
 - [ ] **INFRA-05**: AuthStack navigation with routes for all 5 auth screens
 - [ ] **INFRA-06**: App routing logic checks session + onboardingComplete to route appropriately
 
@@ -386,10 +386,10 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 | NAV-01 | Phase 25 | Complete |
 | NAV-02 | Phase 25 | Complete |
 | NAV-03 | Phase 25 | Complete |
-| INFRA-01 | Phase 30 | Pending |
-| INFRA-02 | Phase 30 | Pending |
-| INFRA-03 | Phase 30 | Pending |
-| INFRA-04 | Phase 30 | Pending |
+| INFRA-01 | Phase 30 | Complete |
+| INFRA-02 | Phase 30 | Complete |
+| INFRA-03 | Phase 30 | Complete |
+| INFRA-04 | Phase 30 | Complete |
 | INFRA-05 | Phase 30 | Pending |
 | INFRA-06 | Phase 30 | Pending |
 | SPLASH-01 | Phase 31 | Pending |
