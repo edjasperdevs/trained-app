@@ -707,7 +707,7 @@ export function LockedProtocolScreen() {
       {/* End Protocol link */}
       <button
         onClick={handleEndProtocol}
-        className="mt-4 text-[#8A8A8A] text-sm hover:text-[#F5F0E8] transition-colors underline"
+        className="mt-16 mb-16 py-4 text-[#8A8A8A] text-sm hover:text-[#F5F0E8] transition-colors underline"
       >
         End Protocol
       </button>

@@ -28,12 +28,30 @@ export async function generateAndShare(options: ShareOptions): Promise<boolean> 
     // Wait for fonts to be ready before capture
     await document.fonts.ready
 
+    // Save original styles and make element visible for capture
+    const originalStyle = element.style.cssText
+    element.style.cssText = `
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 390px;
+      height: 844px;
+      z-index: 9999;
+      pointer-events: none;
+    `
+
+    // Small delay to ensure browser has painted
+    await new Promise(resolve => setTimeout(resolve, 50))
+
     // Generate PNG from DOM element
     const dataUrl = await toPng(element, {
       quality: 0.95,
       pixelRatio: 2, // Retina quality
       cacheBust: true, // Prevent stale cached images
     })
+
+    // Restore original styles immediately
+    element.style.cssText = originalStyle
 
     if (!isNative()) {
       // Web fallback: trigger download

@@ -559,7 +559,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 44. Locked Protocol | 6/6 | Complete   | 2026-03-07 | - |
+| 44. Locked Protocol | 6/6 | Complete    | 2026-03-07 | - |
 | 36. Forgot Password Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
