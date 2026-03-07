@@ -38,7 +38,12 @@
   5. Push notification fires on Sunday at 7pm local time and deep links to weekly report screen
   6. User can toggle weekly report notifications on/off in Settings
   7. Share button generates weekly report share card and opens native share sheet
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 41-01-PLAN.md -- Weekly Report screen, data store, highlights generator
+- [ ] 41-02-PLAN.md -- In-app trigger, push notification, Settings toggle
+- [ ] 41-03-PLAN.md -- Weekly report share card
 
 ### Phase 42: Referral System
 **Goal**: Users have unique referral links they can share to invite new users, with deep link capture and recruits list
