@@ -10,7 +10,68 @@
 - v1.5 Native iOS App (Phases 11-16, closed 2026-02-27)
 - v2.0 WellTrained V2 (Phases 17-24, in progress)
 - v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
-- **v2.2 Auth Flow Redesign** (Phases 30-36, in progress)
+- v2.2 Auth Flow Redesign (Phases 30-36, in progress)
+- **v2.2.1 Social Sharing** (Phases 37-40, in progress)
+
+## v2.2.1 Social Sharing
+
+**Milestone Goal:** Three branded share card types (Rank-Up, Workout, Compliance) that users can share to social media after key protocol moments. PNG generation via html-to-image, native share sheet via @capacitor/share, DP rewards for sharing with daily/per-rank gating.
+
+### Phases
+
+- [ ] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper
+- [ ] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward
+- [ ] **Phase 39: Compliance Sharing** - ComplianceShareCard component, CheckInModal integration, +5 DP daily reward
+- [ ] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward
+
+## v2.2.1 Phase Details
+
+### Phase 37: Share Infrastructure
+**Goal**: Foundation for all share cards -- dependencies installed, DP reward actions ready, core sharing utility functional
+**Depends on**: Nothing (first phase of v2.2.1)
+**Requirements**: SHARE-01, SHARE-02, SHARE-03, SHARE-10, SHARE-11, SHARE-12, SHARE-15
+**Success Criteria** (what must be TRUE):
+  1. html-to-image, @capacitor/share, @capacitor/camera packages installed with iOS permissions configured
+  2. dpStore has awardShareWorkoutDP, awardShareComplianceDP, awardShareRankUpDP actions with correct gating
+  3. shareCard.ts utility can render a component off-screen, convert to PNG, and open native share sheet
+  4. Web platform shows "Download Card" fallback instead of native share
+**Plans**: TBD
+
+### Phase 38: Rank-Up Sharing
+**Goal**: Users can share a branded card celebrating their new rank after claiming it
+**Depends on**: Phase 37 (shareCard.ts utility required)
+**Requirements**: SHARE-04, SHARE-07
+**Success Criteria** (what must be TRUE):
+  1. RankUpShareCard displays rank name, avatar, total DP, streak with gold/obsidian styling
+  2. RankUpModal shows "Share Your Rank" button after user claims rank
+  3. Tapping share opens native share sheet with PNG card and pre-filled text
+  4. Successful share awards +10 DP (once per rank, not repeatable)
+**Plans**: TBD
+
+### Phase 39: Compliance Sharing
+**Goal**: Users can share a branded card celebrating full 5/5 daily compliance
+**Depends on**: Phase 37 (shareCard.ts utility required)
+**Requirements**: SHARE-06, SHARE-09
+**Success Criteria** (what must be TRUE):
+  1. ComplianceShareCard displays streak, 5 compliance checks, milestone banners (Day 7/30/100)
+  2. CheckInModal shows "Share Your Protocol" button only on full 5/5 compliance days
+  3. Tapping share opens native share sheet with PNG card and pre-filled text
+  4. Successful share awards +5 DP (once per day, daily gate)
+**Plans**: TBD
+
+### Phase 40: Workout Sharing
+**Goal**: Users can share a branded card showing workout stats with optional selfie
+**Depends on**: Phase 37 (shareCard.ts utility required)
+**Requirements**: SHARE-05, SHARE-08, SHARE-13, SHARE-14
+**Success Criteria** (what must be TRUE):
+  1. WorkoutShareCard displays sets, top lift, DP earned with full-bleed photo layout
+  2. Workouts screen shows "Share Protocol" button on completed workouts
+  3. Bottom sheet offers "with photo" / "without photo" options
+  4. Camera capture composites photo into share card background
+  5. Successful share awards +5 DP (once per day, daily gate)
+**Plans**: TBD
+
+---
 
 ## v2.2 Auth Flow Redesign
 
@@ -57,7 +118,7 @@ Plans:
 Plans:
 - [x] 31-01-PLAN.md -- Build Splash screen with chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline, animated gold loading bar
 - [x] 31-02-PLAN.md -- Review implementation against mockup, document visual gaps
-- [ ] 31-03-PLAN.md -- Refine spacing, typography, and animations based on review findings
+- [x] 31-03-PLAN.md -- Refine spacing, typography, and animations based on review findings
 
 ### Phase 32: Sign Up Screen
 **Goal**: New users can begin registration via Apple, Google, or email
@@ -459,7 +520,7 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 30 -> 31 -> 32 -> 33 -> 34 -> 35 -> 36 (then 24 for App Store)
+**Execution Order:** 37 -> 38 -> 39 -> 40 (v2.2.1), then 32 -> 33 -> 34 -> 35 -> 36 (v2.2), then 24 (App Store)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -482,13 +543,19 @@ Plans:
 | 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 30. Auth Infrastructure | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
-| 31. Splash Screen | 3/3 | Complete   | 2026-03-07 | - |
+| 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
+| 31. Splash Screen | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
+| 37. Share Infrastructure | v2.2.1 | 0/TBD | Not started | - |
+| 38. Rank-Up Sharing | v2.2.1 | 0/TBD | Not started | - |
+| 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
+| 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
 
 **v2.2 Total Plans:** 20
 **v2.2 Requirements Coverage:** 34/34 mapped
+**v2.2.1 Total Phases:** 4
+**v2.2.1 Requirements Coverage:** 15/15 mapped
