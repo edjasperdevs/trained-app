@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 41 (Weekly Protocol Report)
-Plan: 01 (of 03)
+Plan: 02 (of 03)
 Status: In progress
-Last activity: 2026-03-07 — Completed 41-01 (Weekly Report Screen)
+Last activity: 2026-03-07 — Completed 41-02 (Home Screen Integration)
 
 Progress: ⬜⬜⬜ (0/3 phases complete)
 
@@ -33,11 +33,12 @@ Progress: ⬜⬜⬜ (0/3 phases complete)
 **v2.3 Engagement & Growth:**
 - Total phases: 3 (Phases 41-43)
 - Total plans: 9 (3 per phase)
-- Plans complete: 1
+- Plans complete: 2
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 41 | 01 | 5min | 2 | 3 |
+| 41 | 02 | 7min | 3 | 5 |
 
 ### Decisions
 
@@ -114,6 +115,8 @@ Progress: ⬜⬜⬜ (0/3 phases complete)
 - 41-01: DP compliance calculated as days with any DP action / 7
 - 41-01: Report shows once per week (gated by lastShownWeekStart)
 - 41-01: Always generate at least one highlight (default: Week Complete with top stat)
+- [Phase 41]: weeklyReport notification defaults to enabled at 7pm Sunday (matches claimXP notification timing)
+- [Phase 41]: Deep link /weekly-report uses sessionStorage flag pattern (avoids route conflict with modal-based UI)
 
 ### Pending Todos
 
