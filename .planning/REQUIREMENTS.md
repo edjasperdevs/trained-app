@@ -22,8 +22,8 @@ Requirements for iOS App Store submission readiness. All items derived from AUDI
 ### UX Improvements
 
 - [x] **UX-01**: Add visible health/medical disclaimer during onboarding flow
-- [ ] **UX-02**: Fix workout name overflow on Workouts screen Today card
-- [ ] **UX-03**: Fix recovery day compliance calculation (4/4 vs 5/5 issue)
+- [x] **UX-02**: Fix workout name overflow on Workouts screen Today card
+- [x] **UX-03**: Fix recovery day compliance calculation (4/4 vs 5/5 issue)
 
 ### Asset Optimization
 
@@ -70,8 +70,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STORE-05 | Phase 48 | Pending |
 | SEC-01 | Phase 46 | Complete |
 | UX-01 | Phase 46 | Complete |
-| UX-02 | Phase 46 | Pending |
-| UX-03 | Phase 46 | Pending |
+| UX-02 | Phase 46 | Complete |
+| UX-03 | Phase 46 | Complete |
 | ASSET-01 | Phase 47 | Pending |
 | ASSET-02 | Phase 47 | Pending |
 | ASSET-03 | Phase 47 | Pending |

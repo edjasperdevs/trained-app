@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 46 of 48 (Security & UX Fixes)
-Plan: 02 of 03
-Status: Executing
-Last activity: 2026-03-07 — Completed 46-02: Health Disclaimer in Onboarding (UX-01 compliance fix)
+Plan: 03 of 03
+Status: Complete
+Last activity: 2026-03-07 — Completed 46-03: UX Fixes - Workout Name & Compliance (UX-02, UX-03 compliance fix)
 
-Progress: [████████████████████████████████████████░░░░░░] 95% (v2.4 Phase 46 in progress: 2/3 plans complete)
+Progress: [████████████████████████████████████████████░░] 96% (v2.4 Phase 46 complete: 3/3 plans complete)
 
 ## Performance Metrics
 
@@ -25,12 +25,13 @@ Progress: [███████████████████████
 
 **By Phase:**
 - Phase 45: 1 plan completed (135s, 3 tasks, 3 files modified, 3 commits)
-- Phase 46: 2 plans completed
+- Phase 46: 3 plans completed
   - 46-01: 110s, 1 task, 1 file modified, 1 commit
   - 46-02: 281s, 2 tasks, 4 files modified, 2 commits
+  - 46-03: 139s, 2 tasks, 2 files modified, 2 commits
 
 **Recent Trend:**
-v2.4 execution in progress: Phase 45 complete (1/1 plan), Phase 46 in progress (2/3 complete).
+v2.4 execution in progress: Phase 45 complete (1/1 plan), Phase 46 complete (3/3 plans), Phase 47 next (4 plans remaining).
 
 ## Accumulated Context
 
@@ -56,6 +57,8 @@ Recent decisions from PROJECT.md affecting v2.4:
 - Positioned disclaimer between goal and archetype screens to ensure users see it before selecting advanced features
 - Made acknowledgment required (Continue button disabled) to ensure compliance visibility
 - Used inline route definition in OnboardingStack instead of separate screen component for simplicity
+- [Phase 46-03]: Used truncate CSS class on workout name paragraph for ellipsis overflow behavior
+- [Phase 46-03]: Implemented 4/4 compliance for recovery days rather than auto-checking workout item (simpler UX)
 
 ### Pending Todos
 
@@ -75,7 +78,7 @@ Recent decisions from PROJECT.md affecting v2.4:
 
 **Universal Links Team ID:** apple-app-site-association structurally prepared but requires actual Apple Team ID from developer.apple.com/account. Clear TODO documented for Phase 48 update.
 
-**P0 Audit Items:** All P0 and P1 items from AUDIT_REPORT.md mapped to phases 45-47. Phase 45-01 resolved STORE-01 and STORE-02. Phase 46-01 resolved SEC-01. Phase 46-02 resolved UX-01. Must be resolved before Phase 48 submission.
+**P0 Audit Items:** All P0 and P1 items from AUDIT_REPORT.md mapped to phases 45-47. Phase 45-01 resolved STORE-01 and STORE-02. Phase 46-01 resolved SEC-01. Phase 46-02 resolved UX-01. Phase 46-03 resolved UX-02 and UX-03. Phase 46 complete. Must be resolved before Phase 48 submission.
 
 ### v2.4 Requirements Coverage
 
@@ -96,5 +99,5 @@ Recent decisions from PROJECT.md affecting v2.4:
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed Phase 46-02 Health Disclaimer in Onboarding plan
-Resume file: .planning/phases/46-security-ux-fixes/46-02-SUMMARY.md
+Stopped at: Completed 46-03-PLAN.md
+Resume file: .planning/phases/46-security-ux-fixes/46-03-SUMMARY.md
