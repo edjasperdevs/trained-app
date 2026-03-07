@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useReferralStore } from '@/stores'
 
 // Chain-link crown logo component matching v2.2 branding
 function ChainLinkCrownLogo({ className }: { className?: string }) {
@@ -128,6 +129,9 @@ export function EmailSignUpScreen() {
       }
       return
     }
+
+    // Attribute referral if code was captured (fire-and-forget)
+    useReferralStore.getState().attributeReferral()
 
     // Session created - App.tsx routing will handle navigation to onboarding
   }

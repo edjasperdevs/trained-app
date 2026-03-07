@@ -4,6 +4,7 @@ import { Mail } from 'lucide-react'
 import { signInWithApple } from '@/lib/apple-auth'
 import { signInWithGoogle } from '@/lib/google-auth'
 import { isNative } from '@/lib/platform'
+import { useReferralStore } from '@/stores'
 
 // Chain-link crown logo component matching v2.2 branding
 function ChainLinkCrownLogo({ className }: { className?: string }) {
@@ -90,6 +91,9 @@ export function SignUpScreen() {
       return
     }
 
+    // Attribute referral if code was captured (fire-and-forget)
+    useReferralStore.getState().attributeReferral()
+
     // Session created - App.tsx routing will handle navigation
   }
 
@@ -105,6 +109,9 @@ export function SignUpScreen() {
       setError(error)
       return
     }
+
+    // Attribute referral if code was captured (fire-and-forget)
+    useReferralStore.getState().attributeReferral()
 
     // Session created - App.tsx routing will handle navigation
   }
