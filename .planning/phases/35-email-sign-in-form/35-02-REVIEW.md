@@ -159,3 +159,127 @@
 - Method: supabase.auth.signInWithPassword({ email, password })
 - Error handling: Invalid credentials, unconfirmed email, generic errors
 - Success: App.tsx routing handles navigation (session-based)
+
+---
+
+## Mockup Comparison
+
+### Design Reference
+
+- **Mockup:** `Design inspo/mockups/auth flow/auth_email_signin.png`
+- **Target:** v2.2 Obsidian/Dopamine Noir styling
+- **Screen:** Email Sign In form (returning user authentication)
+
+### Element-by-Element Analysis
+
+| Element | Mockup | Implementation | Match? | Gap Details |
+|---------|--------|----------------|--------|-------------|
+| Back arrow | Top-left, gray arrow icon | Top-left, ArrowLeft (lucide-react), #8A8A8A | ✓ | None - position and color match |
+| Logo | Centered, chain-link crown, gold | Centered, ChainLinkCrownLogo, w-16 h-16, #D4A853 | ✓ | Size appears correct (64px) |
+| Headline | "WELCOME BACK" (Oswald, bold, uppercase) | "WELCOME BACK" (Oswald, text-2xl, bold, uppercase) | ✓ | None - font and styling match |
+| Subline | Gray text, centered below headline | "Sign in with your email and password." (#8A8A8A, centered) | ✓ | None - color and position match |
+| Email label | "EMAIL" uppercase, small gray text | "EMAIL" text-xs uppercase, #8A8A8A | ✓ | None - styling matches |
+| Email field | Dark background, gold border on focus, gold Mail icon left | #141414 bg, #3A3A3A border, gold focus ring, Mail icon left (#D4A853) | ✓ | None - colors and layout match |
+| Email placeholder | "your@email.com" gray text | "your@email.com" #8A8A8A placeholder | ✓ | None - text and color match |
+| Password label | "PASSWORD" uppercase, small gray text | "PASSWORD" text-xs uppercase, #8A8A8A | ✓ | None - styling matches |
+| Password field | Dark background, gold border on focus, gold Lock icon left, eye toggle right | #141414 bg, #3A3A3A border, gold focus ring, Lock icon left (#D4A853), Eye/EyeOff toggle right | ✓ | None - complete match with toggle |
+| Password placeholder | "Your password" gray text | "Your password" #8A8A8A placeholder | ✓ | None - text and color match |
+| Forgot Password link | Below password field, right-aligned, gold underlined text | Below password, text-right, text-[#D4A853] underline | ✓ | None - position and styling match |
+| SIGN IN button | Full-width, gold background, black text, rounded, uppercase (Oswald) | w-full, #D4A853 bg, black text, rounded-full, uppercase (Oswald) | ✓ | None - complete match |
+| Create Account text | Bottom, centered, gray text with gold underlined "Create Account" | Bottom, centered, #8A8A8A with gold underlined link | ✓ | None - text and styling match |
+| Field height | Consistent height across inputs | h-14 (56px) on both fields | ✓ | None - consistent sizing |
+| Field border radius | Rounded corners (medium radius) | rounded-xl (12px) | ✓ | None - border radius matches |
+| Spacing (vertical) | Consistent gaps between elements | mt-16 → mt-6 → mt-2 → mt-8 → space-y-4 → mt-6 → mt-6 | ✓ | None - vertical rhythm matches mockup |
+
+### Visual Gaps Identified
+
+After comprehensive element-by-element comparison, analyzing the mockup against the implementation:
+
+**High Priority:**
+- None identified
+
+**Medium Priority:**
+- None identified
+
+**Low Priority:**
+- None identified
+
+### Analysis
+
+The Email Sign In screen implementation demonstrates **excellent fidelity** to the mockup. All core elements are present, correctly positioned, and styled according to the v2.2 Obsidian/Dopamine Noir design system:
+
+**✓ Layout Structure:**
+- Vertical centered layout matches mockup flow
+- Proper use of spacing (mt-16, mt-6, mt-2, mt-8, space-y-4)
+- Safe area padding (pt-safe, pb-safe) for device compatibility
+- Horizontal padding (px-6) for content margins
+
+**✓ Color Palette:**
+- Background: #0A0A0A (Obsidian) - matches mockup
+- Primary accent: #D4A853 (gold) - used consistently for icons, links, button, focus states
+- Field backgrounds: #141414 (dark card) - matches mockup
+- Field borders: #3A3A3A (subtle gray) - matches mockup
+- Text colors: #F5F0E8 (warm white), #8A8A8A (gray) - matches mockup
+- Error color: #EF4444 (red) - appropriate for error states
+
+**✓ Typography:**
+- Headline: Oswald, text-2xl, bold, uppercase - matches mockup style
+- Body text: text-sm for labels and links - matches mockup
+- Button text: Oswald, uppercase, tracking-widest - matches mockup
+- All text sizes and weights match design intent
+
+**✓ Input Fields:**
+- Dark backgrounds (#141414) with subtle borders (#3A3A3A) - matches mockup
+- Gold icons positioned left (Mail, Lock) - matches mockup
+- Eye toggle positioned right in password field - matches mockup
+- Height (h-14 / 56px) and border radius (rounded-xl / 12px) - matches mockup
+- Focus state with gold ring - matches mockup interaction design
+- Placeholder text color (#8A8A8A) - matches mockup
+
+**✓ Interactive Elements:**
+- Back arrow: correct position (top-left) and color (#8A8A8A) - matches mockup
+- Password toggle: Eye/EyeOff icons with hover state - matches mockup
+- Forgot Password link: right-aligned, underlined, gold color - matches mockup
+- SIGN IN button: full-width, gold background, rounded-full, black text - matches mockup
+- Create Account link: centered, gray base text with gold underlined link - matches mockup
+
+**✓ Functional Requirements:**
+- Form validation (email regex + password non-empty)
+- Button disabled state (opacity-50) until form valid
+- Loading state ("Signing In..." text)
+- Error display area below password field
+- Navigation handlers for all links and back button
+- Supabase authentication integration
+
+### Gaps Summary
+
+**Total gaps:** 0
+**High priority:** 0
+**Medium priority:** 0
+**Low priority:** 0
+
+### Recommendation
+
+The implementation is **production-ready** and matches the mockup with high fidelity. All visual requirements from the Authentication Flow Brief are met:
+
+- Two input fields (email, password) with proper icons and styling
+- Password visibility toggle
+- Form validation with disabled button state
+- Supabase auth.signInWithPassword() integration
+- Error handling for invalid credentials and unconfirmed emails
+- Navigation handlers (back, forgot password, create account)
+
+**User verification recommended** to confirm the implementation meets expectations before proceeding. If approved, Plan 03 may be verification-only or can be skipped entirely (following the pattern from Phase 33 and 34 where user approval led to verification-only Plan 03).
+
+### Visual Comparison Notes
+
+Comparing the mockup image side-by-side with the documented implementation:
+
+1. **Logo size (w-16 h-16 / 64px):** Appears to match the mockup proportions relative to screen size
+2. **Headline sizing (text-2xl):** Matches the bold, prominent display in mockup
+3. **Input field proportions:** Height (h-14) and width (max-w-sm) match mockup layout
+4. **Button styling:** Full-width gold button with rounded-full matches mockup exactly
+5. **Vertical spacing:** The mt-16, mt-6, mt-2, mt-8 progression creates the same visual rhythm as mockup
+6. **Icon positioning:** Left-aligned icons (Mail, Lock) and right-aligned toggle match mockup precisely
+
+No adjustments recommended at this time. The implementation follows the mockup faithfully.
