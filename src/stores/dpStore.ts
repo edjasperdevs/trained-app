@@ -64,12 +64,20 @@ interface DPStore {
   lastActionDate: string | null
   lastCelebratedRank: number
   dailyLogs: DailyDP[]
+  // Share gating state
+  lastShareWorkoutDate: string | null
+  lastShareComplianceDate: string | null
+  lastRankUpShareClaimed: string | null
 
   awardDP: (action: DPAction) => { dpAwarded: number; rankedUp: boolean; newRank: number }
   getRankInfo: () => { name: string; rank: number; dpForNext: number; progress: number }
   checkObedienceStreak: () => void
   getTodayLog: () => DailyDP | null
   resetDP: () => void
+  // Share DP actions
+  awardShareWorkoutDP: () => void
+  awardShareComplianceDP: () => void
+  awardShareRankUpDP: (rankName: string) => void
 }
 
 /** Calculate rank from totalDP using the rank threshold table */
@@ -92,6 +100,10 @@ const INITIAL_STATE = {
   lastActionDate: null as string | null,
   lastCelebratedRank: 0,
   dailyLogs: [] as DailyDP[],
+  // Share gating state
+  lastShareWorkoutDate: null as string | null,
+  lastShareComplianceDate: null as string | null,
+  lastRankUpShareClaimed: null as string | null,
 }
 
 export const useDPStore = create<DPStore>()(
@@ -236,6 +248,71 @@ export const useDPStore = create<DPStore>()(
 
       resetDP: () => {
         set({ ...INITIAL_STATE, dailyLogs: [] })
+      },
+
+      awardShareWorkoutDP: () => {
+        const today = getLocalDateString()
+        const { lastShareWorkoutDate } = get()
+        if (lastShareWorkoutDate === today) return // already claimed today
+
+        const newTotalDP = get().totalDP + 5
+        const oldRank = get().currentRank
+        const newRank = calculateRank(newTotalDP)
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: newRank > oldRank ? newRank : get().lastCelebratedRank,
+          lastShareWorkoutDate: today,
+        })
+
+        // Fire DP toast
+        try {
+          getGlobalShowDPToast()?.(5, 'share_workout')
+        } catch { /* non-critical */ }
+      },
+
+      awardShareComplianceDP: () => {
+        const today = getLocalDateString()
+        const { lastShareComplianceDate } = get()
+        if (lastShareComplianceDate === today) return // already claimed today
+
+        const newTotalDP = get().totalDP + 5
+        const oldRank = get().currentRank
+        const newRank = calculateRank(newTotalDP)
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: newRank > oldRank ? newRank : get().lastCelebratedRank,
+          lastShareComplianceDate: today,
+        })
+
+        // Fire DP toast
+        try {
+          getGlobalShowDPToast()?.(5, 'share_compliance')
+        } catch { /* non-critical */ }
+      },
+
+      awardShareRankUpDP: (rankName: string) => {
+        const { lastRankUpShareClaimed } = get()
+        if (lastRankUpShareClaimed === rankName) return // already claimed for this rank
+
+        const newTotalDP = get().totalDP + 10
+        const oldRank = get().currentRank
+        const newRank = calculateRank(newTotalDP)
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: newRank > oldRank ? newRank : get().lastCelebratedRank,
+          lastRankUpShareClaimed: rankName,
+        })
+
+        // Fire DP toast
+        try {
+          getGlobalShowDPToast()?.(10, 'share_rankup')
+        } catch { /* non-critical */ }
       },
     }),
     {
