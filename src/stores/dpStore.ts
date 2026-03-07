@@ -68,6 +68,8 @@ interface DPStore {
   lastShareWorkoutDate: string | null
   lastShareComplianceDate: string | null
   lastRankUpShareClaimed: string | null
+  // Referral DP tracking
+  referralDPAwarded: string[] // recruit IDs that have already triggered DP award
 
   awardDP: (action: DPAction) => { dpAwarded: number; rankedUp: boolean; newRank: number }
   getRankInfo: () => { name: string; rank: number; dpForNext: number; progress: number }
@@ -78,6 +80,8 @@ interface DPStore {
   awardShareWorkoutDP: () => void
   awardShareComplianceDP: () => void
   awardShareRankUpDP: (rankName: string) => void
+  // Referral DP action
+  awardReferralDP: (recruitId: string) => { dpAwarded: number; rankedUp: boolean; newRank: number }
 }
 
 /** Calculate rank from totalDP using the rank threshold table */
@@ -104,6 +108,8 @@ const INITIAL_STATE = {
   lastShareWorkoutDate: null as string | null,
   lastShareComplianceDate: null as string | null,
   lastRankUpShareClaimed: null as string | null,
+  // Referral DP tracking
+  referralDPAwarded: [] as string[],
 }
 
 export const useDPStore = create<DPStore>()(
@@ -247,7 +253,7 @@ export const useDPStore = create<DPStore>()(
       },
 
       resetDP: () => {
-        set({ ...INITIAL_STATE, dailyLogs: [] })
+        set({ ...INITIAL_STATE, dailyLogs: [], referralDPAwarded: [] })
       },
 
       awardShareWorkoutDP: () => {
@@ -313,6 +319,35 @@ export const useDPStore = create<DPStore>()(
         try {
           getGlobalShowDPToast()?.(10, 'share_rankup')
         } catch { /* non-critical */ }
+      },
+
+      awardReferralDP: (recruitId: string) => {
+        const state = get()
+
+        // Prevent duplicate awards for same recruit
+        if (state.referralDPAwarded.includes(recruitId)) {
+          return { dpAwarded: 0, rankedUp: false, newRank: state.currentRank }
+        }
+
+        const dpValue = 100 // Fixed reward for recruit completion
+        const newTotalDP = state.totalDP + dpValue
+        const oldRank = state.currentRank
+        const newRank = calculateRank(newTotalDP)
+        const rankedUp = newRank > oldRank
+
+        set({
+          totalDP: newTotalDP,
+          currentRank: newRank,
+          lastCelebratedRank: rankedUp ? newRank : state.lastCelebratedRank,
+          referralDPAwarded: [...state.referralDPAwarded, recruitId],
+        })
+
+        // Fire DP toast notification
+        try {
+          getGlobalShowDPToast()?.(dpValue, 'referral')
+        } catch { /* non-critical */ }
+
+        return { dpAwarded: dpValue, rankedUp, newRank }
       },
     }),
     {
