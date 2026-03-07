@@ -17,7 +17,7 @@ import { useRemindersStore } from '@/stores/remindersStore'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { Auth } from '@/screens'
-import { OnboardingStack } from '@/navigation'
+import { OnboardingStack, AuthStack } from '@/navigation'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
@@ -255,17 +255,17 @@ function AppContent() {
     )
   }
 
-  // If not authenticated, show auth screen
+  // If not authenticated, show AuthStack
   if (!devBypass && !user) {
     return (
       <>
         <ToastContainer />
         <SentryRoutes>
-          <Route path="/auth" element={<Auth defaultMode="login" />} />
+          <Route path="/auth/*" element={<AuthStack />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-          <Route path="*" element={<Auth />} />
+          <Route path="*" element={<Navigate to="/auth/signup" replace />} />
         </SentryRoutes>
       </>
     )
