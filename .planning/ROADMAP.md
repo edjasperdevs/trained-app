@@ -24,7 +24,7 @@
 - [x] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes) (completed 2026-03-07)
 - [x] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes) (completed 2026-03-07)
 - [x] **Phase 34: Email Sign Up Form** - Email/password registration with strength indicator (3 passes) (completed 2026-03-07)
-- [ ] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes)
+- [x] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes) (completed 2026-03-07)
 - [ ] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes)
 
 ## Phase Details
@@ -398,7 +398,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/3 plans executed
+**Plans:** 1/3 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -469,7 +469,7 @@ Plans:
 | 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 33. Sign In Screen | 3/3 | Complete    | 2026-03-07 | - |
 | 34. Email Sign Up Form | 2/3 | Complete    | 2026-03-07 | - |
-| 35. Email Sign In Form | 1/3 | In Progress|  | - |
+| 35. Email Sign In Form | 1/3 | Complete    | 2026-03-07 | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
