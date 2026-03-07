@@ -47,21 +47,18 @@ Previous milestones delivered:
 
 ### Active
 
-**Current Milestone: v2.2 Auth Flow Redesign**
+**Current Milestone: v2.2.1 Social Sharing**
 
-**Goal:** Full authentication flow redesign with Apple Sign-In, Google Sign-In, and email/password — all screens updated to Obsidian/Dopamine Noir styling, plus app splash screen.
+**Goal:** Three branded share card types (Rank-Up, Workout, Compliance) that users can share to social media after key protocol moments, with DP rewards for sharing.
 
 **Target features:**
-- Splash screen with chain-link crown logo, wordmark, tagline, loading indicator
-- Sign Up screen (social entry) with Apple/Google/Email buttons
-- Sign In screen (social entry) for returning users
-- Email Sign Up form with password strength indicator (4-segment bar)
-- Email Sign In form with forgot password link
-- Forgot Password screen with email input and success state
-- Apple Sign-In via Capacitor plugin + Supabase signInWithIdToken
-- Google Sign-In via Capacitor plugin + Supabase signInWithIdToken
-- Obsidian design tokens (#0A0A0A bg, #D4A853 gold accents)
-- 3-pass implementation per screen (Build → Review → Refine)
+- Rank-Up share card (triggered after claiming new rank, +10 DP once per rank)
+- Workout share card with optional camera selfie compositing (+5 DP daily)
+- Compliance share card for full 5/5 check-in days (+5 DP daily)
+- PNG generation via html-to-image, native share sheet via @capacitor/share
+- DP reward gating (daily limits for workout/compliance, per-rank for rank-up)
+- Integration into RankUpModal, Workouts, and CheckInModal
+- Obsidian design tokens matching v2.2 aesthetic
 
 ### Out of Scope
 
@@ -133,4 +130,4 @@ Previous milestones delivered:
 | Splash screen | Branded loading experience during app initialization | — Pending |
 
 ---
-*Last updated: 2026-03-06 — v2.2 Auth Flow Redesign started*
+*Last updated: 2026-03-06 — v2.2.1 Social Sharing started*
