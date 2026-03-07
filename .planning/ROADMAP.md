@@ -11,81 +11,7 @@
 - v2.0 WellTrained V2 (Phases 17-24, in progress)
 - v2.1 Onboarding Redesign (Phases 25-29, completed 2026-03-06)
 - v2.2 Auth Flow Redesign (Phases 30-36, in progress)
-- **v2.2.1 Social Sharing** (Phases 37-40, in progress)
-
-## v2.2.1 Social Sharing
-
-**Milestone Goal:** Three branded share card types (Rank-Up, Workout, Compliance) that users can share to social media after key protocol moments. PNG generation via html-to-image, native share sheet via @capacitor/share, DP rewards for sharing with daily/per-rank gating.
-
-### Phases
-
-- [x] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper (completed 2026-03-07)
-- [x] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward (completed 2026-03-07)
-- [x] **Phase 39: Compliance Sharing** - ComplianceShareCard component, CheckInModal integration, +5 DP daily reward (completed 2026-03-07)
-- [x] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward (completed 2026-03-07)
-
-## v2.2.1 Phase Details
-
-### Phase 37: Share Infrastructure
-**Goal**: Foundation for all share cards -- dependencies installed, DP reward actions ready, core sharing utility functional
-**Depends on**: Nothing (first phase of v2.2.1)
-**Requirements**: SHARE-01, SHARE-02, SHARE-03, SHARE-10, SHARE-11, SHARE-12, SHARE-15
-**Success Criteria** (what must be TRUE):
-  1. html-to-image, @capacitor/share, @capacitor/camera packages installed with iOS permissions configured
-  2. dpStore has awardShareWorkoutDP, awardShareComplianceDP, awardShareRankUpDP actions with correct gating
-  3. shareCard.ts utility can render a component off-screen, convert to PNG, and open native share sheet
-  4. Web platform shows "Download Card" fallback instead of native share
-**Plans**: 2 plans
-
-Plans:
-- [x] 37-01-PLAN.md -- Install dependencies, configure iOS camera permissions, add DP share actions to dpStore
-- [x] 37-02-PLAN.md -- Create shareCard.ts utility with generateAndShare, ShareCardWrapper component, web fallback
-
-### Phase 38: Rank-Up Sharing
-**Goal**: Users can share a branded card celebrating their new rank after claiming it
-**Depends on**: Phase 37 (shareCard.ts utility required)
-**Requirements**: SHARE-04, SHARE-07
-**Success Criteria** (what must be TRUE):
-  1. RankUpShareCard displays rank name, avatar, total DP, streak with gold/obsidian styling
-  2. RankUpModal shows "Share Your Rank" button after user claims rank
-  3. Tapping share opens native share sheet with PNG card and pre-filled text
-  4. Successful share awards +10 DP (once per rank, not repeatable)
-**Plans**: 1 plan
-
-Plans:
-- [x] 38-01-PLAN.md -- Create RankUpShareCard component and integrate share button into RankUpModal
-
-### Phase 39: Compliance Sharing
-**Goal**: Users can share a branded card celebrating full 5/5 daily compliance
-**Depends on**: Phase 37 (shareCard.ts utility required)
-**Requirements**: SHARE-06, SHARE-09
-**Success Criteria** (what must be TRUE):
-  1. ComplianceShareCard displays streak, 5 compliance checks, milestone banners (Day 7/30/100)
-  2. CheckInModal shows "Share Your Protocol" button only on full 5/5 compliance days
-  3. Tapping share opens native share sheet with PNG card and pre-filled text
-  4. Successful share awards +5 DP (once per day, daily gate)
-**Plans**: 1 plan
-
-Plans:
-- [x] 39-01-PLAN.md -- Create ComplianceShareCard component and integrate share button into CheckInModal
-
-### Phase 40: Workout Sharing
-**Goal**: Users can share a branded card showing workout stats with optional selfie
-**Depends on**: Phase 37 (shareCard.ts utility required)
-**Requirements**: SHARE-05, SHARE-08, SHARE-13, SHARE-14
-**Success Criteria** (what must be TRUE):
-  1. WorkoutShareCard displays sets, top lift, DP earned with full-bleed photo layout
-  2. Workouts screen shows "Share Protocol" button on completed workouts
-  3. Bottom sheet offers "with photo" / "without photo" options
-  4. Camera capture composites photo into share card background
-  5. Successful share awards +5 DP (once per day, daily gate)
-**Plans**: 2 plans
-
-Plans:
-- [ ] 40-01-PLAN.md -- Create WorkoutShareCard and ShareBottomSheet components
-- [ ] 40-02-PLAN.md -- Integrate share button into Workouts screen with camera flow
-
----
+- ✅ v2.2.1 Social Sharing (Phases 37-40, shipped 2026-03-07) — [Archive](milestones/v2.2.1-ROADMAP.md)
 
 ## v2.2 Auth Flow Redesign
 
@@ -96,7 +22,7 @@ Plans:
 - [x] **Phase 30: Auth Infrastructure** - Apple/Google Sign-In plugins, Supabase providers, AuthStack navigation
 - [x] **Phase 31: Splash Screen** - Chain-link crown logo, wordmark, tagline, loading indicator (3 passes) (completed 2026-03-07)
 - [x] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes) (completed 2026-03-07)
-- [ ] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes)
+- [x] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes) (completed 2026-03-07)
 - [ ] **Phase 34: Email Sign Up Form** - Email/password registration with strength indicator (3 passes)
 - [ ] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes)
 - [ ] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes)
@@ -472,7 +398,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -534,42 +460,30 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 37 -> 38 -> 39 -> 40 (v2.2.1), then 32 -> 33 -> 34 -> 35 -> 36 (v2.2), then 24 (App Store)
+**Execution Order:** 33 -> 34 -> 35 -> 36 (v2.2), then 24 (App Store)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 11. Capacitor Shell | v1.5 | 2/2 | Complete | 2026-02-22 |
-| 12. Native Polish | v1.5 | 2/2 | Complete | 2026-02-22 |
-| 13. Deep Linking + Auth | v1.5 | 1/1 | Complete | 2026-02-22 |
-| 14. Remote Push Notifications | v1.5 | 3/3 | Complete | 2026-02-22 |
-| 15. Local Notifications + Engagement | v1.5 | 2/2 | Complete | 2026-02-22 |
-| 16. App Store Submission | v1.5 | 2/4 | Closed | 2026-02-27 |
-| 17. Foundation Cleanup | v2.0 | 2/2 | Complete | 2026-02-27 |
-| 18. Gamification Engine | v2.0 | 3/3 | Complete | 2026-02-28 |
-| 19. Subscriptions | v2.0 | 4/4 | Complete | 2026-02-28 |
-| 20. Health Tracking | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 21. Archetypes | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 22. Protocol Orders | v2.0 | 2/2 | Complete | 2026-02-28 |
-| 23. Avatar Evolution | v2.0 | 2/2 | Complete | 2026-03-01 |
-| 24. App Store Submission | v2.0 | 0/3 | Not started | - |
-| 25. Onboarding Navigation | v2.1 | 1/1 | Complete | 2026-03-06 |
-| 26. Welcome and Value | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 33. Sign In Screen | 2/3 | In Progress|  | - |
+| 33. Sign In Screen | 3/3 | Complete   | 2026-03-07 | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
-| 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
-| 38. Rank-Up Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
-| 39. Compliance Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
-| 40. Workout Sharing | 2/2 | Complete    | 2026-03-07 | - |
+| 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
 **v2.2 Total Plans:** 20
 **v2.2 Requirements Coverage:** 34/34 mapped
-**v2.2.1 Total Phases:** 4
-**v2.2.1 Requirements Coverage:** 15/15 mapped
+
+<details>
+<summary>Archived Milestones</summary>
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 11-16 | v1.5 Native iOS App | 12/14 | Closed | 2026-02-27 |
+| 17-23 | v2.0 WellTrained V2 | 17/17 | Complete | 2026-03-01 |
+| 25-29 | v2.1 Onboarding Redesign | 9/9 | Complete | 2026-03-06 |
+| 37-40 | v2.2.1 Social Sharing | 6/6 | Complete | 2026-03-07 |
+
+</details>
