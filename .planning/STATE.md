@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.2 Auth Flow Redesign (Phase 30: Auth Infrastructure)
+**Current focus:** v2.2 Auth Flow Redesign (Phase 31: Splash Screen)
 
 ## Current Position
 
-Phase: 30 of 36 (Auth Infrastructure)
-Plan: 2 of 2 in current phase
+Phase: 31 of 36 (Splash Screen)
+Plan: 1 of 3 in current phase
 Status: Complete
-Last activity: 2026-03-07 -- Completed 30-02 (Auth Navigation Setup)
+Last activity: 2026-03-07 -- Completed 31-01 (Splash Screen Implementation)
 
-Progress: [##########----------] 54% (v2.0-v2.2 scope: 29/54 plans)
+Progress: [##########----------] 56% (v2.0-v2.2 scope: 30/54 plans)
 
 ## Performance Metrics
 
@@ -31,12 +31,13 @@ Progress: [##########----------] 54% (v2.0-v2.2 scope: 29/54 plans)
 **v2.2 Auth Flow Redesign:**
 - Total phases: 7 (Phases 30-36)
 - Total plans: 20 (2 + 6x3)
-- Plans complete: 2
+- Plans complete: 3
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 30 | 01 | 15min | 3 | 10 |
 | 30 | 02 | 5min | 3 | 10 |
+| 31 | 01 | 2min | 3 | 2 |
 
 ## Accumulated Context
 
@@ -49,6 +50,7 @@ Progress: [##########----------] 54% (v2.0-v2.2 scope: 29/54 plans)
 - 30-01: Used @southdevs/capacitor-google-auth instead of @codetrix-studio (Capacitor 7 compatibility)
 - 30-01: Native sign-in returns to Supabase via signInWithIdToken, not OAuth redirect flow
 - 30-02: Used auth-screens/ directory instead of auth/ to avoid case collision with existing Auth.tsx
+- 31-01: Used inline SVG React component instead of file import for better animation control
 
 ### Pending Todos
 
@@ -63,5 +65,5 @@ Progress: [##########----------] 54% (v2.0-v2.2 scope: 29/54 plans)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 30-02-PLAN.md (Auth Navigation Setup)
+Stopped at: Completed 31-01-PLAN.md (Splash Screen Implementation)
 Resume file: None

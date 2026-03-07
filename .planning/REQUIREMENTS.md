@@ -187,9 +187,9 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Splash Screen
 
-- [ ] **SPLASH-01**: Splash screen displays chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline
-- [ ] **SPLASH-02**: Gold loading bar animates during app initialization
-- [ ] **SPLASH-03**: Splash auto-transitions to appropriate destination after load complete
+- [x] **SPLASH-01**: Splash screen displays chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline
+- [x] **SPLASH-02**: Gold loading bar animates during app initialization
+- [x] **SPLASH-03**: Splash auto-transitions to appropriate destination after load complete
 
 ### Sign Up (Social Entry)
 
@@ -392,9 +392,9 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 | INFRA-04 | Phase 30 | Complete |
 | INFRA-05 | Phase 30 | Complete |
 | INFRA-06 | Phase 30 | Complete |
-| SPLASH-01 | Phase 31 | Pending |
-| SPLASH-02 | Phase 31 | Pending |
-| SPLASH-03 | Phase 31 | Pending |
+| SPLASH-01 | Phase 31 | Complete |
+| SPLASH-02 | Phase 31 | Complete |
+| SPLASH-03 | Phase 31 | Complete |
 | SIGNUP-01 | Phase 32 | Pending |
 | SIGNUP-02 | Phase 32 | Pending |
 | SIGNUP-03 | Phase 32 | Pending |
