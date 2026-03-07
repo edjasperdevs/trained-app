@@ -22,7 +22,7 @@
 - [x] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper (completed 2026-03-07)
 - [x] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward (completed 2026-03-07)
 - [x] **Phase 39: Compliance Sharing** - ComplianceShareCard component, CheckInModal integration, +5 DP daily reward (completed 2026-03-07)
-- [ ] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward
+- [x] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward (completed 2026-03-07)
 
 ## v2.2.1 Phase Details
 
@@ -472,7 +472,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -567,7 +567,7 @@ Plans:
 | 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
 | 38. Rank-Up Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
 | 39. Compliance Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
-| 40. Workout Sharing | 1/2 | In Progress|  | - |
+| 40. Workout Sharing | 2/2 | Complete   | 2026-03-07 | - |
 
 **v2.2 Total Plans:** 20
 **v2.2 Requirements Coverage:** 34/34 mapped

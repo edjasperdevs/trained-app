@@ -250,7 +250,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 ### Integration Points
 
 - [x] **SHARE-07**: RankUpModal shows "Share Your Rank" button after rank claim
-- [ ] **SHARE-08**: Workouts shows "Share Protocol" button on completed workouts
+- [x] **SHARE-08**: Workouts shows "Share Protocol" button on completed workouts
 - [x] **SHARE-09**: CheckInModal shows "Share Your Protocol" on full 5/5 compliance
 
 ### DP Rewards
@@ -469,7 +469,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SHARE-05 | Phase 40 | Complete |
 | SHARE-06 | Phase 39 | Complete |
 | SHARE-07 | Phase 38 | Complete |
-| SHARE-08 | Phase 40 | Pending |
+| SHARE-08 | Phase 40 | Complete |
 | SHARE-09 | Phase 39 | Complete |
 | SHARE-10 | Phase 37 | Complete |
 | SHARE-11 | Phase 37 | Complete |
