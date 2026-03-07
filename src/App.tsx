@@ -14,6 +14,7 @@ import { scheduleAllNotifications } from '@/lib/notifications'
 import { updateBadge } from '@/lib/badge'
 import { useWorkoutStore } from '@/stores/workoutStore'
 import { useRemindersStore } from '@/stores/remindersStore'
+import { useReferralStore } from '@/stores/referralStore'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { Auth } from '@/screens'
@@ -149,6 +150,13 @@ function AppContent() {
       }
     }
     initSubscriptions()
+  }, [user])
+
+  // Check for recruit completions after auth (fire-and-forget)
+  useEffect(() => {
+    if (user) {
+      useReferralStore.getState().checkRecruitCompletion()
+    }
   }, [user])
 
   // Online/offline detection and background sync

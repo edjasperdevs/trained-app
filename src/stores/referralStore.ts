@@ -29,6 +29,7 @@ interface ReferralStore {
   clearCapturedCode: () => void
   attributeReferral: () => Promise<void> // Create referral record post-signup
   grantReferralPremium: () => Promise<void> // Trigger 7-day premium grant for referred user
+  checkRecruitCompletion: () => Promise<void> // Check pending recruits for completion
 
   // Computed helpers
   pendingCount: () => number
@@ -295,6 +296,39 @@ export const useReferralStore = create<ReferralStore>()(
           }
         } catch (error) {
           console.error('[referralStore] Grant premium error:', error)
+        }
+      },
+
+      checkRecruitCompletion: async (): Promise<void> => {
+        const user = useAuthStore.getState().user
+        if (!user || !supabase) {
+          return
+        }
+
+        try {
+          // Call Edge Function to check for completed recruits
+          const { data, error } = await supabase.functions.invoke('check-recruit-completion')
+
+          if (error) {
+            console.error('[referralStore] Check completion error:', error)
+            return
+          }
+
+          // Award DP for each completed recruit
+          if (data?.completed && data.completed.length > 0) {
+            const { useDPStore } = await import('./dpStore')
+            for (const recruitId of data.completed) {
+              const result = useDPStore.getState().awardReferralDP(recruitId)
+              if (result.dpAwarded > 0) {
+                console.log('[referralStore] Awarded referral DP for recruit:', recruitId)
+              }
+            }
+
+            // Refresh recruits list to show updated status
+            get().fetchRecruits()
+          }
+        } catch (error) {
+          console.error('[referralStore] Check completion error:', error)
         }
       },
 
