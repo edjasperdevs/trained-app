@@ -498,7 +498,6 @@ export function Home() {
               markReportShown()
               setShowWeeklyReportFull(false)
             }}
-            onShare={() => {}} // Wired in Plan 03
           />
         )}
       </div>

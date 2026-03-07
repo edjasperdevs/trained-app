@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useWeeklyReportStore } from '@/stores/weeklyReportStore'
 import { useDPStore } from '@/stores/dpStore'
+import { useUserStore } from '@/stores/userStore'
 import { generateHighlights, type Highlight } from '@/lib/highlights'
+import { shareWeeklyReportCard } from '@/lib/shareCard'
+import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
+import { WeeklyReportShareCard } from '@/components/share/WeeklyReportShareCard'
+import { getAvatarStage } from '@/lib/avatarUtils'
 import {
   Zap,
   Percent,
@@ -18,7 +23,6 @@ import {
 
 interface WeeklyReportScreenProps {
   onClose: () => void
-  onShare: () => void
 }
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -37,14 +41,18 @@ const ICON_MAP: Record<string, LucideIcon> = {
  * Shows weekly stats, rank progress, and auto-generated highlights.
  * Gold/obsidian styling matching RankUpShareCard aesthetic.
  */
-export function WeeklyReportScreen({ onClose, onShare }: WeeklyReportScreenProps) {
+export function WeeklyReportScreen({ onClose }: WeeklyReportScreenProps) {
   const getWeeklyStats = useWeeklyReportStore((state) => state.getWeeklyStats)
   const getRankInfo = useDPStore((state) => state.getRankInfo)
   const longestStreak = useDPStore((state) => state.longestObedienceStreak)
+  const profile = useUserStore((state) => state.profile)
 
   const [stats] = useState(() => getWeeklyStats())
   const [rankInfo] = useState(() => getRankInfo())
   const [highlights] = useState<Highlight[]>(() => generateHighlights(stats, longestStreak))
+
+  // Ref for off-screen share card
+  const shareCardRef = useRef<HTMLDivElement>(null)
 
   // Mark report as shown when component mounts
   const markReportShown = useWeeklyReportStore((state) => state.markReportShown)
@@ -52,9 +60,36 @@ export function WeeklyReportScreen({ onClose, onShare }: WeeklyReportScreenProps
     markReportShown()
   }, [markReportShown])
 
+  // Handle share button click
+  const handleShare = async () => {
+    if (!shareCardRef.current) return
+    await shareWeeklyReportCard(
+      shareCardRef.current,
+      stats.dpEarned,
+      stats.streak,
+      rankInfo.name
+    )
+  }
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0A0A] overflow-y-auto">
-      <div className="min-h-screen w-full max-w-[390px] mx-auto px-6 py-12 flex flex-col">
+    <>
+      {/* Off-screen share card for capture */}
+      <ShareCardWrapper cardRef={shareCardRef}>
+        <WeeklyReportShareCard
+          dpEarned={stats.dpEarned}
+          compliancePercentage={stats.compliancePercentage}
+          streak={stats.streak}
+          workoutsCompleted={stats.workoutsCompleted}
+          rankName={rankInfo.name}
+          progress={rankInfo.progress}
+          callsign={profile?.username || 'Recruit'}
+          avatarStage={getAvatarStage(rankInfo.rank) as 1 | 2 | 3 | 4 | 5}
+          archetype={profile?.archetype || 'bro'}
+        />
+      </ShareCardWrapper>
+
+      <div className="fixed inset-0 z-50 bg-[#0A0A0A] overflow-y-auto">
+        <div className="min-h-screen w-full max-w-[390px] mx-auto px-6 py-12 flex flex-col">
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
           {/* Chain-link crown SVG mark */}
@@ -177,7 +212,7 @@ export function WeeklyReportScreen({ onClose, onShare }: WeeklyReportScreenProps
         <div className="mt-auto pt-4 space-y-3">
           {/* Share Report button */}
           <button
-            onClick={onShare}
+            onClick={handleShare}
             className="w-full bg-[#C9A84C] text-[#0A0A0A] font-semibold py-4 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-[#D4A853] transition-colors"
           >
             <Share2 size={20} />
@@ -193,7 +228,8 @@ export function WeeklyReportScreen({ onClose, onShare }: WeeklyReportScreenProps
             <span>Dismiss</span>
           </button>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

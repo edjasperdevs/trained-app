@@ -4,7 +4,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem'
 import { isNative } from './platform'
 import { useDPStore } from '@/stores/dpStore'
 
-type ShareType = 'workout' | 'compliance' | 'rankup'
+type ShareType = 'workout' | 'compliance' | 'rankup' | 'weekly'
 
 interface ShareOptions {
   element: HTMLElement
@@ -90,6 +90,9 @@ function awardDPForShare(shareType: ShareType, rankName?: string): void {
         store.awardShareRankUpDP(rankName)
       }
       break
+    case 'weekly':
+      // No DP award for weekly report share
+      break
   }
 }
 
@@ -143,5 +146,21 @@ export async function shareComplianceCard(
     filename: `welltrained-compliance-day${streak}`,
     text,
     shareType: 'compliance',
+  })
+}
+
+export async function shareWeeklyReportCard(
+  element: HTMLElement,
+  dpEarned: number,
+  streak: number,
+  rankName: string
+): Promise<boolean> {
+  const text = `Weekly Protocol Report: +${dpEarned} DP earned, ${streak} day streak, ${rankName} rank. Submit to the Gains. welltrained.app`
+
+  return generateAndShare({
+    element,
+    filename: `welltrained-weekly-report-${Date.now()}`,
+    text,
+    shareType: 'weekly',
   })
 }
