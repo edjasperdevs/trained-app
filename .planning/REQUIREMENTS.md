@@ -1,6 +1,6 @@
 # Requirements: WellTrained
 
-**Defined:** 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2)
+**Defined:** 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2), 2026-03-07 (v2.3)
 **Core Value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
 
 ## v2.0 Requirements
@@ -268,7 +268,32 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 - [x] **SHARE-15**: Web platform shows "Download Card" fallback instead of native share
 
-## Future Requirements (v2.3+)
+## v2.3 Requirements
+
+Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit a Sub referral system.
+
+### Weekly Report
+
+- [ ] **WRPT-01**: User sees full-screen weekly summary with DP earned, compliance %, streak, workouts completed
+- [ ] **WRPT-02**: Summary shows current rank, DP to next rank, and rank progress bar
+- [ ] **WRPT-03**: Auto-generated highlights appear based on protein compliance, PRs, streak milestones
+- [ ] **WRPT-04**: Push notification triggers report on Sunday at 7pm local time
+- [ ] **WRPT-05**: In-app trigger shows report on Sunday after first DP action (once per week)
+- [ ] **WRPT-06**: Share button produces weekly report share card
+- [ ] **WRPT-07**: User can configure weekly report notification in Settings
+
+### Referrals
+
+- [ ] **REFR-01**: User has unique referral link with callsign and short code
+- [ ] **REFR-02**: Referred user receives 7-day Premium free via RevenueCat promotional entitlement
+- [ ] **REFR-03**: Referrer earns 100 DP when recruit completes first week (7 days with DP actions)
+- [ ] **REFR-04**: Recruit a Sub screen shows referral link with copy button
+- [ ] **REFR-05**: Social share buttons (Instagram, X, Messages) share referral link
+- [ ] **REFR-06**: Recruits list shows recruit callsign, rank, status, and DP earned
+- [ ] **REFR-07**: Deep link handling captures referral code before signup
+- [ ] **REFR-08**: Settings has "Recruit a Sub" entry under Protocol section
+
+## Future Requirements (v2.4+)
 
 ### Onboarding Enhancements
 
@@ -483,9 +508,10 @@ Requirements for Social Sharing milestone. Three branded share card types.
 - v2.1 requirements: 44 total
 - v2.2 requirements: 34 total
 - v2.2.1 requirements: 15 total
+- v2.3 requirements: 15 total
 - Total mapped to phases: 140
-- Unmapped: 0
+- Unmapped: 15 (v2.3 pending roadmap)
 
 ---
-*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1)*
-*Last updated: 2026-03-07 -- v2.2.1 Social Sharing roadmap created*
+*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1), 2026-03-07 (v2.3)*
+*Last updated: 2026-03-07 -- v2.3 Engagement & Growth requirements defined*
