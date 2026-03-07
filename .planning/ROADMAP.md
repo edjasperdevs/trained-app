@@ -35,7 +35,11 @@
   2. dpStore has awardShareWorkoutDP, awardShareComplianceDP, awardShareRankUpDP actions with correct gating
   3. shareCard.ts utility can render a component off-screen, convert to PNG, and open native share sheet
   4. Web platform shows "Download Card" fallback instead of native share
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 37-01-PLAN.md -- Install dependencies, configure iOS camera permissions, add DP share actions to dpStore
+- [ ] 37-02-PLAN.md -- Create shareCard.ts utility with generateAndShare, ShareCardWrapper component, web fallback
 
 ### Phase 38: Rank-Up Sharing
 **Goal**: Users can share a branded card celebrating their new rank after claiming it
@@ -544,13 +548,13 @@ Plans:
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
-| 31. Splash Screen | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
+| 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
-| 37. Share Infrastructure | v2.2.1 | 0/TBD | Not started | - |
+| 37. Share Infrastructure | v2.2.1 | 0/2 | Not started | - |
 | 38. Rank-Up Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
