@@ -32,7 +32,7 @@ function NoirInput({
   suffix?: React.ReactNode
 }) {
   return (
-    <div>
+    <div className="min-w-0 w-full">
       <label htmlFor={id} className="block text-xs font-medium text-[#A1A1AA] uppercase tracking-wider mb-2">
         {label}
       </label>
@@ -46,7 +46,7 @@ function NoirInput({
           autoFocus={autoFocus}
           required={required}
           className={cn(
-            'w-full bg-[#26282B] border border-[#2E3035] rounded-xl px-4 py-3.5',
+            'w-full min-w-0 bg-[#26282B] border border-[#2E3035] rounded-xl px-4 py-3.5',
             'text-[#FAFAFA] placeholder:text-[#A1A1AA]/50 text-sm',
             'focus:outline-none focus:border-[#C8FF00] focus:ring-1 focus:ring-[#C8FF00]/30',
             'transition-all duration-200',
@@ -334,7 +334,7 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 flex-1 w-full max-w-full">
+      <form onSubmit={handleSubmit} className="space-y-4 flex-1 w-full min-w-0 overflow-hidden">
         <NoirInput
           label="Email Address"
           id="email"

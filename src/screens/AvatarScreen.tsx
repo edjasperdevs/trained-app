@@ -2,7 +2,7 @@ import { EvolvingAvatar } from '@/components'
 import { useAvatarStore, useDPStore, useUserStore } from '@/stores'
 import { cn } from '@/lib/cn'
 import { getAvatarStage } from '@/lib/avatarUtils'
-import { Dumbbell, Beef, Heart, TrendingUp, User, ChevronRight, LineChart } from 'lucide-react'
+import { Dumbbell, Beef, Heart, TrendingUp, User, ChevronRight, LineChart, Settings } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { Archetype } from '@/design/constants'
@@ -203,6 +203,25 @@ export function AvatarScreen() {
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               Training volume, PRs, and heatmap
+            </p>
+          </div>
+          <ChevronRight size={20} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+        </button>
+
+        {/* Settings Button */}
+        <button
+          onClick={() => navigate('/settings')}
+          className="w-full bg-surface border border-border rounded-xl p-4 flex items-center gap-4 hover:border-primary/30 transition-colors group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-surface-elevated border border-border flex items-center justify-center">
+            <Settings size={20} className="text-muted-foreground" />
+          </div>
+          <div className="flex-1 text-left">
+            <h3 className="text-base font-heading font-bold text-foreground">
+              Settings
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Account, notifications, and preferences
             </p>
           </div>
           <ChevronRight size={20} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
