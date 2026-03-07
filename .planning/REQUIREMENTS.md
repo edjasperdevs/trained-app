@@ -287,11 +287,11 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **REFR-01**: User has unique referral link with callsign and short code
 - [ ] **REFR-02**: Referred user receives 7-day Premium free via RevenueCat promotional entitlement
 - [ ] **REFR-03**: Referrer earns 100 DP when recruit completes first week (7 days with DP actions)
-- [ ] **REFR-04**: Recruit a Sub screen shows referral link with copy button
-- [ ] **REFR-05**: Social share buttons (Instagram, X, Messages) share referral link
-- [ ] **REFR-06**: Recruits list shows recruit callsign, rank, status, and DP earned
+- [x] **REFR-04**: Recruit a Sub screen shows referral link with copy button
+- [x] **REFR-05**: Social share buttons (Instagram, X, Messages) share referral link
+- [x] **REFR-06**: Recruits list shows recruit callsign, rank, status, and DP earned
 - [ ] **REFR-07**: Deep link handling captures referral code before signup
-- [ ] **REFR-08**: Settings has "Recruit a Sub" entry under Protocol section
+- [x] **REFR-08**: Settings has "Recruit a Sub" entry under Protocol section
 
 ## Future Requirements (v2.4+)
 
@@ -512,11 +512,11 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | REFR-01 | Phase 42 | Complete |
 | REFR-02 | Phase 43 | Pending |
 | REFR-03 | Phase 43 | Pending |
-| REFR-04 | Phase 42 | Pending |
-| REFR-05 | Phase 42 | Pending |
-| REFR-06 | Phase 42 | Pending |
+| REFR-04 | Phase 42 | Complete |
+| REFR-05 | Phase 42 | Complete |
+| REFR-06 | Phase 42 | Complete |
 | REFR-07 | Phase 42 | Pending |
-| REFR-08 | Phase 42 | Pending |
+| REFR-08 | Phase 42 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 47 total
