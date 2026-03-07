@@ -44,21 +44,22 @@ Previous milestones delivered:
 - ✓ 8-screen onboarding flow (Welcome, Value, Profile, Goal, Archetype, Macros, Paywall, Final) — v2.1
 - ✓ RevenueCat paywall with 7-day free trial and reverse trial — v2.1
 - ✓ Value-first onboarding with protocol language — v2.1
+- ✓ Rank-Up share card with +10 DP per-rank reward, RankUpModal integration — v2.2.1
+- ✓ Workout share card with camera selfie compositing, +5 DP daily reward — v2.2.1
+- ✓ Compliance share card for 5/5 days with +5 DP daily reward — v2.2.1
+- ✓ Share infrastructure (html-to-image, @capacitor/share, web download fallback) — v2.2.1
 
 ### Active
 
-**Current Milestone: v2.2.1 Social Sharing**
+**Current Milestone: v2.2 Auth Flow Redesign (continued)**
 
-**Goal:** Three branded share card types (Rank-Up, Workout, Compliance) that users can share to social media after key protocol moments, with DP rewards for sharing.
+**Goal:** Complete authentication flow with Apple Sign-In, Google Sign-In, and email/password. Remaining screens: Sign In, Email Sign Up, Email Sign In, Forgot Password.
 
 **Target features:**
-- Rank-Up share card (triggered after claiming new rank, +10 DP once per rank)
-- Workout share card with optional camera selfie compositing (+5 DP daily)
-- Compliance share card for full 5/5 check-in days (+5 DP daily)
-- PNG generation via html-to-image, native share sheet via @capacitor/share
-- DP reward gating (daily limits for workout/compliance, per-rank for rank-up)
-- Integration into RankUpModal, Workouts, and CheckInModal
-- Obsidian design tokens matching v2.2 aesthetic
+- Sign In screen with Apple/Google/Email buttons (Phase 33, in progress)
+- Email Sign Up form with password strength indicator (Phase 34)
+- Email Sign In form with error handling (Phase 35)
+- Forgot Password screen with success state (Phase 36)
 
 ### Out of Scope
 
@@ -76,10 +77,11 @@ Previous milestones delivered:
 ## Context
 
 **Current State:**
-- Five milestones shipped (v1.0–v1.4) + v1.5 closed (App Store submission pending Apple Developer approval)
+- v2.2.1 Social Sharing shipped (3 branded share cards, DP rewards, camera compositing)
+- v2.2 Auth Flow Redesign in progress (Splash, Sign Up complete; Sign In, Email forms remaining)
+- v2.1 Onboarding Redesign complete (8-screen value-first flow with reverse trial)
 - Capacitor iOS shell fully functional with native features
 - 139 unit tests + 10 E2E tests passing
-- Coach dashboard (~4,500 lines) to be stripped — welltrained-coach is the separate coach app
 - Apple Developer account enrollment submitted, awaiting verification
 - Domain: app.welltrained.fitness (Vercel)
 
@@ -125,9 +127,11 @@ Previous milestones delivered:
 | Value-first onboarding | Show transformation promise before asking for data; paywall after investment | ✓ Good |
 | Reverse trial | 7-day free Premium for users who skip paywall; increases conversion 30-50% | ✓ Good |
 | 8-screen flow | Shorter than previous 10-step; value proposition screen before data collection | ✓ Good |
-| 3-pass design implementation | Build → Review → Refine for each screen; ensures mockup fidelity | — Pending |
-| Apple + Google Sign-In | Social auth reduces friction; Apple required for App Store if offering other social login | — Pending |
-| Splash screen | Branded loading experience during app initialization | — Pending |
+| 3-pass design implementation | Build → Review → Refine for each screen; ensures mockup fidelity | ✓ Good |
+| Apple + Google Sign-In | Social auth reduces friction; Apple required for App Store if offering other social login | ✓ Good |
+| Splash screen | Branded loading experience during app initialization | ✓ Good |
+| html-to-image for share cards | DOM-to-PNG generation, works with native share sheet | ✓ Good |
+| Daily/per-rank DP gating | Prevents share spam while rewarding engagement | ✓ Good |
 
 ---
-*Last updated: 2026-03-06 — v2.2.1 Social Sharing started*
+*Last updated: 2026-03-07 — v2.2.1 Social Sharing complete*

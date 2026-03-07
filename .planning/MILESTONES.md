@@ -112,3 +112,29 @@
 **Phases completed:** 5 phases, 10 plans, 16 requirements
 
 ---
+
+## v2.2.1 Social Sharing (Shipped: 2026-03-07)
+
+**Delivered:** Three branded share card types (Rank-Up, Workout, Compliance) that users share to social media after key protocol moments. PNG generation via html-to-image, native share sheet via @capacitor/share, DP rewards for sharing with daily/per-rank gating.
+
+**Phases completed:** 37-40 (4 phases, 6 plans)
+
+**Key accomplishments:**
+
+- Share infrastructure with html-to-image PNG generation, @capacitor/share native sheet, and dpStore share actions with daily/per-rank gating
+- ShareCardWrapper component for off-screen DOM rendering with web download fallback
+- RankUpShareCard with gold/obsidian styling, integrated into RankUpModal with +10 DP per-rank reward
+- ComplianceShareCard with 5-check layout and milestone banners (Day 7/30/100), integrated into CheckInModal with +5 DP daily reward
+- WorkoutShareCard with full-bleed photo layout and camera compositing via ShareBottomSheet, integrated into Workouts with +5 DP daily reward
+
+**Stats:**
+
+- 39 files created/modified
+- +5,165 lines of TypeScript/TSX
+- 4 phases, 6 plans
+- Git range: `chore(37-01)` → `docs(40-02)`
+
+**What's next:** Continue v2.2 Auth Flow Redesign (Phases 33-36).
+
+---
+
