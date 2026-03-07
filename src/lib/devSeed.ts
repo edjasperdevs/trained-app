@@ -259,18 +259,6 @@ const achievementsStore = {
   version: 0,
 }
 
-// --- Access Store ---
-const accessStore = {
-  state: {
-    hasAccess: true,
-    licenseKey: 'TEST-DEV-KEY-1234',
-    accessGrantedAt: daysAgo(45).toISOString(),
-    email: 'test@example.com',
-    instanceId: 'dev-instance-001',
-  },
-  version: 2,
-}
-
 // --- Reminders Store ---
 const remindersStore = {
   state: {
@@ -292,7 +280,6 @@ export function seedTestData() {
   localStorage.setItem('gamify-gains-macros', JSON.stringify(macroStore))
   localStorage.setItem('gamify-gains-avatar', JSON.stringify(avatarStore))
   localStorage.setItem('gamify-gains-achievements', JSON.stringify(achievementsStore))
-  localStorage.setItem('gamify-gains-access', JSON.stringify(accessStore))
   localStorage.setItem('gamify-gains-reminders', JSON.stringify(remindersStore))
 
   console.log('✅ Test data seeded!')
@@ -445,7 +432,7 @@ export function clearTestData() {
   const keys = [
     'gamify-gains-user', 'gamify-gains-workouts', 'gamify-gains-macros',
     'gamify-gains-avatar', 'gamify-gains-achievements',
-    'gamify-gains-access', 'gamify-gains-reminders', 'gamify-gains-dp',
+    'gamify-gains-reminders', 'gamify-gains-dp',
     'gamify-gains-subscription',
   ]
   keys.forEach(k => localStorage.removeItem(k))
@@ -795,16 +782,6 @@ export function seedPersona(persona: TestPersona) {
       recentReaction: null,
     },
     version: 0,
-  }))
-  localStorage.setItem('gamify-gains-access', JSON.stringify({
-    state: {
-      hasAccess: true,
-      licenseKey: `TEST-${persona.toUpperCase()}`,
-      accessGrantedAt: daysAgo(config.daysActive).toISOString(),
-      email: `${persona}@test.welltrained.app`,
-      instanceId: `test-${persona}`,
-    },
-    version: 2,
   }))
   localStorage.setItem('gamify-gains-reminders', JSON.stringify(remindersStore))
 

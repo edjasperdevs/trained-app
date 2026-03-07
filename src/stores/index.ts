@@ -24,8 +24,6 @@ export type { ReminderType, ReminderPreferences, ActiveReminder, NotificationTim
 export { useAchievementsStore, RARITY_COLORS } from './achievementsStore'
 export type { Badge, BadgeRarity, EarnedBadge } from './achievementsStore'
 
-export { useAccessStore } from './accessStore'
-
 export { useSyncStore } from './syncStore'
 export type { SyncStatus } from './syncStore'
 

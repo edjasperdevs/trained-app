@@ -18,7 +18,6 @@ import {
   useWorkoutStore,
   useAvatarStore,
   useAuthStore,
-  useAccessStore,
   useRemindersStore,
   useAchievementsStore,
   useSubscriptionStore,
@@ -423,7 +422,6 @@ export function Settings() {
         useMacroStore.getState().resetMacros()
         useWorkoutStore.getState().resetWorkouts()
         useAvatarStore.getState().resetAvatar()
-        useAccessStore.getState().revokeAccess()
 
         await signOut()
         toast.success('Account deleted')
