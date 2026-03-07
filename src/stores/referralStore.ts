@@ -28,6 +28,7 @@ interface ReferralStore {
   setCapturedCode: (code: string) => void // Store captured code
   clearCapturedCode: () => void
   attributeReferral: () => Promise<void> // Create referral record post-signup
+  grantReferralPremium: () => Promise<void> // Trigger 7-day premium grant for referred user
 
   // Computed helpers
   pendingCount: () => number
@@ -269,6 +270,31 @@ export const useReferralStore = create<ReferralStore>()(
           get().clearCapturedCode()
         } catch (error) {
           console.error('[referralStore] Error in attributeReferral:', error)
+        }
+      },
+
+      grantReferralPremium: async (): Promise<void> => {
+        const user = useAuthStore.getState().user
+        if (!user || !supabase) {
+          return
+        }
+
+        try {
+          // Fire-and-forget call to Edge Function
+          const { error } = await supabase.functions.invoke('grant-referral-premium', {
+            body: { userId: user.id },
+          })
+
+          if (error) {
+            console.error('[referralStore] Grant premium error:', error)
+          } else {
+            console.log('[referralStore] Promotional premium grant initiated')
+            // Refresh subscription state to pick up new entitlement
+            const { useSubscriptionStore } = await import('./subscriptionStore')
+            useSubscriptionStore.getState().checkEntitlements()
+          }
+        } catch (error) {
+          console.error('[referralStore] Grant premium error:', error)
         }
       },
 

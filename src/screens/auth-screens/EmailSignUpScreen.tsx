@@ -133,6 +133,9 @@ export function EmailSignUpScreen() {
     // Attribute referral if code was captured (fire-and-forget)
     useReferralStore.getState().attributeReferral()
 
+    // Grant promotional premium if referred (fire-and-forget)
+    useReferralStore.getState().grantReferralPremium()
+
     // Session created - App.tsx routing will handle navigation to onboarding
   }
 

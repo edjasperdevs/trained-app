@@ -94,6 +94,9 @@ export function SignUpScreen() {
     // Attribute referral if code was captured (fire-and-forget)
     useReferralStore.getState().attributeReferral()
 
+    // Grant promotional premium if referred (fire-and-forget)
+    useReferralStore.getState().grantReferralPremium()
+
     // Session created - App.tsx routing will handle navigation
   }
 
@@ -112,6 +115,9 @@ export function SignUpScreen() {
 
     // Attribute referral if code was captured (fire-and-forget)
     useReferralStore.getState().attributeReferral()
+
+    // Grant promotional premium if referred (fire-and-forget)
+    useReferralStore.getState().grantReferralPremium()
 
     // Session created - App.tsx routing will handle navigation
   }
