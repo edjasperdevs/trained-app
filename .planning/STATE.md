@@ -5,16 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** v2.3 Engagement & Growth
+**Current focus:** v2.4 App Store Readiness
 
 ## Current Position
 
-Phase: 44 (Locked Protocol)
-Plan: 06 (of 06)
-Status: Complete
-Last activity: 2026-03-07 — Completed 44-06 (Weekly Report Integration)
-
-Progress: ⬛⬛⬛⬛⬛⬛ (6/6 plans complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-07 — Milestone v2.4 started
 
 ## Performance Metrics
 

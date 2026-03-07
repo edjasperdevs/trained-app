@@ -55,16 +55,18 @@ Previous milestones delivered:
 
 ### Active
 
-**Current Milestone:** Planning next milestone
+**Current Milestone:** v2.4 App Store Readiness
 
-**Recently Shipped (v2.3):**
-- Weekly Protocol Report with auto-generated highlights (protein compliance, PRs, streak milestones)
-- Referral system with promotional entitlement flow for 7-day Premium trials
-- Locked Protocol streak tracker with protocol-aware notifications
-- Complete engagement and growth feature set
+**Goal:** Resolve all P0 and P1 blockers identified in AUDIT_REPORT.md to prepare for iOS App Store submission.
 
-**Next Up:**
-- TBD via `/gsd:new-milestone`
+**Target deliverables:**
+- Fix all P0 App Store submission blockers (PrivacyInfo.xcprivacy, aps-environment, Team ID, dev fallback)
+- Complete App Store Connect metadata preparation
+- Verify Xcode and iOS SDK compliance
+- Address P1 UX issues (health disclaimer, workout name overflow, recovery day compliance)
+- Optimize assets (splash screen branding, oversized logos)
+- Clean up repository (remove .DS_Store files, legacy code)
+- Host public privacy policy URL
 
 ### Out of Scope
 
@@ -145,4 +147,4 @@ Previous milestones delivered:
 | Streak yesterday grace | Allows user to log "today" if they logged yesterday but haven't yet today | ✓ Good |
 
 ---
-*Last updated: 2026-03-07 after v2.3 Engagement & Growth milestone*
+*Last updated: 2026-03-07 after starting v2.4 App Store Readiness milestone*
