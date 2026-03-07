@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 41 (Weekly Protocol Report)
-Plan: 03 (of 03)
+Phase: 42 (Referral System)
+Plan: 01 (of 03)
 Status: Complete
-Last activity: 2026-03-07 — Completed 41-03 (Share Card Integration)
+Last activity: 2026-03-07 — Completed 42-01 (Referral Infrastructure)
 
-Progress: ⬛⬜⬜ (1/3 phases complete)
+Progress: ⬛⬛⬜ (4/9 plans complete)
 
 ## Performance Metrics
 
@@ -33,13 +33,14 @@ Progress: ⬛⬜⬜ (1/3 phases complete)
 **v2.3 Engagement & Growth:**
 - Total phases: 3 (Phases 41-43)
 - Total plans: 9 (3 per phase)
-- Plans complete: 3
+- Plans complete: 4
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 41 | 01 | 5min | 2 | 3 |
 | 41 | 02 | 7min | 3 | 5 |
 | 41 | 03 | 5min | 2 | 4 |
+| 42 | 01 | 4min | 2 | 4 |
 
 ### Decisions
 
@@ -120,6 +121,9 @@ Progress: ⬛⬜⬜ (1/3 phases complete)
 - [Phase 41]: Deep link /weekly-report uses sessionStorage flag pattern (avoids route conflict with modal-based UI)
 - 41-03: No DP award for weekly report share (informational content, not reward action)
 - 41-03: Share functionality internal to WeeklyReportScreen (no onShare prop pattern)
+- 42-01: Referral code format CALLSIGN-XXXX (4-char alphanumeric suffix)
+- 42-01: referral_code nullable in profiles (generated lazily on first access)
+- 42-01: Client-side code generation to reduce DB round-trips
 
 ### Pending Todos
 
@@ -151,6 +155,6 @@ Progress: ⬛⬜⬜ (1/3 phases complete)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 41-03-PLAN.md (Weekly Report Share Card) — Phase 41 complete
+Stopped at: Completed 42-01-PLAN.md (Referral Infrastructure)
 Resume file: None
-Next action: Begin Phase 42 (Referral System)
+Next action: Execute Phase 42 Plan 02 (Recruit-a-Bro screen)
