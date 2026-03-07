@@ -18,7 +18,7 @@
 
 ### Phases
 
-- [ ] **Phase 30: Auth Infrastructure** - Apple/Google Sign-In plugins, Supabase providers, AuthStack navigation
+- [x] **Phase 30: Auth Infrastructure** - Apple/Google Sign-In plugins, Supabase providers, AuthStack navigation
 - [ ] **Phase 31: Splash Screen** - Chain-link crown logo, wordmark, tagline, loading indicator (3 passes)
 - [ ] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes)
 - [ ] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes)
@@ -42,7 +42,7 @@
 
 Plans:
 - [x] 30-01-PLAN.md -- Install Apple/Google Sign-In Capacitor plugins, create auth wrapper modules, configure Supabase providers
-- [ ] 30-02-PLAN.md -- Create AuthStack navigation with 5 auth screen placeholders, update App.tsx routing logic
+- [x] 30-02-PLAN.md -- Create AuthStack navigation with 5 auth screen placeholders, update App.tsx routing logic
 
 ### Phase 31: Splash Screen
 **Goal**: Branded loading experience during app initialization
@@ -482,7 +482,7 @@ Plans:
 | 27. Profile and Goal | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
-| 30. Auth Infrastructure | v2.2 | 1/2 | In progress | - |
+| 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 0/3 | Not started | - |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |

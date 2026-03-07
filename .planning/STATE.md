@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 30 of 36 (Auth Infrastructure)
-Plan: 1 of 2 in current phase
-Status: Executing
-Last activity: 2026-03-06 -- Completed 30-01 (Social Auth Plugins)
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-03-07 -- Completed 30-02 (Auth Navigation Setup)
 
-Progress: [##########----------] 52% (v2.0-v2.2 scope: 28/54 plans)
+Progress: [##########----------] 54% (v2.0-v2.2 scope: 29/54 plans)
 
 ## Performance Metrics
 
@@ -31,11 +31,12 @@ Progress: [##########----------] 52% (v2.0-v2.2 scope: 28/54 plans)
 **v2.2 Auth Flow Redesign:**
 - Total phases: 7 (Phases 30-36)
 - Total plans: 20 (2 + 6x3)
-- Plans complete: 0
+- Plans complete: 2
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 30 | 01 | 15min | 3 | 10 |
+| 30 | 02 | 5min | 3 | 10 |
 
 ## Accumulated Context
 
@@ -47,6 +48,7 @@ Progress: [##########----------] 52% (v2.0-v2.2 scope: 28/54 plans)
 - v2.2: AuthStack separate from OnboardingStack -- auth first, then onboarding for new users
 - 30-01: Used @southdevs/capacitor-google-auth instead of @codetrix-studio (Capacitor 7 compatibility)
 - 30-01: Native sign-in returns to Supabase via signInWithIdToken, not OAuth redirect flow
+- 30-02: Used auth-screens/ directory instead of auth/ to avoid case collision with existing Auth.tsx
 
 ### Pending Todos
 
@@ -60,6 +62,6 @@ Progress: [##########----------] 52% (v2.0-v2.2 scope: 28/54 plans)
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: Completed 30-01-PLAN.md (Social Auth Plugins)
+Last session: 2026-03-07
+Stopped at: Completed 30-02-PLAN.md (Auth Navigation Setup)
 Resume file: None
