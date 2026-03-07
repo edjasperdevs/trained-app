@@ -87,6 +87,9 @@ Progress: [################----] 73% (v2.0-v2.2 scope: 41/56 plans)
 - 40-01: ShareBottomSheet stays open if user cancels camera - only closes on successful share or explicit cancel
 - 40-02: Used username field as callsign for share card (profile.username maps to callsign prop)
 - 40-02: Type assertion for avatarStage (getAvatarStage returns number, card expects 1|2|3|4|5)
+- 33-01: Reused inline SVG icons from SignUpScreen (no shared component)
+- 33-01: Used navigate(-1) for back arrow navigation
+- 33-01: Added underline styling to Create Account and Forgot Password links per mockup
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ Progress: [################----] 73% (v2.0-v2.2 scope: 41/56 plans)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 40-02-PLAN.md (Workout Screen Integration)
+Stopped at: Completed 33-01-PLAN.md (Sign In Screen Build)
 Resume file: None
-Next action: v2.2.1 Social Sharing milestone complete. Next milestone: v2.2 Auth Flow Redesign continuation (Phases 33-36)
+Next action: Continue with 33-02-PLAN.md (Sign In Screen Review)

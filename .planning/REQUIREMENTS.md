@@ -201,12 +201,12 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 
 ### Sign In (Social Entry)
 
-- [ ] **SIGNIN-01**: Sign In screen displays logo, WELCOME BACK headline, 3 auth buttons
-- [ ] **SIGNIN-02**: Apple button triggers Apple Sign-In flow
-- [ ] **SIGNIN-03**: Google button triggers Google Sign-In flow
-- [ ] **SIGNIN-04**: Email button navigates to Email Sign In form
-- [ ] **SIGNIN-05**: Create Account link navigates to Sign Up screen
-- [ ] **SIGNIN-06**: Forgot Password link navigates to Forgot Password screen
+- [x] **SIGNIN-01**: Sign In screen displays logo, WELCOME BACK headline, 3 auth buttons
+- [x] **SIGNIN-02**: Apple button triggers Apple Sign-In flow
+- [x] **SIGNIN-03**: Google button triggers Google Sign-In flow
+- [x] **SIGNIN-04**: Email button navigates to Email Sign In form
+- [x] **SIGNIN-05**: Create Account link navigates to Sign Up screen
+- [x] **SIGNIN-06**: Forgot Password link navigates to Forgot Password screen
 
 ### Email Sign Up Form
 
@@ -442,12 +442,12 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SIGNUP-03 | Phase 32 | Complete |
 | SIGNUP-04 | Phase 32 | Complete |
 | SIGNUP-05 | Phase 32 | Complete |
-| SIGNIN-01 | Phase 33 | Pending |
-| SIGNIN-02 | Phase 33 | Pending |
-| SIGNIN-03 | Phase 33 | Pending |
-| SIGNIN-04 | Phase 33 | Pending |
-| SIGNIN-05 | Phase 33 | Pending |
-| SIGNIN-06 | Phase 33 | Pending |
+| SIGNIN-01 | Phase 33 | Complete |
+| SIGNIN-02 | Phase 33 | Complete |
+| SIGNIN-03 | Phase 33 | Complete |
+| SIGNIN-04 | Phase 33 | Complete |
+| SIGNIN-05 | Phase 33 | Complete |
+| SIGNIN-06 | Phase 33 | Complete |
 | EMAILSIGNUP-01 | Phase 34 | Pending |
 | EMAILSIGNUP-02 | Phase 34 | Pending |
 | EMAILSIGNUP-03 | Phase 34 | Pending |
