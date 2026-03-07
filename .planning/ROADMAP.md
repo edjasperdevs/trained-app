@@ -91,9 +91,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 33-01-PLAN.md -- Build Sign In screen with layout, auth handlers, and navigation
-- [ ] 33-02-PLAN.md -- Review implementation against mockup, document visual gaps
-- [ ] 33-03-PLAN.md -- Refine spacing, typography, and styling based on review findings
+- [x] 33-01-PLAN.md -- Build Sign In screen with layout, auth handlers, and navigation
+- [x] 33-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [x] 33-03-PLAN.md -- Refine spacing, typography, and styling based on review findings
 
 ### Phase 34: Email Sign Up Form
 **Goal**: Users can create account with email and password
@@ -108,7 +108,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 34-01-PLAN.md -- Implement Email Sign Up form with fields, validation, strength indicator, Supabase auth
+- [x] 34-01-PLAN.md -- Implement Email Sign Up form with fields, validation, strength indicator, Supabase auth
 - [ ] 34-02-PLAN.md -- Review implementation against mockup, document visual gaps
 - [ ] 34-03-PLAN.md -- Pixel-polish form styling, error states, animations based on review findings
 
@@ -398,7 +398,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 3/3 plans complete
+**Plans:** 1/3 plans executed
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -468,7 +468,7 @@ Plans:
 | 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 33. Sign In Screen | 3/3 | Complete    | 2026-03-07 | - |
-| 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
+| 34. Email Sign Up Form | 1/3 | In Progress|  | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
