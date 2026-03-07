@@ -15,6 +15,9 @@ export const NOTIFICATION_IDS = {
   WEEKLY_CHECKIN: 5,
   STREAK_AT_RISK: 6,
   WEEKLY_REPORT: 7,
+  LOCKED_REMINDER: 7001,
+  LOCKED_MORNING: 7002,
+  LOCKED_EVENING: 7003,
   REST_TIMER: 100,
 } as const
 
@@ -165,6 +168,55 @@ export async function scheduleAllNotifications(
     })
   }
 
+  // Locked Protocol notifications
+  if (prefs.lockedProtocol.enabled) {
+    if (prefs.lockedProtocol.protocolType === 'continuous') {
+      // Continuous: evening reminder at configured time
+      notifications.push({
+        id: NOTIFICATION_IDS.LOCKED_REMINDER,
+        title: 'Protocol reminder.',
+        body: "You haven't logged today. Don't break the streak.",
+        schedule: {
+          on: {
+            hour: prefs.lockedProtocol.time.hour,
+            minute: prefs.lockedProtocol.time.minute,
+          },
+        },
+        extra: { route: '/locked-protocol' },
+      })
+    } else if (prefs.lockedProtocol.protocolType === 'day_lock') {
+      // Day Lock: morning "lock up" reminder
+      notifications.push({
+        id: NOTIFICATION_IDS.LOCKED_MORNING,
+        title: 'Time to lock up.',
+        body: 'Your protocol is waiting.',
+        schedule: {
+          on: {
+            hour: prefs.lockedProtocol.time.hour,
+            minute: prefs.lockedProtocol.time.minute,
+          },
+        },
+        extra: { route: '/locked-protocol' },
+      })
+
+      // Day Lock: optional evening soft reminder
+      if (prefs.lockedProtocol.eveningReminder.enabled) {
+        notifications.push({
+          id: NOTIFICATION_IDS.LOCKED_EVENING,
+          title: 'End of day.',
+          body: 'Protocol check.',
+          schedule: {
+            on: {
+              hour: prefs.lockedProtocol.eveningReminder.time.hour,
+              minute: prefs.lockedProtocol.eveningReminder.time.minute,
+            },
+          },
+          extra: { route: '/locked-protocol' },
+        })
+      }
+    }
+  }
+
   if (notifications.length > 0) {
     try {
       await LocalNotifications.schedule({ notifications })
@@ -216,4 +268,104 @@ export async function notifyRestTimerComplete(): Promise<void> {
     'Time to start your next set!',
     NOTIFICATION_IDS.REST_TIMER
   )
+}
+
+/**
+ * Cancel locked protocol notifications.
+ * Called when protocol ends or notifications are disabled.
+ */
+export async function cancelLockedProtocolNotifications(): Promise<void> {
+  if (!isNative()) return
+
+  try {
+    await LocalNotifications.cancel({
+      notifications: [
+        { id: NOTIFICATION_IDS.LOCKED_REMINDER },
+        { id: NOTIFICATION_IDS.LOCKED_MORNING },
+        { id: NOTIFICATION_IDS.LOCKED_EVENING },
+      ],
+    })
+  } catch {
+    // Ignore if not found
+  }
+}
+
+/**
+ * Schedule locked protocol notifications based on protocol type and preferences.
+ * This is a convenience function that can be called when locked store state changes.
+ *
+ * @param prefs - Locked protocol notification preferences
+ * @param activeProtocol - Whether user has an active protocol (if false, cancels notifications)
+ * @param hasLoggedToday - Whether user has logged today (Continuous type only schedules if not logged)
+ */
+export async function scheduleLockedProtocolNotifications(
+  prefs: NotificationPreferences['lockedProtocol'],
+  activeProtocol: boolean,
+  hasLoggedToday: boolean
+): Promise<void> {
+  if (!isNative()) return
+
+  // Cancel existing locked notifications first
+  await cancelLockedProtocolNotifications()
+
+  // Only schedule if enabled and protocol is active
+  if (!prefs.enabled || !activeProtocol) return
+
+  const notifications: LocalNotificationSchema[] = []
+
+  if (prefs.protocolType === 'continuous') {
+    // Schedule evening reminder only if not logged today
+    if (!hasLoggedToday) {
+      notifications.push({
+        id: NOTIFICATION_IDS.LOCKED_REMINDER,
+        title: 'Protocol reminder.',
+        body: "You haven't logged today. Don't break the streak.",
+        schedule: {
+          on: {
+            hour: prefs.time.hour,
+            minute: prefs.time.minute,
+          },
+        },
+        extra: { route: '/locked-protocol' },
+      })
+    }
+  } else if (prefs.protocolType === 'day_lock') {
+    // Schedule morning "lock up" reminder (always, for daily habit)
+    notifications.push({
+      id: NOTIFICATION_IDS.LOCKED_MORNING,
+      title: 'Time to lock up.',
+      body: 'Your protocol is waiting.',
+      schedule: {
+        on: {
+          hour: prefs.time.hour,
+          minute: prefs.time.minute,
+        },
+      },
+      extra: { route: '/locked-protocol' },
+    })
+
+    // Schedule optional evening soft reminder
+    if (prefs.eveningReminder.enabled) {
+      notifications.push({
+        id: NOTIFICATION_IDS.LOCKED_EVENING,
+        title: 'End of day.',
+        body: 'Protocol check.',
+        schedule: {
+          on: {
+            hour: prefs.eveningReminder.time.hour,
+            minute: prefs.eveningReminder.time.minute,
+          },
+        },
+        extra: { route: '/locked-protocol' },
+      })
+    }
+  }
+
+  if (notifications.length > 0) {
+    try {
+      await LocalNotifications.schedule({ notifications })
+    } catch {
+      // Non-blocking
+    }
+  }
 }
