@@ -274,9 +274,9 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 
 ### Weekly Report
 
-- [ ] **WRPT-01**: User sees full-screen weekly summary with DP earned, compliance %, streak, workouts completed
-- [ ] **WRPT-02**: Summary shows current rank, DP to next rank, and rank progress bar
-- [ ] **WRPT-03**: Auto-generated highlights appear based on protein compliance, PRs, streak milestones
+- [x] **WRPT-01**: User sees full-screen weekly summary with DP earned, compliance %, streak, workouts completed
+- [x] **WRPT-02**: Summary shows current rank, DP to next rank, and rank progress bar
+- [x] **WRPT-03**: Auto-generated highlights appear based on protein compliance, PRs, streak milestones
 - [ ] **WRPT-04**: Push notification triggers report on Sunday at 7pm local time
 - [ ] **WRPT-05**: In-app trigger shows report on Sunday after first DP action (once per week)
 - [ ] **WRPT-06**: Share button produces weekly report share card
@@ -502,9 +502,9 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | SHARE-13 | Phase 40 | Complete |
 | SHARE-14 | Phase 40 | Complete |
 | SHARE-15 | Phase 37 | Complete |
-| WRPT-01 | Phase 41 | Pending |
-| WRPT-02 | Phase 41 | Pending |
-| WRPT-03 | Phase 41 | Pending |
+| WRPT-01 | Phase 41 | Complete |
+| WRPT-02 | Phase 41 | Complete |
+| WRPT-03 | Phase 41 | Complete |
 | WRPT-04 | Phase 41 | Pending |
 | WRPT-05 | Phase 41 | Pending |
 | WRPT-06 | Phase 41 | Pending |
