@@ -20,7 +20,7 @@
 ### Phases
 
 - [x] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper (completed 2026-03-07)
-- [ ] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward
+- [x] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward (completed 2026-03-07)
 - [ ] **Phase 39: Compliance Sharing** - ComplianceShareCard component, CheckInModal integration, +5 DP daily reward
 - [ ] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward
 
@@ -53,7 +53,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 38-01-PLAN.md -- Create RankUpShareCard component and integrate share button into RankUpModal
+- [x] 38-01-PLAN.md -- Create RankUpShareCard component and integrate share button into RankUpModal
 
 ### Phase 39: Compliance Sharing
 **Goal**: Users can share a branded card celebrating full 5/5 daily compliance
@@ -558,7 +558,7 @@ Plans:
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
-| 38. Rank-Up Sharing | v2.2.1 | 0/1 | Not started | - |
+| 38. Rank-Up Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
 | 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
 
