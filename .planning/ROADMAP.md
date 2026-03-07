@@ -67,7 +67,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 39-01-PLAN.md -- Create ComplianceShareCard component and integrate share button into CheckInModal
+- [x] 39-01-PLAN.md -- Create ComplianceShareCard component and integrate share button into CheckInModal
 
 ### Phase 40: Workout Sharing
 **Goal**: Users can share a branded card showing workout stats with optional selfie
@@ -79,7 +79,11 @@ Plans:
   3. Bottom sheet offers "with photo" / "without photo" options
   4. Camera capture composites photo into share card background
   5. Successful share awards +5 DP (once per day, daily gate)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 40-01-PLAN.md -- Create WorkoutShareCard and ShareBottomSheet components
+- [ ] 40-02-PLAN.md -- Integrate share button into Workouts screen with camera flow
 
 ---
 
@@ -555,15 +559,15 @@ Plans:
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 32. Sign Up Screen | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
+| 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
 | 37. Share Infrastructure | v2.2.1 | 2/2 | Complete | 2026-03-07 |
 | 38. Rank-Up Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
-| 39. Compliance Sharing | 1/1 | Complete    | 2026-03-07 | - |
-| 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
+| 39. Compliance Sharing | v2.2.1 | 1/1 | Complete | 2026-03-07 |
+| 40. Workout Sharing | v2.2.1 | 0/2 | Not started | - |
 
 **v2.2 Total Plans:** 20
 **v2.2 Requirements Coverage:** 34/34 mapped
