@@ -55,8 +55,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 31-01-PLAN.md -- Build Splash screen with chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline, animated gold loading bar
-- [ ] 31-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [x] 31-01-PLAN.md -- Build Splash screen with chain-link crown logo, WELLTRAINED wordmark, FORGE YOUR LEGEND tagline, animated gold loading bar
+- [x] 31-02-PLAN.md -- Review implementation against mockup, document visual gaps
 - [ ] 31-03-PLAN.md -- Refine spacing, typography, and animations based on review findings
 
 ### Phase 32: Sign Up Screen
@@ -483,7 +483,7 @@ Plans:
 | 28. Archetype and Macros | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 30. Auth Infrastructure | v2.2 | Complete    | 2026-03-07 | 2026-03-07 |
-| 31. Splash Screen | 1/3 | In Progress|  | - |
+| 31. Splash Screen | v2.2 | 2/3 | In Progress | - |
 | 32. Sign Up Screen | v2.2 | 0/3 | Not started | - |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
