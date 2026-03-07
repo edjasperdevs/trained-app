@@ -165,9 +165,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 33-01: Build - Implement Sign In screen with layout and auth button handlers
-- [ ] 33-02: Review - Compare to mockup and identify visual gaps
-- [ ] 33-03: Refine - Pixel-polish spacing, button styling, animations
+- [ ] 33-01-PLAN.md -- Build Sign In screen with layout, auth handlers, and navigation
+- [ ] 33-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [ ] 33-03-PLAN.md -- Refine spacing, typography, and styling based on review findings
 
 ### Phase 34: Email Sign Up Form
 **Goal**: Users can create account with email and password
