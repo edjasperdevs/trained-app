@@ -295,8 +295,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 
 ### Locked Protocol
 
-- [ ] **LOCK-01**: Database tables (locked_protocols, locked_logs) exist with RLS policies
-- [ ] **LOCK-02**: lockedStore provides fetchProtocol, startProtocol, logCompliance, endProtocol methods
+- [x] **LOCK-01**: Database tables (locked_protocols, locked_logs) exist with RLS policies
+- [x] **LOCK-02**: lockedStore provides fetchProtocol, startProtocol, logCompliance, endProtocol methods
 - [ ] **LOCK-03**: User sees acceptance flow with protocol type selection (Continuous/Day Lock)
 - [ ] **LOCK-04**: User sees acceptance flow with goal duration selection (7, 14, 21, 30, 60, 90 days)
 - [ ] **LOCK-05**: User sees active protocol screen with day counter, streak, stats, and milestone list
@@ -533,8 +533,8 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | REFR-06 | Phase 42 | Complete |
 | REFR-07 | Phase 42 | Complete |
 | REFR-08 | Phase 42 | Complete |
-| LOCK-01 | Phase 44 | Pending |
-| LOCK-02 | Phase 44 | Pending |
+| LOCK-01 | Phase 44 | Complete |
+| LOCK-02 | Phase 44 | Complete |
 | LOCK-03 | Phase 44 | Pending |
 | LOCK-04 | Phase 44 | Pending |
 | LOCK-05 | Phase 44 | Pending |

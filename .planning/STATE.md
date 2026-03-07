@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 43 (Referral Rewards)
-Plan: 02 (of 02)
+Phase: 44 (Locked Protocol)
+Plan: 01 (of 06)
 Status: Complete
-Last activity: 2026-03-07 — Completed 43-02 (Referrer DP Rewards)
+Last activity: 2026-03-07 — Completed 44-01 (Schema & Store)
 
-Progress: ⬛⬛⬛⬛ (9/9 plans complete)
+Progress: ⬛⬜⬜⬜⬜⬜ (1/6 plans complete)
 
 ## Performance Metrics
 
@@ -32,8 +32,8 @@ Progress: ⬛⬛⬛⬛ (9/9 plans complete)
 
 **v2.3 Engagement & Growth:**
 - Total phases: 4 (Phases 41-44)
-- Total plans: 9+ (Phase 44 not yet planned)
-- Plans complete: 9
+- Total plans: 15 (9 shipped + 6 Phase 44)
+- Plans complete: 10
 
 ### Roadmap Evolution
 
@@ -49,6 +49,7 @@ Progress: ⬛⬛⬛⬛ (9/9 plans complete)
 | 42 | 03 | 8min | 3 | 5 |
 | 43 | 01 | 3min | 2 | 5 |
 | 43 | 02 | 3min | 3 | 5 |
+| 44 | 01 | 3min | 2 | 3 |
 
 ### Decisions
 
@@ -144,6 +145,9 @@ Progress: ⬛⬛⬛⬛ (9/9 plans complete)
 - 43-02: 7-day completion criteria: 7 distinct days with any DP activity
 - 43-02: Fire-and-forget completion check on app mount
 - 43-02: Security definer function for referral status updates
+- 44-01: Types added to existing database.types.ts (not separate src/types/ directory)
+- 44-01: Streak has yesterday grace period - continues if logged yesterday even if not today yet
+- 44-01: MILESTONE_DP rewards: 7d=50, 14d=100, 21d=150, 30d=250, 60d=500, 90d=750
 
 ### Pending Todos
 
@@ -175,6 +179,6 @@ Progress: ⬛⬛⬛⬛ (9/9 plans complete)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 43-02-PLAN.md (Referrer DP Rewards)
+Stopped at: Completed 44-01-PLAN.md (Schema & Store)
 Resume file: None
-Next action: v2.3 Milestone Complete - all 9 plans finished
+Next action: Execute 44-02-PLAN.md (Protocol Start Flow)
