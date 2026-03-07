@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useWeeklyReportStore } from '@/stores/weeklyReportStore'
 import { useDPStore } from '@/stores/dpStore'
 import { useUserStore } from '@/stores/userStore'
+import { useLockedStore } from '@/stores/lockedStore'
 import { generateHighlights, type Highlight } from '@/lib/highlights'
 import { shareWeeklyReportCard } from '@/lib/shareCard'
 import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
@@ -18,6 +19,7 @@ import {
   Calendar,
   Share2,
   X,
+  Lock,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -34,6 +36,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Trophy,
   Beef,
   Calendar,
+  Lock,
 }
 
 /**
@@ -46,10 +49,17 @@ export function WeeklyReportScreen({ onClose }: WeeklyReportScreenProps) {
   const getRankInfo = useDPStore((state) => state.getRankInfo)
   const longestStreak = useDPStore((state) => state.longestObedienceStreak)
   const profile = useUserStore((state) => state.profile)
+  const { activeProtocol, currentStreak: lockedStreak, totalDPEarned: lockedDPEarned } = useLockedStore()
 
   const [stats] = useState(() => getWeeklyStats())
   const [rankInfo] = useState(() => getRankInfo())
-  const [highlights] = useState<Highlight[]>(() => generateHighlights(stats, longestStreak))
+  const [highlights] = useState<Highlight[]>(() =>
+    generateHighlights(stats, longestStreak, {
+      isActive: !!activeProtocol,
+      currentStreak: lockedStreak,
+      totalDPEarned: lockedDPEarned,
+    })
+  )
 
   // Ref for off-screen share card
   const shareCardRef = useRef<HTMLDivElement>(null)
@@ -161,6 +171,19 @@ export function WeeklyReportScreen({ onClose }: WeeklyReportScreenProps) {
             </p>
             <p className="text-xs uppercase tracking-wider text-zinc-400">Completed</p>
           </div>
+
+          {/* LOCKED STREAK - only shows when protocol is active */}
+          {activeProtocol && (
+            <div className="col-span-2 bg-[#1A1A1A] border border-[#D4A853] rounded-lg p-4 flex items-center justify-center gap-4">
+              <Lock className="text-[#D4A853]" size={24} />
+              <div className="flex items-baseline gap-2">
+                <p className="font-jetbrains text-3xl font-bold text-white">
+                  {lockedStreak}
+                </p>
+                <p className="text-xs uppercase tracking-wider text-zinc-400">LOCKED STREAK</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Rank Progress Section */}

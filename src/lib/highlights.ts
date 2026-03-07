@@ -1,18 +1,38 @@
 import type { WeeklyStats } from '@/stores/weeklyReportStore'
 
 export interface Highlight {
-  type: 'protein' | 'pr' | 'streak' | 'workouts' | 'compliance' | 'dp'
+  type: 'protein' | 'pr' | 'streak' | 'workouts' | 'compliance' | 'dp' | 'locked'
   title: string
   description: string
   icon: string // Lucide icon name
+}
+
+export interface LockedProtocolData {
+  isActive: boolean
+  currentStreak: number
+  totalDPEarned: number
 }
 
 /**
  * Generate highlights based on weekly performance metrics.
  * Always returns at least one highlight.
  */
-export function generateHighlights(stats: WeeklyStats, longestStreak: number): Highlight[] {
+export function generateHighlights(
+  stats: WeeklyStats,
+  longestStreak: number,
+  lockedProtocol?: LockedProtocolData
+): Highlight[] {
   const highlights: Highlight[] = []
+
+  // Locked Protocol highlight (shows first when active)
+  if (lockedProtocol?.isActive && lockedProtocol.currentStreak > 0) {
+    highlights.push({
+      type: 'locked',
+      title: `Locked Protocol: Day ${lockedProtocol.currentStreak}`,
+      description: `${lockedProtocol.totalDPEarned} DP earned from compliance`,
+      icon: 'Lock',
+    })
+  }
 
   // 1. Protein Protocol Mastered
   if (stats.proteinDaysHit >= 5) {
