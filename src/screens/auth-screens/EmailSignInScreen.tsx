@@ -49,6 +49,11 @@ function ChainLinkCrownLogo({ className }: { className?: string }) {
   )
 }
 
+// Email validation
+const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
 export function EmailSignInScreen() {
   const navigate = useNavigate()
 
@@ -58,6 +63,12 @@ export function EmailSignInScreen() {
 
   // Password visibility state
   const [showPassword, setShowPassword] = useState(false)
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Form validation
+  const isFormValid = isValidEmail(email) && password.length > 0
 
   // Back button handler
   const handleBack = () => {
@@ -72,6 +83,11 @@ export function EmailSignInScreen() {
   // Create Account navigation
   const handleCreateAccount = () => {
     navigate('/auth/signup')
+  }
+
+  // Sign In handler (placeholder for Task 3)
+  const handleSignIn = async () => {
+    // Will be implemented in Task 3
   }
 
   return (
@@ -171,13 +187,18 @@ export function EmailSignInScreen() {
       {/* Spacer */}
       <div className="mt-6" />
 
-      {/* SIGN IN button (placeholder for now) */}
+      {/* SIGN IN button */}
       <button
-        disabled
-        className="w-full max-w-sm h-14 rounded-full bg-[#D4A853] text-black font-bold tracking-widest uppercase text-base opacity-50 cursor-not-allowed"
+        onClick={handleSignIn}
+        disabled={!isFormValid || isLoading}
+        className={`
+          w-full max-w-sm h-14 rounded-full bg-[#D4A853] text-black font-bold
+          tracking-widest uppercase text-base
+          ${(!isFormValid || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
         style={{ fontFamily: "'Oswald', sans-serif" }}
       >
-        SIGN IN
+        {isLoading ? 'Signing In...' : 'SIGN IN'}
       </button>
 
       {/* Create Account link */}
