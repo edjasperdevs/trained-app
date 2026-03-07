@@ -237,9 +237,9 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 ### Share Infrastructure
 
-- [ ] **SHARE-01**: Share utility generates PNG from React components via html-to-image
-- [ ] **SHARE-02**: Native share sheet opens via @capacitor/share with image file
-- [ ] **SHARE-03**: Off-screen render wrapper enables DOM capture without UI flicker
+- [x] **SHARE-01**: Share utility generates PNG from React components via html-to-image
+- [x] **SHARE-02**: Native share sheet opens via @capacitor/share with image file
+- [x] **SHARE-03**: Off-screen render wrapper enables DOM capture without UI flicker
 
 ### Share Cards
 
@@ -266,7 +266,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 ### Platform Handling
 
-- [ ] **SHARE-15**: Web platform shows "Download Card" fallback instead of native share
+- [x] **SHARE-15**: Web platform shows "Download Card" fallback instead of native share
 
 ## Future Requirements (v2.3+)
 
@@ -462,9 +462,9 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | FORGOT-02 | Phase 36 | Pending |
 | FORGOT-03 | Phase 36 | Pending |
 | FORGOT-04 | Phase 36 | Pending |
-| SHARE-01 | Phase 37 | Pending |
-| SHARE-02 | Phase 37 | Pending |
-| SHARE-03 | Phase 37 | Pending |
+| SHARE-01 | Phase 37 | Complete |
+| SHARE-02 | Phase 37 | Complete |
+| SHARE-03 | Phase 37 | Complete |
 | SHARE-04 | Phase 38 | Pending |
 | SHARE-05 | Phase 40 | Pending |
 | SHARE-06 | Phase 39 | Pending |
@@ -476,7 +476,7 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SHARE-12 | Phase 37 | Complete |
 | SHARE-13 | Phase 40 | Pending |
 | SHARE-14 | Phase 40 | Pending |
-| SHARE-15 | Phase 37 | Pending |
+| SHARE-15 | Phase 37 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 47 total

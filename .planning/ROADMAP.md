@@ -19,7 +19,7 @@
 
 ### Phases
 
-- [ ] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper
+- [x] **Phase 37: Share Infrastructure** - Dependencies, dpStore share actions, shareCard.ts utility, off-screen wrapper (completed 2026-03-07)
 - [ ] **Phase 38: Rank-Up Sharing** - RankUpShareCard component, RankUpModal integration, +10 DP per-rank reward
 - [ ] **Phase 39: Compliance Sharing** - ComplianceShareCard component, CheckInModal integration, +5 DP daily reward
 - [ ] **Phase 40: Workout Sharing** - WorkoutShareCard component, Workouts integration, camera compositing, +5 DP daily reward
@@ -462,7 +462,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 2/3 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -554,7 +554,7 @@ Plans:
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
 | 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
-| 37. Share Infrastructure | v2.2.1 | 1/2 | In Progress | - |
+| 37. Share Infrastructure | 2/2 | Complete   | 2026-03-07 | - |
 | 38. Rank-Up Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 39. Compliance Sharing | v2.2.1 | 0/TBD | Not started | - |
 | 40. Workout Sharing | v2.2.1 | 0/TBD | Not started | - |
