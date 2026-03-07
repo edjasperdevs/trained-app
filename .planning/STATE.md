@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 42 (Referral System)
-Plan: 02 (of 03)
+Plan: 03 (of 03)
 Status: Complete
-Last activity: 2026-03-07 — Completed 42-02 (Recruit-a-Sub Screen)
+Last activity: 2026-03-07 — Completed 42-03 (Deep Link Capture)
 
-Progress: ⬛⬛⬜ (5/9 plans complete)
+Progress: ⬛⬛⬜ (6/9 plans complete)
 
 ## Performance Metrics
 
@@ -33,7 +33,7 @@ Progress: ⬛⬛⬜ (5/9 plans complete)
 **v2.3 Engagement & Growth:**
 - Total phases: 3 (Phases 41-43)
 - Total plans: 9 (3 per phase)
-- Plans complete: 5
+- Plans complete: 6
 
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
@@ -42,6 +42,7 @@ Progress: ⬛⬛⬜ (5/9 plans complete)
 | 41 | 03 | 5min | 2 | 4 |
 | 42 | 01 | 4min | 2 | 4 |
 | 42 | 02 | 5min | 2 | 3 |
+| 42 | 03 | 8min | 3 | 5 |
 
 ### Decisions
 
@@ -128,6 +129,8 @@ Progress: ⬛⬛⬜ (5/9 plans complete)
 - 42-02: Used RANKS array from dpStore for rank name lookup (no separate RANK_INFO)
 - 42-02: Native share uses @capacitor/share, web uses platform-specific URLs
 - 42-02: Instagram web fallback copies text to clipboard (no direct share URL)
+- 42-03: Referral code captured before auth flow, attributed after signup (fire-and-forget)
+- 42-03: capturedReferralCode persisted via zustand partialize for app restart resilience
 
 ### Pending Todos
 
@@ -159,6 +162,6 @@ Progress: ⬛⬛⬜ (5/9 plans complete)
 ## Session Continuity
 
 Last session: 2026-03-07
-Stopped at: Completed 42-02-PLAN.md (Recruit-a-Sub Screen)
+Stopped at: Completed 42-03-PLAN.md (Deep Link Capture)
 Resume file: None
-Next action: Execute Phase 42 Plan 03 (Referral Rewards)
+Next action: Execute Phase 43 Plan 01 (Referral Rewards)

@@ -290,7 +290,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 - [x] **REFR-04**: Recruit a Sub screen shows referral link with copy button
 - [x] **REFR-05**: Social share buttons (Instagram, X, Messages) share referral link
 - [x] **REFR-06**: Recruits list shows recruit callsign, rank, status, and DP earned
-- [ ] **REFR-07**: Deep link handling captures referral code before signup
+- [x] **REFR-07**: Deep link handling captures referral code before signup
 - [x] **REFR-08**: Settings has "Recruit a Sub" entry under Protocol section
 
 ## Future Requirements (v2.4+)
@@ -515,7 +515,7 @@ Requirements for Engagement & Growth milestone. Weekly Protocol Report + Recruit
 | REFR-04 | Phase 42 | Complete |
 | REFR-05 | Phase 42 | Complete |
 | REFR-06 | Phase 42 | Complete |
-| REFR-07 | Phase 42 | Pending |
+| REFR-07 | Phase 42 | Complete |
 | REFR-08 | Phase 42 | Complete |
 
 **Coverage:**
