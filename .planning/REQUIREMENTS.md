@@ -231,6 +231,43 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 - [ ] **FORGOT-03**: Success state shows confirmation message with submitted email address
 - [ ] **FORGOT-04**: Back to Sign In link navigates to Sign In screen
 
+## v2.2.1 Requirements
+
+Requirements for Social Sharing milestone. Three branded share card types.
+
+### Share Infrastructure
+
+- [ ] **SHARE-01**: Share utility generates PNG from React components via html-to-image
+- [ ] **SHARE-02**: Native share sheet opens via @capacitor/share with image file
+- [ ] **SHARE-03**: Off-screen render wrapper enables DOM capture without UI flicker
+
+### Share Cards
+
+- [ ] **SHARE-04**: Rank-Up card displays rank name, avatar, total DP, streak with gold/obsidian styling
+- [ ] **SHARE-05**: Workout card displays sets, top lift, DP earned with full-bleed photo layout
+- [ ] **SHARE-06**: Compliance card displays streak, 5 compliance checks, milestone banners (Day 7/30/100)
+
+### Integration Points
+
+- [ ] **SHARE-07**: RankUpModal shows "Share Your Rank" button after rank claim
+- [ ] **SHARE-08**: Workouts shows "Share Protocol" button on completed workouts
+- [ ] **SHARE-09**: CheckInModal shows "Share Your Protocol" on full 5/5 compliance
+
+### DP Rewards
+
+- [ ] **SHARE-10**: Sharing workout awards +5 DP with daily limit gate
+- [ ] **SHARE-11**: Sharing compliance awards +5 DP with daily limit gate
+- [ ] **SHARE-12**: Sharing rank-up awards +10 DP with per-rank limit gate
+
+### Camera Compositing
+
+- [ ] **SHARE-13**: Camera capture integrates photo into workout share card
+- [ ] **SHARE-14**: Bottom sheet offers "with photo" / "without photo" options
+
+### Platform Handling
+
+- [ ] **SHARE-15**: Web platform shows "Download Card" fallback instead of native share
+
 ## Future Requirements (v2.3+)
 
 ### Onboarding Enhancements
@@ -268,6 +305,11 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 | Chat / messaging | Check-in responses cover communication needs |
 | Marketing site | App only |
 | Coach dashboard in-app | Moved to welltrained-coach |
+| Instagram/X API integration | Native share sheet handles routing; no platform SDKs needed |
+| Share to specific platforms | User chooses destination via native share sheet |
+| Share history / analytics | Not needed for v1 of feature |
+| Custom share text editing | Pre-generated text is sufficient |
+| Video share cards | PNG only; video would require different tech stack |
 | Email collection during onboarding | Research shows email walls cause abandonment; collect in Profile after engagement |
 | Onboarding skip option | All screens are conversion-critical |
 | Custom avatar selection in onboarding | Avatar is fixed during onboarding; customization is post-onboarding |
@@ -420,14 +462,30 @@ Requirements for Auth Flow Redesign. 6 screens with 3-pass implementation (Build
 | FORGOT-02 | Phase 36 | Pending |
 | FORGOT-03 | Phase 36 | Pending |
 | FORGOT-04 | Phase 36 | Pending |
+| SHARE-01 | — | Pending |
+| SHARE-02 | — | Pending |
+| SHARE-03 | — | Pending |
+| SHARE-04 | — | Pending |
+| SHARE-05 | — | Pending |
+| SHARE-06 | — | Pending |
+| SHARE-07 | — | Pending |
+| SHARE-08 | — | Pending |
+| SHARE-09 | — | Pending |
+| SHARE-10 | — | Pending |
+| SHARE-11 | — | Pending |
+| SHARE-12 | — | Pending |
+| SHARE-13 | — | Pending |
+| SHARE-14 | — | Pending |
+| SHARE-15 | — | Pending |
 
 **Coverage:**
 - v2.0 requirements: 47 total
 - v2.1 requirements: 44 total
 - v2.2 requirements: 34 total
+- v2.2.1 requirements: 15 total
 - Total mapped to phases: 125
-- Unmapped: 0
+- Unmapped: 15 (v2.2.1 roadmap pending)
 
 ---
-*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2)*
-*Last updated: 2026-03-06 -- v2.2 Auth Flow requirements mapped to Phases 30-36*
+*Requirements defined: 2026-02-27 (v2.0), 2026-03-06 (v2.1, v2.2, v2.2.1)*
+*Last updated: 2026-03-06 -- v2.2.1 Social Sharing requirements defined*
