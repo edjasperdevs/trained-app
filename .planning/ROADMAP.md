@@ -56,10 +56,10 @@
   1. PrivacyInfo.xcprivacy declares all collected data types (health, fitness, email, photos, usage)
   2. App.entitlements has aps-environment set to "production" for App Store builds
   3. apple-app-site-association file contains actual Team ID (no XXXXXXXXXX placeholder)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 45-01: TBD
+- [ ] 45-01-PLAN.md — Update iOS native config files (privacy manifest, APNS production, Team ID placeholder)
 
 #### Phase 46: Security & UX Fixes
 **Goal**: Security vulnerabilities closed and UX issues resolved
@@ -395,7 +395,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 45. iOS Configuration & Entitlements | v2.4 | 0/? | Not started | - |
+| 45. iOS Configuration & Entitlements | v2.4 | 0/1 | Not started | - |
 | 46. Security & UX Fixes | v2.4 | 0/? | Not started | - |
 | 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
