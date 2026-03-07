@@ -255,9 +255,9 @@ Requirements for Social Sharing milestone. Three branded share card types.
 
 ### DP Rewards
 
-- [ ] **SHARE-10**: Sharing workout awards +5 DP with daily limit gate
-- [ ] **SHARE-11**: Sharing compliance awards +5 DP with daily limit gate
-- [ ] **SHARE-12**: Sharing rank-up awards +10 DP with per-rank limit gate
+- [x] **SHARE-10**: Sharing workout awards +5 DP with daily limit gate
+- [x] **SHARE-11**: Sharing compliance awards +5 DP with daily limit gate
+- [x] **SHARE-12**: Sharing rank-up awards +10 DP with per-rank limit gate
 
 ### Camera Compositing
 
@@ -471,9 +471,9 @@ Requirements for Social Sharing milestone. Three branded share card types.
 | SHARE-07 | Phase 38 | Pending |
 | SHARE-08 | Phase 40 | Pending |
 | SHARE-09 | Phase 39 | Pending |
-| SHARE-10 | Phase 37 | Pending |
-| SHARE-11 | Phase 37 | Pending |
-| SHARE-12 | Phase 37 | Pending |
+| SHARE-10 | Phase 37 | Complete |
+| SHARE-11 | Phase 37 | Complete |
+| SHARE-12 | Phase 37 | Complete |
 | SHARE-13 | Phase 40 | Pending |
 | SHARE-14 | Phase 40 | Pending |
 | SHARE-15 | Phase 37 | Pending |
