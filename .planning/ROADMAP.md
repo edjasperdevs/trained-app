@@ -108,9 +108,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 34-01: Build - Implement Email Sign Up form with fields, validation, strength indicator
-- [ ] 34-02: Review - Compare to mockup and identify visual gaps
-- [ ] 34-03: Refine - Pixel-polish form styling, error states, animations
+- [ ] 34-01-PLAN.md -- Implement Email Sign Up form with fields, validation, strength indicator, Supabase auth
+- [ ] 34-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [ ] 34-03-PLAN.md -- Pixel-polish form styling, error states, animations based on review findings
 
 ### Phase 35: Email Sign In Form
 **Goal**: Users can sign in with email and password
