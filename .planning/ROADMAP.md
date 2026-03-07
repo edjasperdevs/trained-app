@@ -22,7 +22,7 @@
 
 - [x] **Phase 41: Weekly Protocol Report** - Full-screen summary with live data, highlights, push notification, share card (completed 2026-03-07)
 - [x] **Phase 42: Referral System** - Unique links, Recruit a Sub screen, deep link handling, recruits list (completed 2026-03-07)
-- [ ] **Phase 43: Referral Rewards** - RevenueCat promo for referred users, DP rewards for referrers
+- [x] **Phase 43: Referral Rewards** - RevenueCat promo for referred users, DP rewards for referrers (completed 2026-03-07)
 
 ## Phase Details
 
@@ -76,7 +76,7 @@ Plans:
 
 Plans:
 - [x] 43-01-PLAN.md -- RevenueCat promotional entitlement grant for referred users on signup
-- [ ] 43-02-PLAN.md -- Recruit completion check, referrer DP rewards, app-level trigger
+- [x] 43-02-PLAN.md -- Recruit completion check, referrer DP rewards, app-level trigger
 
 ---
 
@@ -534,9 +534,9 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 41. Weekly Protocol Report | 3/3 | Complete    | 2026-03-07 | - |
-| 42. Referral System | 3/3 | Complete    | 2026-03-07 | - |
-| 43. Referral Rewards | v2.3 | 1/2 | In progress | - |
+| 41. Weekly Protocol Report | v2.3 | 3/3 | Complete    | 2026-03-07 |
+| 42. Referral System | v2.3 | 3/3 | Complete    | 2026-03-07 |
+| 43. Referral Rewards | v2.3 | 2/2 | Complete | 2026-03-07 |
 | 36. Forgot Password Screen | 3/3 | Complete    | 2026-03-07 | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
