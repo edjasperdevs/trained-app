@@ -763,6 +763,39 @@ export interface Database {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          id: string
+          created_at: string
+          referrer_id: string
+          recruit_id: string | null
+          referral_code_used: string
+          status: ReferralStatus
+          completed_at: string | null
+          dp_awarded: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          referrer_id: string
+          recruit_id?: string | null
+          referral_code_used: string
+          status?: ReferralStatus
+          completed_at?: string | null
+          dp_awarded?: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          referrer_id?: string
+          recruit_id?: string | null
+          referral_code_used?: string
+          status?: ReferralStatus
+          completed_at?: string | null
+          dp_awarded?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       coach_client_summary: {

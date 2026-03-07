@@ -44,3 +44,6 @@ export type { OnboardingData, OnboardingScreen } from './onboardingStore'
 
 export { useWeeklyReportStore } from './weeklyReportStore'
 export type { WeeklyStats } from './weeklyReportStore'
+
+export { useReferralStore } from './referralStore'
+export type { Recruit } from './referralStore'
