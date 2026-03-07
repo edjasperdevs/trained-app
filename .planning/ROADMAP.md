@@ -85,7 +85,7 @@ Plans:
 
 - [x] **Phase 30: Auth Infrastructure** - Apple/Google Sign-In plugins, Supabase providers, AuthStack navigation
 - [x] **Phase 31: Splash Screen** - Chain-link crown logo, wordmark, tagline, loading indicator (3 passes) (completed 2026-03-07)
-- [ ] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes)
+- [x] **Phase 32: Sign Up Screen** - Social entry with Apple/Google/Email buttons (3 passes) (completed 2026-03-07)
 - [ ] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes)
 - [ ] **Phase 34: Email Sign Up Form** - Email/password registration with strength indicator (3 passes)
 - [ ] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes)
@@ -137,9 +137,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md -- Build Sign Up screen with layout, auth button handlers, and navigation
-- [ ] 32-02-PLAN.md -- Review implementation against mockup, document visual gaps
-- [ ] 32-03-PLAN.md -- Refine spacing, typography, and styling based on review findings
+- [x] 32-01-PLAN.md -- Build Sign Up screen with layout, auth button handlers, and navigation
+- [x] 32-02-PLAN.md -- Review implementation against mockup, document visual gaps
+- [x] 32-03-PLAN.md -- Refine spacing, typography, and styling based on review findings
 
 ### Phase 33: Sign In Screen
 **Goal**: Returning users can authenticate via Apple, Google, or email
@@ -549,7 +549,7 @@ Plans:
 | 29. Paywall and Entry | v2.1 | 2/2 | Complete | 2026-03-06 |
 | 30. Auth Infrastructure | v2.2 | 2/2 | Complete | 2026-03-07 |
 | 31. Splash Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
-| 32. Sign Up Screen | 2/3 | In Progress|  | - |
+| 32. Sign Up Screen | v2.2 | 3/3 | Complete | 2026-03-07 |
 | 33. Sign In Screen | v2.2 | 0/3 | Not started | - |
 | 34. Email Sign Up Form | v2.2 | 0/3 | Not started | - |
 | 35. Email Sign In Form | v2.2 | 0/3 | Not started | - |
