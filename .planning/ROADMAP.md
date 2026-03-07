@@ -78,7 +78,7 @@
 - [x] **Phase 33: Sign In Screen** - Returning user entry with social auth options (3 passes) (completed 2026-03-07)
 - [x] **Phase 34: Email Sign Up Form** - Email/password registration with strength indicator (3 passes) (completed 2026-03-07)
 - [x] **Phase 35: Email Sign In Form** - Email/password login with error handling (3 passes) (completed 2026-03-07)
-- [ ] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes)
+- [x] **Phase 36: Forgot Password Screen** - Password reset request with success state (3 passes) (completed 2026-03-07)
 
 <details>
 <summary>v2.2 Phase Details</summary>
@@ -454,7 +454,7 @@ Plans:
 **Goal**: The existing React app runs inside a native iOS shell with no browser chrome, and all WKWebView-incompatible patterns are fixed
 **Depends on**: Nothing (first phase of v1.5; builds on existing PWA codebase)
 **Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, SHELL-05
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md -- Capacitor project setup, platform detection, service worker guard, iOS simulator build
@@ -523,7 +523,7 @@ Plans:
 | 41. Weekly Protocol Report | v2.3 | 0/TBD | Not started | - |
 | 42. Referral System | v2.3 | 0/TBD | Not started | - |
 | 43. Referral Rewards | v2.3 | 0/TBD | Not started | - |
-| 36. Forgot Password Screen | v2.2 | 0/3 | Not started | - |
+| 36. Forgot Password Screen | 3/3 | Complete   | 2026-03-07 | - |
 | 24. App Store Submission | v2.0 | 0/3 | Not started | - |
 
 **v2.3 Total Plans:** TBD (will be determined during phase planning)
