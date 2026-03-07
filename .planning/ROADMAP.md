@@ -41,7 +41,7 @@
 
 ### Phases
 
-- [ ] **Phase 45: iOS Configuration & Entitlements** - Fix privacy manifest, APN environment, and Team ID
+- [x] **Phase 45: iOS Configuration & Entitlements** - Fix privacy manifest, APN environment, and Team ID (completed 2026-03-07)
 - [ ] **Phase 46: Security & UX Fixes** - Close dev fallback, add health disclaimer, fix overflow and compliance bugs
 - [ ] **Phase 47: Asset & Code Cleanup** - Optimize splash/logos, remove .DS_Store and dead code
 - [ ] **Phase 48: App Store Submission** - Complete metadata, verify Xcode build, host privacy policy
@@ -395,7 +395,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 45. iOS Configuration & Entitlements | v2.4 | 0/1 | Not started | - |
+| 45. iOS Configuration & Entitlements | 1/1 | Complete   | 2026-03-07 | - |
 | 46. Security & UX Fixes | v2.4 | 0/? | Not started | - |
 | 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |

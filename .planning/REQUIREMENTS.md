@@ -9,9 +9,9 @@ Requirements for iOS App Store submission readiness. All items derived from AUDI
 
 ### App Store Configuration
 
-- [ ] **STORE-01**: PrivacyInfo.xcprivacy declares all collected data types (health, fitness, email, photos, usage)
-- [ ] **STORE-02**: App.entitlements has aps-environment set to "production" (not "development")
-- [ ] **STORE-03**: apple-app-site-association has actual Team ID (replace XXXXXXXXXX placeholder)
+- [x] **STORE-01**: PrivacyInfo.xcprivacy declares all collected data types (health, fitness, email, photos, usage)
+- [x] **STORE-02**: App.entitlements has aps-environment set to "production" (not "development")
+- [x] **STORE-03**: apple-app-site-association has actual Team ID (replace XXXXXXXXXX placeholder)
 - [ ] **STORE-04**: App Store Connect metadata complete (screenshots, description, privacy label)
 - [ ] **STORE-05**: Build compiles with latest Xcode and iOS 18 SDK
 
@@ -63,9 +63,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STORE-01 | Phase 45 | Pending |
-| STORE-02 | Phase 45 | Pending |
-| STORE-03 | Phase 45 | Pending |
+| STORE-01 | Phase 45 | Complete |
+| STORE-02 | Phase 45 | Complete |
+| STORE-03 | Phase 45 | Complete |
 | STORE-04 | Phase 48 | Pending |
 | STORE-05 | Phase 48 | Pending |
 | SEC-01 | Phase 46 | Pending |
