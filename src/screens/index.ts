@@ -1,4 +1,3 @@
-export { Onboarding } from './Onboarding'
 export { Home } from './Home'
 export { CheckInModal } from './CheckInModal'
 export { WeeklyReportModal } from './WeeklyReportModal'

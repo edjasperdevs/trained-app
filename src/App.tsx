@@ -16,14 +16,13 @@ import { useWorkoutStore } from '@/stores/workoutStore'
 import { useRemindersStore } from '@/stores/remindersStore'
 import { useReferralStore } from '@/stores/referralStore'
 import { analytics } from '@/lib/analytics'
-import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, OnboardingSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
+import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { Auth } from '@/screens'
 import { OnboardingStack, AuthStack } from '@/navigation'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
 // Lazy-loaded route components
-const Onboarding = lazy(() => import('@/screens/Onboarding').then(m => ({ default: m.Onboarding })))
 const Home = lazy(() => import('@/screens/Home').then(m => ({ default: m.Home })))
 const Workouts = lazy(() => import('@/screens/Workouts').then(m => ({ default: m.Workouts })))
 const Macros = lazy(() => import('@/screens/Macros').then(m => ({ default: m.Macros })))
@@ -335,7 +334,6 @@ function AppContent() {
             <Route path="/recruit" element={<Suspense fallback={<SettingsSkeleton />}><RecruitScreen /></Suspense>} />
             <Route path="/locked-protocol" element={<Suspense fallback={<SettingsSkeleton />}><LockedProtocolScreen /></Suspense>} />
             <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
-            {devBypass && <Route path="/onboarding" element={<Suspense fallback={<OnboardingSkeleton />}><Onboarding /></Suspense>} />}
             <Route path="*" element={<NotFound />} />
           </SentryRoutes>
         </AnimatePresence>
