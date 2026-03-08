@@ -89,9 +89,9 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 47-01-PLAN.md — Update splash screen with WellTrained branding
-- [ ] 47-02-PLAN.md — Optimize oversized logo files in public directory
-- [ ] 47-03-PLAN.md — Remove .DS_Store files and update .gitignore
+- [x] 47-01-PLAN.md — Update splash screen with WellTrained branding
+- [x] 47-02-PLAN.md — Optimize oversized logo files in public directory
+- [x] 47-03-PLAN.md — Remove .DS_Store files and update .gitignore
 - [ ] 47-04-PLAN.md — Remove legacy Onboarding.tsx and references
 
 #### Phase 48: App Store Submission
@@ -402,7 +402,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 45. iOS Configuration & Entitlements | v2.4 | 1/1 | Complete | 2026-03-07 |
 | 46. Security & UX Fixes | 3/3 | Complete    | 2026-03-07 | - |
-| 47. Asset & Code Cleanup | 2/4 | In Progress|  | - |
+| 47. Asset & Code Cleanup | v2.4 | 3/4 | In Progress | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
 | 41. Weekly Protocol Report | v2.3 | 3/3 | Complete | 2026-03-07 |
 | 42. Referral System | v2.3 | 3/3 | Complete | 2026-03-07 |
