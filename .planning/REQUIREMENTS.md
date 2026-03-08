@@ -5,6 +5,7 @@ This document defines all functional and non-functional requirements for v2.4 Ap
 ## Phase 47 Requirements: Asset & Code Cleanup
 
 ### ASSET-01: Splash Screen Branding
+**Status:** ✅ Complete (Phase 47-01)
 **Priority:** P1
 **Category:** Assets
 **Description:** Replace the generic dim green glow splash screen with proper WellTrained branding.
@@ -20,6 +21,7 @@ This document defines all functional and non-functional requirements for v2.4 Ap
 ---
 
 ### ASSET-02: Logo File Optimization
+**Status:** ✅ Complete (Phase 47-02)
 **Priority:** P1
 **Category:** Assets
 **Description:** Optimize oversized logo files that significantly impact web performance.
@@ -142,8 +144,8 @@ This document defines all functional and non-functional requirements for v2.4 Ap
 
 | Requirement | Phase | Plans | Status |
 |-------------|-------|-------|--------|
-| ASSET-01 | 47 | 47-01 | Not Started |
-| ASSET-02 | 47 | 47-02 | Not Started |
+| ASSET-01 | 47 | 47-01 | ✅ Complete |
+| ASSET-02 | 47 | 47-02 | ✅ Complete |
 | ASSET-03 | 47 | 47-03 | Not Started |
 | INFRA-02 | 47 | 47-04 | Not Started |
 | STORE-01 | 45 | 45-01 | ✅ Complete |
