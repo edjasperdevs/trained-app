@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** Daily discipline earns visible rank progression -- the app makes consistency feel like leveling up
-**Current focus:** Phase 46: Security & UX Fixes (v2.4 App Store Readiness)
+**Current focus:** Phase 47: Asset & Code Cleanup (v2.4 App Store Readiness)
 
 ## Current Position
 
-Phase: 46 of 48 (Security & UX Fixes)
-Plan: 03 of 03
-Status: Complete
-Last activity: 2026-03-07 — Completed 46-03: UX Fixes - Workout Name & Compliance (UX-02, UX-03 compliance fix)
+Phase: 47 of 48 (Asset & Code Cleanup)
+Plan: 01 of 04
+Status: In Progress
+Last activity: 2026-03-08 — Completed 47-01: Replace Generic Splash Screen (ASSET-01)
 
-Progress: [████████████████████████████████████████████░░] 96% (v2.4 Phase 46 complete: 3/3 plans complete)
+Progress: [████████████████████████████████████████████░░] 97% (v2.4 Phase 47 in progress: 1/4 plans complete)
 
 ## Performance Metrics
 
@@ -29,9 +29,11 @@ Progress: [███████████████████████
   - 46-01: 110s, 1 task, 1 file modified, 1 commit
   - 46-02: 281s, 2 tasks, 4 files modified, 2 commits
   - 46-03: 139s, 2 tasks, 2 files modified, 2 commits
+- Phase 47: 1 plan completed
+  - 47-01: 18s, 2 tasks, 1 file created, 1 commit
 
 **Recent Trend:**
-v2.4 execution in progress: Phase 45 complete (1/1 plan), Phase 46 complete (3/3 plans), Phase 47 next (4 plans remaining).
+v2.4 execution in progress: Phase 45 complete (1/1 plan), Phase 46 complete (3/3 plans), Phase 47 in progress (1/4 plans complete).
 
 ## Accumulated Context
 
@@ -59,6 +61,11 @@ Recent decisions from PROJECT.md affecting v2.4:
 - Used inline route definition in OnboardingStack instead of separate screen component for simplicity
 - [Phase 46-03]: Used truncate CSS class on workout name paragraph for ellipsis overflow behavior
 - [Phase 46-03]: Implemented 4/4 compliance for recovery days rather than auto-checking workout item (simpler UX)
+
+**Phase 47-01 Decisions:**
+- Used "W" logo instead of full wordmark for better visibility at 640x640 resolution, maintains minimalist aesthetic
+- Gold accent (#C8FF00) on dark background (#0A0A0A) matches Dopamine Noir V2 brand guidelines
+- Centered logo composition follows standard splash screen pattern, ensures visibility across device sizes
 
 ### Pending Todos
 
@@ -98,6 +105,6 @@ Recent decisions from PROJECT.md affecting v2.4:
 
 ## Session Continuity
 
-Last session: 2026-03-07
-Stopped at: Completed 46-03-PLAN.md
-Resume file: .planning/phases/46-security-ux-fixes/46-03-SUMMARY.md
+Last session: 2026-03-08
+Stopped at: Completed 47-01-PLAN.md
+Resume file: .planning/phases/47-asset-code-cleanup/47-01-SUMMARY.md

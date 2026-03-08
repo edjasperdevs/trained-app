@@ -402,7 +402,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 45. iOS Configuration & Entitlements | v2.4 | 1/1 | Complete | 2026-03-07 |
 | 46. Security & UX Fixes | 3/3 | Complete    | 2026-03-07 | - |
-| 47. Asset & Code Cleanup | v2.4 | 0/? | Not started | - |
+| 47. Asset & Code Cleanup | 1/4 | In Progress|  | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
 | 41. Weekly Protocol Report | v2.3 | 3/3 | Complete | 2026-03-07 |
 | 42. Referral System | v2.3 | 3/3 | Complete | 2026-03-07 |
