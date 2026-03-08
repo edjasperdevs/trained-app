@@ -29,7 +29,7 @@ export default defineConfig({
         baseURL: 'http://localhost:5174',
       },
       // Tests that need seeded data use dev bypass
-      testMatch: /(core-journeys|p0-critical|workout-features|favorites|food-search)\.spec\.ts/,
+      testMatch: /(core-journeys|p0-critical|workout-features|favorites|food-search|settings-features|locked-protocol|achievements|recruit|home-dashboard)\.spec\.ts/,
     },
     {
       name: 'chromium-auth',
