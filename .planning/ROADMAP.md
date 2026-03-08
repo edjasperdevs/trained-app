@@ -43,7 +43,7 @@
 
 - [x] **Phase 45: iOS Configuration & Entitlements** - Fix privacy manifest, APN environment, and Team ID (completed 2026-03-07)
 - [x] **Phase 46: Security & UX Fixes** - Close dev fallback, add health disclaimer, fix overflow and compliance bugs (completed 2026-03-07)
-- [ ] **Phase 47: Asset & Code Cleanup** - Optimize splash/logos, remove .DS_Store and dead code
+- [x] **Phase 47: Asset & Code Cleanup** - Optimize splash/logos, remove .DS_Store and dead code (completed 2026-03-08)
 - [ ] **Phase 48: App Store Submission** - Complete metadata, verify Xcode build, host privacy policy
 
 ### Phase Details
@@ -402,7 +402,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 45. iOS Configuration & Entitlements | v2.4 | 1/1 | Complete | 2026-03-07 |
 | 46. Security & UX Fixes | 3/3 | Complete    | 2026-03-07 | - |
-| 47. Asset & Code Cleanup | v2.4 | 3/4 | In Progress | - |
+| 47. Asset & Code Cleanup | 4/4 | Complete   | 2026-03-08 | - |
 | 48. App Store Submission | v2.4 | 0/? | Not started | - |
 | 41. Weekly Protocol Report | v2.3 | 3/3 | Complete | 2026-03-07 |
 | 42. Referral System | v2.3 | 3/3 | Complete | 2026-03-07 |
