@@ -86,10 +86,13 @@ Plans:
   2. Icon-only.png and WT Logo.png are optimized (reduced from 3.1 MB each)
   3. Repository contains no .DS_Store files and .gitignore prevents future additions
   4. Legacy Onboarding.tsx (1,017 lines) removed from codebase
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 47-01: TBD
+- [ ] 47-01-PLAN.md — Update splash screen with WellTrained branding
+- [ ] 47-02-PLAN.md — Optimize oversized logo files in public directory
+- [ ] 47-03-PLAN.md — Remove .DS_Store files and update .gitignore
+- [ ] 47-04-PLAN.md — Remove legacy Onboarding.tsx and references
 
 #### Phase 48: App Store Submission
 **Goal**: App successfully submitted to App Store
