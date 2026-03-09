@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
-import { useOnboardingStore } from '@/stores'
+import { useOnboardingStore, useSubscriptionStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
 import { haptics } from '@/lib/haptics'
 import { ARCHETYPE_INFO, type Archetype } from '@/design/constants'
@@ -106,7 +106,8 @@ function getBadgeType(archetype: Archetype): BadgeType {
 }
 
 export function ArchetypeScreen() {
-  const { nextStep, prevStep, updateData } = useOnboardingStore()
+  const { nextStep, prevStep, updateData, setStep } = useOnboardingStore()
+  const isPremium = useSubscriptionStore((s) => s.isPremium)
   const [selectedArchetype, setSelectedArchetype] = useState<Archetype>('bro')
 
   const handleSelect = (archetype: Archetype) => {
@@ -119,7 +120,17 @@ export function ArchetypeScreen() {
 
   const handleContinue = () => {
     updateData({ archetype: selectedArchetype })
-    nextStep()
+
+    // Check if selected archetype is premium and user is not subscribed
+    const isPremiumArchetype = ['himbo', 'brute', 'pup'].includes(selectedArchetype)
+
+    if (isPremiumArchetype && !isPremium) {
+      // Skip macros and go directly to paywall (step 9)
+      setStep(9)
+    } else {
+      // Continue normally to macros
+      nextStep()
+    }
   }
 
   // Animation variants

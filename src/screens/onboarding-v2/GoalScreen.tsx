@@ -10,7 +10,7 @@ type GoalId = 'build_muscle' | 'lose_fat' | 'get_stronger' | 'improve_fitness'
 const GOALS = [
   { id: 'build_muscle' as const, label: 'BUILD MUSCLE', subtitle: 'Add size and strength', icon: TrendingUp },
   { id: 'lose_fat' as const, label: 'LOSE FAT', subtitle: 'Lean out and define', icon: Zap },
-  { id: 'get_stronger' as const, label: 'GET STRONGER', subtitle: 'Increase raw power', icon: Dumbbell },
+  { id: 'get_stronger' as const, label: 'LEAN GAINS', subtitle: 'Build muscle, lose fat', icon: Dumbbell },
   { id: 'improve_fitness' as const, label: 'IMPROVE OVERALL FITNESS', subtitle: 'Build a complete foundation', icon: Heart },
 ] as const
 
