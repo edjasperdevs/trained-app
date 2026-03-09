@@ -174,7 +174,8 @@ export function ArchetypeScreen() {
       <div className="flex-shrink-0 px-4">
         {/* Header with back button and progress */}
         <motion.div
-          className="flex items-center justify-between mb-8 pt-safe"
+          className="flex items-center justify-between mb-8"
+          style={{ paddingTop: 'env(safe-area-inset-top)' }}
           initial="hidden"
           animate="visible"
           variants={fadeInVariants}

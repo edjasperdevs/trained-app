@@ -562,7 +562,7 @@ export function LockedProtocolScreen() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 pt-safe">
+      <div className="flex items-center justify-between px-4 py-4" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <button
           onClick={handleBack}
           className="p-2 -ml-2 text-[#F5F0E8]"
