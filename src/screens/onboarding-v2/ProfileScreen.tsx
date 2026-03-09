@@ -17,13 +17,13 @@ const FITNESS_LEVELS: { value: FitnessLevel; label: string; iconBars: number }[]
 ]
 
 export function ProfileScreen() {
-  const { nextStep, prevStep, updateData } = useOnboardingStore()
+  const { nextStep, prevStep, updateData, data } = useOnboardingStore()
 
-  // Local form state
-  const [name, setName] = useState('')
-  const [units, setUnits] = useState<Units>('imperial')
-  const [trainingDays, setTrainingDays] = useState<number>(4)
-  const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>('intermediate')
+  // Local form state - initialize from store if exists
+  const [name, setName] = useState(data.name || '')
+  const [units, setUnits] = useState<Units>(data.units || 'imperial')
+  const [trainingDays, setTrainingDays] = useState<number>(data.trainingDays || 4)
+  const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>(data.fitnessLevel || 'intermediate')
 
   const canContinue = name.trim().length > 0
 
