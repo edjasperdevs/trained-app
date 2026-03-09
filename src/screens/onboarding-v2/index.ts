@@ -8,6 +8,7 @@ export {
 export { WelcomeScreen } from './WelcomeScreen'
 export { ValueScreen } from './ValueScreen'
 export { ProfileScreen } from './ProfileScreen'
+export { PhysicalStatsScreen } from './PhysicalStatsScreen'
 export { GoalScreen } from './GoalScreen'
 export { ArchetypeScreen } from './ArchetypeScreen'
 export { MacrosScreen } from './MacrosScreen'

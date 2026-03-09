@@ -1,20 +1,44 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
-import { ChevronLeft, Dumbbell } from 'lucide-react'
+import { ChevronLeft, Activity } from 'lucide-react'
 import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
 import { haptics } from '@/lib/haptics'
-import { getWeightUnit, getHeightUnit, toInternalWeight, toInternalHeight, toDisplayWeight, toDisplayHeight } from '@/lib/units'
 
-type Units = 'imperial' | 'metric'
-type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
+type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
 
 const TRAINING_DAYS = [3, 4, 5] as const
 
-const FITNESS_LEVELS: { value: FitnessLevel; label: string; iconBars: number }[] = [
-  { value: 'beginner', label: 'Beginner', iconBars: 1 },
-  { value: 'intermediate', label: 'Intermediate', iconBars: 2 },
-  { value: 'advanced', label: 'Advanced', iconBars: 3 },
+const ACTIVITY_LEVELS: {
+  value: ActivityLevel
+  label: string
+  description: string
+  iconBars: number
+}[] = [
+  {
+    value: 'sedentary',
+    label: 'Sedentary',
+    description: 'Desk job, little to no exercise outside of training sessions',
+    iconBars: 1
+  },
+  {
+    value: 'lightly_active',
+    label: 'Lightly Active',
+    description: 'Light exercise or walking 1-3 days per week',
+    iconBars: 2
+  },
+  {
+    value: 'moderately_active',
+    label: 'Moderately Active',
+    description: 'Active job or regular daily movement, moderate exercise 3-5 days per week',
+    iconBars: 3
+  },
+  {
+    value: 'very_active',
+    label: 'Very Active',
+    description: 'Physically demanding job or intense exercise 6-7 days per week',
+    iconBars: 4
+  },
 ]
 
 export function ProfileScreen() {
@@ -22,41 +46,24 @@ export function ProfileScreen() {
 
   // Local form state - initialize from store if exists
   const [name, setName] = useState(data.name || '')
-  const [units, setUnits] = useState<Units>(data.units || 'imperial')
   const [gender, setGender] = useState<'male' | 'female'>(data.gender || 'male')
   const [age, setAge] = useState<number>(data.age || 25)
-  const [weight, setWeight] = useState<number>(data.weight ? toDisplayWeight(data.weight, units) : units === 'metric' ? 75 : 165)
-  const [height, setHeight] = useState<number>(data.height ? toDisplayHeight(data.height, units) : units === 'metric' ? 175 : 69)
   const [trainingDays, setTrainingDays] = useState<number>(data.trainingDays || 4)
-  const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>(data.fitnessLevel || 'intermediate')
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(data.activityLevel || 'moderately_active')
 
-  const canContinue = name.trim().length > 0 && age > 0 && weight > 0 && height > 0
+  const canContinue = name.trim().length > 0 && age > 0
 
   const handleContinue = () => {
     if (!canContinue) return
 
-    // Convert display values to internal storage (lbs and inches)
-    const internalWeight = toInternalWeight(weight, units)
-    const internalHeight = toInternalHeight(height, units)
-
     updateData({
       name: name.trim(),
-      units,
       gender,
       age,
-      weight: internalWeight,
-      height: internalHeight,
       trainingDays,
-      fitnessLevel
+      activityLevel
     })
     nextStep()
-  }
-
-  const handleUnitsChange = (newUnits: Units) => {
-    if (newUnits !== units) {
-      haptics.light()
-      setUnits(newUnits)
-    }
   }
 
   const handleTrainingDaysChange = (days: number) => {
@@ -66,22 +73,16 @@ export function ProfileScreen() {
     }
   }
 
-  const handleFitnessLevelChange = (level: FitnessLevel) => {
-    if (level !== fitnessLevel) {
+  const handleActivityLevelChange = (level: ActivityLevel) => {
+    if (level !== activityLevel) {
       haptics.light()
-      setFitnessLevel(level)
+      setActivityLevel(level)
     }
   }
 
-  // Sync weight/height display when units toggle
-  useEffect(() => {
-    if (data.weight) {
-      setWeight(toDisplayWeight(data.weight, units))
-    }
-    if (data.height) {
-      setHeight(toDisplayHeight(data.height, units))
-    }
-  }, [units, data.weight, data.height])
+  const selectedActivityDescription = ACTIVITY_LEVELS.find(
+    (level) => level.value === activityLevel
+  )?.description || ''
 
   // Animation variants
   const fadeInVariants: Variants = {
@@ -229,64 +230,6 @@ export function ProfileScreen() {
           />
         </motion.div>
 
-        {/* Weight input */}
-        <motion.div variants={formItemVariants}>
-          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">
-            Weight ({getWeightUnit(units)})
-          </label>
-          <input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(Number(e.target.value))}
-            min={units === 'metric' ? 20 : 50}
-            max={units === 'metric' ? 225 : 500}
-            placeholder={units === 'metric' ? 'kg' : 'lbs'}
-            className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
-          />
-        </motion.div>
-
-        {/* Height input */}
-        <motion.div variants={formItemVariants}>
-          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">
-            Height ({getHeightUnit(units)})
-          </label>
-          <input
-            type="number"
-            value={height}
-            onChange={(e) => setHeight(Number(e.target.value))}
-            min={units === 'metric' ? 120 : 48}
-            max={units === 'metric' ? 245 : 96}
-            placeholder={units === 'metric' ? 'cm' : 'inches'}
-            className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
-          />
-        </motion.div>
-
-        {/* Units toggle (LBS/KG) */}
-        <motion.div variants={formItemVariants}>
-          <div className="flex gap-3">
-            <button
-              onClick={() => handleUnitsChange('imperial')}
-              className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
-                units === 'imperial'
-                  ? 'bg-[#D4A853]/8 border-2 border-[#D4A853] text-[#D4A853]'
-                  : 'bg-[#26282B] border border-[#2A2A2A] text-[#A1A1AA]'
-              }`}
-            >
-              LBS
-            </button>
-            <button
-              onClick={() => handleUnitsChange('metric')}
-              className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
-                units === 'metric'
-                  ? 'bg-[#D4A853]/8 border-2 border-[#D4A853] text-[#D4A853]'
-                  : 'bg-[#26282B] border border-[#2A2A2A] text-[#A1A1AA]'
-              }`}
-            >
-              KG
-            </button>
-          </div>
-        </motion.div>
-
         {/* Training days selector */}
         <motion.div variants={formItemVariants}>
           <label className="block text-[#FAFAFA] text-sm font-medium mb-3">
@@ -309,43 +252,43 @@ export function ProfileScreen() {
           </div>
         </motion.div>
 
-        {/* Fitness level cards */}
+        {/* Activity level cards */}
         <motion.div variants={formItemVariants}>
-          <label className="block text-[#FAFAFA] text-sm font-medium mb-3">Fitness level</label>
-          <div className="flex gap-3">
-            {FITNESS_LEVELS.map(({ value, label, iconBars }) => (
+          <label className="block text-[#FAFAFA] text-sm font-medium mb-3">Activity level</label>
+          <div className="grid grid-cols-2 gap-3">
+            {ACTIVITY_LEVELS.map(({ value, label, iconBars }) => (
               <button
                 key={value}
-                onClick={() => handleFitnessLevelChange(value)}
-                className={`flex-1 flex flex-col items-center py-4 rounded-lg transition-all ${
-                  fitnessLevel === value
+                onClick={() => handleActivityLevelChange(value)}
+                className={`flex flex-col items-center py-4 rounded-lg transition-all ${
+                  activityLevel === value
                     ? 'bg-[#D4A853]/8 border-2 border-[#D4A853]'
                     : 'bg-[#26282B] border border-[#2A2A2A]'
                 }`}
               >
-                {/* Dumbbell icon with varying weights */}
+                {/* Activity icon with varying intensity */}
                 <div className="mb-2 relative">
-                  <Dumbbell
+                  <Activity
                     className={`w-8 h-8 ${
-                      fitnessLevel === value ? 'text-[#D4A853]' : 'text-[#71717A]'
+                      activityLevel === value ? 'text-[#D4A853]' : 'text-[#71717A]'
                     }`}
-                    strokeWidth={iconBars === 1 ? 1.5 : iconBars === 2 ? 2 : 2.5}
+                    strokeWidth={iconBars === 1 ? 1.5 : iconBars === 2 ? 2 : iconBars === 3 ? 2.5 : 3}
                   />
-                  {/* Visual weight indicators */}
+                  {/* Visual intensity indicators */}
                   <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
                     {Array.from({ length: iconBars }).map((_, i) => (
                       <div
                         key={i}
                         className={`w-1.5 h-1 rounded-full ${
-                          fitnessLevel === value ? 'bg-[#D4A853]' : 'bg-[#71717A]'
+                          activityLevel === value ? 'bg-[#D4A853]' : 'bg-[#71717A]'
                         }`}
                       />
                     ))}
                   </div>
                 </div>
                 <span
-                  className={`text-xs font-medium ${
-                    fitnessLevel === value ? 'text-[#D4A853]' : 'text-[#A1A1AA]'
+                  className={`text-xs font-medium text-center ${
+                    activityLevel === value ? 'text-[#D4A853]' : 'text-[#A1A1AA]'
                   }`}
                 >
                   {label}
@@ -353,6 +296,19 @@ export function ProfileScreen() {
               </button>
             ))}
           </div>
+
+          {/* Activity level description */}
+          <motion.div
+            className="mt-4 p-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            key={activityLevel}
+          >
+            <p className="text-[#A1A1AA] text-sm text-center">
+              {selectedActivityDescription}
+            </p>
+          </motion.div>
         </motion.div>
       </motion.div>
 

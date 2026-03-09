@@ -3,15 +3,16 @@ import { persist } from 'zustand/middleware'
 import type { Archetype } from '@/design/constants'
 
 export const ONBOARDING_SCREENS = [
-  'welcome',      // 0
-  'value',        // 1
-  'profile',      // 2
-  'goal',         // 3
-  'disclaimer',   // 4
-  'archetype',    // 5
-  'macros',       // 6
-  'paywall',      // 7
-  'final',        // 8
+  'welcome',        // 0
+  'value',          // 1
+  'profile',        // 2
+  'physical-stats', // 3
+  'goal',           // 4
+  'disclaimer',     // 5
+  'archetype',      // 6
+  'macros',         // 7
+  'paywall',        // 8
+  'final',          // 9
 ] as const
 
 export type OnboardingScreen = typeof ONBOARDING_SCREENS[number]
@@ -24,7 +25,8 @@ export interface OnboardingData {
   weight?: number  // stored in lbs (internal format)
   height?: number  // stored in inches (internal format)
   trainingDays?: number
-  fitnessLevel?: 'beginner' | 'intermediate' | 'advanced'
+  activityLevel?: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
+  fitnessLevel?: 'beginner' | 'intermediate' | 'advanced'  // keep for backward compatibility
   goal?: 'build_muscle' | 'lose_fat' | 'get_stronger' | 'improve_fitness'
   archetype?: Archetype
   macros?: { protein: number; carbs: number; fat: number; calories: number }
@@ -32,7 +34,7 @@ export interface OnboardingData {
 
 interface OnboardingState {
   // Flow control
-  currentStep: number // 0-8 for 9 screens
+  currentStep: number // 0-9 for 10 screens
 
   // Collected data (populated as user progresses)
   data: OnboardingData

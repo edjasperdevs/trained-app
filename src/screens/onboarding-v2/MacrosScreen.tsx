@@ -21,6 +21,14 @@ const GOAL_CALORIE_ADJUSTMENTS: Record<Goal, number> = {
   bulk: 300,
 }
 
+// Activity level multipliers for TDEE calculation
+const ACTIVITY_MULTIPLIERS: Record<string, number> = {
+  sedentary: 1.2,
+  lightly_active: 1.375,
+  moderately_active: 1.55,
+  very_active: 1.725,
+}
+
 interface CalculatedMacros {
   protein: number
   carbs: number
@@ -44,17 +52,21 @@ export function MacrosScreen() {
     const weight = data.weight || 185 // lbs (internal storage)
     const age = data.age || 30
     const gender = data.gender || 'male'
+    const activityLevel = data.activityLevel || 'moderately_active'
 
     // Get goal from onboarding data, default to maintain
     const onboardingGoal = data.goal || 'improve_fitness'
     const goal: Goal = GOAL_MAP[onboardingGoal] || 'maintain'
 
-    // Mifflin-St Jeor formula (same as before, but using REAL data)
+    // Mifflin-St Jeor formula using REAL user data
     const weightKg = weight * 0.453592
     const heightCm = height * 2.54
     const genderAdjustment = gender === 'male' ? 5 : -161
     const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + genderAdjustment
-    const tdee = bmr * 1.55 // moderate activity
+
+    // Apply activity multiplier based on user's selected activity level
+    const activityMultiplier = ACTIVITY_MULTIPLIERS[activityLevel] || 1.55
+    const tdee = bmr * activityMultiplier
     const adjustedCalories = Math.round(tdee + GOAL_CALORIE_ADJUSTMENTS[goal])
 
     // Protein: 1g per lb
@@ -70,7 +82,7 @@ export function MacrosScreen() {
     const carbs = Math.round(carbCalories / 4)
 
     setMacros({ protein, carbs, fat, calories: adjustedCalories })
-  }, [data.goal, data.height, data.weight, data.age, data.gender])
+  }, [data.goal, data.height, data.weight, data.age, data.gender, data.activityLevel])
 
   // Start chart animation after 300ms delay
   useEffect(() => {
@@ -182,7 +194,7 @@ export function MacrosScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={5} currentStep={4} />
+        <ProgressIndicator totalSteps={5} currentStep={5} />
         <div className="w-10" />
       </motion.div>
 
