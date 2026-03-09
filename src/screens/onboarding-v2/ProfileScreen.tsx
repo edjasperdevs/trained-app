@@ -223,8 +223,6 @@ export function ProfileScreen() {
             type="number"
             value={age}
             onChange={(e) => setAge(Number(e.target.value))}
-            min="13"
-            max="120"
             placeholder="Age"
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />

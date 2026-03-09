@@ -213,8 +213,6 @@ export function PhysicalStatsScreen() {
             type="number"
             value={weight}
             onChange={(e) => setWeight(Number(e.target.value))}
-            min={units === 'metric' ? 20 : 50}
-            max={units === 'metric' ? 225 : 500}
             placeholder={units === 'metric' ? 'kg' : 'lbs'}
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />
@@ -230,8 +228,6 @@ export function PhysicalStatsScreen() {
                   type="number"
                   value={heightFeet}
                   onChange={(e) => setHeightFeet(Number(e.target.value))}
-                  min="3"
-                  max="8"
                   placeholder="Feet"
                   className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
                 />
@@ -242,8 +238,6 @@ export function PhysicalStatsScreen() {
                   type="number"
                   value={heightInches}
                   onChange={(e) => setHeightInches(Number(e.target.value))}
-                  min="0"
-                  max="11"
                   placeholder="Inches"
                   className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
                 />
@@ -263,8 +257,6 @@ export function PhysicalStatsScreen() {
               type="number"
               value={heightCm}
               onChange={(e) => setHeightCm(Number(e.target.value))}
-              min="120"
-              max="245"
               placeholder="cm"
               className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
             />
