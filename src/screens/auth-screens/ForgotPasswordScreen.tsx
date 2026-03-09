@@ -106,7 +106,8 @@ export function ForgotPasswordScreen() {
       {/* Back arrow - top-left absolute */}
       <button
         onClick={handleBack}
-        className="absolute top-4 left-4 p-2 text-[#8A8A8A] hover:text-white transition-colors"
+        className="absolute left-4 p-2 text-[#8A8A8A] hover:text-white transition-colors"
+        style={{ top: 'calc(env(safe-area-inset-top) + 1rem)' }}
         aria-label="Go back"
       >
         <ArrowLeft className="w-6 h-6" />
