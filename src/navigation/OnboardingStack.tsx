@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 
 export function OnboardingStack() {
   const currentStep = useOnboardingStore(s => s.currentStep)
+  const { nextStep, prevStep } = useOnboardingStore()
   const navigate = useNavigate()
   const [disclaimerAcknowledged, setDisclaimerAcknowledged] = useState(false)
 
@@ -47,7 +48,7 @@ export function OnboardingStack() {
               </div>
               <HealthDisclaimer onAcknowledge={setDisclaimerAcknowledged} />
               <Button
-                onClick={() => navigate('/onboarding/archetype')}
+                onClick={nextStep}
                 disabled={!disclaimerAcknowledged}
                 className="w-full h-12 bg-[#D4A853] text-[#0A0A0A] font-bold text-lg tracking-wider rounded-lg hover:bg-[#D4A853]/90 disabled:opacity-50"
                 style={{ fontFamily: "'Oswald', sans-serif" }}
@@ -55,7 +56,7 @@ export function OnboardingStack() {
                 CONTINUE
               </Button>
               <button
-                onClick={() => navigate('/onboarding/goal')}
+                onClick={prevStep}
                 className="w-full text-center text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors"
               >
                 Back

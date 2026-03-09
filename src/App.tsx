@@ -48,6 +48,7 @@ function AppContent() {
   const checkNeglected = useAvatarStore((state) => state.checkNeglected)
   const initializeAuth = useAuthStore((state) => state.initialize)
   const authLoading = useAuthStore((state) => state.isLoading)
+  const isSyncing = useAuthStore((state) => state.isSyncing)
   const user = useAuthStore((state) => state.user)
   const navigate = useNavigate()
   const location = useLocation()
@@ -240,8 +241,8 @@ function AppContent() {
   const subscriptionLoading = useSubscriptionStore((s) => s.isLoading)
   const healthPermissionStatus = useHealthStore((s) => s.permissionStatus)
 
-  // Show loading while auth initializes (skip in dev bypass)
-  if (!devBypass && authLoading) {
+  // Show loading while auth initializes or profile syncs (skip in dev bypass)
+  if (!devBypass && (authLoading || isSyncing)) {
     return (
       <>
         <ToastContainer />
