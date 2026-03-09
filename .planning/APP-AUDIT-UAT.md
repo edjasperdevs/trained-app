@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 type: full-app-audit
 started: 2026-03-09T04:40:00Z
 updated: 2026-03-09T04:45:00Z
@@ -196,17 +196,29 @@ skipped: 0
   reason: "User reported: I signed in as CoachJasper@WellTrained.Fitness, and it made me go to the onboarding flow, even though I already have an account."
   severity: major
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Race condition between authentication and profile loading causes existing users to be routed to onboarding when their profile hasn't loaded into local state yet. App.tsx routing checks authLoading but not isSyncing before making routing decision."
+  artifacts:
+    - path: "src/App.tsx"
+      issue: "Routing logic checks authLoading but not isSyncing (lines 244-300)"
+    - path: "src/stores/authStore.ts"
+      issue: "signIn() calls syncData() without awaiting (lines 109-149)"
+    - path: "src/lib/sync.ts"
+      issue: "loadProfileFromCloud loads profile asynchronously but routing happens before completion"
+  missing:
+    - "Add isSyncing check in App.tsx before routing decisions"
+    - "Show loading state while sync is in progress"
+  debug_session: ".planning/debug/existing-user-onboarding-routing.md"
 
 - truth: "Health disclaimer screen in onboarding advances on Continue and goes back on Back button"
   status: failed
   reason: "User reported: After entering my name, it takes me to a health and safety notice. When I check the checkbox and press continue, it doesn't go to the next screen. When I click back, it doesn't go to the screen before."
   severity: blocker
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Navigation conflict between hardcoded navigate() calls and store-controlled routing. Disclaimer screen uses direct navigate() calls while useEffect enforces URL-to-store synchronization, causing navigation to be immediately reverted."
+  artifacts:
+    - path: "src/navigation/OnboardingStack.tsx"
+      issue: "Disclaimer route uses hardcoded navigate() calls (lines 50, 58) that conflict with store-sync useEffect (lines 24-27)"
+  missing:
+    - "Create proper DisclaimerScreen component"
+    - "Replace navigate() calls with nextStep() and prevStep() methods"
+  debug_session: ".planning/debug/health-disclaimer-navigation-broken.md"
