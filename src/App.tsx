@@ -247,14 +247,12 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SafeAreaLayout>
-          <div className="bg-background flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
           </div>
-        </SafeAreaLayout>
+        </div>
       </>
     )
   }
@@ -264,14 +262,12 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SafeAreaLayout>
-          <div className="bg-background flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading...</p>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
           </div>
-        </SafeAreaLayout>
+        </div>
       </>
     )
   }
@@ -281,15 +277,13 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SafeAreaLayout>
-          <SentryRoutes>
-            <Route path="/auth/*" element={<AuthStack />} />
-            <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
-            <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
-            <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-            <Route path="*" element={<Navigate to="/auth/signup" replace />} />
-          </SentryRoutes>
-        </SafeAreaLayout>
+        <SentryRoutes>
+          <Route path="/auth/*" element={<AuthStack />} />
+          <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+          <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
+          <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
+          <Route path="*" element={<Navigate to="/auth/signup" replace />} />
+        </SentryRoutes>
       </>
     )
   }
@@ -299,13 +293,11 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SafeAreaLayout>
-          <SentryRoutes>
-            <Route path="/onboarding/*" element={<OnboardingStack />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
-          </SentryRoutes>
-        </SafeAreaLayout>
+        <SentryRoutes>
+          <Route path="/onboarding/*" element={<OnboardingStack />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
+        </SentryRoutes>
       </>
     )
   }
