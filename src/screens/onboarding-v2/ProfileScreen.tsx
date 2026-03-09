@@ -1,45 +1,8 @@
 import { useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
-import { ChevronLeft, Activity } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
-import { haptics } from '@/lib/haptics'
-
-type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active'
-
-const TRAINING_DAYS = [3, 4, 5] as const
-
-const ACTIVITY_LEVELS: {
-  value: ActivityLevel
-  label: string
-  description: string
-  iconBars: number
-}[] = [
-  {
-    value: 'sedentary',
-    label: 'Sedentary',
-    description: 'Desk job, little to no exercise outside of training sessions',
-    iconBars: 1
-  },
-  {
-    value: 'lightly_active',
-    label: 'Lightly Active',
-    description: 'Light exercise or walking 1-3 days per week',
-    iconBars: 2
-  },
-  {
-    value: 'moderately_active',
-    label: 'Moderately Active',
-    description: 'Active job or regular daily movement, moderate exercise 3-5 days per week',
-    iconBars: 3
-  },
-  {
-    value: 'very_active',
-    label: 'Very Active',
-    description: 'Physically demanding job or intense exercise 6-7 days per week',
-    iconBars: 4
-  },
-]
 
 export function ProfileScreen() {
   const { nextStep, prevStep, updateData, data } = useOnboardingStore()
@@ -48,8 +11,6 @@ export function ProfileScreen() {
   const [name, setName] = useState(data.name || '')
   const [gender, setGender] = useState<'male' | 'female'>(data.gender || 'male')
   const [age, setAge] = useState<number>(data.age || 25)
-  const [trainingDays, setTrainingDays] = useState<number>(data.trainingDays || 4)
-  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(data.activityLevel || 'moderately_active')
 
   const canContinue = name.trim().length > 0 && age > 0
 
@@ -59,30 +20,10 @@ export function ProfileScreen() {
     updateData({
       name: name.trim(),
       gender,
-      age,
-      trainingDays,
-      activityLevel
+      age
     })
     nextStep()
   }
-
-  const handleTrainingDaysChange = (days: number) => {
-    if (days !== trainingDays) {
-      haptics.light()
-      setTrainingDays(days)
-    }
-  }
-
-  const handleActivityLevelChange = (level: ActivityLevel) => {
-    if (level !== activityLevel) {
-      haptics.light()
-      setActivityLevel(level)
-    }
-  }
-
-  const selectedActivityDescription = ACTIVITY_LEVELS.find(
-    (level) => level.value === activityLevel
-  )?.description || ''
 
   // Animation variants
   const fadeInVariants: Variants = {
@@ -146,7 +87,7 @@ export function ProfileScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={5} currentStep={1} />
+        <ProgressIndicator totalSteps={7} currentStep={2} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 
@@ -227,87 +168,6 @@ export function ProfileScreen() {
             placeholder="Age"
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />
-        </motion.div>
-
-        {/* Training days selector */}
-        <motion.div variants={formItemVariants}>
-          <label className="block text-[#FAFAFA] text-sm font-medium mb-3">
-            Training days per week
-          </label>
-          <div className="flex gap-2 justify-between">
-            {TRAINING_DAYS.map((days) => (
-              <button
-                key={days}
-                onClick={() => handleTrainingDaysChange(days)}
-                className={`w-12 h-12 rounded-full font-semibold text-sm transition-all ${
-                  trainingDays === days
-                    ? 'bg-[#D4A853]/8 border-2 border-[#D4A853] text-[#D4A853] scale-110'
-                    : 'bg-[#26282B] border border-[#2A2A2A] text-[#A1A1AA]'
-                }`}
-              >
-                {days}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Activity level cards */}
-        <motion.div variants={formItemVariants}>
-          <label className="block text-[#FAFAFA] text-sm font-medium mb-3">Activity level</label>
-          <div className="grid grid-cols-2 gap-3">
-            {ACTIVITY_LEVELS.map(({ value, label, iconBars }) => (
-              <button
-                key={value}
-                onClick={() => handleActivityLevelChange(value)}
-                className={`flex flex-col items-center py-4 rounded-lg transition-all ${
-                  activityLevel === value
-                    ? 'bg-[#D4A853]/8 border-2 border-[#D4A853]'
-                    : 'bg-[#26282B] border border-[#2A2A2A]'
-                }`}
-              >
-                {/* Activity icon with varying intensity */}
-                <div className="mb-2 relative">
-                  <Activity
-                    className={`w-8 h-8 ${
-                      activityLevel === value ? 'text-[#D4A853]' : 'text-[#71717A]'
-                    }`}
-                    strokeWidth={iconBars === 1 ? 1.5 : iconBars === 2 ? 2 : iconBars === 3 ? 2.5 : 3}
-                  />
-                  {/* Visual intensity indicators */}
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
-                    {Array.from({ length: iconBars }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`w-1.5 h-1 rounded-full ${
-                          activityLevel === value ? 'bg-[#D4A853]' : 'bg-[#71717A]'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <span
-                  className={`text-xs font-medium text-center ${
-                    activityLevel === value ? 'text-[#D4A853]' : 'text-[#A1A1AA]'
-                  }`}
-                >
-                  {label}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Activity level description */}
-          <motion.div
-            className="mt-4 p-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            key={activityLevel}
-          >
-            <p className="text-[#A1A1AA] text-sm text-center">
-              {selectedActivityDescription}
-            </p>
-          </motion.div>
         </motion.div>
       </motion.div>
 

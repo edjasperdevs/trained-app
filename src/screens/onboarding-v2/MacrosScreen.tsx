@@ -195,7 +195,7 @@ export function MacrosScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={5} currentStep={5} />
+        <ProgressIndicator totalSteps={7} currentStep={7} />
         <div className="w-10" />
       </motion.div>
 

@@ -146,7 +146,7 @@ export function PhysicalStatsScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={5} currentStep={2} />
+        <ProgressIndicator totalSteps={7} currentStep={3} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 

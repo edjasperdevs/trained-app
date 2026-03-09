@@ -7,6 +7,7 @@ import {
   ValueScreen,
   ProfileScreen,
   PhysicalStatsScreen,
+  TrainingScreen,
   GoalScreen,
   ArchetypeScreen,
   MacrosScreen,
@@ -35,6 +36,7 @@ export function OnboardingStack() {
         <Route path="value" element={<ValueScreen />} />
         <Route path="profile" element={<ProfileScreen />} />
         <Route path="physical-stats" element={<PhysicalStatsScreen />} />
+        <Route path="training" element={<TrainingScreen />} />
         <Route path="goal" element={<GoalScreen />} />
         <Route path="disclaimer" element={
           <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 py-8">

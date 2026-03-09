@@ -186,7 +186,7 @@ export function ArchetypeScreen() {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <ProgressIndicator totalSteps={5} currentStep={4} />
+          <ProgressIndicator totalSteps={7} currentStep={6} />
           <div className="w-10" /> {/* Spacer for alignment */}
         </motion.div>
 

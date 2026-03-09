@@ -5,14 +5,15 @@ import type { Archetype } from '@/design/constants'
 export const ONBOARDING_SCREENS = [
   'welcome',        // 0
   'value',          // 1
-  'profile',        // 2
-  'physical-stats', // 3
-  'goal',           // 4
-  'disclaimer',     // 5
-  'archetype',      // 6
-  'macros',         // 7
-  'paywall',        // 8
-  'final',          // 9
+  'profile',        // 2 - name, sex, age
+  'physical-stats', // 3 - weight, height, units
+  'training',       // 4 - training days, activity level
+  'goal',           // 5
+  'disclaimer',     // 6
+  'archetype',      // 7
+  'macros',         // 8
+  'paywall',        // 9
+  'final',          // 10
 ] as const
 
 export type OnboardingScreen = typeof ONBOARDING_SCREENS[number]

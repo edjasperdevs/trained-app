@@ -86,7 +86,7 @@ export function ValueScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={5} currentStep={0} />
+        <ProgressIndicator totalSteps={7} currentStep={1} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 
