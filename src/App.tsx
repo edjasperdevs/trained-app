@@ -17,6 +17,7 @@ import { useRemindersStore } from '@/stores/remindersStore'
 import { useReferralStore } from '@/stores/referralStore'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
+import { SafeAreaLayout } from '@/components/layout/SafeAreaLayout'
 import { Auth } from '@/screens'
 import { OnboardingStack, AuthStack } from '@/navigation'
 
@@ -246,12 +247,14 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading...</p>
+        <SafeAreaLayout>
+          <div className="bg-background flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
-        </div>
+        </SafeAreaLayout>
       </>
     )
   }
@@ -261,12 +264,14 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading...</p>
+        <SafeAreaLayout>
+          <div className="bg-background flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
           </div>
-        </div>
+        </SafeAreaLayout>
       </>
     )
   }
@@ -276,13 +281,15 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SentryRoutes>
-          <Route path="/auth/*" element={<AuthStack />} />
-          <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
-          <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
-          <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-          <Route path="*" element={<Navigate to="/auth/signup" replace />} />
-        </SentryRoutes>
+        <SafeAreaLayout>
+          <SentryRoutes>
+            <Route path="/auth/*" element={<AuthStack />} />
+            <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+            <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
+            <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
+            <Route path="*" element={<Navigate to="/auth/signup" replace />} />
+          </SentryRoutes>
+        </SafeAreaLayout>
       </>
     )
   }
@@ -292,11 +299,13 @@ function AppContent() {
     return (
       <>
         <ToastContainer />
-        <SentryRoutes>
-          <Route path="/onboarding/*" element={<OnboardingStack />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
-        </SentryRoutes>
+        <SafeAreaLayout>
+          <SentryRoutes>
+            <Route path="/onboarding/*" element={<OnboardingStack />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
+          </SentryRoutes>
+        </SafeAreaLayout>
       </>
     )
   }
@@ -308,38 +317,40 @@ function AppContent() {
     <>
       <ToastContainer />
       <DPToastContainer toasts={toasts} onRemove={removeToast} />
-      <div className="relative">
-        <SyncStatusIndicator />
-        <AnimatePresence mode="wait" initial={false}>
-          <SentryRoutes location={location} key={location.pathname}>
-            <Route path="/" element={
-              needsHealthPermission
-                ? <Navigate to="/health-permission" replace />
-                : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
-            } />
-            <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
-            <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
-            <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
-            {/* TODO: Re-enable for v2 launch */}
-            {/* <Route path="/protocol-ai" element={<Suspense fallback={<MacrosSkeleton />}><MealPlanScreen /></Suspense>} />*/}
-            <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
-            <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
-            <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
-            <Route path="/progress" element={<Suspense fallback={<HomeSkeleton />}><Progress /></Suspense>} />
-            <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
-            <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
-            <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
-            <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-            <Route path="/paywall" element={<Suspense fallback={<HomeSkeleton />}><Paywall /></Suspense>} />
-            <Route path="/debug" element={<Suspense fallback={<HomeSkeleton />}><DebugScreen /></Suspense>} />
-            <Route path="/recruit" element={<Suspense fallback={<SettingsSkeleton />}><RecruitScreen /></Suspense>} />
-            <Route path="/locked-protocol" element={<Suspense fallback={<SettingsSkeleton />}><LockedProtocolScreen /></Suspense>} />
-            <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
-            <Route path="*" element={<NotFound />} />
-          </SentryRoutes>
-        </AnimatePresence>
-        <Navigation />
-      </div>
+      <SafeAreaLayout>
+        <div className="relative">
+          <SyncStatusIndicator />
+          <AnimatePresence mode="wait" initial={false}>
+            <SentryRoutes location={location} key={location.pathname}>
+              <Route path="/" element={
+                needsHealthPermission
+                  ? <Navigate to="/health-permission" replace />
+                  : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
+              } />
+              <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
+              <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
+              <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
+              {/* TODO: Re-enable for v2 launch */}
+              {/* <Route path="/protocol-ai" element={<Suspense fallback={<MacrosSkeleton />}><MealPlanScreen /></Suspense>} />*/}
+              <Route path="/avatar" element={<Suspense fallback={<AvatarSkeleton />}><AvatarScreen /></Suspense>} />
+              <Route path="/settings" element={<Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense>} />
+              <Route path="/achievements" element={<Suspense fallback={<AchievementsSkeleton />}><Achievements /></Suspense>} />
+              <Route path="/progress" element={<Suspense fallback={<HomeSkeleton />}><Progress /></Suspense>} />
+              <Route path="/checkin" element={<Suspense fallback={<HomeSkeleton />}><WeeklyCheckIn /></Suspense>} />
+              <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+              <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
+              <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
+              <Route path="/paywall" element={<Suspense fallback={<HomeSkeleton />}><Paywall /></Suspense>} />
+              <Route path="/debug" element={<Suspense fallback={<HomeSkeleton />}><DebugScreen /></Suspense>} />
+              <Route path="/recruit" element={<Suspense fallback={<SettingsSkeleton />}><RecruitScreen /></Suspense>} />
+              <Route path="/locked-protocol" element={<Suspense fallback={<SettingsSkeleton />}><LockedProtocolScreen /></Suspense>} />
+              <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </SentryRoutes>
+          </AnimatePresence>
+          <Navigation />
+        </div>
+      </SafeAreaLayout>
     </>
   )
 }

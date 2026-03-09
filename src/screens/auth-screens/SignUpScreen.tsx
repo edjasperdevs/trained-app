@@ -134,7 +134,7 @@ export function SignUpScreen() {
   const showNativeOnly = !isNative()
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 pt-safe pb-safe">
+    <div className="bg-[#0A0A0A] flex flex-col items-center justify-center px-6 h-full">
       {/* Chain-link crown logo */}
       <ChainLinkCrownLogo className="w-24 h-24" />
 

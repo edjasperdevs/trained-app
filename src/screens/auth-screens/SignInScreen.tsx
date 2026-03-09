@@ -129,7 +129,7 @@ export function SignInScreen() {
   const showNativeOnly = !isNative()
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 pt-safe pb-safe relative">
+    <div className="bg-[#0A0A0A] flex flex-col items-center justify-center px-6 h-full relative">
       {/* Back arrow - top-left absolute */}
       <button
         onClick={handleBack}

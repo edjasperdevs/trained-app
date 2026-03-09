@@ -116,7 +116,7 @@ export function EmailSignInScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center px-6 pt-safe pb-safe">
+    <div className="bg-[#0A0A0A] flex flex-col items-center px-6 h-full relative">
       {/* Back arrow - top-left absolute */}
       <button
         onClick={handleBack}
