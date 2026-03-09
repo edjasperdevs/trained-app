@@ -131,10 +131,10 @@ export function ProfileScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col px-6 pt-safe pb-8">
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col px-6 pb-8">
       {/* Header with back button and progress */}
       <motion.div
-        className="flex items-center justify-between mb-8 mt-4"
+        className="flex items-center justify-between mb-8 pt-safe"
         initial="hidden"
         animate="visible"
         variants={fadeInVariants}

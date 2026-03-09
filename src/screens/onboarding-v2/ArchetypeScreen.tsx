@@ -171,10 +171,10 @@ export function ArchetypeScreen() {
   return (
     <div className="h-screen bg-[#0A0A0A] flex flex-col overflow-hidden">
       {/* Fixed header section */}
-      <div className="flex-shrink-0 px-4 pt-safe">
+      <div className="flex-shrink-0 px-4">
         {/* Header with back button and progress */}
         <motion.div
-          className="flex items-center justify-between mb-8 mt-4"
+          className="flex items-center justify-between mb-8 pt-safe"
           initial="hidden"
           animate="visible"
           variants={fadeInVariants}
