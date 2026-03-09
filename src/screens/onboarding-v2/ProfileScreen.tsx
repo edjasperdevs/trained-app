@@ -8,7 +8,7 @@ import { haptics } from '@/lib/haptics'
 type Units = 'imperial' | 'metric'
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
 
-const TRAINING_DAYS = [2, 3, 4, 5, 6] as const
+const TRAINING_DAYS = [3, 4, 5] as const
 
 const FITNESS_LEVELS: { value: FitnessLevel; label: string; iconBars: number }[] = [
   { value: 'beginner', label: 'Beginner', iconBars: 1 },
