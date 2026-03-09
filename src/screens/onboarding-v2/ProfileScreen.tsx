@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { ChevronLeft, Dumbbell } from 'lucide-react'
 import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
 import { haptics } from '@/lib/haptics'
+import { getWeightUnit, getHeightUnit, toInternalWeight, toInternalHeight, toDisplayWeight, toDisplayHeight } from '@/lib/units'
 
 type Units = 'imperial' | 'metric'
 type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
@@ -22,14 +23,32 @@ export function ProfileScreen() {
   // Local form state - initialize from store if exists
   const [name, setName] = useState(data.name || '')
   const [units, setUnits] = useState<Units>(data.units || 'imperial')
+  const [gender, setGender] = useState<'male' | 'female'>(data.gender || 'male')
+  const [age, setAge] = useState<number>(data.age || 25)
+  const [weight, setWeight] = useState<number>(data.weight ? toDisplayWeight(data.weight, units) : units === 'metric' ? 75 : 165)
+  const [height, setHeight] = useState<number>(data.height ? toDisplayHeight(data.height, units) : units === 'metric' ? 175 : 69)
   const [trainingDays, setTrainingDays] = useState<number>(data.trainingDays || 4)
   const [fitnessLevel, setFitnessLevel] = useState<FitnessLevel>(data.fitnessLevel || 'intermediate')
 
-  const canContinue = name.trim().length > 0
+  const canContinue = name.trim().length > 0 && age > 0 && weight > 0 && height > 0
 
   const handleContinue = () => {
     if (!canContinue) return
-    updateData({ name: name.trim(), units, trainingDays, fitnessLevel })
+
+    // Convert display values to internal storage (lbs and inches)
+    const internalWeight = toInternalWeight(weight, units)
+    const internalHeight = toInternalHeight(height, units)
+
+    updateData({
+      name: name.trim(),
+      units,
+      gender,
+      age,
+      weight: internalWeight,
+      height: internalHeight,
+      trainingDays,
+      fitnessLevel
+    })
     nextStep()
   }
 
@@ -53,6 +72,16 @@ export function ProfileScreen() {
       setFitnessLevel(level)
     }
   }
+
+  // Sync weight/height display when units toggle
+  useEffect(() => {
+    if (data.weight) {
+      setWeight(toDisplayWeight(data.weight, units))
+    }
+    if (data.height) {
+      setHeight(toDisplayHeight(data.height, units))
+    }
+  }, [units, data.weight, data.height])
 
   // Animation variants
   const fadeInVariants: Variants = {
@@ -155,6 +184,79 @@ export function ProfileScreen() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your name"
+            className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
+          />
+        </motion.div>
+
+        {/* Sex assigned at birth toggle */}
+        <motion.div variants={formItemVariants}>
+          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">Sex assigned at birth</label>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setGender('male')}
+              className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
+                gender === 'male'
+                  ? 'bg-[#D4A853]/8 border-2 border-[#D4A853] text-[#D4A853]'
+                  : 'bg-[#26282B] border border-[#2A2A2A] text-[#A1A1AA]'
+              }`}
+            >
+              Male
+            </button>
+            <button
+              onClick={() => setGender('female')}
+              className={`flex-1 py-3 rounded-lg font-semibold text-sm transition-all ${
+                gender === 'female'
+                  ? 'bg-[#D4A853]/8 border-2 border-[#D4A853] text-[#D4A853]'
+                  : 'bg-[#26282B] border border-[#2A2A2A] text-[#A1A1AA]'
+              }`}
+            >
+              Female
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Age input */}
+        <motion.div variants={formItemVariants}>
+          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">Age</label>
+          <input
+            type="number"
+            value={age}
+            onChange={(e) => setAge(Number(e.target.value))}
+            min="13"
+            max="120"
+            placeholder="Age"
+            className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
+          />
+        </motion.div>
+
+        {/* Weight input */}
+        <motion.div variants={formItemVariants}>
+          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">
+            Weight ({getWeightUnit(units)})
+          </label>
+          <input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(Number(e.target.value))}
+            min={units === 'metric' ? 20 : 50}
+            max={units === 'metric' ? 225 : 500}
+            placeholder={units === 'metric' ? 'kg' : 'lbs'}
+            className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
+          />
+        </motion.div>
+
+        {/* Height input */}
+        <motion.div variants={formItemVariants}>
+          <label className="block text-[#FAFAFA] text-sm font-medium mb-2">
+            Height ({getHeightUnit(units)})
+          </label>
+          <input
+            type="number"
+            value={height}
+            onChange={(e) => setHeight(Number(e.target.value))}
+            min={units === 'metric' ? 120 : 48}
+            max={units === 'metric' ? 245 : 96}
+            placeholder={units === 'metric' ? 'cm' : 'inches'}
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />
         </motion.div>

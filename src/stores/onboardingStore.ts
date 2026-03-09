@@ -19,6 +19,10 @@ export type OnboardingScreen = typeof ONBOARDING_SCREENS[number]
 export interface OnboardingData {
   name?: string
   units?: 'imperial' | 'metric'
+  gender?: 'male' | 'female'
+  age?: number
+  weight?: number  // stored in lbs (internal format)
+  height?: number  // stored in inches (internal format)
   trainingDays?: number
   fitnessLevel?: 'beginner' | 'intermediate' | 'advanced'
   goal?: 'build_muscle' | 'lose_fat' | 'get_stronger' | 'improve_fitness'

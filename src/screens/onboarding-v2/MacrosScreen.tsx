@@ -37,19 +37,19 @@ export function MacrosScreen() {
   const [countUpStarted, setCountUpStarted] = useState(false)
   const [countUpValues, setCountUpValues] = useState({ protein: 0, carbs: 0, fat: 0 })
 
-  // Calculate macros on mount using default profile + selected goal
+  // Calculate macros on mount using actual user data from onboarding
   useEffect(() => {
-    // Default profile values: 5'10" (70 inches), 185 lbs, age 30, male
-    const height = 70 // inches
-    const weight = 185 // lbs
-    const age = 30
-    const gender = 'male'
+    // Get actual user data from onboarding, with fallback defaults
+    const height = data.height || 70 // inches (internal storage)
+    const weight = data.weight || 185 // lbs (internal storage)
+    const age = data.age || 30
+    const gender = data.gender || 'male'
 
     // Get goal from onboarding data, default to maintain
     const onboardingGoal = data.goal || 'improve_fitness'
     const goal: Goal = GOAL_MAP[onboardingGoal] || 'maintain'
 
-    // Mifflin-St Jeor formula
+    // Mifflin-St Jeor formula (same as before, but using REAL data)
     const weightKg = weight * 0.453592
     const heightCm = height * 2.54
     const genderAdjustment = gender === 'male' ? 5 : -161
@@ -70,7 +70,7 @@ export function MacrosScreen() {
     const carbs = Math.round(carbCalories / 4)
 
     setMacros({ protein, carbs, fat, calories: adjustedCalories })
-  }, [data.goal])
+  }, [data.goal, data.height, data.weight, data.age, data.gender])
 
   // Start chart animation after 300ms delay
   useEffect(() => {
