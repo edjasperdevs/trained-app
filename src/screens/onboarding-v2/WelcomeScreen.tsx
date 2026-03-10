@@ -5,10 +5,15 @@ import { useOnboardingStore } from '@/stores'
 import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 export function WelcomeScreen() {
-  const { nextStep } = useOnboardingStore()
+  const { nextStep, reset } = useOnboardingStore()
   const navigate = useNavigate()
   const [hasInteracted, setHasInteracted] = useState(false)
   const [shouldPulse, setShouldPulse] = useState(false)
+
+  // Reset onboarding store when landing on welcome screen
+  useEffect(() => {
+    reset()
+  }, [reset])
 
   // Start pulse animation after 2 seconds if user hasn't interacted
   useEffect(() => {
