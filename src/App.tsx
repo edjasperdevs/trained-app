@@ -19,7 +19,7 @@ import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { SafeAreaLayout } from '@/components/layout/SafeAreaLayout'
 import { Auth } from '@/screens'
-import { OnboardingStack, AuthStack } from '@/navigation'
+import { OnboardingStack } from '@/navigation'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
@@ -272,17 +272,18 @@ function AppContent() {
     )
   }
 
-  // If not authenticated, show AuthStack
+  // If not authenticated, show onboarding (which includes auth)
   if (!devBypass && !user) {
     return (
       <>
         <ToastContainer />
         <SentryRoutes>
-          <Route path="/auth/*" element={<AuthStack />} />
+          <Route path="/onboarding/*" element={<OnboardingStack />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-          <Route path="*" element={<Navigate to="/auth/signup" replace />} />
+          <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
         </SentryRoutes>
       </>
     )
