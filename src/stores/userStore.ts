@@ -113,9 +113,15 @@ export const useUserStore = create<UserStore>()(
         }
       }),
 
-      completeOnboarding: () => set((state) => ({
-        profile: state.profile ? { ...state.profile, onboardingComplete: true } : null
-      })),
+      completeOnboarding: async () => {
+        set((state) => ({
+          profile: state.profile ? { ...state.profile, onboardingComplete: true } : null
+        }))
+
+        // Immediately sync to cloud so the change persists
+        const { syncProfileToCloud } = await import('../lib/sync')
+        await syncProfileToCloud()
+      },
 
       updateStreak: (didCheckIn: boolean) => {
         const profile = get().profile
