@@ -10,9 +10,10 @@ export function ProfileScreen() {
   // Local form state - initialize from store if exists
   const [name, setName] = useState(data.name || '')
   const [gender, setGender] = useState<'male' | 'female'>(data.gender || 'male')
-  const [age, setAge] = useState<number>(data.age || 25)
+  const [age, setAge] = useState<string>(data.age ? String(data.age) : '')
 
-  const canContinue = name.trim().length > 0 && age > 0
+  const ageNum = age === '' ? 0 : Number(age)
+  const canContinue = name.trim().length > 0 && ageNum > 0 && ageNum < 120
 
   const handleContinue = () => {
     if (!canContinue) return
@@ -20,7 +21,7 @@ export function ProfileScreen() {
     updateData({
       name: name.trim(),
       gender,
-      age
+      age: ageNum
     })
     nextStep()
   }
@@ -164,8 +165,10 @@ export function ProfileScreen() {
           <input
             type="number"
             value={age}
-            onChange={(e) => setAge(Number(e.target.value))}
-            placeholder="Age"
+            onChange={(e) => setAge(e.target.value)}
+            placeholder="Enter your age"
+            min="13"
+            max="120"
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />
         </motion.div>
