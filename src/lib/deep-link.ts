@@ -62,8 +62,8 @@ async function handleDeepLink(url: string, navigate: (path: string) => void) {
       const code = parsed.pathname.replace('/join/', '')
       if (code && code.includes('-')) {
         useReferralStore.getState().setCapturedCode(code)
-        // Navigate to signup to complete referral
-        navigate('/auth/signup')
+        // Navigate to auth splash (Auth component handles showing signup)
+        navigate('/auth')
         return
       }
     }

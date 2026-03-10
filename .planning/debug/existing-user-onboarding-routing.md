@@ -1,8 +1,8 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Investigate root cause of Issue 1 from app audit. Existing user incorrectly routed to onboarding"
 created: 2026-03-09T00:00:00Z
-updated: 2026-03-09T00:10:00Z
+updated: 2026-03-10T08:10:00Z
 symptoms_prefilled: true
 goal: find_root_cause_only
 ---
@@ -126,5 +126,7 @@ When an existing user signs in:
 - All these scenarios: profile is null until sync completes
 
 fix: Add isSyncing check to routing logic before checking profile state
-verification: Ensure app shows loading state while sync in progress, doesn't make routing decision until profile loaded
+verification: App now shows loading state while sync in progress, doesn't make routing decision until profile loaded
 files_changed: ['/Users/ejasper/code/welltrained-platform/trained-app/src/App.tsx']
+resolved_at: 2026-03-10T08:10:00Z
+resolution_summary: Added isSyncing check in App.tsx lines 292-315. When authenticated user has no profile loaded yet, app now checks if sync is in progress and shows loading spinner instead of immediately routing to onboarding. This prevents race condition where existing users were sent to onboarding before their profile loaded from cloud.

@@ -290,7 +290,24 @@ function AppContent() {
   }
 
   // If authenticated but onboarding not complete, show OnboardingStack
+  // IMPORTANT: Check isSyncing to avoid race condition where existing users
+  // are sent to onboarding before their profile loads from the cloud
   if (!devBypass && (!profile || !profile.onboardingComplete)) {
+    // If still syncing, show loading state instead of making routing decision
+    if (isSyncing) {
+      return (
+        <>
+          <ToastContainer />
+          <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </>
+      )
+    }
+
     return (
       <>
         <ToastContainer />
