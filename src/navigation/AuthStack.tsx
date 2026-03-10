@@ -1,26 +1,9 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Suspense } from 'react'
-import { HomeSkeleton } from '@/components'
-import {
-  SignUpScreen,
-  SignInScreen,
-  EmailSignUpScreen,
-  EmailSignInScreen,
-  ForgotPasswordScreen,
-} from '@/screens/auth-screens'
+import { Navigate } from 'react-router-dom'
 
+/**
+ * AuthStack - Redirects to onboarding flow
+ * The new onboarding flow handles both auth and onboarding
+ */
 export function AuthStack() {
-  return (
-    <Suspense fallback={<HomeSkeleton />}>
-      <Routes>
-        <Route path="signup" element={<SignUpScreen />} />
-        <Route path="signin" element={<SignInScreen />} />
-        <Route path="email-signup" element={<EmailSignUpScreen />} />
-        <Route path="email-signin" element={<EmailSignInScreen />} />
-        <Route path="forgot-password" element={<ForgotPasswordScreen />} />
-        {/* Default to signup for new users */}
-        <Route path="*" element={<Navigate to="signup" replace />} />
-      </Routes>
-    </Suspense>
-  )
+  return <Navigate to="/onboarding/welcome" replace />
 }
