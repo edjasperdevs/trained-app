@@ -2,6 +2,21 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useUserStore } from './userStore'
 import { getLocalDateString } from '../lib/dateUtils'
 
+// Mock sync functions
+vi.mock('../lib/sync', () => ({
+  syncProfileToCloud: vi.fn().mockResolvedValue({ error: null }),
+}))
+
+// Mock onboarding store
+vi.mock('./onboardingStore', () => ({
+  useOnboardingStore: {
+    getState: () => ({
+      data: {},
+      reset: vi.fn(),
+    }),
+  },
+}))
+
 describe('userStore', () => {
   beforeEach(() => {
     vi.useRealTimers()
@@ -76,7 +91,7 @@ describe('userStore', () => {
   // completeOnboarding
   // =========================================================
   describe('completeOnboarding', () => {
-    it('should set onboardingComplete to true', () => {
+    it('should set onboardingComplete to true', async () => {
       useUserStore.getState().initProfile({
         username: 'ONBOARD',
         gender: 'male',
@@ -90,13 +105,18 @@ describe('userStore', () => {
         units: 'imperial',
       })
 
-      useUserStore.getState().completeOnboarding()
+      await useUserStore.getState().completeOnboarding()
       expect(useUserStore.getState().profile!.onboardingComplete).toBe(true)
     })
 
-    it('should do nothing when profile is null', () => {
-      useUserStore.getState().completeOnboarding()
-      expect(useUserStore.getState().profile).toBeNull()
+    it('should create profile from onboarding data when profile is null', async () => {
+      await useUserStore.getState().completeOnboarding()
+      const profile = useUserStore.getState().profile
+      expect(profile).not.toBeNull()
+      expect(profile!.onboardingComplete).toBe(true)
+      // Should have defaults when no onboarding data
+      expect(profile!.archetype).toBe('bro')
+      expect(profile!.units).toBe('imperial')
     })
   })
 

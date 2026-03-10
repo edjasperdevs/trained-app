@@ -114,13 +114,66 @@ export const useUserStore = create<UserStore>()(
       }),
 
       completeOnboarding: async () => {
-        set((state) => ({
-          profile: state.profile ? { ...state.profile, onboardingComplete: true } : null
-        }))
+        // Get onboarding data to transfer to profile
+        const { useOnboardingStore } = await import('./onboardingStore')
+        const onboardingData = useOnboardingStore.getState().data
+
+        // Map onboarding goal to userStore goal type
+        const goalMap: Record<string, Goal> = {
+          'build_muscle': 'bulk',
+          'lose_fat': 'cut',
+          'get_stronger': 'recomp',
+          'improve_fitness': 'maintain',
+        }
+
+        const existingProfile = get().profile
+
+        if (existingProfile) {
+          // Update existing profile with onboarding data
+          set((state) => ({
+            profile: state.profile ? {
+              ...state.profile,
+              username: onboardingData.name || state.profile.username,
+              gender: onboardingData.gender || state.profile.gender,
+              age: onboardingData.age || state.profile.age,
+              weight: onboardingData.weight || state.profile.weight,
+              height: onboardingData.height || state.profile.height,
+              trainingDaysPerWeek: (onboardingData.trainingDays as 3 | 4 | 5) || state.profile.trainingDaysPerWeek,
+              goal: (onboardingData.goal ? goalMap[onboardingData.goal] || 'maintain' : state.profile.goal),
+              archetype: onboardingData.archetype || state.profile.archetype,
+              units: onboardingData.units || state.profile.units,
+              onboardingComplete: true
+            } : null
+          }))
+        } else {
+          // Create new profile from onboarding data
+          const newProfile: UserProfile = {
+            username: onboardingData.name || '',
+            gender: onboardingData.gender || 'male',
+            fitnessLevel: onboardingData.fitnessLevel || 'beginner',
+            trainingDaysPerWeek: (onboardingData.trainingDays as 3 | 4 | 5) || 3,
+            weight: onboardingData.weight || 150,
+            height: onboardingData.height || 68,
+            age: onboardingData.age || 25,
+            goal: (onboardingData.goal ? goalMap[onboardingData.goal] || 'maintain' : 'maintain'),
+            archetype: onboardingData.archetype || 'bro',
+            createdAt: Date.now(),
+            currentStreak: 0,
+            longestStreak: 0,
+            lastCheckInDate: null,
+            streakPaused: false,
+            onboardingComplete: true,
+            units: onboardingData.units || 'imperial',
+          }
+          set({ profile: newProfile })
+        }
 
         // Immediately sync to cloud so the change persists
         const { syncProfileToCloud } = await import('../lib/sync')
         await syncProfileToCloud()
+
+        // Reset onboarding store after completion
+        useOnboardingStore.getState().reset()
       },
 
       updateStreak: (didCheckIn: boolean) => {
