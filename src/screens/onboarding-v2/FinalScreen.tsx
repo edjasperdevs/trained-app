@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { EvolvingAvatar } from '@/components/EvolvingAvatar'
 import { useUserStore } from '@/stores'
@@ -6,6 +7,7 @@ import { RANKS } from '@/stores/dpStore'
 
 export function FinalScreen() {
   const completeOnboarding = useUserStore((s) => s.completeOnboarding)
+  const navigate = useNavigate()
   const [shouldPulse, setShouldPulse] = useState(false)
 
   // Trigger CTA pulse after 1 second (FINAL-06)
@@ -17,11 +19,12 @@ export function FinalScreen() {
   }, [])
 
   // Handle enter button tap (FINAL-07, FINAL-08)
-  const handleEnter = () => {
+  const handleEnter = async () => {
     // Mark profile as onboarding complete
-    completeOnboarding()
+    await completeOnboarding()
 
-    // Navigate to home (App.tsx will handle routing since onboardingComplete is now true)
+    // Navigate to home to trigger App.tsx routing check
+    navigate('/', { replace: true })
   }
 
   // Get threshold for first rank (Initiate = 250 DP)
