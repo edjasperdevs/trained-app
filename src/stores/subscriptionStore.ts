@@ -79,6 +79,15 @@ export const useSubscriptionStore = create<SubscriptionState>()(
        * Called after initialization and after any purchase/restore.
        */
       checkEntitlements: async () => {
+        // Development bypass: grant premium access without RevenueCat
+        if (import.meta.env.VITE_DEV_PREMIUM === 'true') {
+          set({ isPremium: true, isLoading: false })
+          if (import.meta.env.DEV) {
+            console.log('[Subscription] DEV PREMIUM BYPASS ACTIVE - granting premium access')
+          }
+          return
+        }
+
         if (!isNative()) {
           set({ isLoading: false })
           return
