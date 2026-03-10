@@ -112,7 +112,7 @@ export function PaywallScreen() {
 
       {/* No header/back button - this is a decision point (PAY-07) */}
 
-      <div className="flex-1 px-6 py-12 flex flex-col z-10">
+      <div className="flex-1 px-6 pb-12 flex flex-col z-10" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 3rem)' }}>
         {/* Hero section */}
         <motion.div
           initial="hidden"
