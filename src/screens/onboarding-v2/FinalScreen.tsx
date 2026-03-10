@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { EvolvingAvatar } from '@/components/EvolvingAvatar'
-import { useOnboardingStore, useUserStore } from '@/stores'
+import { useUserStore } from '@/stores'
 import { RANKS } from '@/stores/dpStore'
 
 export function FinalScreen() {
   const completeOnboarding = useUserStore((s) => s.completeOnboarding)
-  const { reset } = useOnboardingStore()
   const [shouldPulse, setShouldPulse] = useState(false)
 
   // Trigger CTA pulse after 1 second (FINAL-06)
@@ -19,9 +18,6 @@ export function FinalScreen() {
 
   // Handle enter button tap (FINAL-07, FINAL-08)
   const handleEnter = () => {
-    // Reset onboarding store state
-    reset()
-
     // Mark profile as onboarding complete
     completeOnboarding()
 
