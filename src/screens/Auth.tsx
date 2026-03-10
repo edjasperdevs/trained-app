@@ -4,9 +4,8 @@ import { Eye, EyeOff, Mail } from 'lucide-react'
 import { useAuthStore, toast } from '@/stores'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
-import heroWelcomeImg from '@/assets/hero-welcome.png'
 
-type AuthMode = 'splash' | 'login' | 'signup' | 'forgot'
+type AuthMode = 'login' | 'signup' | 'forgot'
 
 // Removed AthleteSilhouette
 
@@ -96,7 +95,7 @@ function LimeButton({
   )
 }
 
-export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
+export function Auth({ defaultMode = 'login' }: { defaultMode?: AuthMode }) {
   const navigate = useNavigate()
   const { signIn, signUp, resetPassword, resendConfirmation, isConfigured } = useAuthStore()
 
@@ -209,83 +208,14 @@ export function Auth({ defaultMode = 'splash' }: { defaultMode?: AuthMode }) {
     )
   }
 
-  // ── SPLASH SCREEN ─────────────────────────────────────────────────────────
-  if (mode === 'splash') {
-    return (
-      <div
-        data-testid="auth-screen"
-        className="min-h-screen flex flex-col bg-[#0A0A0A] relative overflow-hidden"
-      >
-        {/* Bottom lime glow atmosphere */}
-        <div className="absolute bottom-0 left-0 right-0 h-[40%] pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 100%, rgba(200,255,0,0.08) 0%, transparent 70%)' }}
-        />
-
-        {/* Avatar — upper 55% of screen */}
-        <div className="flex-1 flex items-end justify-center px-4 pb-0" style={{ maxHeight: '58vh' }}>
-          <div className="w-full max-w-[400px] flex items-end justify-center">
-            <img
-              src={heroWelcomeImg}
-              alt="The Protocol Archetypes"
-              className="w-full h-auto object-contain object-bottom drop-shadow-2xl opacity-90 mix-blend-screen"
-            />
-          </div>
-        </div>
-
-        {/* Brand + CTAs — lower section */}
-        <div className="px-6 pb-10 pt-4">
-          {/* Wordmark */}
-          <h1
-            className="text-5xl font-black text-[#FAFAFA] tracking-tight leading-none mb-0"
-            style={{ fontFamily: "'Oswald', sans-serif", letterSpacing: '-0.01em' }}
-          >
-            WELLTRAINED
-          </h1>
-
-          {/* Lime rule */}
-          <div className="h-px bg-[#C8FF00] my-4 w-full" />
-
-          {/* Tagline */}
-          <p className="text-[#A1A1AA] text-xs tracking-[0.25em] uppercase mb-8">
-            The Protocol. The Discipline. The Rank.
-          </p>
-
-          {/* CTAs */}
-          <div className="space-y-3">
-            <LimeButton onClick={() => setMode('signup')}>
-              Begin
-            </LimeButton>
-
-            <button
-              onClick={() => setMode('login')}
-              className="w-full py-3 text-[#A1A1AA] text-sm hover:text-[#FAFAFA] transition-colors"
-            >
-              Already a member? <span className="text-[#C8FF00]">Sign In</span>
-            </button>
-          </div>
-
-          {/* Legal */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => navigate('/privacy')}
-              className="text-[10px] text-[#A1A1AA]/60"
-            >
-              Terms &amp; Privacy
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // ── SIGN UP / LOGIN / FORGOT SCREENS ──────────────────────────────────────
   const isSignUp = mode === 'signup'
 
   return (
     <div data-testid="auth-screen" className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#0A0A0A] px-6 pt-12 pb-10">
-      {/* Back to splash */}
+      {/* Back button */}
       <button
-        onClick={() => { setMode('splash'); setError(''); setSuccess('') }}
+        onClick={() => navigate('/onboarding/welcome')}
         className="text-[#A1A1AA] text-sm mb-8 text-left hover:text-[#FAFAFA] transition-colors"
       >
         ← Back

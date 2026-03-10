@@ -18,8 +18,7 @@ import { useReferralStore } from '@/stores/referralStore'
 import { analytics } from '@/lib/analytics'
 import { Navigation, ToastContainer, ErrorBoundary, UpdatePrompt, NotFound, HomeSkeleton, WorkoutsSkeleton, MacrosSkeleton, AchievementsSkeleton, AvatarSkeleton, SettingsSkeleton, SyncStatusIndicator, DPToastContainer, useDPToasts, AnimatedSplashScreen } from '@/components'
 import { SafeAreaLayout } from '@/components/layout/SafeAreaLayout'
-import { Auth } from '@/screens'
-import { OnboardingStack } from '@/navigation'
+import { AuthStack, OnboardingStack } from '@/navigation'
 
 const SentryRoutes = withSentryReactRouterV6Routing(Routes)
 
@@ -238,6 +237,30 @@ function AppContent() {
     }
   }, [profile?.onboardingComplete, checkNeglected])
 
+  // Migration: Auto-complete onboarding for existing users with complete profiles
+  useEffect(() => {
+    if (!profile || profile.onboardingComplete) return
+
+    // Check if profile has all required fields
+    const hasAllRequiredFields = Boolean(
+      profile.username &&
+      profile.archetype &&
+      profile.gender &&
+      profile.fitnessLevel &&
+      profile.trainingDaysPerWeek &&
+      profile.weight &&
+      profile.height &&
+      profile.age &&
+      profile.goal
+    )
+
+    // If profile is complete but missing onboardingComplete flag, fix it
+    if (hasAllRequiredFields) {
+      console.log('[Migration] Auto-completing onboarding for existing user')
+      useUserStore.getState().setProfile({ onboardingComplete: true })
+    }
+  }, [profile])
+
   const devBypass = import.meta.env.VITE_DEV_BYPASS === 'true'
   const subscriptionLoading = useSubscriptionStore((s) => s.isLoading)
   const healthPermissionStatus = useHealthStore((s) => s.permissionStatus)
@@ -272,18 +295,18 @@ function AppContent() {
     )
   }
 
-  // If not authenticated, show onboarding (which includes auth)
+  // If not authenticated, show auth screen
   if (!devBypass && !user) {
     return (
       <>
         <ToastContainer />
         <SentryRoutes>
           <Route path="/onboarding/*" element={<OnboardingStack />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/*" element={<AuthStack />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
-          <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
         </SentryRoutes>
       </>
     )
@@ -313,7 +336,7 @@ function AppContent() {
         <ToastContainer />
         <SentryRoutes>
           <Route path="/onboarding/*" element={<OnboardingStack />} />
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/*" element={<AuthStack />} />
           <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
         </SentryRoutes>
       </>
@@ -354,7 +377,7 @@ function AppContent() {
               <Route path="/debug" element={<Suspense fallback={<HomeSkeleton />}><DebugScreen /></Suspense>} />
               <Route path="/recruit" element={<Suspense fallback={<SettingsSkeleton />}><RecruitScreen /></Suspense>} />
               <Route path="/locked-protocol" element={<Suspense fallback={<SettingsSkeleton />}><LockedProtocolScreen /></Suspense>} />
-              <Route path="/auth" element={devBypass ? <Auth /> : <Navigate to="/" replace />} />
+              <Route path="/auth/*" element={devBypass ? <AuthStack /> : <Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </SentryRoutes>
           </AnimatePresence>
