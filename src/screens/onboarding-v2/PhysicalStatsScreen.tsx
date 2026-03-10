@@ -13,46 +13,46 @@ export function PhysicalStatsScreen() {
 
   // Local form state - initialize from store if exists
   const [units, setUnits] = useState<Units>(data.units || 'imperial')
-  const [weight, setWeight] = useState<number>(
-    data.weight ? toDisplayWeight(data.weight, units) : units === 'metric' ? 75 : 165
+  const [weight, setWeight] = useState<string>(
+    data.weight ? String(toDisplayWeight(data.weight, units)) : units === 'metric' ? '75' : '165'
   )
 
   // For imperial: separate feet and inches
-  const [heightFeet, setHeightFeet] = useState<number>(() => {
+  const [heightFeet, setHeightFeet] = useState<string>(() => {
     if (data.height && units === 'imperial') {
-      return Math.floor(data.height / 12)
+      return String(Math.floor(data.height / 12))
     }
-    return 5
+    return '5'
   })
-  const [heightInches, setHeightInches] = useState<number>(() => {
+  const [heightInches, setHeightInches] = useState<string>(() => {
     if (data.height && units === 'imperial') {
-      return data.height % 12
+      return String(data.height % 12)
     }
-    return 9
+    return '9'
   })
 
   // For metric: cm
-  const [heightCm, setHeightCm] = useState<number>(() => {
+  const [heightCm, setHeightCm] = useState<string>(() => {
     if (data.height && units === 'metric') {
-      return toDisplayHeight(data.height, units)
+      return String(toDisplayHeight(data.height, units))
     }
-    return 175
+    return '175'
   })
 
-  const canContinue = weight > 0 && (
+  const canContinue = Number(weight) > 0 && (
     units === 'imperial'
-      ? heightFeet > 0 || heightInches > 0
-      : heightCm > 0
+      ? Number(heightFeet) > 0 || Number(heightInches) > 0
+      : Number(heightCm) > 0
   )
 
   const handleContinue = () => {
     if (!canContinue) return
 
     // Convert display values to internal storage (lbs and inches)
-    const internalWeight = toInternalWeight(weight, units)
+    const internalWeight = toInternalWeight(Number(weight), units)
     const internalHeight = units === 'imperial'
-      ? heightFeet * 12 + heightInches
-      : toInternalHeight(heightCm, units)
+      ? Number(heightFeet) * 12 + Number(heightInches)
+      : toInternalHeight(Number(heightCm), units)
 
     updateData({
       units,
@@ -72,14 +72,14 @@ export function PhysicalStatsScreen() {
   // Sync weight/height display when units toggle
   useEffect(() => {
     if (data.weight) {
-      setWeight(toDisplayWeight(data.weight, units))
+      setWeight(String(toDisplayWeight(data.weight, units)))
     }
     if (data.height) {
       if (units === 'imperial') {
-        setHeightFeet(Math.floor(data.height / 12))
-        setHeightInches(data.height % 12)
+        setHeightFeet(String(Math.floor(data.height / 12)))
+        setHeightInches(String(data.height % 12))
       } else {
-        setHeightCm(toDisplayHeight(data.height, units))
+        setHeightCm(String(toDisplayHeight(data.height, units)))
       }
     }
   }, [units, data.weight, data.height])
@@ -213,7 +213,7 @@ export function PhysicalStatsScreen() {
           <input
             type="number"
             value={weight}
-            onChange={(e) => setWeight(Number(e.target.value))}
+            onChange={(e) => setWeight(e.target.value)}
             placeholder={units === 'metric' ? 'kg' : 'lbs'}
             className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
           />
@@ -228,7 +228,7 @@ export function PhysicalStatsScreen() {
                 <input
                   type="number"
                   value={heightFeet}
-                  onChange={(e) => setHeightFeet(Number(e.target.value))}
+                  onChange={(e) => setHeightFeet(e.target.value)}
                   placeholder="Feet"
                   className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
                 />
@@ -238,7 +238,7 @@ export function PhysicalStatsScreen() {
                 <input
                   type="number"
                   value={heightInches}
-                  onChange={(e) => setHeightInches(Number(e.target.value))}
+                  onChange={(e) => setHeightInches(e.target.value)}
                   placeholder="Inches"
                   className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
                 />
@@ -257,7 +257,7 @@ export function PhysicalStatsScreen() {
             <input
               type="number"
               value={heightCm}
-              onChange={(e) => setHeightCm(Number(e.target.value))}
+              onChange={(e) => setHeightCm(e.target.value)}
               placeholder="cm"
               className="w-full px-4 py-3 bg-[#26282B] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#71717A] focus:border-[#D4A853] focus:outline-none transition-colors"
             />
