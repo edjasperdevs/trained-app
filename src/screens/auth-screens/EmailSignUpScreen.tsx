@@ -181,113 +181,122 @@ export function EmailSignUpScreen() {
       {/* Spacer */}
       <div className="mt-8" />
 
-      {/* Form fields container */}
-      <div className="w-full max-w-sm space-y-4">
-        {/* Email field */}
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
-            EMAIL
-          </label>
-          <div className="relative">
-            <Mail className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              autoCapitalize="none"
-              autoComplete="email"
-              className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
-            />
-          </div>
-        </div>
-
-        {/* Password field */}
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
-            PASSWORD
-          </label>
-          <div className="relative">
-            <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              autoComplete="new-password"
-              className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 pr-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-white transition-colors"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-          {/* Password strength indicator */}
-          <PasswordStrengthIndicator strength={passwordStrength} />
-        </div>
-
-        {/* Confirm Password field */}
-        <div>
-          <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
-            CONFIRM PASSWORD
-          </label>
-          <div className="relative">
-            <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
-            <input
-              type={showConfirmPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              autoComplete="new-password"
-              className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 pr-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-white transition-colors"
-              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="w-5 h-5" />
-              ) : (
-                <Eye className="w-5 h-5" />
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Error display */}
-      {error && (
-        <p className="text-sm text-[#EF4444] text-center mt-4 max-w-sm">
-          {error}
-        </p>
-      )}
-
-      {/* Spacer */}
-      <div className="mt-6" />
-
-      {/* CREATE ACCOUNT button */}
-      <button
-        onClick={handleCreateAccount}
-        disabled={!isFormValid || isLoading}
-        className={`
-          w-full max-w-sm h-14 rounded-full bg-[#D4A853] text-black font-bold
-          tracking-widest uppercase text-base
-          ${(!isFormValid || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
-        `}
-        style={{ fontFamily: "'Oswald', sans-serif" }}
+      {/* Form */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleCreateAccount()
+        }}
+        className="w-full max-w-sm"
       >
-        {isLoading ? 'Creating Account...' : 'CREATE ACCOUNT'}
-      </button>
+        {/* Form fields container */}
+        <div className="space-y-4">
+          {/* Email field */}
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
+              EMAIL
+            </label>
+            <div className="relative">
+              <Mail className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                autoCapitalize="none"
+                autoComplete="email"
+                className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
+              />
+            </div>
+          </div>
+
+          {/* Password field */}
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
+              PASSWORD
+            </label>
+            <div className="relative">
+              <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+                autoComplete="new-password"
+                className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 pr-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-white transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {/* Password strength indicator */}
+            <PasswordStrengthIndicator strength={passwordStrength} />
+          </div>
+
+          {/* Confirm Password field */}
+          <div>
+            <label className="block text-xs uppercase tracking-wider text-[#8A8A8A] mb-2">
+              CONFIRM PASSWORD
+            </label>
+            <div className="relative">
+              <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                autoComplete="new-password"
+                className="bg-[#141414] rounded-xl border border-[#3A3A3A] h-14 px-4 pl-12 pr-12 w-full text-[#F5F0E8] focus:outline-none focus:ring-2 focus:ring-[#D4A853] focus:ring-opacity-50 placeholder:text-[#8A8A8A]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8A8A8A] hover:text-white transition-colors"
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Error display */}
+        {error && (
+          <p className="text-sm text-[#EF4444] text-center mt-4">
+            {error}
+          </p>
+        )}
+
+        {/* Spacer */}
+        <div className="mt-6" />
+
+        {/* CREATE ACCOUNT button */}
+        <button
+          type="submit"
+          disabled={!isFormValid || isLoading}
+          className={`
+            w-full h-14 rounded-full bg-[#D4A853] text-black font-bold
+            tracking-widest uppercase text-base
+            ${(!isFormValid || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}
+          `}
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          {isLoading ? 'Creating Account...' : 'CREATE ACCOUNT'}
+        </button>
+      </form>
 
       {/* Sign In link */}
       <p className="mt-6 text-[#8A8A8A] text-sm text-center">

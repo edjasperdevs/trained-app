@@ -1,17 +1,17 @@
 // Allowed origins for CORS
+// Note: localhost ports are always included because:
+// 1. Edge functions are protected by JWT auth (Authorization header)
+// 2. CORS is not a security boundary for authenticated APIs
+// 3. Development testing requires localhost access even against prod functions
 const ALLOWED_ORIGINS = [
   'https://app.welltrained.fitness',
   'https://welltrained.fitness',
   'capacitor://localhost', // iOS app
   'http://localhost', // iOS app fallback
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:4173', // Vite preview
+  'http://127.0.0.1:5173', // Vite alternative
 ]
-
-// In development, also allow localhost
-if (Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
-  ALLOWED_ORIGINS.push('http://localhost:5173')
-  ALLOWED_ORIGINS.push('http://localhost:4173')
-  ALLOWED_ORIGINS.push('http://127.0.0.1:5173')
-}
 
 /**
  * Get CORS headers for a request.

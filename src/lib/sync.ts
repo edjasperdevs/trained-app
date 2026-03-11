@@ -919,7 +919,7 @@ export async function pullCoachData() {
       .eq('client_id', user.id)
       .order('week_of', { ascending: false })
       .limit(1)
-      .single(),
+      .maybeSingle(),
   ])
 
   // Process macro targets

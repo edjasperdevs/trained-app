@@ -307,7 +307,10 @@ export const useReferralStore = create<ReferralStore>()(
 
         try {
           // Call Edge Function to check for completed recruits
-          const { data, error } = await supabase.functions.invoke('check-recruit-completion')
+          // Pass empty body to ensure POST request with auth headers
+          const { data, error } = await supabase.functions.invoke('check-recruit-completion', {
+            body: {},
+          })
 
           if (error) {
             console.error('[referralStore] Check completion error:', error)
