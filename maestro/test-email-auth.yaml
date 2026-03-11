@@ -1,0 +1,64 @@
+appId: fitness.welltrained.app
+---
+# Test Email Sign-In Flow
+- launchApp:
+    clearState: true
+
+# Wait for splash screen
+- waitForAnimationToEnd
+
+# We should be on the auth landing screen
+- assertVisible: "WELLTRAINED"
+
+# Navigate to sign in
+- tapOn:
+    text: "Sign In"
+    optional: true
+
+- waitForAnimationToEnd
+
+# Tap Sign In with Email
+- tapOn: "Sign In with Email"
+
+- waitForAnimationToEnd
+
+# Should see email sign in form
+- assertVisible: "WELCOME BACK"
+
+# Enter test credentials
+- tapOn:
+    id: "email-input"
+    optional: true
+- tapOn:
+    text: "your@email.com"
+    optional: true
+
+- inputText: "test@welltrained.fitness"
+
+- tapOn:
+    text: "Your password"
+    optional: true
+
+- inputText: "testpassword123"
+
+# Take screenshot before submitting
+- takeScreenshot: email-form-filled
+
+# Tap sign in button
+- tapOn: "SIGN IN"
+
+# Wait for response
+- extendedWaitUntil:
+    visible:
+      textContains: "Loading"
+    timeout: 3000
+    optional: true
+
+# Wait for result (success or error)
+- extendedWaitUntil:
+    notVisible:
+      text: "Signing In..."
+    timeout: 20000
+
+# Take final screenshot
+- takeScreenshot: email-auth-result

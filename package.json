@@ -18,7 +18,11 @@
     "build:ios": "tsc -b && vite build && npx cap sync ios",
     "cap:open": "npx cap open ios",
     "cap:sync": "npx cap sync ios",
-    "cap:run": "npx cap run ios"
+    "cap:run": "npx cap run ios",
+    "test:ios": "./maestro/run-tests.sh",
+    "test:ios:google": "./maestro/run-tests.sh test-google-auth.yaml",
+    "test:ios:apple": "./maestro/run-tests.sh test-apple-auth.yaml",
+    "test:ios:email": "./maestro/run-tests.sh test-email-auth.yaml"
   },
   "dependencies": {
     "@capacitor-community/apple-sign-in": "^7.1.0",

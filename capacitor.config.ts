@@ -18,10 +18,8 @@ const config: CapacitorConfig = {
       overlaysWebView: true,
     },
     SplashScreen: {
-      launchAutoHide: true,
-      launchShowDuration: 500,
+      launchAutoHide: false,
       backgroundColor: '#0a0a0aff',
-      launchFadeOutDuration: 200,
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
@@ -36,7 +34,8 @@ const config: CapacitorConfig = {
     },
     GoogleAuth: {
       scopes: ['profile', 'email'],
-      serverClientId: process.env.VITE_GOOGLE_WEB_CLIENT_ID,
+      iosClientId: '809336881982-h226g1k2qtp7nh7csq1nfk7d9crrmnvr.apps.googleusercontent.com',
+      serverClientId: '809336881982-fq9scr1jlk5jqg8l3junqlj09c1p4l46.apps.googleusercontent.com',
       forceCodeForRefreshToken: true,
     },
   },

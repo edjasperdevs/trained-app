@@ -1,0 +1,50 @@
+appId: fitness.welltrained.app
+---
+# Test Google Sign-In Flow
+- launchApp
+
+# Wait for app to load
+- extendedWaitUntil:
+    visible: "WELLTRAINED"
+    timeout: 10000
+
+- takeScreenshot: 01-before-google-tap
+
+# Tap Continue with Google
+- tapOn: "Continue with Google"
+
+# Take screenshot immediately after tap
+- takeScreenshot: 02-immediately-after-tap
+
+# Wait 2 seconds
+- repeat:
+    times: 2
+    commands:
+      - extendedWaitUntil:
+          visible: "ZZZNEVEREXISTS"
+          timeout: 1000
+          optional: true
+
+- takeScreenshot: 03-after-2sec
+
+# Wait 5 more seconds
+- repeat:
+    times: 5
+    commands:
+      - extendedWaitUntil:
+          visible: "ZZZNEVEREXISTS"
+          timeout: 1000
+          optional: true
+
+- takeScreenshot: 04-after-7sec
+
+# Wait 25 more seconds for timeout
+- repeat:
+    times: 25
+    commands:
+      - extendedWaitUntil:
+          visible: "ZZZNEVEREXISTS"
+          timeout: 1000
+          optional: true
+
+- takeScreenshot: 05-final-after-32sec

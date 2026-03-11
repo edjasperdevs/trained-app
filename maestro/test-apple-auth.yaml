@@ -1,0 +1,39 @@
+appId: fitness.welltrained.app
+---
+# Test Apple Sign-In Flow
+- launchApp:
+    clearState: true
+
+# Wait for splash screen
+- waitForAnimationToEnd
+
+# We should be on the auth landing screen
+- assertVisible: "WELLTRAINED"
+
+# Navigate to sign in
+- tapOn:
+    text: "Sign In"
+    optional: true
+
+- waitForAnimationToEnd
+
+# Tap Continue with Apple
+- tapOn: "Continue with Apple"
+
+# Wait for Apple Sign-In dialog or timeout
+- extendedWaitUntil:
+    visible:
+      textContains: "Sign in with Apple"
+    timeout: 10000
+    optional: true
+
+# Take screenshot of whatever appears
+- takeScreenshot: apple-auth-state
+
+# If Apple dialog appeared, we can try to proceed (simulator may not fully support this)
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - takeScreenshot: apple-auth-continued

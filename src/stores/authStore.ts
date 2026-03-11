@@ -230,19 +230,32 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!user) return
 
     set({ isSyncing: true })
+
+    // Timeout wrapper to prevent indefinite hangs (15 second max)
+    const withTimeout = <T>(promise: Promise<T>, ms = 15000): Promise<T> => {
+      return Promise.race([
+        promise,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error('Sync timeout')), ms)
+        )
+      ])
+    }
+
     try {
       // First load any existing cloud data
-      await loadAllFromCloud()
+      await withTimeout(loadAllFromCloud())
       // Pull coach-set data (macros, future: workouts)
-      await pullCoachData()
+      await withTimeout(pullCoachData())
       // Then push client-owned changes to cloud
-      await pushClientData()
+      await withTimeout(pushClientData())
     } catch (error) {
       if (import.meta.env.DEV) console.error('Sync error:', error)
       // Show user-friendly error message
       if (error instanceof Error) {
         captureError(error, { context: 'auth.syncData' })
-        if (error.message.includes('network') || error.message.includes('fetch')) {
+        if (error.message.includes('timeout')) {
+          toast.warning('Sync timed out - will retry later')
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
           toast.warning('Unable to sync - check your internet connection')
         } else {
           toast.error('Failed to sync data. Changes saved locally.')

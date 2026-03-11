@@ -4,15 +4,34 @@ import { isNative } from './platform'
 
 let isConfigured = false
 
+// Timeout wrapper to prevent hanging
+function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${operation} timed out after ${ms / 1000}s`)), ms)
+    )
+  ])
+}
+
 export async function configureGoogleSignIn(): Promise<void> {
   if (isConfigured || !isNative()) return
 
-  await GoogleAuth.initialize({
-    clientId: import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID,
-    scopes: ['profile', 'email'],
-    grantOfflineAccess: true,
-  })
+  // Use iOS client ID for native iOS app
+  const clientId = import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID || import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID
+  console.log('[Google Auth] Initializing with client ID:', clientId?.substring(0, 20) + '...')
+
+  await withTimeout(
+    GoogleAuth.initialize({
+      clientId,
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+    }),
+    10000,
+    'Google Auth initialization'
+  )
   isConfigured = true
+  console.log('[Google Auth] Initialized successfully')
 }
 
 export async function signInWithGoogle(): Promise<{ data: any; error: string | null }> {
@@ -25,16 +44,25 @@ export async function signInWithGoogle(): Promise<{ data: any; error: string | n
   }
 
   try {
+    console.log('[Google Auth] Starting sign-in flow...')
     await configureGoogleSignIn()
 
-    const result = await GoogleAuth.signIn({
-      scopes: ['profile', 'email'],
-    })
+    console.log('[Google Auth] Calling GoogleAuth.signIn()...')
+    const result = await withTimeout(
+      GoogleAuth.signIn({
+        scopes: ['profile', 'email'],
+        serverClientId: import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID,
+      } as any),
+      30000,
+      'Google Sign-In'
+    )
+    console.log('[Google Auth] Sign-in returned:', result ? 'success' : 'no result')
 
     if (!result.authentication?.idToken) {
       return { data: null, error: 'No ID token received from Google' }
     }
 
+    console.log('[Google Auth] Got ID token, exchanging with Supabase...')
     // Pass ID token to Supabase
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
@@ -42,9 +70,11 @@ export async function signInWithGoogle(): Promise<{ data: any; error: string | n
     })
 
     if (error) {
+      console.error('[Google Auth] Supabase error:', error.message)
       return { data: null, error: error.message }
     }
 
+    console.log('[Google Auth] Sign-in complete!')
     return { data, error: null }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Google Sign-In failed'
