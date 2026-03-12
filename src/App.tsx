@@ -336,7 +336,7 @@ function AppContent() {
         <ToastContainer />
         <SentryRoutes>
           <Route path="/onboarding/*" element={<OnboardingStack />} />
-          <Route path="/auth/*" element={<AuthStack />} />
+          {/* No auth routes here - user is already authenticated, redirect to onboarding */}
           <Route path="*" element={<Navigate to="/onboarding/welcome" replace />} />
         </SentryRoutes>
       </>
@@ -345,6 +345,20 @@ function AppContent() {
 
   // Check if iOS user needs health permission soft-ask (after onboarding complete)
   const needsHealthPermission = isIOS() && healthPermissionStatus === 'unknown'
+
+  // Show health permission screen without bottom nav (part of onboarding flow)
+  if (needsHealthPermission) {
+    return (
+      <>
+        <ToastContainer />
+        <SafeAreaLayout>
+          <Suspense fallback={<HomeSkeleton />}>
+            <HealthPermission />
+          </Suspense>
+        </SafeAreaLayout>
+      </>
+    )
+  }
 
   return (
     <>
@@ -355,12 +369,7 @@ function AppContent() {
           <SyncStatusIndicator />
           <AnimatePresence mode="wait" initial={false}>
             <SentryRoutes location={location} key={location.pathname}>
-              <Route path="/" element={
-                needsHealthPermission
-                  ? <Navigate to="/health-permission" replace />
-                  : <Suspense fallback={<HomeSkeleton />}><Home /></Suspense>
-              } />
-              <Route path="/health-permission" element={<Suspense fallback={<HomeSkeleton />}><HealthPermission /></Suspense>} />
+              <Route path="/" element={<Suspense fallback={<HomeSkeleton />}><Home /></Suspense>} />
               <Route path="/workouts" element={<Suspense fallback={<WorkoutsSkeleton />}><Workouts /></Suspense>} />
               <Route path="/macros" element={<Suspense fallback={<MacrosSkeleton />}><Macros /></Suspense>} />
               {/* TODO: Re-enable for v2 launch */}

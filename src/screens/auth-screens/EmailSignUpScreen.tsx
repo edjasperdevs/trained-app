@@ -106,6 +106,9 @@ export function EmailSignUpScreen() {
     password.length >= 8 &&
     passwordsMatch
 
+  // Success state for email confirmation
+  const [showConfirmation, setShowConfirmation] = useState(false)
+
   // Handlers
   const handleCreateAccount = async () => {
     if (!isFormValid || isLoading) return
@@ -113,7 +116,7 @@ export function EmailSignUpScreen() {
     setIsLoading(true)
     setError(null)
 
-    const { error } = await supabase!.auth.signUp({
+    const { data, error } = await supabase!.auth.signUp({
       email,
       password,
     })
@@ -127,6 +130,13 @@ export function EmailSignUpScreen() {
       } else {
         setError(error.message)
       }
+      return
+    }
+
+    // Check if email confirmation is required (user exists but no session)
+    if (data.user && !data.session) {
+      // Email confirmation is required
+      setShowConfirmation(true)
       return
     }
 
@@ -145,6 +155,48 @@ export function EmailSignUpScreen() {
 
   const handleSignIn = () => {
     navigate('/auth/signin')
+  }
+
+  // Show email confirmation screen
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 pt-safe pb-safe">
+        {/* Chain-link crown logo */}
+        <ChainLinkCrownLogo className="w-20 h-20" />
+
+        {/* Headline */}
+        <h1
+          className="text-2xl font-bold text-[#F5F0E8] tracking-wide mt-6 text-center"
+          style={{ fontFamily: "'Oswald', sans-serif" }}
+        >
+          CHECK YOUR EMAIL
+        </h1>
+
+        {/* Subline */}
+        <p className="text-sm text-[#8A8A8A] text-center mt-4 max-w-xs">
+          We sent a confirmation link to <span className="text-[#D4A853]">{email}</span>.
+          Click the link to activate your account.
+        </p>
+
+        {/* Icon */}
+        <div className="mt-8 w-16 h-16 rounded-full bg-[#141414] border border-[#D4A853] flex items-center justify-center">
+          <Mail className="w-8 h-8 text-[#D4A853]" />
+        </div>
+
+        {/* Note */}
+        <p className="text-xs text-[#8A8A8A] text-center mt-8 max-w-xs">
+          Didn't receive it? Check your spam folder or try again.
+        </p>
+
+        {/* Back to Sign In */}
+        <button
+          onClick={handleSignIn}
+          className="mt-6 text-[#D4A853] text-sm underline hover:no-underline"
+        >
+          Back to Sign In
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -199,6 +251,7 @@ export function EmailSignUpScreen() {
             <div className="relative">
               <Mail className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
+                id="signup-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -218,6 +271,7 @@ export function EmailSignUpScreen() {
             <div className="relative">
               <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
+                id="signup-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -250,6 +304,7 @@ export function EmailSignUpScreen() {
             <div className="relative">
               <Lock className="w-5 h-5 text-[#D4A853] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
+                id="signup-confirm-password"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}

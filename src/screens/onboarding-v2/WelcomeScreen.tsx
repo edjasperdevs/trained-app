@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { motion, type Variants } from 'framer-motion'
 import { useOnboardingStore } from '@/stores'
 import heroWelcomeImg from '@/assets/hero-welcome.png'
 
 export function WelcomeScreen() {
   const { nextStep, reset } = useOnboardingStore()
-  const navigate = useNavigate()
   const [hasInteracted, setHasInteracted] = useState(false)
   const [shouldPulse, setShouldPulse] = useState(false)
 
@@ -30,11 +28,6 @@ export function WelcomeScreen() {
     setHasInteracted(true)
     setShouldPulse(false)
     nextStep()
-  }
-
-  const handleSignIn = () => {
-    setHasInteracted(true)
-    navigate('/auth')
   }
 
   // Animation variants
@@ -190,18 +183,6 @@ export function WelcomeScreen() {
         >
           BEGIN PROTOCOL
         </motion.button>
-
-        {/* Sign In Link */}
-        <button
-          onClick={handleSignIn}
-          className="w-full mt-4 text-center text-[#A1A1AA] text-sm"
-        >
-          Already initiated?{' '}
-          <span className="text-[#FAFAFA] underline underline-offset-2">
-            Sign In
-          </span>
-          .
-        </button>
       </motion.div>
     </div>
   )

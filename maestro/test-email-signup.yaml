@@ -1,0 +1,73 @@
+appId: fitness.welltrained.app
+---
+# Test Email Sign-Up Flow (Account Creation)
+- launchApp:
+    clearState: true
+
+# Wait for app to load
+- waitForAnimationToEnd
+
+# We should be on the auth landing screen
+- assertVisible: "WELLTRAINED"
+
+# Tap Sign In with Email to get to auth options
+- tapOn: "Sign In with Email"
+
+- waitForAnimationToEnd
+
+# Should see sign in form - tap Create Account link
+- assertVisible: "WELCOME BACK"
+- tapOn: "Create Account"
+
+- waitForAnimationToEnd
+
+# Should now be on the signup options screen
+- assertVisible: "BEGIN YOUR PROTOCOL"
+
+# Tap Continue with Email to get to email signup form
+- tapOn: "Continue with Email"
+
+- waitForAnimationToEnd
+
+# Should now be on the email signup form
+- assertVisible: "CREATE YOUR ACCOUNT"
+
+# Take screenshot of empty signup form
+- takeScreenshot: signup-01-empty-form
+
+# Tap email field and enter test email
+- tapOn: "your@email.com"
+- inputText: "signuptest6@welltrained.fitness"
+
+# Tap password field and enter password
+- tapOn: "Create a password"
+- inputText: "TestPass123"
+
+# Hide keyboard to reveal confirm password field
+- hideKeyboard
+
+# Scroll down a bit to ensure confirm password is visible
+- scroll
+
+# Tap confirm password field by tapping below the CONFIRM PASSWORD label
+- tapOn:
+    below: "CONFIRM PASSWORD"
+- inputText: "TestPass123"
+
+# Tap Done to dismiss keyboard
+- tapOn: "Done"
+
+# Take screenshot of filled form
+- takeScreenshot: signup-02-form-filled
+
+# Tap CREATE ACCOUNT button
+- tapOn: "CREATE ACCOUNT"
+
+# Wait for auth response
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# Take screenshot of result
+- takeScreenshot: signup-03-result
