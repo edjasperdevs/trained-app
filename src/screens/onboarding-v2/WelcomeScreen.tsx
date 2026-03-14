@@ -1,7 +1,49 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { useOnboardingStore } from '@/stores'
-import heroWelcomeImg from '@/assets/hero-welcome.png'
+import { WTLogo, metallicGoldStyle } from '@/components'
+
+// Floating particles background
+function FloatingParticles({ count = 30 }: { count?: number }) {
+  const particles = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100, // random horizontal position (%)
+      size: Math.random() * 4 + 2, // 2-6px
+      duration: Math.random() * 15 + 10, // 10-25s to float up
+      delay: Math.random() * 10, // stagger start times
+      opacity: Math.random() * 0.4 + 0.1, // 0.1-0.5 opacity
+    }))
+  }, [count])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-[#D4A853]"
+          style={{
+            left: `${particle.x}%`,
+            width: particle.size,
+            height: particle.size,
+            opacity: particle.opacity,
+          }}
+          initial={{ y: '100vh', opacity: 0 }}
+          animate={{
+            y: '-10vh',
+            opacity: [0, particle.opacity, particle.opacity, 0],
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export function WelcomeScreen() {
   const { nextStep, reset } = useOnboardingStore()
@@ -86,33 +128,32 @@ export function WelcomeScreen() {
     : {}
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-between py-12 px-6">
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-between py-12 px-6 relative overflow-hidden">
+      {/* Floating particles background */}
+      <FloatingParticles count={50} />
+
       <motion.div
-        className="flex flex-col items-center justify-center flex-1"
+        className="flex flex-col items-center justify-center flex-1 relative z-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {/* Brand Mark */}
-        <motion.div variants={fadeUpVariants} className="w-32 h-32 mb-4 relative">
-          <div className="absolute inset-0 bg-[#D4A853]/20 blur-2xl rounded-full scale-75" />
-          <img
-            src={heroWelcomeImg}
-            alt="WellTrained Crown"
-            className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(212,168,83,0.4)]"
-          />
+        {/* Brand Mark - WT Lock Logo */}
+        <motion.div variants={fadeUpVariants} className="w-28 h-auto mb-4 relative">
+          <div className="absolute inset-0 bg-[#D4A853]/10 blur-2xl rounded-full scale-125" />
+          <WTLogo className="w-full h-full relative z-10 drop-shadow-[0_0_8px_rgba(212,168,83,0.2)]" />
         </motion.div>
 
-        {/* Wordmark */}
+        {/* Wordmark - Metallic Gold */}
         <motion.h1
           variants={fadeUpVariants}
-          className="text-3xl font-black text-[#D4A853] tracking-[0.15em] leading-none text-center mb-8"
-          style={{ fontFamily: "'Oswald', sans-serif" }}
+          className="text-3xl font-black tracking-[0.15em] leading-none text-center mb-8"
+          style={{ fontFamily: "'Oswald', sans-serif", ...metallicGoldStyle }}
         >
           WELLTRAINED
         </motion.h1>
 
-        {/* Headline - Three Lines */}
+        {/* Headline - Two Lines */}
         <motion.div
           variants={headlineVariants}
           className="text-center mb-8"
@@ -122,21 +163,14 @@ export function WelcomeScreen() {
             className="text-3xl font-black text-[#FAFAFA] tracking-wide leading-tight"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            YOUR DISCIPLINE.
+            OBEY THE PROTOCOL.
           </motion.p>
           <motion.p
             variants={lineVariants}
             className="text-3xl font-black text-[#FAFAFA] tracking-wide leading-tight"
             style={{ fontFamily: "'Oswald', sans-serif" }}
           >
-            YOUR RANK.
-          </motion.p>
-          <motion.p
-            variants={lineVariants}
-            className="text-3xl font-black text-[#FAFAFA] tracking-wide leading-tight"
-            style={{ fontFamily: "'Oswald', sans-serif" }}
-          >
-            YOUR LEGEND.
+            EARN YOUR PHYSIQUE.
           </motion.p>
         </motion.div>
 
@@ -145,7 +179,7 @@ export function WelcomeScreen() {
           variants={fadeUpVariants}
           className="text-[#A1A1AA] text-center text-sm leading-relaxed max-w-xs"
         >
-          The Discipline System. Built for men who train with intention.
+          The system that turns discipline into results.
         </motion.p>
 
         {/* Progress dots */}
@@ -166,7 +200,7 @@ export function WelcomeScreen() {
 
       {/* Bottom CTA Section */}
       <motion.div
-        className="w-full max-w-sm"
+        className="w-full max-w-sm relative z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.2, duration: 0.3, ease: [0, 0, 0.2, 1] }}

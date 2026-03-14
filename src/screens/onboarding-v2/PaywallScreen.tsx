@@ -76,9 +76,9 @@ export function PaywallScreen() {
   }
 
   const features = [
-    { title: 'AI Protocol', desc: 'Advanced data-driven tracking', Icon: Sparkles },
-    { title: 'Evolution Stages 3-5', desc: 'Unlock full geometric growth', Icon: Zap },
-    { title: 'Performance Analytics', desc: 'Precision metrics and charts', Icon: BarChart3 },
+    { title: 'Premium Archetypes', desc: 'Unlock Himbo, Brute, and Pup disciplines', Icon: Sparkles },
+    { title: 'Full Avatar Evolution', desc: 'All 16 ranks from Uninitiated to Master', Icon: Zap },
+    { title: 'Advanced Macro Tracking', desc: 'Personalized nutrition protocols', Icon: BarChart3 },
   ]
 
   // Animation variants

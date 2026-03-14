@@ -3,6 +3,7 @@ import { motion, type Variants } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
+import { WTLogo } from '@/components'
 import { haptics } from '@/lib/haptics'
 import { getWeightUnit, toInternalWeight, toInternalHeight, toDisplayWeight, toDisplayHeight } from '@/lib/units'
 
@@ -146,7 +147,7 @@ export function PhysicalStatsScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={7} currentStep={3} />
+        <ProgressIndicator totalSteps={8} currentStep={4} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 
@@ -265,9 +266,18 @@ export function PhysicalStatsScreen() {
         )}
       </motion.div>
 
+      {/* Logo watermark - centered in remaining space */}
+      <motion.div
+        className="flex-1 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      >
+        <WTLogo className="w-24 h-auto" />
+      </motion.div>
+
       {/* Bottom CTA */}
       <motion.div
-        className="mt-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.3, ease: [0, 0, 0.2, 1] }}

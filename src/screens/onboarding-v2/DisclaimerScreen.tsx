@@ -79,7 +79,7 @@ export function DisclaimerScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={7} currentStep={6} />
+        <ProgressIndicator totalSteps={8} currentStep={7} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 

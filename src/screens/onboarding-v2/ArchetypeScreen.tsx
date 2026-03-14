@@ -125,8 +125,8 @@ export function ArchetypeScreen() {
     const isPremiumArchetype = ['himbo', 'brute', 'pup'].includes(selectedArchetype)
 
     if (isPremiumArchetype && !isPremium) {
-      // Skip macros and go directly to paywall (step 9)
-      setStep(9)
+      // Skip macros and go directly to paywall (step 10)
+      setStep(10)
     } else {
       // Continue normally to macros
       nextStep()
@@ -197,7 +197,7 @@ export function ArchetypeScreen() {
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <ProgressIndicator totalSteps={7} currentStep={6} />
+          <ProgressIndicator totalSteps={8} currentStep={7} />
           <div className="w-10" /> {/* Spacer for alignment */}
         </motion.div>
 

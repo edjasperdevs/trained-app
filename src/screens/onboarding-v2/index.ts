@@ -8,6 +8,7 @@ export {
 export { WelcomeScreen } from './WelcomeScreen'
 export { ValueScreen } from './ValueScreen'
 export { ProfileScreen } from './ProfileScreen'
+export { UsernameScreen } from './UsernameScreen'
 export { PhysicalStatsScreen } from './PhysicalStatsScreen'
 export { TrainingScreen } from './TrainingScreen'
 export { GoalScreen } from './GoalScreen'

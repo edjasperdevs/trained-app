@@ -2,6 +2,7 @@ import { motion, type Variants } from 'framer-motion'
 import { Zap, Crown, Shield, ChevronLeft } from 'lucide-react'
 import { useOnboardingStore } from '@/stores'
 import { ProgressIndicator } from '@/components/onboarding'
+import { WTLogo } from '@/components'
 
 const benefits = [
   {
@@ -29,8 +30,8 @@ export function ValueScreen() {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.4, // After headline
+        staggerChildren: 0.2, // More stagger between items
+        delayChildren: 0.5, // After headline
       },
     },
   }
@@ -48,13 +49,13 @@ export function ValueScreen() {
   }
 
   const benefitVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
+    hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.3,
-        ease: [0, 0, 0.2, 1],
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1], // More dramatic ease-out
       },
     },
   }
@@ -86,7 +87,7 @@ export function ValueScreen() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <ProgressIndicator totalSteps={7} currentStep={1} />
+        <ProgressIndicator totalSteps={8} currentStep={1} />
         <div className="w-10" /> {/* Spacer for alignment */}
       </motion.div>
 
@@ -108,7 +109,7 @@ export function ValueScreen() {
         animate="visible"
         variants={headlineVariants}
       >
-        IMAGINE A FITNESS APP THAT TRAINS YOU LIKE A CHAMPION
+        DISCIPLINE HAS A SYSTEM NOW.
       </motion.h1>
 
       {/* Benefit rows */}
@@ -142,9 +143,18 @@ export function ValueScreen() {
         })}
       </motion.div>
 
+      {/* Logo watermark - centered in remaining space */}
+      <motion.div
+        className="flex-1 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        transition={{ delay: 1.2, duration: 0.5 }}
+      >
+        <WTLogo className="w-24 h-auto" />
+      </motion.div>
+
       {/* Bottom CTA */}
       <motion.div
-        className="mt-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.0, duration: 0.3, ease: [0, 0, 0.2, 1] }}

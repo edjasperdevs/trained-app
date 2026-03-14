@@ -1,9 +1,51 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { EvolvingAvatar } from '@/components/EvolvingAvatar'
 import { useUserStore } from '@/stores'
 import { RANKS } from '@/stores/dpStore'
+
+// Floating particles background
+function FloatingParticles({ count = 50 }: { count?: number }) {
+  const particles = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100, // random horizontal position (%)
+      size: Math.random() * 4 + 2, // 2-6px
+      duration: Math.random() * 15 + 10, // 10-25s to float up
+      delay: Math.random() * 10, // stagger start times
+      opacity: Math.random() * 0.4 + 0.1, // 0.1-0.5 opacity
+    }))
+  }, [count])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full bg-[#D4A853]"
+          style={{
+            left: `${particle.x}%`,
+            width: particle.size,
+            height: particle.size,
+            opacity: particle.opacity,
+          }}
+          initial={{ y: '100vh', opacity: 0 }}
+          animate={{
+            y: '-10vh',
+            opacity: [0, particle.opacity, particle.opacity, 0],
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export function FinalScreen() {
   const completeOnboarding = useUserStore((s) => s.completeOnboarding)
@@ -32,9 +74,12 @@ export function FinalScreen() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center px-6 relative overflow-hidden">
+      {/* Floating particles background */}
+      <FloatingParticles count={50} />
+
       {/* Subtle radial gradient glow at center (gold tint) */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none z-0"
         style={{
           background:
             'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(212,168,83,0.06) 0%, transparent 70%)',

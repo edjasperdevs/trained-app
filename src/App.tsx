@@ -39,6 +39,7 @@ const DebugScreen = lazy(() => import('@/screens/DebugScreen').then(m => ({ defa
 const Progress = lazy(() => import('@/screens/Progress').then(m => ({ default: m.Progress })))
 const RecruitScreen = lazy(() => import('@/screens/RecruitScreen').then(m => ({ default: m.RecruitScreen })))
 const LockedProtocolScreen = lazy(() => import('@/screens/LockedProtocolScreen').then(m => ({ default: m.LockedProtocolScreen })))
+const EmailConfirmed = lazy(() => import('@/screens/EmailConfirmed').then(m => ({ default: m.EmailConfirmed })))
 // TODO: Re-enable for v2 launch
 // const MealPlanScreen = lazy(() => import('@/screens/MealPlanScreen').then(m => ({ default: m.MealPlanScreen })))
 
@@ -304,6 +305,7 @@ function AppContent() {
           <Route path="/onboarding/*" element={<OnboardingStack />} />
           <Route path="/auth/*" element={<AuthStack />} />
           <Route path="/reset-password" element={<Suspense fallback={<HomeSkeleton />}><ResetPassword /></Suspense>} />
+          <Route path="/email-confirmed" element={<Suspense fallback={<HomeSkeleton />}><EmailConfirmed /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<HomeSkeleton />}><Privacy /></Suspense>} />
           <Route path="/terms" element={<Suspense fallback={<HomeSkeleton />}><Terms /></Suspense>} />
           <Route path="*" element={<Navigate to="/auth" replace />} />
@@ -386,6 +388,7 @@ function AppContent() {
               <Route path="/debug" element={<Suspense fallback={<HomeSkeleton />}><DebugScreen /></Suspense>} />
               <Route path="/recruit" element={<Suspense fallback={<SettingsSkeleton />}><RecruitScreen /></Suspense>} />
               <Route path="/locked-protocol" element={<Suspense fallback={<SettingsSkeleton />}><LockedProtocolScreen /></Suspense>} />
+              <Route path="/email-confirmed" element={<Suspense fallback={<HomeSkeleton />}><EmailConfirmed /></Suspense>} />
               <Route path="/auth/*" element={devBypass ? <AuthStack /> : <Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </SentryRoutes>
