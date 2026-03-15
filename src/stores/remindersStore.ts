@@ -120,7 +120,7 @@ export const useRemindersStore = create<RemindersStore>()(
         logMacros: { enabled: true, time: { hour: 19, minute: 0 } },
         claimXP: { enabled: true, time: { hour: 10, minute: 0 } },
         weeklyCheckIn: { enabled: false, time: { hour: 10, minute: 0 } },
-        streakProtection: { enabled: true, time: { hour: 20, minute: 0 } },
+        streakProtection: { enabled: true, time: { hour: 19, minute: 0 } },
         weeklyReport: { enabled: true, time: { hour: 19, minute: 0 } },
         lockedProtocol: {
           enabled: true,

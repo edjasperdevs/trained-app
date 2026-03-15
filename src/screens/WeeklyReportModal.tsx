@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button'
 import { ProgressBar } from '@/components'
 import { useDPStore, RANKS } from '@/stores/dpStore'
 import { LABELS } from '@/design/constants'
-import { Trophy, Dumbbell, Utensils, Beef, Footprints, Moon, X, TrendingUp } from 'lucide-react'
+import { Trophy, Dumbbell, Utensils, Beef, Footprints, Moon, X, TrendingUp, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface WeeklyReportModalProps {
   isOpen: boolean
   onClose: () => void
+  onViewFullReport?: () => void
 }
 
 const ACTION_ICONS: Record<string, typeof Dumbbell> = {
@@ -28,18 +29,24 @@ const ACTION_LABELS: Record<string, string> = {
   sleep: 'Sleep',
 }
 
-export function WeeklyReportModal({ isOpen, onClose }: WeeklyReportModalProps) {
+export function WeeklyReportModal({ isOpen, onClose, onViewFullReport }: WeeklyReportModalProps) {
   const { dailyLogs, totalDP, currentRank } = useDPStore()
   const rankInfo = useDPStore((s) => s.getRankInfo)()
 
-  // Calculate weekly DP breakdown
+  // Calculate weekly DP breakdown (Monday through Sunday)
   const weeklyData = useMemo(() => {
     const now = new Date()
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    const weekAgoStr = weekAgo.toISOString().split('T')[0]
 
-    // Filter logs from last 7 days
-    const recentLogs = dailyLogs.filter(log => log.date >= weekAgoStr)
+    // Get Monday of current week
+    const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - daysFromMonday)
+    monday.setHours(0, 0, 0, 0)
+    const mondayStr = monday.toISOString().split('T')[0]
+
+    // Filter logs from Monday onwards
+    const recentLogs = dailyLogs.filter(log => log.date >= mondayStr)
 
     // Calculate totals by action type
     const breakdown = {
@@ -226,8 +233,22 @@ export function WeeklyReportModal({ isOpen, onClose }: WeeklyReportModalProps) {
             </Card>
           </div>
 
-          {/* Close Button */}
-          <div className="p-6 pt-0">
+          {/* Buttons */}
+          <div className="p-6 pt-0 space-y-3">
+            {onViewFullReport && (
+              <Button
+                onClick={() => {
+                  onClose()
+                  onViewFullReport()
+                }}
+                variant="outline"
+                className="w-full border-primary/40 text-primary"
+                size="lg"
+              >
+                View Full Report
+                <ChevronRight size={18} className="ml-1" />
+              </Button>
+            )}
             <Button onClick={onClose} className="w-full" size="lg">
               Continue
             </Button>

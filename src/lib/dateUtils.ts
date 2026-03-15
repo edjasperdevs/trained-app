@@ -59,16 +59,18 @@ export function isConsecutiveDay(date1: string, date2: string): boolean {
 }
 
 /**
- * Get the start of the current local week (Sunday at midnight local time).
+ * Get the start of the current local week (Monday at midnight local time).
  */
 export function getStartOfLocalWeek(date: Date = new Date()): Date {
   const result = getStartOfLocalDay(date)
-  result.setDate(result.getDate() - result.getDay()) // Go back to Sunday
+  const day = result.getDay()
+  const daysFromMonday = day === 0 ? 6 : day - 1 // Sunday = 6 days back, Mon = 0, Tue = 1, etc.
+  result.setDate(result.getDate() - daysFromMonday) // Go back to Monday
   return result
 }
 
 /**
- * Get local week string in YYYY-MM-DD format (the Sunday of that week).
+ * Get local week string in YYYY-MM-DD format (the Monday of that week).
  */
 export function getLocalWeekString(date: Date = new Date()): string {
   return getLocalDateString(getStartOfLocalWeek(date))

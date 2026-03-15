@@ -48,6 +48,7 @@ export async function generateAndShare(options: ShareOptions): Promise<boolean> 
       quality: 0.95,
       pixelRatio: 2, // Retina quality
       cacheBust: true, // Prevent stale cached images
+      skipFonts: true, // Skip font embedding entirely to avoid CORS issues with Google Fonts
     })
 
     // Restore original styles immediately

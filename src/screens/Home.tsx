@@ -4,12 +4,13 @@ import { EvolvingAvatar, RankUpModal, AnimatedPage, ProtocolOrders, ProgressBar,
 import { HealthCard } from '@/components/HealthCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { motion } from 'framer-motion'
-import { Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck, Target, Activity, LineChart, Flame, Beef } from 'lucide-react'
+import { Sparkles, ChevronRight, Trophy, AlertTriangle, ClipboardCheck, Target, Activity, LineChart, Flame, Beef, Bell, X } from 'lucide-react'
 import {
   useUserStore,
   useDPStore,
   useHealthStore,
-  useMacroStore
+  useMacroStore,
+  useNotificationStore
 } from '@/stores'
 import { getLocalDateString, getLocalDaysDifference } from '@/lib/dateUtils'
 import { haptics } from '@/lib/haptics'
@@ -18,6 +19,7 @@ import { WeeklyReportModal } from './WeeklyReportModal'
 import { WeeklyReportScreen } from './WeeklyReportScreen'
 import { useWeeklyCheckins } from '@/hooks/useWeeklyCheckins'
 import { Card, CardContent } from '@/components/ui/card'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useQuestStore } from '@/stores/questStore'
 import { useWeeklyReportStore } from '@/stores/weeklyReportStore'
 
@@ -82,6 +84,7 @@ export function Home() {
 
   const [showCheckIn, setShowCheckIn] = useState(false)
   const [showWeeklyReport, setShowWeeklyReport] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const [showWeeklyReportFull, setShowWeeklyReportFull] = useState(false)
   const [justCheckedIn, setJustCheckedIn] = useState(false)
   const [weeklyCheckinDue, setWeeklyCheckinDue] = useState<boolean | null>(null)
@@ -89,6 +92,12 @@ export function Home() {
   const [rankUpData, setRankUpData] = useState<{ oldRank: number; newRank: number; rankName: string } | null>(null)
 
   const { hasCheckinForCurrentWeek, isCoachingClient } = useWeeklyCheckins()
+
+  // Notifications
+  const notifications = useNotificationStore((s) => s.notifications)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications)
+  const dismissNotification = useNotificationStore((s) => s.dismissNotification)
 
   useEffect(() => {
     let cancelled = false
@@ -126,6 +135,11 @@ export function Home() {
   useEffect(() => {
     useQuestStore.getState().checkAndCompleteQuests()
   }, [])
+
+  // Fetch notifications
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications])
 
   // Check for weekly report trigger on mount and after DP actions
   useEffect(() => {
@@ -177,15 +191,22 @@ export function Home() {
     year: 'numeric'
   })
 
-  // Calculate weekly DP (from logs in last 7 days)
+  // Calculate weekly DP (Monday through Sunday)
   const weeklyDP = useMemo(() => {
     const logs = useDPStore.getState().dailyLogs
     const now = new Date()
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    return Object.entries(logs)
-      .filter(([date]) => new Date(date) >= weekAgo)
-      .reduce((sum, [, log]) => sum + (log.total || 0), 0)
+    // Get Monday of current week
+    const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - daysFromMonday)
+    monday.setHours(0, 0, 0, 0)
+    const mondayStr = monday.toISOString().split('T')[0]
+
+    return logs
+      .filter(log => log.date >= mondayStr)
+      .reduce((sum, log) => sum + (log.total || 0), 0)
   }, [totalDP])
 
   useEffect(() => {
@@ -198,7 +219,7 @@ export function Home() {
   return (
     <AnimatedPage>
       <div data-testid="home-screen" className="min-h-screen pb-24 bg-background">
-        <AppHeader />
+        <AppHeader onNotificationPress={() => setShowNotifications(true)} notificationCount={unreadCount} />
 
         {/* Greeting */}
         <div className="px-6 pb-4">
@@ -314,10 +335,10 @@ export function Home() {
                 setShowWeeklyReport(true)
                 haptics.light()
               }}
-              className="bg-surface border border-border rounded-xl p-4 text-center hover:border-primary/50 transition-colors active:scale-[0.98]"
+              className="bg-primary/5 border border-primary/40 rounded-xl p-4 text-center transition-all active:scale-[0.97] active:bg-primary/10"
             >
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-medium">
-                Weekly DP
+              <p className="text-[10px] uppercase tracking-widest text-primary/70 mb-1 font-medium">
+                Weekly DP ›
               </p>
               <p className="text-xl font-bold font-mono text-primary">
                 {weeklyDP.toLocaleString()}
@@ -489,6 +510,7 @@ export function Home() {
         <WeeklyReportModal
           isOpen={showWeeklyReport}
           onClose={() => setShowWeeklyReport(false)}
+          onViewFullReport={() => setShowWeeklyReportFull(true)}
         />
 
         {/* Weekly Report Full Screen (triggered on Sunday after DP action) */}
@@ -500,6 +522,42 @@ export function Home() {
             }}
           />
         )}
+
+        {/* Notifications Sheet */}
+        <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
+          <SheetContent side="top" className="pt-14">
+            <SheetHeader>
+              <SheetTitle>Notifications</SheetTitle>
+            </SheetHeader>
+            {notifications.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                <Bell size={32} className="mb-3 opacity-50" />
+                <p>No notifications</p>
+              </div>
+            ) : (
+              <div className="px-4 py-2 space-y-2">
+                {notifications.map((notification) => (
+                  <div key={notification.id} className="flex gap-3 p-4 bg-surface border border-border rounded-xl">
+                    <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Sparkles size={20} className="text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground">{notification.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
+                    </div>
+                    <button
+                      onClick={() => dismissNotification(notification.id)}
+                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-elevated transition-colors flex-shrink-0"
+                      aria-label="Dismiss"
+                    >
+                      <X size={16} className="text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
       </div>
     </AnimatedPage>
   )

@@ -37,11 +37,11 @@ export const useWeeklyReportStore = create<WeeklyReportStore>()(
         const dpStore = useDPStore.getState()
         const workoutStore = useWorkoutStore.getState()
 
-        // Get the past 7 days (Sunday - Saturday)
+        // Get the current week (Monday - Sunday)
         const weekStart = getStartOfLocalWeek()
         const weekStartStr = getLocalDateString(weekStart)
 
-        // Calculate week end (6 days after week start to include Sunday-Saturday)
+        // Calculate week end (6 days after week start to include Monday-Sunday)
         const weekEnd = new Date(weekStart)
         weekEnd.setDate(weekEnd.getDate() + 6)
         const weekEndStr = getLocalDateString(weekEnd)

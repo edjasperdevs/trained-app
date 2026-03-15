@@ -15,7 +15,7 @@ import type { Archetype } from '@/design/constants'
 import { analytics } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { Button } from '@/components/ui/button'
-import { Flame, PartyPopper, Moon, Check, X } from 'lucide-react'
+import { Flame, PartyPopper, Moon, Check, X, Info } from 'lucide-react'
 import { ShareCardWrapper } from '@/components/share/ShareCardWrapper'
 import { ComplianceShareCard } from '@/components/share/ComplianceShareCard'
 import { shareComplianceCard } from '@/lib/shareCard'
@@ -73,6 +73,22 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
 
   const todayWorkout = getTodayWorkout()
   const workoutCompleted = isWorkoutCompletedToday()
+
+  // Manual override cutoff time (7pm / 19:00)
+  const MANUAL_OVERRIDE_HOUR = 19
+  const MANUAL_OVERRIDE_MINUTE = 0
+
+  // Check if current time is past the cutoff time
+  const isPastCutoffTime = () => {
+    const now = new Date()
+    const currentHour = now.getHours()
+    const currentMinute = now.getMinutes()
+
+    return currentHour > MANUAL_OVERRIDE_HOUR ||
+           (currentHour === MANUAL_OVERRIDE_HOUR && currentMinute >= MANUAL_OVERRIDE_MINUTE)
+  }
+
+  const canManuallyOverride = isPastCutoffTime()
 
   // Full compliance logic:
   // - Training day (workout scheduled): 5/5 required (workout + protein + meal + steps + sleep)
@@ -228,7 +244,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Daily check-in"
-      className="fixed inset-0 bg-background z-50 flex flex-col animate-in fade-in duration-200"
+      className="fixed inset-0 bg-background z-[60] flex flex-col animate-in fade-in duration-200"
       onClick={() => onClose(false)}
     >
       <div
@@ -253,6 +269,16 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
               <p className="text-[15px] text-muted-foreground">
                 Log your compliance. Earn your DP.
               </p>
+              {/* Explanatory note */}
+              <div className="mt-4 flex items-start gap-2 text-left bg-muted/50 rounded-lg px-3 py-2.5 mx-2">
+                <Info size={16} className="text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="text-[13px] text-muted-foreground leading-relaxed">
+                  {canManuallyOverride
+                    ? 'Your progress is tracked automatically. You can manually adjust if needed.'
+                    : 'Your progress is tracked automatically. Manual adjustments available after 7:00 PM.'
+                  }
+                </p>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6">
@@ -265,7 +291,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                     dp={DP_VALUES.training}
                     checked={data.workout}
                     onChange={(v) => setData(d => ({ ...d, workout: v }))}
-                    disabled={workoutCompleted}
+                    disabled={workoutCompleted || !canManuallyOverride}
                   />
                 ) : (
                   <div
@@ -289,6 +315,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   dp={DP_VALUES.protein}
                   checked={data.protein}
                   onChange={(v) => setData(d => ({ ...d, protein: v }))}
+                  disabled={!canManuallyOverride}
                 />
 
                 {/* Meal Compliance */}
@@ -298,6 +325,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   dp={DP_VALUES.meal}
                   checked={data.meal}
                   onChange={(v) => setData(d => ({ ...d, meal: v }))}
+                  disabled={!canManuallyOverride}
                 />
 
                 {/* Steps */}
@@ -307,6 +335,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   dp={DP_VALUES.steps}
                   checked={data.steps}
                   onChange={(v) => setData(d => ({ ...d, steps: v }))}
+                  disabled={!canManuallyOverride}
                 />
 
                 {/* Sleep */}
@@ -316,6 +345,7 @@ export function CheckInModal({ isOpen, onClose }: CheckInModalProps) {
                   dp={DP_VALUES.sleep}
                   checked={data.sleep}
                   onChange={(v) => setData(d => ({ ...d, sleep: v }))}
+                  disabled={!canManuallyOverride}
                 />
 
                 {/* Streak Info */}
